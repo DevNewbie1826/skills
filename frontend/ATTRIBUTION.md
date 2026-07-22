@@ -117,5 +117,5 @@ SOFTWARE.
 The layout pattern catalog, recipes, planning guides, motion references, design-engineering references, game-UI references, and platform guides under `references/design/layout-patterns/`, `layout-recipes/`, `motion/`, `design-engineering/`, `game-ui/`, and `platform-guides/` are derived from `github.com/changeroa/StyleGallery`.
 
 - Copyright the StyleGallery contributors (github.com/changeroa/StyleGallery)
-- Upstream carried no LICENSE file at merge time (2026-07-21); the repository author granted the pack maintainer permission for anyone to use the content (stated 2026-07-21). If upstream later adds an explicit license, that license supersedes this note.
+- Upstream carried no LICENSE file at merge time (2026-07-21). The repository author granted permission directly to the pack maintainer in a private chat with the words "가져가 쓰세요" ("go ahead and take and use it"), attested by the maintainer (DevNewbie1826) on 2026-07-22. No public artifact of the grant exists; this entry is the maintainer's record of it. If upstream later adds an explicit license, that license supersedes this note.
 - Changes: governance machinery (DOMAINS.md, GOVERNANCE.md, consumer-reference/, quality/, scripts/, root manifests) intentionally excluded; links retargeted to the merged subset; generated-file markers removed; content otherwise preserved.
