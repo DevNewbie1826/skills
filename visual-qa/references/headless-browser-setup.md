@@ -7,9 +7,21 @@ A browser capture is valid only when it renders the real page at the requested s
 ## Capability options and fallbacks
 
 1. **Built-in browser control:** Use it when it can navigate, set the required state, and save a screenshot. If it cannot reach the page or lacks a required action, move to a CDP connection.
-2. **CDP-capable Chromium:** Connect a driver to an existing Chromium-family browser with remote debugging enabled. If no CDP endpoint or usable browser binary is available, use Playwright.
-3. **Playwright:** Use an installed project dependency or an approved temporary setup to launch or connect to Chromium. If it is unavailable, use another real-browser driver already supported by the environment.
-4. **Equivalent driver:** Use a real browser automation capability that can set viewport, navigate, wait for the required state, and write a PNG. If none exists, document the missing capability and do not claim screenshot-based visual verification.
+2. **Headless CLI screenshot:** For quick static captures, invoke Chromium's headless CLI directly (`--headless=new --screenshot=... --window-size=W,H --hide-scrollbars`). No driver or protocol work is required, but see the viewport floor warning below before trusting small-width output. If the CLI path cannot reach the required state or viewport, move to a CDP connection.
+3. **CDP-capable Chromium:** Connect a driver to an existing Chromium-family browser with remote debugging enabled. If no CDP endpoint or usable browser binary is available, use Playwright.
+4. **Playwright:** Use an installed project dependency or an approved temporary setup to launch or connect to Chromium. If it is unavailable, use another real-browser driver already supported by the environment.
+5. **Equivalent driver:** Use a real browser automation capability that can set viewport, navigate, wait for the required state, and write a PNG. If none exists, document the missing capability and do not claim screenshot-based visual verification.
+
+## Headless CLI screenshots (quick captures)
+
+For unauthenticated static pages, the Chromium headless CLI is the cheapest capture path:
+
+```sh
+"$CHROMIUM_BIN" --headless=new --disable-gpu --hide-scrollbars \
+  --virtual-time-budget=3000 --window-size=1280,900 --screenshot=actual.png "$URL"
+```
+
+**Viewport floor warning:** the CLI enforces a minimum CSS layout width (observed: 500 px) — a `--window-size=375,900` capture is silently laid out at the floor width and cropped, producing clipped text that looks like a page defect. Before trusting any sub-500 px capture, probe the real viewport (inject `document.title = innerWidth` and read it via `--dump-dom`); if it does not match the requested width, do not claim that width as verified. For sub-500 px viewports use CDP device metrics (`Emulation.setDeviceMetricsOverride`) or Playwright's `viewport` option, both of which honor exact widths; `--force-device-scale-factor` does not lower the floor.
 
 Do not require a global installation. Prefer the project's existing dependency or browser configuration, and keep any temporary setup outside the product source tree unless the project explicitly requests it.
 
