@@ -1,0 +1,32 @@
+[
+ {
+  "path_glob": "frontend/references/design/claude.md",
+  "token": "claude",
+  "reason": "Layer-B brand design-system CONTENT, not an agent/model presupposition"
+ },
+ {
+  "path_glob": "frontend/references/design/claude.md",
+  "token": "anthropic",
+  "reason": "Layer-B brand design-system CONTENT, not an agent/model presupposition"
+ },
+ {
+  "path_glob": "frontend/references/design/cursor.md",
+  "token": "cursor",
+  "reason": "Layer-B brand design-system CONTENT, not an IDE presupposition"
+ },
+ {
+  "path_glob": "frontend/references/design/claude.md",
+  "token": "opus",
+  "reason": "product names quoted inside Layer-B brand marketing copy (content), not a model presupposition"
+ },
+ {
+  "path_glob": "frontend/references/design/claude.md",
+  "token": "sonnet",
+  "reason": "product names quoted inside Layer-B brand marketing copy (content), not a model presupposition"
+ },
+ {
+  "path_glob": "frontend/references/design/claude.md",
+  "token": "haiku",
+  "reason": "product names quoted inside Layer-B brand marketing copy (content), not a model presupposition"
+ }
+]

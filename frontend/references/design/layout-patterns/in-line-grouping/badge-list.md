@@ -1,0 +1,75 @@
+---
+type: Layout Pattern
+name: badge-list
+title: badge-list
+category: In-line grouping
+description: Align item labels with trailing counts.
+primary_spatial_problem: Align item labels with trailing counts.
+secondary_spatial_problems: none
+layout_axis: inline
+content_shape: mixed
+responsiveness: fluid
+constraints: Uses only local class hooks and explicit layout constraints.
+scroll_ownership: No internal scroll container.
+source_lineage: https://developer.mozilla.org/en-US/docs/Web/CSS/How_to/Layout_cookbook
+---
+
+# badge-list
+
+## When To Use
+
+Use this pattern when you need to align item labels with trailing counts.
+
+## HTML
+
+```html
+<section class="badge_list" aria-label="Repository counts">
+    <div class="badge_list_item"><span>Open issues</span><span>12</span></div>
+    <div class="badge_list_item"><span>Pull requests</span><span>4</span></div>
+    <div class="badge_list_item"><span>Reviews waiting</span><span>7</span></div>
+</section>
+```
+
+## CSS
+
+```css
+.badge_list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.badge_list_item {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+```
+
+## Core Properties
+
+- `display`, `gap`, `align-items`, `justify-content` define the spatial behavior for this pattern.
+
+## Properties That Break The Layout If Removed
+
+- Removing `display`, `gap`, `align-items`, `justify-content` changes the pattern from its documented layout responsibility back toward ordinary flow or an unsafe fixed arrangement.
+
+## Constraints And Change Points
+
+- fluid responsiveness is part of the contract; change sizing values only when the new minimum, maximum, or wrap point is documented with the pattern.
+- Keep the HTML class hooks and CSS selectors in one-to-one agreement.
+
+## Scroll Ownership
+
+No internal scroll container.
+
+Shared policy: see [CATALOG.md#shared-pattern-policy](../CATALOG.md#shared-pattern-policy).
+
+## Composition Notes
+
+Use `badge_list` as the stable pattern root and compose additional layout behavior outside that root unless the child class is part of the documented relationship.
+
+## IA Navigation
+
+Parent: [In-line grouping patterns](index.md) in [Pattern Categories](../index.md).
+Next: [Layout Recipes](../../layout-recipes/index.md) for screen-level composition, or return to the [Layout Pattern Catalog](../CATALOG.md) when choosing another primitive.
