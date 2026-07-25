@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: "Use for frontend, web UI, UX, visual design, styling, layout, animation, mockups, performance, accessibility, or SEO work. Routes design references, real-browser audits, UI/UX lookups, and design operating guidance; includes optional framework-specific lanes such as React tooling."
+description: "Use for frontend, web UI, UX, visual design, styling, layout, animation, mockups, performance, accessibility, or SEO work. Routes design references, real-browser audits, UI/UX lookups, design operating guidance, and a visual/copy AI-slop taxonomy with a scanner for de-slop audits and pre-ship scans; includes optional framework-specific lanes such as React tooling. Also triggers on: kill AI slop, de-slop, remove the AI look, looks AI-generated, templated."
 ---
 
 # Frontend
@@ -15,6 +15,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | Frontend code, performance, SEO, accessibility, or quality auditing | Also `references/perfection/README.md` for real-browser audits and root-cause remediation. |
 | A concrete style, palette, font pairing, chart, landing structure, UX guideline, or generated project design system | `references/ui-ux-db/README.md` on demand. It is a lookup tool, not a visual-direction substitute. |
 | An implementation or redesign that creates or updates `DESIGN.md`, or needs personas, critique, debt, handoff, or synthetic testing | `references/designpowers/README.md` and `lane-c-review.md`; load other lanes only for their applicable phase. |
+| A de-slop request ("looks AI-generated", "remove the AI look", feels templated), or any build/redesign approaching done | `references/deslop/README.md`. A 34-tell visual and copy AI-slop taxonomy with a dependency-free scanner: audit workflow for explicit requests, a creation-time checklist during builds, and a final scan before the visual-evidence gate. |
 
 For implementation work, load design and perfection together. A fast page that looks generic, or a beautiful page with an avoidable performance cost, has not met the bar.
 
@@ -108,6 +109,19 @@ Domains and stacks are enumerated in its README; choose the stack matching the p
 
 Use this internal reference for design operating guidance. It complements frontend routing and can inform planning, implementation, visual evidence, independent critique, design debt, and handoff; it does not create a separate runtime or workflow.
 
+## Ruleset 5 - deslop (`references/deslop/`)
+
+`README.md` documents the three uses: audit mode for explicit de-slop requests (scope, scan, triage, report, fix; never mass-edit before the user sees the report), a creation-time checklist, and the final pre-ship scan. The 34 tells (indigo-to-violet gradients, gradient-clip headlines, kickers over every heading, invented stat rows, stock font pairings, and 29 more) live in `taxonomy.md`; grep patterns and false positives in `detection.md`; before-and-after patches in `fixes.md`. The core discipline: slop is the absence of a decision - triage every hit as slop vs. intentional before touching code, and prefer fixing shared tokens or `DESIGN.md` over every call site. Distinct from the `remove-ai-slops` skill, which removes code-level slop (comments, dead code, over-defensive code); deslop judges what the user sees and reads.
+
+Scanner (pure Node, no dependencies, never edits files):
+
+```bash
+node $SKILL_DIR/references/deslop/scripts/scan.mjs <root>          # human-readable report
+node $SKILL_DIR/references/deslop/scripts/scan.mjs <root> --json   # machine-readable, for triage
+```
+
+Narrow with `--only=01,06` / `--skip=19` / `--exclude=legacy`; extend with `--rules=extra.mjs` for project- or language-specific tells. Defended hits are pinned in source with `deslop-ignore` / `deslop-ignore-next-line 06` / `deslop-ignore-file` comments.
+
 ## Quick routes
 
 | Request | Load |
@@ -124,6 +138,8 @@ Use this internal reference for design operating guidance. It complements fronte
 | Shipped-product research | `design/lazyweb.md` when available + `design/_INDEX.md` shortlist |
 | React setup | `design/README.md` + optional `design/react-dev-tooling-skill.md` |
 | Personas, accessibility, critique, debt, or handoff | `design/README.md` + `designpowers/README.md` (+ perfection if implementation follows) |
+| Looks AI-generated, de-slop a page, remove the AI look | `deslop/README.md` audit mode (scan, triage, report, fix) + `design/README.md` if tokens or `DESIGN.md` need rework |
+| Pre-done check on a new page | `deslop` scanner over the changed source + `perfection/README.md` audit + `visual-qa` |
 
 ## Shared axioms
 
@@ -134,6 +150,7 @@ Use this internal reference for design operating guidance. It complements fronte
 - **Use composited animation for new code.** When writing new animation, prefer composited properties (`transform`, `opacity`, and `filter`); review-level edge cases follow [`references/design/motion/`](references/design/motion/).
 - **Motion serves meaning.** Every animation or hover maps to an interaction, state change, or affordance.
 - **Done requires evidence.** Run `visual-qa` at 375, 768, and 1280px with states and motion exercised, then complete two independent review passes on fresh evidence.
+- **No machine-default tells.** New UI ships free of the 34 AI-slop tells in `references/deslop/taxonomy.md` - run the deslop scanner over new or changed source and triage every hit before the evidence gate. A defended, intentional choice documented in `DESIGN.md` is not slop.
 
 ## When to load something else
 
@@ -144,6 +161,7 @@ Use this internal reference for design operating guidance. It complements fronte
 | **Optional game UI / engine lane:** The work is a game HUD, menu, inventory, or another game interface. | [`design/game-ui/index.md`](references/design/game-ui/index.md) for engine-neutral hierarchy and named-engine guidance. |
 | **Optional platform-comparison lane:** A platform convention needs a bounded, current comparison before web adaptation. | [`design/platform-guides/index.md`](references/design/platform-guides/index.md). |
 | Pure logic work with no visual surface | `programming` alone. |
+| Code-level AI slop (obvious comments, dead code, over-defensive code, needless abstraction) | `remove-ai-slops` - the `deslop` ruleset here covers visual and copy slop only. |
 
 ## Activation
 

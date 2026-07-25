@@ -119,3 +119,12 @@ The layout pattern catalog, recipes, planning guides, motion references, design-
 - Copyright the StyleGallery contributors (github.com/changeroa/StyleGallery)
 - Upstream carried no LICENSE file at merge time (2026-07-21). The repository author granted permission directly to the pack maintainer in a private chat with the words "가져가 쓰세요" ("go ahead and take and use it"), attested by the maintainer (DevNewbie1826) on 2026-07-22. No public artifact of the grant exists; this entry is the maintainer's record of it. If upstream later adds an explicit license, that license supersedes this note.
 - Changes: governance machinery (DOMAINS.md, GOVERNANCE.md, consumer-reference/, quality/, scripts/, root manifests) intentionally excluded; links retargeted to the merged subset; generated-file markers removed; content otherwise preserved.
+
+---
+
+## AI-slop taxonomy, detection patterns, and scanner
+
+The `references/deslop/` ruleset (`taxonomy.md`, `detection.md`, `fixes.md`, and `scripts/`) is derived from github.com/yetone/kill-ai-slop by yetone and adapted for the frontend pack.
+
+- Licensed under the Apache License, Version 2.0 (full text in `LICENSE-Apache-2.0.txt`).
+- Changes: integrated as a ruleset of the frontend skill rather than a standalone skill; `README.md` rewritten as a pack ruleset guide; `detection.md` adapted for the pack link checker (`$SKILL_DIR`-prefixed inline paths in two prose mentions, and the tell-11 font-size regex rewritten to the equivalent `[4-9]\.?[0-9]*rem`); `scan.mjs` and `rules.ru.mjs` vendored verbatim from upstream; `taxonomy.md` and `fixes.md` byte-identical to upstream.
