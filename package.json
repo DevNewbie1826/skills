@@ -1,0 +1,21 @@
+{
+  "name": "devnewbie1826-skills",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "pi-package"
+  ],
+  "pi": {
+    "skills": [
+      "frontend",
+      "debugging",
+      "git-master",
+      "programming",
+      "remove-ai-slops",
+      "visual-qa"
+    ],
+    "extensions": [
+      "extensions/skills-pack.ts"
+    ]
+  }
+}

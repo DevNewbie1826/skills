@@ -39,6 +39,7 @@ Skills are individually self-contained: take only what you need. Commands instal
 | Gemini CLI (workspace) | `.gemini/skills/` | `mkdir -p .gemini/skills && cp -R frontend .gemini/skills/` |
 | Cursor (user) | `~/.cursor/skills/` | `mkdir -p ~/.cursor/skills && cp -R frontend ~/.cursor/skills/` |
 | Cursor (project) | `.cursor/skills/` | `mkdir -p .cursor/skills && cp -R frontend .cursor/skills/` |
+| pi | `git:github.com/DevNewbie1826/skills` | `pi install git:github.com/DevNewbie1826/skills` |
 | Any agent / no loader | No standard path: `$SKILLS_DIR` you expose to the agent | `mkdir -p "$SKILLS_DIR" && cp -R frontend "$SKILLS_DIR"/` |
 
 `~/.agents/skills/` and `.agents/skills/` are interoperable paths: Codex uses them;

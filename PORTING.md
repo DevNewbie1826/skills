@@ -75,3 +75,9 @@ Banned in prose, code, comments, and (where feasible) filenames:
   self-containment, dangling skill refs). Allowlists live in `tools/allowlist/*.json`
   — add only CONTENT exceptions with a reason per entry, never to silence real violations.
 - Smoke: every bundled script entrypoint runs (`--help` or a tiny fixture invocation).
+
+## Rule 7 — Host adapters live outside skill content
+
+- Host-specific packaging (`.pi/` directories, `package.json` manifests) is allowed at the repo root as an adapter layer.
+- Banned-token and neutrality rules still apply inside every skill directory.
+- Adapters must never be referenced from skill content.
