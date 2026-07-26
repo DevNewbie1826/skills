@@ -98,7 +98,12 @@ function readPackSkills(root: string): readonly string[] {
 }
 
 export function buildBootstrap(root: string): string {
-  const skills = readPackSkills(root);
+  let skills: readonly string[];
+  try {
+    skills = readPackSkills(root);
+  } catch {
+    return ""; // no readable manifest (e.g. loose-file install) — inject nothing
+  }
   const bulletLines: string[] = [];
 
   for (const skillDir of skills) {
@@ -136,6 +141,7 @@ export default function createSkillsPackExtension(pi: ExtensionAPI) {
 
   pi.on("before_agent_start", async (event) => {
     cachedBootstrap ??= buildBootstrap(packRoot);
+    if (!cachedBootstrap) return;
     return { systemPrompt: `${event.systemPrompt}\n\n${cachedBootstrap}` };
   });
 }
