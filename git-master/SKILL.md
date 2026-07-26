@@ -44,6 +44,8 @@ When a PR body needs screenshots or terminal PNGs, use the host's authenticated 
 
 Commit only the user's requested changes. Preserve unrelated dirty work.
 
+For decision-context trailers in commit messages, use the `lore` skill.
+
 1. Detect message style from recent history. Use the dominant local pattern, language, and casing. Do not default to Conventional Commits unless the repo uses them.
 2. Inspect the full diff, not only filenames. Separate unrelated user edits from the requested commit.
 3. Build atomic groups by behavior, module, and revertability. Keep implementation and its direct tests together.

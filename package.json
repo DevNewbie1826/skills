@@ -13,7 +13,8 @@
       "git-master",
       "programming",
       "remove-ai-slops",
-      "visual-qa"
+      "visual-qa",
+      "lore"
     ],
     "extensions": [
       "extensions/skills-pack.ts"
