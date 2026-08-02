@@ -8,16 +8,11 @@
   ],
   "pi": {
     "skills": [
-      "frontend",
-      "debugging",
-      "git-master",
-      "programming",
-      "remove-ai-slops",
-      "visual-qa",
-      "lore"
+      "./skills"
     ],
     "extensions": [
-      "extensions/skills-pack.ts"
+      "extensions/skills-pack.ts",
+      "extensions/wf-goal.ts"
     ]
   }
 }

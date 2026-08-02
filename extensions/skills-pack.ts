@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -82,15 +82,28 @@ function readSkillMetadata(skillMdPath: string): SkillMetadata | undefined {
 function readPackSkills(root: string): readonly string[] {
   const manifestText = readFileSync(join(root, "package.json"), "utf8");
   const manifestValue: unknown = JSON.parse(manifestText);
-  const skillsValue = getObjectProperty(getObjectProperty(manifestValue, "pi"), "skills");
-  if (!Array.isArray(skillsValue)) {
+  const containers = getObjectProperty(getObjectProperty(manifestValue, "pi"), "skills");
+  if (!Array.isArray(containers)) {
     throw new Error("package.json must contain a pi.skills array");
   }
 
+  // pi.skills lists CONTAINER directories (e.g. ["."] or ["./skills"]); each is
+  // scanned one level deep for <container>/<name>/SKILL.md. This matches omp's
+  // native plugin-skill discovery, which treats entries as containers, not names.
   const skills: string[] = [];
-  for (const skill of skillsValue) {
-    if (typeof skill === "string" && skill.length > 0) {
-      skills.push(skill);
+  for (const container of containers) {
+    if (typeof container !== "string" || container.length === 0) continue;
+    const containerDir = resolve(root, container);
+    let entries: string[];
+    try {
+      entries = readdirSync(containerDir);
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (existsSync(join(containerDir, entry, "SKILL.md"))) {
+        skills.push(join(container, entry));
+      }
     }
   }
 
