@@ -1,27 +1,31 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
-// Opt-in trigger: `/wf <task>` is rewritten to `/goal <task> — <flow>` so Goal
-// Mode runs with the Plan-DAG-Council methodology (ultrathink/workflowz fire).
-// `/goal` itself is NEVER touched — management subcommands (drop/show/pause/...)
-// and plain goals keep working. The task goes FIRST so omp's goal-status display
-// shows the task, not the flow prefix.
+// Opt-in triggers (no autocomplete — these are input-hook patterns, omp would
+// dispatch a *registered* /wf to a handler that cannot activate Goal Mode):
+//   /wf  <task>  → /goal <task> — <tip flow>             (workflowz keyword)
+//   /uwf <task>  → /goal <task> — ultrathink. <tip flow> (workflowz + ultrathink)
+// `/goal` is never touched, so management subcommands keep working. The task
+// leads the objective so omp's goal-status shows the task, not the flow.
+// The flow text is the user's original tip verbatim — no added elaboration.
 
-const MARKER = "Plan-DAG-Council"; // idempotency guard
-const FLOW_SUFFIX =
-  " — approach via the Plan-DAG-Council flow: " +
-  "ultrathink; (1) Plan — decompose into independent slices, planning only; " +
-  "(2) DAG — one dependency DAG, parallel where independent, a barrier only where " +
-  "a stage needs the full prior result set; (3) Councils — each decision runs a " +
-  "council-of-subagents (independent reviewers), keep only what survives an " +
-  "adversarial refute. Skip for trivial requests. workflowz";
+const MARKER = "monolithic DAG workflow"; // idempotency guard
+const TIP =
+  "workflowz design full agentic one monolithic DAG workflow for these plans and " +
+  "tasks; run the full workflowz with multiple council-of-subagents " +
+  "(Plan Mode → Plan DAGs → work with subagent councils).";
 
 export default function wfGoalExtension(pi: ExtensionAPI) {
-  pi.setLabel("Workflowz flow (/wf trigger)");
+  pi.setLabel("Workflowz flow (/wf, /uwf)");
 
   pi.on("input", async (event) => {
     if (!(event && typeof event === "object" && "text" in event)) return;
     const text = event.text;
-    if (typeof text !== "string" || !text.startsWith("/wf ") || text.includes(MARKER)) return;
-    return { text: "/goal " + text.slice("/wf ".length) + FLOW_SUFFIX };
+    if (typeof text !== "string" || text.includes(MARKER)) return;
+    if (text.startsWith("/uwf ")) {
+      return { text: "/goal " + text.slice("/uwf ".length) + " — ultrathink. " + TIP };
+    }
+    if (text.startsWith("/wf ")) {
+      return { text: "/goal " + text.slice("/wf ".length) + " — " + TIP };
+    }
   });
 }
