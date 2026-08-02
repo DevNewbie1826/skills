@@ -1,6 +1,6 @@
 # Agent Skill Pack
 
-Six self-contained, drop-anywhere agent skills. Framework-neutral, model-neutral,
+Seven self-contained, drop-anywhere agent skills. Framework-neutral, model-neutral,
 agent-neutral, language-neutral. Progressive disclosure throughout: each `SKILL.md`
 is a thin router; detail lives in `references/` and is loaded only when routed to.
 
@@ -14,6 +14,7 @@ is a thin router; detail lives in `references/` and is loaded only when routed t
 | `visual-qa/` | Verifying a built UI/page/TUI visually: screenshots, pixel diffs, responsive and CJK checks |
 | `remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
 | `git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
+| `lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
 
 ## Install
 
@@ -50,7 +51,7 @@ at `SKILL.md`; otherwise check your runtime docs.
 
 ### Frontmatter compatibility
 
-All six skills have Agent Skills-style YAML frontmatter: `name` matches the directory,
+All seven skills have Agent Skills-style YAML frontmatter: `name` matches the directory,
 uses a 1-64-character lowercase/hyphenated identifier, and includes a 281-991-character
 `description` (within the 1-1,024-character limit).
 
@@ -86,6 +87,6 @@ Content-driven allowlist exceptions (e.g. brand design references) live in
 ## Layout note
 
 `.omo/` and `.senpi/` at this root are runtime session/state directories created by
-the authoring environment — they are NOT part of the skill pack. Copy only the six
+the authoring environment — they are NOT part of the skill pack. Copy only the seven
 skill directories (plus `PORTING.md`, `README.md`, `tools/` if you want the checker)
 when taking the pack elsewhere.

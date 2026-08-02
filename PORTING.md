@@ -60,7 +60,7 @@ Banned in prose, code, comments, and (where feasible) filenames:
   and allowed. No host-specific state dirs (`.omo/`, `.senpi/`) inside skill content.
 - External tools are named with a fallback: "if X is unavailable, do Y or skip and say so".
 - Cross-references may only target skills IN THIS PACK (frontend, debugging,
-  remove-ai-slops, visual-qa, programming, git-master) or be generic capability text.
+  remove-ai-slops, visual-qa, programming, git-master, lore) or be generic capability text.
   References to open-design, agent-browser, ulw-plan, start-work, review-work etc. must be
   rewritten generically (e.g. "a browser-driving capability", "your planning workflow").
 
