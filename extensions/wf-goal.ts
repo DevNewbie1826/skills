@@ -1,28 +1,27 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
-// Goal-gated, same-turn injection of the Plan → DAG → Council workflow.
-// The `input` hook rewrites `/goal <task>` into `/goal <flow> <task>` so the
-// flow becomes the Goal Mode objective AND the ultrathink/workflowz keywords
-// fire for that turn (verified: omp matches keywords in /goal objectives).
-// Fires ONLY for /goal — non-goal input is untouched.
+// Opt-in trigger: `/wf <task>` is rewritten to `/goal <task> — <flow>` so Goal
+// Mode runs with the Plan-DAG-Council methodology (ultrathink/workflowz fire).
+// `/goal` itself is NEVER touched — management subcommands (drop/show/pause/...)
+// and plain goals keep working. The task goes FIRST so omp's goal-status display
+// shows the task, not the flow prefix.
 
-const MARKER = "Plan-DAG-Council flow"; // idempotency guard
-const FLOW =
-  "ultrathink. Run this task through the Plan-DAG-Council flow: " +
-  "(1) Plan — decompose into independent slices, planning only, no execution; " +
-  "(2) DAG — arrange the slices into one dependency DAG, parallel where independent, " +
-  "a barrier only where a stage needs the full prior result set; " +
-  "(3) Councils — execute along the DAG, running a council-of-subagents (independent reviewers) " +
-  "at each decision and keeping only what survives an adversarial refute. " +
-  "Skip this flow for trivial requests. workflowz: ";
+const MARKER = "Plan-DAG-Council"; // idempotency guard
+const FLOW_SUFFIX =
+  " — approach via the Plan-DAG-Council flow: " +
+  "ultrathink; (1) Plan — decompose into independent slices, planning only; " +
+  "(2) DAG — one dependency DAG, parallel where independent, a barrier only where " +
+  "a stage needs the full prior result set; (3) Councils — each decision runs a " +
+  "council-of-subagents (independent reviewers), keep only what survives an " +
+  "adversarial refute. Skip for trivial requests. workflowz";
 
 export default function wfGoalExtension(pi: ExtensionAPI) {
-  pi.setLabel("Workflowz flow (goal-gated)");
+  pi.setLabel("Workflowz flow (/wf trigger)");
 
   pi.on("input", async (event) => {
     if (!(event && typeof event === "object" && "text" in event)) return;
     const text = event.text;
-    if (typeof text !== "string" || !text.startsWith("/goal ") || text.includes(MARKER)) return;
-    return { text: "/goal " + FLOW + text.slice("/goal ".length) };
+    if (typeof text !== "string" || !text.startsWith("/wf ") || text.includes(MARKER)) return;
+    return { text: "/goal " + text.slice("/wf ".length) + FLOW_SUFFIX };
   });
 }
