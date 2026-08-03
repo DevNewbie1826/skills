@@ -2,8 +2,8 @@ import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
 // Opt-in triggers WITH autocomplete (from commands/*.md) and a zero-config
 // fallback input hook. Both rewrite /wf and /uwf into /goal with the flow.
-//   /wf  <task>  → /goal <task> — <flow>            (workflowz keyword)
-//   /uwf <task>  → /goal <task> — ultrathink. <flow> (workflowz + ultrathink)
+//   /wf  <task>  → /goal <task>\n\n<flow>            (workflowz keyword)
+//   /uwf <task>  → /goal <task>\n\nultrathink. <flow> (workflowz + ultrathink)
 // Keywords stay OUTSIDE the XML so omp's magic-keyword matcher sees them
 // (XML/HTML sections are ignored by the matcher per the omp docs).
 
@@ -30,10 +30,10 @@ export default function wfGoalExtension(pi: ExtensionAPI) {
     const text = event.text;
     if (typeof text !== "string" || text.includes(MARKER)) return;
     if (text.startsWith("/uwf ")) {
-      return { text: "/goal " + text.slice("/uwf ".length) + " — ultrathink. " + FLOW };
+      return { text: "/goal " + text.slice("/uwf ".length) + "\n\nultrathink. " + FLOW };
     }
     if (text.startsWith("/wf ")) {
-      return { text: "/goal " + text.slice("/wf ".length) + " — " + FLOW };
+      return { text: "/goal " + text.slice("/wf ".length) + "\n\n" + FLOW };
     }
   });
 }

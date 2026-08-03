@@ -2,7 +2,9 @@
 description: Goal Mode with the Plan→DAG→Council flow
 ---
 
-/goal $ARGUMENTS — workflowz. Run this task through the following three-phase flow:
+/goal $ARGUMENTS
+
+workflowz. Run this task through the following three-phase flow:
 
 <workflow-flow>
   <phase step="1" name="Plan Mode">
