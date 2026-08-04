@@ -4,6 +4,14 @@
 
 The best code is code that never needs to exist. When code is necessary, make the smallest change that preserves the real contract: type-strict, boundary-aware, async-correct, and clear about ownership.
 
+## Pre-edit discipline
+
+These apply before the first edit, for any change to code, configuration, documentation, prompts, or skill guidance.
+
+1. **Resolve assumptions at the source.** Read the approved task and any relevant plan, the current behavior and tests, and nearby conventions before the first edit; then confirm types, interfaces, imports, and call sites through reads, AST/LSP, or tests — not after. A guessed API or contract is a bug waiting to happen.
+2. **Touch only what the task justifies.** No drive-by refactors, broad renames, or style rewrites alongside an unrelated change. A corrective change the escalation rules below require (a responsibility split, a typed parameter group) is justified, not a drive-by.
+3. **Define done before editing.** Name the concrete success criterion and the verification command first. Completion is evidence, not effort.
+
 ## The seven axioms
 
 1. **Stop at the first rung that holds.** Ask, in order: does this need to exist; does the codebase already provide it; does the standard library or platform provide it; does an existing dependency provide it; can it be one direct operation; only then write the minimum new code. Trace the flow first. A small patch at the wrong seam is a second bug.

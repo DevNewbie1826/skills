@@ -31,6 +31,7 @@ Before writing or editing code, identify the language and read its entry point. 
 
 | Need | Read |
 |---|---|
+| Before the first edit: assumptions, task scope, or done criteria | [Shared programming philosophy § Pre-edit discipline](references/philosophy.md) |
 | Design, test shape, review, LOC limits, or portable verification | [Shared programming philosophy](references/philosophy.md) |
 | Adding or changing logs, logger setup, or boundary error handling | [Logging](references/logging.md) |
 | A file exceeds 200 pure LOC, a function has more than three parameters, verification is redundant, or names are negative-form | [Code smells](references/code-smells.md) |
