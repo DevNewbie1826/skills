@@ -1,6 +1,6 @@
 ---
 name: git-master
-description: "MUST USE whenever a task needs a commit or git-history investigation. Covers atomic commits, staging, commit-message style, rebase, squash, fixup/autosquash, blame, bisect, reflog, git log -S/-G, and questions like who wrote this or when was this added. Do not use for ordinary code edits unless the user asks for git work."
+description: "MUST USE whenever a task needs a commit, a git-history investigation, or working-tree/diff inspection. Covers atomic commits, staging, commit-message style, rebase, squash, fixup/autosquash, blame, bisect, reflog, git log -S/-G, branch/diff/status inspection, and questions like who wrote this or when was this added. Also covers WORKTREE mode: provision an isolated worktree on explicit request, with ignore handling and merge/PR/cleanup lifecycle. Do not use for ordinary code edits unless the user asks for git work."
 ---
 
 # Git Master
@@ -15,6 +15,8 @@ Classify the request first:
 - `REBASE`: rebase, squash, fixup, autosquash, reorder, split, or otherwise rewrite branch history.
 - `HISTORY`: answer when, where, who, why, or which commit changed something.
 - `STATUS`: inspect branch, diff, or working-tree state without changing it.
+- `WORKTREE`: provision an isolated worktree for work the user explicitly asked to do in a worktree.
+WORKTREE is a setup overlay: when paired with `COMMIT` or `REBASE`, provision the worktree first and run the other mode inside it. STATUS stays read-only and never triggers provisioning.
 
 Do not commit, rebase, push, force-push, reset, stash-pop, or delete anything unless the user explicitly asked for that operation. If the request is only investigative, report findings and stop.
 
@@ -88,6 +90,18 @@ Choose the Git tool by the question:
 - `git reflog`: recover or explain recent local history movement.
 
 Always cite the exact command evidence in the answer: commit hash, subject, file path, and line or diff context when relevant. If the evidence is ambiguous, say what remains unproven.
+
+## Worktree Mode
+
+Provision an isolated worktree only when the user explicitly asks to work in one. Never create one for read-only or investigative work. The full provisioning, ignore handling, merge/PR, and cleanup lifecycle is in [Worktree lifecycle](references/worktree.md).
+
+Core rules:
+
+- Anchor everything to the repository root and the base worktree you start in, not the current directory; capture both before provisioning.
+- Ignore `.worktrees/` through the local exclude file first (commit-free); commit to `.gitignore` only on a separate explicit request for a team-wide convention.
+- Before provisioning, confirm the start point (a branch, or a commit that limits outcomes to PR/Keep), check a name collision on both the path and the branch ref, and warn if the base worktree is dirty.
+- For the outcome, run merge and cleanup against the base worktree, never inside the feature worktree.
+- Never `git worktree remove --force`; before removal check ignored files (`git status --untracked-files=all --ignored --short`), which plain status hides.
 
 ## Safety Checks
 
