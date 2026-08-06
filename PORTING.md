@@ -1,12 +1,20 @@
-# PORTING CONTRACT — neutral, self-contained skill pack
+# PORTING CONTRACT — OMP skill pack (ported skills neutralized)
 
-This directory is a **drop-anywhere agent skill pack**. Every skill in it MUST obey the
-rules below. `tools/check-skills.py` (stdlib-only) enforces the machine-checkable subset;
-the rest is enforced by review. A skill is done only when the checker passes AND a
-QA-by-read confirms the expertise survived.
+This directory is an **OMP skill pack** (used in Oh My Pi). It holds two kinds of skills:
+**ported** skills brought from other agents, and **OMP-native** skills written for OMP.
 
-## Rule 1 — Agent neutrality (Tier A, banned everywhere)
-Banned in prose, code, comments, and (where feasible) filenames:
+**Ported** skills MUST be neutralized per the rules below to strip origin-agent branding
+(Rules 1–3). **OMP-native** skills are exempt from the agent/model-neutrality rules
+(Rule 8) — they may name and use OMP mechanisms (`eval`, `task`, `hub`, `local://`, goal
+mode).
+
+`tools/check-skills.py` (stdlib-only) enforces the machine-checkable subset; the rest is
+enforced by review. A skill is done only when the checker passes AND a QA-by-read
+confirms the expertise survived.
+
+## Rule 1 — Agent neutrality (Tier A, banned in ported skills)
+Banned in prose, code, comments, and (where feasible) filenames of **ported** skills
+(OMP-native skills are exempt — see Rule 8):
 - Agent products/runtimes: senpi, omo (incl. `.omo/`), sisyphus, codex, opencode,
   claude code, aider, windsurf, amp, droid, openclaw, codegraph, cursor-the-IDE
   (the Layer-B brand file `frontend/references/design/cursor.md` is allowlisted CONTENT),
@@ -60,7 +68,8 @@ Banned in prose, code, comments, and (where feasible) filenames:
   and allowed. No host-specific state dirs (`.omo/`, `.senpi/`) inside skill content.
 - External tools are named with a fallback: "if X is unavailable, do Y or skip and say so".
 - Cross-references may only target skills IN THIS PACK (frontend, debugging,
-  remove-ai-slops, visual-qa, programming, git-master, lore) or be generic capability text.
+  remove-ai-slops, visual-qa, programming, git-master, lore, dag-workflow) or be generic
+  capability text.
   References to open-design, agent-browser, ulw-plan, start-work, review-work etc. must be
   rewritten generically (e.g. "a browser-driving capability", "your planning workflow").
 
@@ -79,5 +88,17 @@ Banned in prose, code, comments, and (where feasible) filenames:
 ## Rule 7 — Host adapters live outside skill content
 
 - Host-specific packaging (`.pi/` directories, `package.json` manifests) is allowed at the repo root as an adapter layer.
-- Banned-token and neutrality rules still apply inside every skill directory.
+- Banned-token and neutrality rules still apply inside every **ported** skill directory (OMP-native skills are exempt per Rule 8).
 - Adapters must never be referenced from skill content.
+
+## Rule 8 — OMP-native skills are exempt from neutrality rules
+
+- This is an OMP pack. Skills written **for OMP** (e.g. `dag-workflow`) are OMP-native and
+  EXEMPT from Rules 1–3 (agent/model/framework neutrality): they may name and use OMP
+  mechanisms (`eval`, `task`, `hub`, `local://`, goal mode, skills, extensions).
+- Rules 1–3 still apply in full to **ported** skills (brought from other agents) — that is
+  exactly what "neutralize on port" means.
+- An OMP-native skill MUST mark itself (frontmatter tag or SKILL.md header note) so
+  reviewers know the exemption applies. `tools/check-skills.py` MUST skip Tier-A token
+  checks for OMP-native-flagged paths via allowlist (**checker update pending — to do at
+  `dag-workflow` implementation**); never to silence real violations in ported skills.

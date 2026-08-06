@@ -338,6 +338,11 @@ check_skill_line_cap() {
     printf '  %d SKILL.md file(s) are within the 200-line cap\n' "$found"
 }
 
+check_wf_goal_regression() {
+    require_command bun
+    bun tools/wf-goal.test.ts
+}
+
 if (( fast )); then
     printf 'Running fast pre-commit subset (contract checker and SKILL.md cap).\n'
     run_section 'A. portable skill contract' check_skill_contract
@@ -348,6 +353,7 @@ else
     run_section 'C. UI/UX database matrix' check_ui_ux_db_matrix
     run_section 'D. visual-qa functional check' check_visual_qa_functional
     run_section 'E. SKILL.md line cap' check_skill_line_cap
+    run_section 'F. wf-goal extension regression' check_wf_goal_regression
 fi
 
 printf '\nPASS: verification gate\n'

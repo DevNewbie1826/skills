@@ -34,7 +34,7 @@ class Results(TypedDict):
     summary: dict[str, int]
     ok: bool
 
-DEFAULT_SKILLS = ("frontend", "debugging", "remove-ai-slops", "visual-qa", "programming", "git-master", "lore")
+DEFAULT_SKILLS = ("frontend", "debugging", "remove-ai-slops", "visual-qa", "programming", "git-master", "lore", "dag-workflow")
 TEXT_SUFFIXES = {".md", ".py", ".ts", ".mjs", ".json", ".csv", ".txt"}
 SCRIPT_SUFFIXES = {".py", ".ts", ".mjs"}
 
@@ -451,6 +451,17 @@ def check_scripts(root: Path, skill: Path, texts: dict[Path, str], results: Resu
         else:
             check_js_imports(root, skill, path, text, dependencies, results)
 
+def is_omp_native(skill_text: str | None) -> bool:
+    # OMP-native skills (PORTING.md Rule 8) are exempt from the Tier-A/Tier-B neutrality
+    # checks. They mark themselves with `omp-native: true` in SKILL.md frontmatter.
+    if skill_text is None:
+        return False
+    parsed = frontmatter(skill_text.splitlines())
+    if parsed is None:
+        return False
+    field = yaml_field(parsed[0], "omp-native")
+    return field is not None and field[0].strip().lower() in ("true", "yes", "1")
+
 def check_skill(root: Path, skill_name: str, allowlists: list[AllowlistEntry], results: Results) -> None:
     skill, skill_file = root / skill_name, root / skill_name / "SKILL.md"
     if not skill.is_dir():
@@ -463,14 +474,18 @@ def check_skill(root: Path, skill_name: str, allowlists: list[AllowlistEntry], r
         except OSError as error:
             add_failure(results, root, path, 0, "TIER-A", f"could not read text file: {error}")
             continue
-        scan_tier_a(root, path, texts[path], allowlists, results)
-        if path.suffix.lower() == ".md":
-            check_hazards(root, path, texts[path], results)
+    omp_native = is_omp_native(texts.get(skill_file))
+    for path, text in texts.items():
+        if not omp_native:
+            scan_tier_a(root, path, text, allowlists, results)
+            if path.suffix.lower() == ".md":
+                check_hazards(root, path, text, results)
     if skill_file not in texts:
         add_failure(results, root, skill_file, 0, "STRUCTURE", "could not read SKILL.md" if skill_file.exists() else "missing SKILL.md")
     else:
         check_structure(root, skill, skill_name, texts[skill_file], results)
-        check_tier_b(root, skill_file, texts[skill_file], results)
+        if not omp_native:
+            check_tier_b(root, skill_file, texts[skill_file], results)
     check_links(root, skill, texts, results)
     check_scripts(root, skill, texts, results)
 
