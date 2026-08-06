@@ -60,6 +60,10 @@ rm -f <journaled-core-dump>
 rm -rf <journaled-playwright-artifact-dir>
 ```
 
+### Browser sessions
+
+When browser work is complete, close every browser, tab, or driver you opened for it. If you launched a browser process, record its PID in the journal at launch and, during cleanup, verify and stop only that recorded process; never close a user-owned browser.
+
 ### Verify the baseline
 
 In a Git worktree, this is the single most important check of the whole skill:

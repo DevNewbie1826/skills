@@ -61,6 +61,14 @@ try {
 
 If a browser is already running with a CDP endpoint, replace launch with `chromium.connectOverCDP(endpoint)` and select the intended context and page. If the installed Playwright version, browser channel, or runner cannot perform this sequence, use the CDP or equivalent-driver fallback instead.
 
+## Browser teardown
+
+When browser work is complete, close every browser, tab, or driver you opened for it. The one-shot headless CLI (Option 2) exits on its own, and the Playwright example above already closes an in-process launch in its `finally` block — those need no extra step. The remaining paths do:
+
+- **Built-in browser control (Option 1):** the browser tool keeps its tab open across calls until you close it. When the capture is done, call the tool's `close` action for the capture tab; use `all: true` only when every open tab belongs to this capture.
+- **CDP-capable Chromium (Option 3):** for an instance you launched, close it through the driver or connection, or verify and stop its recorded PID after capture. For a pre-existing endpoint you did not start, close only the page, context, or connection you opened — never its process.
+- **Equivalent driver (Option 5):** close the driver or browser you opened; if you launched a process, record its PID at launch and stop only that recorded process.
+
 ## Capture discipline
 
 For every screenshot, record and match the reference's:

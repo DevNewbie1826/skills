@@ -53,6 +53,8 @@ Render through a real pseudoterminal in a browser terminal emulator and capture 
 
 Drive the real command and replay representative input and resize states. If a browser terminal renderer is unavailable, retain raw text and ANSI output, run the width check, and explicitly report that a pixel-level terminal review could not be performed.
 
+After saving the browser-rendered terminal capture, apply [Browser teardown](headless-browser-setup.md#browser-teardown) to the emulator and browser you opened.
+
 Run the bundled check with an available runner:
 
 ```sh

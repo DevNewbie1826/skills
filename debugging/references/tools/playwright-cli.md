@@ -62,6 +62,8 @@ npx playwright codegen --device="iPhone 14" https://your-app.local
 
 Click / type / navigate in the browser; watch the script build in the side panel. Copy the generated script into your journal as the repro for Phase 8.
 
+When recording ends, exit `codegen` so it closes its browser. If it must stay open for a long-lived repro, record its browser PID in the journal at launch and apply [Browser sessions](../methodology/09-cleanup.md#browser-sessions) when the repro ends.
+
 ### 2. A one-shot Playwright script — reproduce + capture
 
 Usually the Phase 8 QA artifact. Save to `/tmp/debug-repro.spec.ts` (journal it):
@@ -180,6 +182,8 @@ test.use({ ...devices['iPhone 14'] });
 ---
 
 ## Phase 9 cleanup specifics
+
+For a standalone `chromium.launch()`, put `await browser.close()` in a `finally` block. The test runner tears down fixture browsers on normal exit; for a headed or hung run that can outlive that lifecycle, follow [Browser sessions](../methodology/09-cleanup.md#browser-sessions) before deleting its artifacts.
 
 ```bash
 # Remove trace files from debug runs

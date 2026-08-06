@@ -12,6 +12,8 @@ A `DESIGN.md` whose every token, interaction state, and motion value was read fr
 
 Drive a real browser with a browser-driving capability; otherwise use the project's Playwright, browser, or development-browser tooling. Do NOT parse CSS files — minification, CORS, CSS-in-JS, and Tailwind utilities make source unreliable. `getComputedStyle` returns what the browser ACTUALLY rendered, so it is the only source of truth.
 
+When browser work is complete, close every browser, tab, or driver you opened for it. If you launched a browser process, record its PID at launch and, during teardown, stop only that recorded process; never close a user-owned browser.
+
 Sweep the page and read, for every meaningful element and every repeated pattern:
 
 - **Tokens** — color, background, border, font family/size/weight, line-height, letter-spacing, radius, shadow, and spacing (padding/margin/gap). Cluster the repeated values into the token scale.
