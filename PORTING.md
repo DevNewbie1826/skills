@@ -93,12 +93,12 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
 
 ## Rule 8 — OMP-native skills are exempt from neutrality rules
 
-- This is an OMP pack. Skills written **for OMP** (e.g. `dag-workflow`) are OMP-native and
+- This is an OMP pack. Skills written **for OMP** are OMP-native and
   EXEMPT from Rules 1–3 (agent/model/framework neutrality): they may name and use OMP
   mechanisms (`eval`, `task`, `hub`, `local://`, goal mode, skills, extensions).
 - Rules 1–3 still apply in full to **ported** skills (brought from other agents) — that is
   exactly what "neutralize on port" means.
-- An OMP-native skill MUST mark itself (frontmatter tag or SKILL.md header note) so
-  reviewers know the exemption applies. `tools/check-skills.py` MUST skip Tier-A token
-  checks for OMP-native-flagged paths via allowlist (**checker update pending — to do at
-  `dag-workflow` implementation**); never to silence real violations in ported skills.
+- An OMP-native skill MUST mark itself with `omp-native: true` frontmatter so
+  reviewers know the exemption applies. `tools/check-skills.py` skips Tier-A token
+  checks for `omp-native: true` skills via `is_omp_native()`; never use this to silence
+  real violations in ported skills.
