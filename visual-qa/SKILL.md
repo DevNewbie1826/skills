@@ -1,6 +1,6 @@
 ---
 name: visual-qa
-description: "Use after building or changing a web, page, component, or terminal UI, or when asked whether it looks right. Covers screenshot and pixel comparison, visual regression, reference fidelity, design-system checks, responsive behavior, CJK clipping, TUI alignment, and box-drawing drift."
+description: "Use to verify a rendered surface against stated intent or a concrete visual reference — not to build or style the UI (that is the frontend skill). Covers screenshot and pixel comparison, visual regression, reference fidelity, design-system checks, responsive behavior, CJK clipping, TUI alignment, and box-drawing drift. Triggers: compare screenshot to mockup or design, does it match, visual regression, screenshot diff, pixel diff, responsive check, mobile layout, breakpoint check, CJK clipping, TUI alignment."
 ---
 
 # Visual QA

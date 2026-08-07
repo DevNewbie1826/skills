@@ -1,6 +1,6 @@
 ---
 name: dag-workflow
-description: "Use for a task that is genuinely too big for one pass: decompose and cover in parallel via eval subagents, apply independent/adversarial cross-checking before you commit, or take on scale one context can't hold (audits, migrations, broad sweeps). Do NOT use for a single edit, a quick lookup, or a task one agent can finish — do those directly."
+description: "Use for a task genuinely too big for one pass: decompose and cover in parallel via subagents, apply independent/adversarial cross-checking before you commit, or take on scale one context can't hold. Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a single edit, a quick lookup, or a task one agent can finish — do those directly."
 ---
 
 # dag-workflow

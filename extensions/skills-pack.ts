@@ -135,7 +135,7 @@ export function buildBootstrap(root: string): string {
   }
 
   const sections: string[] = [
-    `This session has a skill pack installed. When the task matches a skill below, load that skill's SKILL.md with the read tool BEFORE starting the work, follow it, and say in one sentence which skill you loaded. Load only the matching skill; if nothing matches, load none — do not read skills just in case. The absolute path pattern is ${root}/<name>/SKILL.md.`,
+    `This session has a skill pack installed. When a skill below is plausibly relevant to the task, load its SKILL.md with the read tool BEFORE starting the work, follow it, and say in one sentence which skill you loaded. Err toward loading: a needless read costs one tool call, but skipping a relevant skill means doing the task without its methodology. Load none only when no skill plausibly applies. The absolute path pattern is ${root}/<name>/SKILL.md.`,
   ];
 
   if (bulletLines.length > 0) {
