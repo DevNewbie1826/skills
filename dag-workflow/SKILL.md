@@ -14,13 +14,13 @@ Design full agentic one monolithic DAG workflow for the task. Follow orchestrati
 1. Fan out parallel agents to define full task scope — every file, subsystem, call site.
 2. Break the task into small slices.
 3. Record `depends_on` between slices. Parallelism is derived from `depends_on` at execution time.
-4. Per slice, assign: `agent` (who runs it — see [references/agents.md](references/agents.md)), optional `model` (e.g. `"@slow"` for hard reasoning), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3).
+4. Per slice, assign: `agent` (who runs it — see [references/agents.md](references/agents.md)), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3).
 
 ## Step 2 — Execute
 
 Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute — default to refuted when unsure. Follow orchestration.md.
 
-1. Dispatch each ready node (deps satisfied) via `agent()` with its assigned `agent` and `model`. Inject upstream outputs and assigned skill names into the prompt (instruct the subagent to read and follow those skills). Run independent nodes concurrently.
+1. Dispatch each ready node (deps satisfied) via `agent()` with its assigned `agent`. Inject upstream outputs and assigned skill names into the prompt (instruct the subagent to read and follow those skills). Run independent nodes concurrently.
 2. Results that survive the council are committed. Results that get refuted retry with feedback (bounded). Unconverged nodes fail — their dependents are skipped.
 
 ## Step 3 — Quality loop
