@@ -1,4 +1,5 @@
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, mkdirSync, symlinkSync, unlinkSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -151,6 +152,19 @@ export function buildBootstrap(root: string): string {
 
 export default function createSkillsPackExtension(pi: ExtensionAPI) {
   pi.on("resources_discover", async () => ({ skillPaths: [packRoot] }));
+
+  // Register pack-internal agents (dag-workflow/agents/) via symlinks to ~/.omp/agent/agents/
+  pi.on("session_start", async () => {
+    const agentsDir = join(packRoot, "dag-workflow", "agents");
+    if (!existsSync(agentsDir)) return;
+    const targetDir = join(homedir(), ".omp", "agent", "agents");
+    mkdirSync(targetDir, { recursive: true });
+    for (const f of readdirSync(agentsDir).filter((f) => f.endsWith(".md"))) {
+      const dst = join(targetDir, f);
+      try { unlinkSync(dst); } catch { /* not present */ }
+      try { symlinkSync(resolve(agentsDir, f), dst, "file"); } catch { /* permission or race */ }
+    }
+  });
 
   pi.on("before_agent_start", async (event) => {
     cachedBootstrap ??= buildBootstrap(packRoot);
