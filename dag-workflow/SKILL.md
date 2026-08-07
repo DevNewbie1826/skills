@@ -18,7 +18,7 @@ Design full agentic one monolithic DAG workflow for the task. Follow orchestrati
 
 ## Step 2 — Execute
 
-Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute — default to refuted when unsure. Follow orchestration.md.
+Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
 
 1. Dispatch each ready node (deps satisfied) via `agent()` with its assigned `agent`. Inject upstream outputs and assigned skill names into the prompt (instruct the subagent to read and follow those skills). Run independent nodes concurrently.
 2. Results that survive the council are committed. Results that get refuted retry with feedback (bounded). Unconverged nodes fail — their dependents are skipped.
@@ -29,6 +29,6 @@ Outside the DAG. Follow orchestration.md.
 
 1. For code, establish green regression-test baseline first.
 2. One round = run every slice's `quality_checks` once, then one integrated whole-output pass across all slices (cross-slice consistency, duplication, conflicts, overall slop).
-3. Resolve every finding before the next round.
-4. Repeat until zero findings. If user specified N rounds, run exactly N and stop, reporting unresolved findings.
-5. Report each round's output. Never declare done unless the final round surfaced zero findings.
+3. Classify each finding from its verdict (not by feel): **real** = actionable & confirmed (`actionable_severity != "none"` and `verification_confidence != "low"`); **borderline** = verifier uncertain (`verification_confidence == "low"`). Resolve real findings before the next round; record borderlines.
+4. Repeat until **K consecutive rounds surface zero real findings** (default K=2). Borderlines don't reset K. If the user specified N rounds, run exactly N and stop, reporting unresolved findings.
+5. Report each round's output. Never declare done unless the final round surfaced zero real findings.

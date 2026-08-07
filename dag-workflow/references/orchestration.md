@@ -26,26 +26,24 @@ Everything runs INLINE and synchronously inside the eval call — no background 
 </helpers>
 
 <structure>
-For independent per-item chains (review → verify, fetch → extract → score), wrap the WHOLE chain in one function and run it with `parallel()` — then each item flows through its own steps without waiting on the others:
+For independent per-item chains (review → verify, fetch → extract → score), wrap the WHOLE chain in one function and run it with `parallel()` — then each item flows through its own steps without waiting for the others. (The examples here reference schemas + fixtures defined by the **shared prelude** in the finder→verifier contract below — every example is runnable *after that prelude*.)
 
 **Python (`eval`, Python backend):**
 
 ```python
-DIMENSIONS = [{"key": "bugs", "prompt": "…"}, {"key": "perf", "prompt": "…"}]
 def review_and_verify(d):
     found = agent(d["prompt"], label=f"review:{d['key']}", schema=FINDINGS_SCHEMA)
     return parallel([lambda f=f: {**f, "verdict": agent(
-        f"Refute if you can (default refuted when unsure): {f['title']}",
+        f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep your best-guess status/severity but set verification_confidence=low)",
         label=f"verify:{f['file']}", schema=VERDICT_SCHEMA)} for f in found["findings"]])
 phase("Review")
 results = parallel([lambda d=d: review_and_verify(d) for d in DIMENSIONS])
-confirmed = [f for group in results for f in group if f["verdict"]["is_real"]]
+confirmed = [f for group in results for f in group if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]  # real = actionable AND confirmed (Q2+Q3) — see finder→verifier contract
 ```
 
 **JavaScript (`eval`, JavaScript backend):**
 
 ```js
-const DIMENSIONS = [{ key: "bugs", prompt: "…" }, { key: "perf", prompt: "…" }];
 async function reviewAndVerify(d) {
     const found = await agent(d.prompt, {
         label: `review:${d.key}`,
@@ -54,14 +52,14 @@ async function reviewAndVerify(d) {
     return await parallel(found.findings.map((f) => async () => ({
         ...f,
         verdict: await agent(
-            `Refute if you can (default refuted when unsure): ${f.title}`,
+            `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep best-guess status/severity but set verification_confidence=low)`,
             { label: `verify:${f.file}`, schema: VERDICT_SCHEMA },
         ),
     })));
 }
 phase("Review");
 const results = await parallel(DIMENSIONS.map((d) => async () => reviewAndVerify(d)));
-const confirmed = results.flat().filter((f) => f.verdict.is_real);
+const confirmed = results.flat().filter((f) => f.verdict.actionable_severity !== "none" && f.verdict.verification_confidence !== "low"); // real = actionable AND confirmed (Q2+Q3) — see finder→verifier contract
 ```
 Reach for `pipeline()` only when a stage genuinely needs ALL of the previous stage first — dedup/merge across the whole set, early-exit on zero, or "compare against the other findings" — because its inter-stage barrier makes every item wait for the slowest peer:
 
@@ -72,7 +70,7 @@ phase("Find")
 found = parallel([lambda d=d: agent(d["prompt"], schema=FINDINGS_SCHEMA) for d in DIMENSIONS])
 findings = dedupe([f for r in found for f in r["findings"]])   # needs everything at once
 phase("Verify")
-verdicts = parallel([lambda f=f: agent(verify_prompt(f), schema=VERDICT_SCHEMA) for f in findings])
+verdicts = parallel([lambda f=f: {"id": f["id"], "verdict": agent(verify_prompt(f), schema=VERDICT_SCHEMA)} for f in findings])  # carry the join key, never positional
 ```
 
 **JavaScript (`eval`, JavaScript backend):**
@@ -84,23 +82,129 @@ const found = await parallel(DIMENSIONS.map((d) => async () =>
 ));
 const findings = dedupe(found.flatMap((r) => r.findings)); // needs everything at once
 phase("Verify");
-const verdicts = await parallel(findings.map((f) => async () =>
-    await agent(verifyPrompt(f), { schema: VERDICT_SCHEMA }),
-));
+const verdicts = await parallel(findings.map((f) => async () => ({
+    id: f.id, verdict: await agent(verifyPrompt(f), { schema: VERDICT_SCHEMA }),
+}))); // carry the join key, never positional
 ```
 Use ordinary code between calls to flatten/map/filter; don't add a barrier just for that. Nested `parallel()` pools each cap independently, so keep total fan-out sane.
+**Finder→verifier contract.** Define the schemas once (shared prelude below); each field answers exactly ONE question, and you aggregate on the field(s) whose question matches your decision. Every example above and below runs after this prelude.
+
+**Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the three schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, and a sample joined `entries` for the `to_act` snippet):
+
+```python
+DIMENSIONS = [{"key": "bugs", "prompt": "…"}, {"key": "perf", "prompt": "…"}]
+FINDINGS_SCHEMA = {                       # finder emits this
+    "type": "object",
+    "properties": {"findings": {"type": "array", "items": {
+        "type": "object",
+        "properties": {
+            "id":       {"type": "string", "minLength": 1},   # globally unique (see below)
+            "file":     {"type": "string", "minLength": 1},
+            "title":    {"type": "string", "minLength": 1},
+            "severity": {"enum": ["low", "medium", "high", "critical"]},
+            "detail":   {"type": "string", "minLength": 1},   # claim body / evidence — nonempty; pass to the verifier
+        },
+        "required": ["id", "file", "title", "severity", "detail"],
+    }}},
+    "required": ["findings"],
+}
+VERDICT_SCHEMA = {                         # per-finding refuter; the ORCHESTRATOR attaches the finding's id in the wrapper
+    "type": "object",
+    "properties": {
+        "original_claim_status":   {"enum": ["upheld", "refuted", "partial"]},              # Q1 — does the CLAIM hold (partial = partly holds; NOT "I'm unsure")
+        "actionable_severity":     {"enum": ["none", "low", "medium", "high", "critical"]}, # Q2 — severity to act on
+        "verification_confidence": {"enum": ["high", "medium", "low"]},                     # Q3 — the VERIFIER's own confidence (separate axis)
+        "reason":                  {"type": "string"},
+    },
+    "required": ["original_claim_status", "actionable_severity", "verification_confidence", "reason"],
+}
+REFUTE_SCHEMA = {"type": "object", "properties": {"refuted": {"type": "boolean"}, "reason": {"type": "string"}}, "required": ["refuted", "reason"]}
+def dedupe(xs):
+    by_id, by_content, out = {}, {}, []
+    for x in xs:
+        if x["id"] in by_id: raise ValueError(f"duplicate finding id (collision): {x['id']} — ids must be globally unique (see finder→verifier contract)")
+        by_id[x["id"]] = x                        # record EVERY id right after the collision check (before content dedup)
+        sig = (x.get("file"), x.get("title"), x.get("detail"), x.get("severity"))    # content fingerprint: same file + title + claim body + severity = same finding
+        if sig in by_content: continue            # legit duplicate (two finders, same issue) — merge to one
+        by_content[sig] = x; out.append(x)
+    return out
+def verify_prompt(f): return f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}]"
+entries = [{"id": "x", "verdict": {"original_claim_status": "refuted", "actionable_severity": "low", "verification_confidence": "high", "reason": "downgraded residual"}},
+           {"id": "y", "verdict": {"original_claim_status": "refuted", "actionable_severity": "none", "verification_confidence": "high", "reason": "nothing actionable"}}]  # joined finding+verdict list (e.g. results/verdicts from above)
+```
+
+```js
+const DIMENSIONS = [{ key: "bugs", prompt: "…" }, { key: "perf", prompt: "…" }];
+const FINDINGS_SCHEMA = {                       // finder emits this
+    "type": "object",
+    "properties": { "findings": { "type": "array", "items": {
+        "type": "object",
+        "properties": {
+            "id":       { "type": "string", "minLength": 1 },   // globally unique (see below)
+            "file":     { "type": "string", "minLength": 1 },
+            "title":    { "type": "string", "minLength": 1 },
+            "severity": { "enum": ["low", "medium", "high", "critical"] },
+            "detail":   { "type": "string", "minLength": 1 },   // claim body / evidence — nonempty; pass to the verifier
+        },
+        "required": ["id", "file", "title", "severity", "detail"],
+    }}},
+    "required": ["findings"],
+};
+const VERDICT_SCHEMA = {                         // per-finding refuter; the ORCHESTRATOR attaches the finding's id in the wrapper
+    "type": "object",
+    "properties": {
+        "original_claim_status":   { "enum": ["upheld", "refuted", "partial"] },              // Q1 — does the CLAIM hold (partial = partly holds; NOT "I'm unsure")
+        "actionable_severity":     { "enum": ["none", "low", "medium", "high", "critical"] }, // Q2 — severity to act on
+        "verification_confidence": { "enum": ["high", "medium", "low"] },                     // Q3 — the VERIFIER's own confidence (separate axis)
+        "reason":                  { "type": "string" },
+    },
+    "required": ["original_claim_status", "actionable_severity", "verification_confidence", "reason"],
+};
+const REFUTE_SCHEMA = { "type": "object", "properties": { "refuted": { "type": "boolean" }, "reason": { "type": "string" } }, "required": ["refuted", "reason"] };
+function dedupe(xs) { const byId = new Map(), byContent = new Map(), out = []; for (const x of xs) { if (byId.has(x.id)) throw new Error(`duplicate finding id (collision): ${x.id} — ids must be globally unique (see finder→verifier contract)`); byId.set(x.id, x); const sig = JSON.stringify([x.file, x.title, x.detail, x.severity]); if (byContent.has(sig)) continue; byContent.set(sig, x); out.push(x); } return out; }
+function verifyPrompt(f) { return `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}]`; }
+const entries = [{ id: "x", verdict: { original_claim_status: "refuted", actionable_severity: "low", verification_confidence: "high", reason: "downgraded residual" } },
+                 { id: "y", verdict: { original_claim_status: "refuted", actionable_severity: "none", verification_confidence: "high", reason: "nothing actionable" } }];
+```
+
+- **Q1** `original_claim_status` — does the CLAIM hold AS STATED, at its original severity? `upheld` / `refuted` / `partial` (`partial` = the claim *partly* holds — a property of the claim, NOT a proxy for "I'm unsure"; uncertainty is Q3).
+- **Q2** `actionable_severity` — what severity would you actually act on? `none` = nothing to act on (whether that's then dropped or borderline depends on Q3 — see convergence). (The orchestrator attaches the finding's `id` in the wrapper when collecting each verdict — the collection examples above do — so the join never depends on output position.)
+- **Q3** `verification_confidence` — how confident is the VERIFIER in this verdict (`high`/`medium`/`low`)? An epistemic axis independent of Q1/Q2 — keep it separate so a "partly-true claim" and an "I'm unsure" verdict stay distinguishable.
+Give the verifier what Q1 asks for: pass `title`, `severity`, **and** `detail`/evidence into the prompt — Q1 judges the claim "at its original severity" and needs the claim body, so the verifier must see all three. (The sketch prompts in the examples show the short form `[title | severity | detail]`; in real use, expand them with the full finding context.)
+
+Aggregate on **Q2 + Q3**, never Q1 alone — "is there confirmed work to do" is Q2∧Q3:
+
+```python
+to_act = [f for f in entries if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]   # real = actionable AND confirmed; a downgraded residual (refuted + low severity + high confidence) still ships
+```
+
+JavaScript:
+
+```js
+const toAct = entries.filter((f) => f.verdict.actionable_severity !== "none" && f.verdict.verification_confidence !== "low"); // real = actionable AND confirmed
+```
+
+Walkthrough — a high-severity "dangerous substitution" claim that's really a benign preempt-DoS: the refuter returns `original_claim_status="refuted"` (the high claim rejected) + `actionable_severity="low"` (a real low residual) + `verification_confidence="high"`. Aggregating on Q2 keeps it as `low` — correct. Aggregating on `original_claim_status == "upheld"` would have **dropped** real low-severity work.
+
+Do **NOT** impose `refuted ⟹ severity:none`. That invariant deletes legitimate downgraded residuals (the case above) — claim status (Q1) never decides discard on its own. A finding is dropped only when it's *confidently* non-actionable: `actionable_severity == "none"` AND `verification_confidence != "low"`; if it's non-actionable but uncertain (`verification_confidence == "low"`) it's borderline and reported, not discarded. (`REFUTE_SCHEMA` is the Q1-only variant for pure majority-vote refutation, used when you don't track a residual — don't aggregate a mixed Q1/Q2 field from it.)
+
+**Finding `id` is the join key.** Make it globally unique across the WHOLE fan-out — `<lens>:<n>` (e.g. `sec:3`) or a uuid — never per-lens local indices like `S1`. Lens-initial IDs collide (`security`↔`streaming` both `S`; `concurrency`↔`contract` both `C`); collisions silently merge findings or drop verdicts at the join. **Attach the finding's `id` in the wrapper when you collect each verdict** — `{**f, "verdict": …}` or `{"id": f["id"], "verdict": …}`; the orchestrator owns the join key. Never reconstruct the pair by zipping `parallel()` output by position, and don't rely on a verifier to echo an `id` it wasn't given.
 </structure>
 
 <patterns>
 Compose the harness the task calls for:
-- **Adversarial verify** — N independent skeptics per finding, each prompted to REFUTE; keep it only if a majority survive. `votes = parallel([lambda i=i: agent(f"Refute: {claim}. refuted=true if unsure.", schema=VERDICT) for i in range(3)])`, then keep when `sum(not v["refuted"] for v in votes) ≥ 2`.
+- **Adversarial verify** — N independent skeptics per finding, each prompted to REFUTE; keep it only if a majority survive. `votes = parallel([lambda i=i: agent(f"Refute: {claim}. refuted=true if unsure.", schema=REFUTE_SCHEMA) for i in range(3)])`, then keep when `sum(not v["refuted"] for v in votes) ≥ 2`. (Q1-only majority vote; pair with `VERDICT_SCHEMA` when you also track a residual — see finder→verifier contract.)
 - **Perspective-diverse verify** — give each verifier a distinct lens (correctness, security, perf, does-it-reproduce) instead of N identical refuters.
 - **Judge panel** — N attempts from different angles, scored by parallel judges; synthesize from the winner, graft the best of the rest.
-- **Loop-until-dry** — for unknown-size discovery, keep spawning finders until K consecutive rounds surface nothing new; dedup against everything SEEN, not just what was confirmed, or it never converges.
+- **Parallel writes (fixes/migrations)** — `agent()`'s `isolated`/`apply`/`merge` integrate writes in separate workspaces and surface a *mechanical* merge/apply conflict as a cell error — but that does NOT catch a *semantic* omission across differently-owned files (a worker says "not my slice" and makes no competing edit → applies cleanly while the contract stays broken). So ownership comes first: pin the shared interface (a widened type, a header) as its OWN preemptive slice — land it, confirm it compiles — THEN fan out the consumers; files that share a contract line stay in ONE slice. Close the residual gap with an integrated cross-slice test/review pass.
+- **Shared context handoff** — before a fan-out, put a shared context PACKET in every prompt, not just a diff. Subagents default to "change = last commit" AND to guessing the goal/scope; both burn rounds (pestering for `git diff HEAD~1`, or wandering off-task). The packet: the user's goal + acceptance criteria/non-goals, the exact baseline commit and changed-file list, any upstream decisions, and the FULL change view — `git diff HEAD` for tracked changes (staged AND unstaged) plus `git status --short` and the contents of task-relevant untracked TEXT files (only those on the changed-file list; exclude/redact unrelated, secret, binary, or oversized files and `log()` the exclusions — a bare `git diff` misses staged and untracked, but don't sweep in everything). `local://` files (the official shared-background channel) usually work, but resolution is harness-dependent — if an eval `read()` can't resolve a `local://` path, fall back to the real filesystem path or inline the content.
+- **Loop-until-dry (discovery)** — keep spawning finders until **K consecutive rounds surface nothing new** (default K=2); dedup against everything SEEN, not just what was confirmed, or it never converges.
+- **Convergence rule (quality / slop loops)** — classify each finding from its verdict, not by feel. Three disjoint, schema-only buckets: **real** = `actionable_severity != "none"` AND `verification_confidence != "low"` (confirmed, actionable now); **borderline** = `verification_confidence == "low"` (the verifier is genuinely uncertain — REPORTED, never silently lost); **dropped** = `actionable_severity == "none"` AND `verification_confidence != "low"` (confidently nothing to do — log it, *no silent caps*). Convergence = **K consecutive rounds with zero real findings** (default K=2). Borderlines do NOT reset the counter — but the final report lists every unresolved borderline. (Uncertainty is its OWN axis: `partial` stays a claim-status value, not a proxy for "unsure".) If the user set N rounds, run exactly N regardless of early convergence, and report what's left.
 - **Multi-modal sweep** — parallel finders each searching a different way (by-container, by-content, by-entity, by-time), each blind to the others.
 - **Completeness critic** — a final agent that asks "what's missing — modality not run, claim unverified, file unread?"; its answer is the next round.
 - **Budget/count loops** — Python: `while len(bugs) < 10:`; JavaScript: `while (bugs.length < 10) { … }`. In Python, gate an explicit budget with `budget.total` and `budget.remaining()`; in JavaScript, use `await budget.total()` and `await budget.remaining()`. `log()` each round.
 - **No silent caps** — if you bound coverage (top-N, no-retry, sampling), `log()` what you dropped; silent truncation reads as "covered everything" when it didn't.
+- **Scope discipline for scanners** — give a review/slop scanner the EXACT changed-file list and "outside this list: one-line note only, never edit." Mark recent intended changes (a bug-fix or guard you just added) as in-scope-but-intentional so they aren't relitigated as slop. A scanner that flags untouched files or pre-existing code is scope creep, not a finding — re-prompt with the file list rather than chasing the noise.
 
 Scale to the ask: "find any bugs" → a few finders, single-vote verify. "thoroughly audit / be comprehensive" → larger finder pool, 3–5-vote adversarial pass, a synthesis stage.
 </patterns>
