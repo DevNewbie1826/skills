@@ -5,11 +5,11 @@ description: "Use for a task genuinely too big for one pass: decompose and cover
 
 # dag-workflow
 
-Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Never go inline when fanning out is possible.**
+Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; a quick lookup, a single edit, or anything one agent finishes stays inline (see orchestration.md `<when>`).**
 
 ## Step 1 — Plan
 
-Design full agentic one monolithic DAG workflow for the task. Follow orchestration.md.
+Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 1–4 below are the **execution-slice** path (work with real cross-step dependencies). A **parallel review/sweep** is an edge-less DAG instead — one node per lens, empty `depends_on`, no slicing: keep step 1 (scope) and step 4 (per-lens `agent`/`skills`/`quality_checks`), skip the slice/`depends_on` steps (2–3).
 
 1. Fan out parallel agents to define full task scope — every file, subsystem, call site.
 2. Break the task into small slices.
