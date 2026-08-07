@@ -63,7 +63,7 @@ at `SKILL.md`; otherwise check your runtime docs.
 ### Frontmatter compatibility
 
 All nine skills have Agent Skills-style YAML frontmatter: `name` matches the directory,
-uses a 1-64-character lowercase/hyphenated identifier, and includes a 281-991-character
+uses a 1-64-character lowercase/hyphenated identifier, and includes a 322-991-character
 `description` (within the 1-1,024-character limit).
 
 - Claude Code makes `name` optional and recommends `description`; its `description`

@@ -40,4 +40,4 @@ SOFTWARE.
 
 ## Project-local adaptations
 
-`SKILL.md` is maintained locally but includes the upstream-derived methodology identified above; its pack-specific routing, the fakes-before-mocks hierarchy, and the determinism rules are project-local adaptations.
+The upstream-derived cycle and test-quality methodology live in `references/cycle.md` and `references/writing-good-tests.md`; `SKILL.md` is the pack-specific router. The fakes-before-mocks hierarchy and the determinism rules are project-local adaptations.
