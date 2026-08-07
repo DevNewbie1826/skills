@@ -20,61 +20,7 @@ These apply before the first edit, for any change to code, configuration, docume
 4. **Parse once at the boundary.** Convert untrusted HTTP, RPC, CLI, configuration, file, queue, and database inputs into typed values at ingress. Interior code consumes typed values and does not repeat validation.
 5. **Match closed variants exhaustively.** Use the language's exhaustive-match pattern and an explicit unreachable assertion where the compiler cannot prove completeness. Do not let a default conditional silently accept a new variant.
 6. **Trust established contracts.** Do not add null checks, broad catches, casts, or post-action verification for states that a type, framework, or operation already guarantees. Validate only at true system boundaries.
-7. **Prove behavior with focused tests.** Start a behavior change with a test that fails for the intended reason, implement the minimum, then refactor with the test green.
-
-## Test-driven delivery
-
-### Red, green, refactor
-
-1. **Red:** write a failing test that names the behavior and run it. Confirm that it fails because the behavior is absent or incorrect, not because the fixture or import is broken.
-2. **Green:** make only the change required for that behavior to pass. Add the next case as the next red test.
-3. **Refactor:** improve the design only while the test is green. If the test blocks a safe refactor, fix the test's coupling before changing production code.
-
-### Test shape
-
-| Layer | Purpose | Expectation |
-|---|---|---|
-| Unit | Pure behavior, edges, boundaries, and error paths | Fast and local; exercise meaningful input classes |
-| Integration | A real adapter against a real downstream or faithful sandbox | Verify the wire, schema, query, or process boundary rather than an implementation imitation |
-| End-to-end | A user-visible narrative through the real surface | Drive the binary, route, CLI, TUI, or equivalent and assert observable outcomes |
-
-Use all applicable layers. An end-to-end scenario does not replace edge-focused units; units do not prove that the real boundary is wired correctly.
-
-### Given / When / Then
-
-Structure each test around one action:
-
-```text
-Given: the preconditions and fixtures
-When:  the single action under test
-Then:  the observable outcome caused by that action
-```
-
-Keep one `When` per test. Assert the contract that changed, not unrelated state, formatting, ordering, whitespace, or implementation details.
-
-### Fakes before mocks
-
-Choose the narrowest truthful substitute:
-
-1. A real object when it is cheap to construct.
-2. An in-memory fake with its own contract tests.
-3. A real service in an isolated sandbox or container.
-4. A wire-level fake that preserves the protocol.
-5. A mock only when the dependency cannot be made real or deterministic, such as a clock, randomness source, or unavailable external service.
-
-A test that fails when internals change but observable behavior stays the same is over-mocked. Reduce the mock boundary or assert the outcome instead.
-
-### Determinism is part of correctness
-
-- Do not use fixed sleeps, polling loops, wall-clock assumptions, or test-order dependence.
-- For asynchronous behavior, subscribe to the exact event or state transition before triggering the action, then await it with a bounded timeout.
-- Inject clocks, randomness, and external seams where their values affect behavior.
-- Start each test from a known fixture and clean up all files, environment variables, transactions, goroutines, tasks, and processes it owns.
-- Ensure override and fallback fixtures differ; a test cannot prove precedence when both values are identical.
-
-### Prompt and generated-text tests
-
-Do not pin prose. A text-fragment assertion or prose snapshot usually blocks legitimate wording changes while failing to prove a machine-consumed decision. Instead test the routing decision, parsed metadata, tool or action schema, feature flag, or other structural behavior. If no machine consumes the text, document that it is reviewed as prose rather than inventing a brittle test.
+7. **Prove behavior with focused tests.** A behavior change earns a test that fails for the intended reason, then the minimum implementation, then a green refactor. The full cycle — and when it does not apply — plus test shape, fakes and mocks, and determinism, live in the `tdd` skill (Test-Driven Delivery).
 
 ## Cross-language design rules
 

@@ -51,7 +51,7 @@ The "mechanism" field is the acid test. If you can't write the causal chain from
 
 ## Phase 7 — TDD Fix
 
-Red, green, refactor. No shortcuts.
+Red, green, refactor. For the general cycle and when it does not apply, see the `tdd` skill; here the non-negotiable part is that the test fails on the reproduction and passes only with the fix.
 
 ### 1. Red — failing-first test
 

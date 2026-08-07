@@ -34,7 +34,7 @@ class Results(TypedDict):
     summary: dict[str, int]
     ok: bool
 
-DEFAULT_SKILLS = ("frontend", "debugging", "remove-ai-slops", "visual-qa", "programming", "git-master", "lore")
+DEFAULT_SKILLS = ("frontend", "debugging", "remove-ai-slops", "visual-qa", "programming", "tdd", "git-master", "lore")
 TEXT_SUFFIXES = {".md", ".py", ".ts", ".mjs", ".json", ".csv", ".txt"}
 SCRIPT_SUFFIXES = {".py", ".ts", ".mjs"}
 

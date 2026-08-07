@@ -1,6 +1,6 @@
 ---
 name: programming
-description: "MUST USE for work on Python, Rust, TypeScript, or Go source files and project manifests. Triggers: write or edit code; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; TDD; end-to-end test; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI."
+description: "MUST USE for work on Python, Rust, TypeScript, or Go source files and project manifests. Triggers: write or edit code; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI."
 ---
 
 # Programming
@@ -32,7 +32,8 @@ Before writing or editing code, identify the language and read its entry point. 
 | Need | Read |
 |---|---|
 | Before the first edit: assumptions, task scope, or done criteria | [Shared programming philosophy § Pre-edit discipline](references/philosophy.md) |
-| Design, test shape, review, LOC limits, or portable verification | [Shared programming philosophy](references/philosophy.md) |
+| Design, review, LOC limits, or portable verification | [Shared programming philosophy](references/philosophy.md) |
+| Test-driven development, test shape, fakes or mocks, or test quality | the `tdd` skill (Test-Driven Delivery) |
 | Adding or changing logs, logger setup, or boundary error handling | [Logging](references/logging.md) |
 | A file exceeds 200 pure LOC, a function has more than three parameters, verification is redundant, or names are negative-form | [Code smells](references/code-smells.md) |
 | Rust memory safety, FFI, or concurrent primitive audit | [Rust soundness lane](references/rust-ub/README.md) and its linked taxonomy |

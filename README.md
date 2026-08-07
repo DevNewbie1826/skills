@@ -2,7 +2,7 @@
 
 An **OMP (Oh My Pi) skill pack**. It holds two kinds of skills:
 
-- **Ported skills** (frontend, programming, debugging, visual-qa, remove-ai-slops,
+- **Ported skills** (frontend, programming, tdd, debugging, visual-qa, remove-ai-slops,
   git-master, lore) — self-contained, drop-anywhere, framework/model/agent/language-
   neutral. Each `SKILL.md` is a thin router; detail lives in `references/`.
 - **OMP-native skills** (`dag-workflow`) — written for OMP, may use OMP
@@ -16,7 +16,8 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | Skill | Use when |
 |---|---|
 | `frontend/` | Any web UI/UX/visual work: building, redesigning, styling, animation, performance, accessibility, design research |
-| `programming/` | Writing or editing code in any language: strict types, modern toolchains, parse-don't-validate, typed errors, TDD |
+| `programming/` | Writing or editing Python, Rust, TypeScript, or Go code: strict types, modern toolchains, parse-don't-validate, typed errors |
+| `tdd/` | Test-driven development in any language: red/green/refactor, test quality, fakes before mocks, determinism |
 | `debugging/` | Real runtime debugging in any language or binary: crashes, silent failures, hangs, leaks, reverse engineering |
 | `visual-qa/` | Verifying a built UI/page/TUI visually: screenshots, pixel diffs, responsive and CJK checks |
 | `remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
@@ -34,7 +35,9 @@ cd skills
 ```
 
 Skills are individually self-contained: take only what you need. Commands install
-`frontend/`; replace it with another skill directory as needed.
+`frontend/`; replace it with another skill directory as needed. Note: `programming/`
+routes test-driven development to the standalone `tdd/` skill, so copy both if you
+want the full testing guidance.
 
 | Runtime | Install path | Copy one skill |
 |---|---|---|
@@ -59,7 +62,7 @@ at `SKILL.md`; otherwise check your runtime docs.
 
 ### Frontmatter compatibility
 
-All eight skills have Agent Skills-style YAML frontmatter: `name` matches the directory,
+All nine skills have Agent Skills-style YAML frontmatter: `name` matches the directory,
 uses a 1-64-character lowercase/hyphenated identifier, and includes a 281-991-character
 `description` (within the 1-1,024-character limit).
 
@@ -97,6 +100,6 @@ Content-driven allowlist exceptions (e.g. brand design references) live in
 ## Layout note
 
 `.omo/` and `.senpi/` at this root are runtime session/state directories created by
-the authoring environment — they are NOT part of the skill pack. Copy only the eight
+the authoring environment — they are NOT part of the skill pack. Copy only the nine
 skill directories (plus `PORTING.md`, `README.md`, `tools/` if you want the checker)
 when taking the pack elsewhere.

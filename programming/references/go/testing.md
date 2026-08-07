@@ -2,7 +2,7 @@
 
 > Read this when designing or reviewing Go unit, integration, end-to-end, property, snapshot, or goroutine-leak tests.
 
-TDD shape, table-driven tests, `require` vs `assert`, snapshot tests, property-based tests, integration tests with testcontainers, goroutine-leak detection. The discipline in `../../SKILL.md` (Given/When/Then, less mock the better, efficient AND accurate) — this document gives the Go-specific recipes.
+TDD shape, table-driven tests, `require` vs `assert`, snapshot tests, property-based tests, integration tests with testcontainers, goroutine-leak detection. General test discipline — Given/When/Then, fakes before mocks, determinism — lives in the `tdd` skill; this document gives only the Go-specific recipes.
 
 ---
 
@@ -369,7 +369,7 @@ func Test_Client_retries_on_500(t *testing.T) {
 - **No `time.Sleep` in tests.** If you need delay, you need a Clock injection.
 - **`go test -shuffle=on`** in every CI run.
 - **`go test -count=1`** to defeat the cache.
-- **Subscribe to the event, do not poll for it.** Channels, callbacks, `t.Cleanup` over polling.
+- **Subscribe to the event, do not poll for it.** Channels, callbacks, `t.Cleanup` over polling. When no subscribable hook exists (black-box or eventually consistent systems), a bounded poll with a timeout and a diagnostic failure is the fallback — see the `tdd` skill.
 - **`t.Parallel()`** for tests that share no state. Speeds up large suites by 4-8x.
 
 A test that fails 1-in-10 runs is a bug, not flake. The race detector + `-shuffle=on` + ordering hygiene catches >95% of "flake".
