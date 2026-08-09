@@ -4,7 +4,7 @@
 
 Pick via `agent="..."` in the `agent()` call.
 
-This table lists EVAL agent types for `agent()` calls. Implementation nodes are dispatched via eval `agent(agent='task')` (see SKILL.md Step 2) — the `agent` field in Step 1 for an implementation node specifies its VERIFICATION agent (the eval reviewer that will refute its output), not the implementer.
+This table lists EVAL agent types for `agent()` calls. The Step 1 `agent` field specifies which type RUNS each node — `task` for implementation nodes, `reviewer` for finder/verifier nodes.
 
 | agent | when to use |
 |---|---|

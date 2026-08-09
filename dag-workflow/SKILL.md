@@ -25,7 +25,7 @@ Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 
 1. Fan out parallel agents to define full task scope — every file, subsystem, call site (scout inline first per orchestration.md `<when>`).
 2. Break the task into small slices.
 3. Record `depends_on` between slices. Parallelism is derived from `depends_on` at execution time.
-4. Per slice, assign: `agent` (eval agent type for this node — `reviewer` for verification, `task` for implementation — see [references/agents.md](references/agents.md)), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3) (a shell command or eval reviewer call; pass = exit 0/zero unaccepted real findings (to_act==0), fail = findings enter the convergence loop — see orchestration.md).
+4. Per slice, assign: `agent` (eval agent type that RUNS this node — `task` for implementation, `reviewer` for review/verification — see [references/agents.md](references/agents.md)), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3) (a shell command or eval reviewer call; pass = exit 0/zero unaccepted real findings (to_act==0), fail = findings enter the convergence loop — see orchestration.md).
 
 A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than trivial inline work (see Routing), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
 
