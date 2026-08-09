@@ -34,10 +34,10 @@ For independent per-item chains (review → verify, fetch → extract → score)
 
 ```python
 def review_and_verify(d):
-    found = agent(d["prompt"], label=f"review:{d['key']}", schema=FINDINGS_SCHEMA)
+    found = agent(d["prompt"], agent="reviewer", label=f"review:{d['key']}", schema=FINDINGS_SCHEMA)
     return parallel([lambda f=f: {**f, "verdict": agent(
         f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep your best-guess status/severity but set verification_confidence=low)",
-        label=f"verify:{f['file']}", schema=VERDICT_SCHEMA)} for f in found["findings"]])
+        agent="reviewer", label=f"verify:{f['file']}", schema=VERDICT_SCHEMA)} for f in found["findings"]])
 phase("Review")
 results = parallel([lambda d=d: review_and_verify(d) for d in DIMENSIONS])
 confirmed = [f for group in results for f in group if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]  # real = actionable AND confirmed (Q2+Q3) — see finder→verifier contract
@@ -48,6 +48,7 @@ confirmed = [f for group in results for f in group if f["verdict"]["actionable_s
 ```js
 async function reviewAndVerify(d) {
     const found = await agent(d.prompt, {
+        agent: "reviewer",
         label: `review:${d.key}`,
         schema: FINDINGS_SCHEMA,
     });
@@ -55,7 +56,7 @@ async function reviewAndVerify(d) {
         ...f,
         verdict: await agent(
             `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep best-guess status/severity but set verification_confidence=low)`,
-            { label: `verify:${f.file}`, schema: VERDICT_SCHEMA },
+            { agent: "reviewer", label: `verify:${f.file}`, schema: VERDICT_SCHEMA },
         ),
     })));
 }
@@ -69,10 +70,10 @@ Reach for `pipeline()` only when a stage genuinely needs ALL of the previous sta
 
 ```python
 phase("Find")
-found = parallel([lambda d=d: agent(d["prompt"], schema=FINDINGS_SCHEMA) for d in DIMENSIONS])
+found = parallel([lambda d=d: agent(d["prompt"], agent="reviewer", schema=FINDINGS_SCHEMA) for d in DIMENSIONS])
 findings = dedupe([f for r in found for f in r["findings"]])   # needs everything at once
 phase("Verify")
-verdicts = parallel([lambda f=f: {"id": f["id"], "verdict": agent(verify_prompt(f), schema=VERDICT_SCHEMA)} for f in findings])  # carry the join key, never positional
+verdicts = parallel([lambda f=f: {"id": f["id"], "verdict": agent(verify_prompt(f), agent="reviewer", schema=VERDICT_SCHEMA)} for f in findings])  # carry the join key, never positional
 ```
 
 **JavaScript (`eval`, JavaScript backend):**
@@ -80,12 +81,12 @@ verdicts = parallel([lambda f=f: {"id": f["id"], "verdict": agent(verify_prompt(
 ```js
 phase("Find");
 const found = await parallel(DIMENSIONS.map((d) => async () =>
-    await agent(d.prompt, { schema: FINDINGS_SCHEMA }),
+    await agent(d.prompt, { agent: "reviewer", schema: FINDINGS_SCHEMA }),
 ));
 const findings = dedupe(found.flatMap((r) => r.findings)); // needs everything at once
 phase("Verify");
 const verdicts = await parallel(findings.map((f) => async () => ({
-    id: f.id, verdict: await agent(verifyPrompt(f), { schema: VERDICT_SCHEMA }),
+    id: f.id, verdict: await agent(verifyPrompt(f), { agent: "reviewer", schema: VERDICT_SCHEMA }),
 }))); // carry the join key, never positional
 ```
 Use ordinary code between calls to flatten/map/filter; don't add a barrier just for that. Nested `parallel()` pools each cap independently, so keep total fan-out sane.
@@ -224,10 +225,10 @@ Do **NOT** impose `refuted ⟹ severity:none`. That invariant deletes legitimate
 
 <patterns>
 Compose the harness the task calls for:
-- **Adversarial verify** — N independent skeptics per finding, each prompted to REFUTE; keep it only if a majority survive. `votes = parallel([lambda i=i: agent(f"Refute: {claim}. refuted=true if unsure.", schema=REFUTE_SCHEMA) for i in range(3)])`, then keep when `sum(not v["refuted"] for v in votes) ≥ 2`. (Q1-only majority vote; pair with `VERDICT_SCHEMA` when you also track a residual — see finder→verifier contract.)
+- **Adversarial verify** — N independent skeptics per finding, each prompted to REFUTE; keep it only if a majority survive. `votes = parallel([lambda i=i: agent(f"Refute: {claim}. refuted=true if unsure.", agent="reviewer", schema=REFUTE_SCHEMA) for i in range(3)])`, then keep when `sum(not v["refuted"] for v in votes) ≥ 2`. (Q1-only majority vote; pair with `VERDICT_SCHEMA` when you also track a residual — see finder→verifier contract.)
 - **Perspective-diverse verify** — give each verifier a distinct lens (correctness, security, perf, does-it-reproduce) instead of N identical refuters. If you build the lenses in a loop, a partial-binding bug (above) can make the **labels** look distinct while every thunk sends the same (last) **prompt**. Verify on what was **actually sent** — not the labels, and not the prompts you built (late binding defeats both): have each thunk capture the exact prompt it passes to `agent()` at call time and return it, then assert the returned prompts are distinct; or, where the runtime exposes it, read each agent's received prompt from the roster/history.
 - **Judge panel** — N attempts from different angles, scored by parallel judges; synthesize from the winner, graft the best of the rest.
-- **Parallel writes (fixes/migrations)** — dispatch each implementation slice as a separate eval `agent(agent='task')` (implementation runs inside eval — per Step 2 eval-only rule). Pin the shared interface (a widened type, a header) as its OWN preemptive slice — land it first via eval `agent(agent='task')`, confirm it compiles — THEN fan out the consumer slices as concurrent eval `agent(agent='task', isolated=true)` agents; files that share a contract line stay in ONE slice. Concurrent implementation agents MUST use ISOLATED workspaces (`isolated=true` gives each writer its own worktree); the orchestrator applies/merges the isolated results after all writers return. Concurrent eval task agents must own DISJOINT files (no two agents edit the same file in the same round); shared paths or contract lines are SERIALIZED — the preemptive interface slice lands and compiles first, then consumer slices fan out. After all slices land and their results are applied/merged, verify with `git diff`/`git status` plus the workspace stability guard (no drift between pre-dispatch and post-merge). Close the residual gap with an integrated eval cross-slice review pass (eval `agent(agent='reviewer', …)`/`parallel()`) after all slices land.
+- **Parallel writes (fixes/migrations)** — dispatch each implementation slice as a separate eval `agent(agent='task')` (implementation runs inside eval — per Step 2's eval execution rule). Pin the shared interface (a widened type, a header) as its OWN preemptive slice — land it first via eval `agent(agent='task')`, confirm it compiles — THEN fan out the consumer slices as concurrent eval `agent(agent='task', isolated=true)` agents; files that share a contract line stay in ONE slice. Concurrent implementation agents MUST use ISOLATED workspaces (`isolated=true` gives each writer its own worktree); the orchestrator applies/merges the isolated results after all writers return. Concurrent eval task agents must own DISJOINT files (no two agents edit the same file in the same round); shared paths or contract lines are SERIALIZED — the preemptive interface slice lands and compiles first, then consumer slices fan out. After all slices land and their results are applied/merged, verify with `git diff`/`git status` plus the workspace stability guard — capture the stability-guard baseline AFTER all accepted implementation writes have been applied/merged, not before dispatch. Close the residual gap with an integrated eval cross-slice review pass (eval `agent(agent='reviewer', …)`/`parallel()`) after all slices land.
 - **Shared context handoff** — Build ONE shared `local://` packet (see the `agent()` helper above) and reference it from every prompt; never paste copies, which waste tokens and drift. Include the user's goal, acceptance criteria/non-goals, exact baseline commit, changed-file allowlist, upstream decisions, and FULL VERBATIM, baseline-aware change view: `git diff <baseline>..<target>` for a committed range or `git show --patch <commit>` for one commit, plus `git diff HEAD`, `git status --short`, and task-relevant untracked TEXT files for the worktree overlay. Never substitute a bare commit pointer, bare `git diff HEAD` (empty after commit), or hand-summary: subagents otherwise assume "change = last commit" and guess goal/scope, wasting rounds. Keep only allowlisted files (exclude/redact secrets/binaries/oversized; `log()` each exclusion); never sweep the whole repo. If `local://` is unresolvable, keep one packet copy on a real filesystem path and reference that path from each prompt; inline into prompts only as last resort, but still generate once from the same allowlisted source.
 - **Pre-code gates** — satisfy the project's pre-code requirements BEFORE dispatch, not after: the mandatory AGENTS.md (or equivalent) read, compliance with the project's coding standards, and confirmation that required build/lint config exists. A gate that is not met is resolved before fan-out — never dispatch past it; and state the gates explicitly in every subagent prompt so no agent bypasses them. The harness's advisor can enforce pre-code gates (blocking an edit until they're met); the skill anticipates this by treating gates as a dispatch precondition, so a gate failure surfaces as a pre-dispatch fix instead of a mid-round blocker that breaks the flow.
 - **No-git fallback** — all of the above assumes a `.git`. In a workspace without `.git` (e.g. a remote directory, a deployed snapshot) the git commands are unavailable, so the orchestrator can't diff — then the changed-file list must come from the USER (or a baseline snapshot the orchestrator keeps), and the orchestrator reads those files VERBATIM into the same `local://` packet (same allowlist/redaction/exclude/`log()` guards). Packet source = git-when-available, else user/baseline-provided file list — never a hand-summary. The packet and the **Workspace stability guard** are separate concerns: the guard's content hash rescans the same frozen owned-root scope regardless of git — see that pattern for the scan contract.
@@ -327,6 +328,6 @@ Scale to the ask: "find any bugs" → a few finders, single-vote verify. "thorou
 - **Model visibility** — A subagent's exact model is not exposed at runtime, so don't assert more than "harness default (assumed same)" from the roster alone; the precise model lives in the session JSONL's `model_change` events. The orchestrator can read those records to report which model each subagent actually ran: look under `~/.omp/agent/sessions/<workspace>/<session>/*.jsonl` for each subagent's `model_change` entries — the `resolvedModelIsFallback` field tells you whether the resolved model was a fallback. When reporting, distinguish the **specified agent type** (what the orchestrator asked for) from the **actual model** (what the session file shows), and note when a model is only inferred from the session file rather than observed live.
 - Keep going until the task is closed — a returned fan-out is a step, not a stopping point.
 - **quality_checks contract** — each Step 1 slice carries ≥1 quality_check: a shell command (e.g. `python -m pytest tests/test_parser.py`, `tsc --noEmit`) or an eval `agent(agent='reviewer', …)` call. Execution: run the command or agent; exit 0 = pass for shell commands; to_act == 0 (zero unaccepted real findings — accepted and borderline don't fail) = pass for reviewer calls; non-zero exit or to_act > 0 = fail. A failed check's findings enter the convergence loop as real findings (Q2/Q3 classified) — they are NOT separate from the review findings.
-- **Node acceptance** — Accept/commit an implementation node only if (1) eval task agent output compiles/runs, (2) `quality_checks` pass (see **quality_checks contract**), and (3) eval finds `to_act == 0` (see **Convergence rule + termination**). On failure, spawn a fresh agent(agent='task') with the original implementation prompt PLUS the combined diagnostics/findings as feedback: compile/run diagnostics; failed shell checks as `{id: 'qc:<name>', file: '<quality-check>', title: 'quality_check failed: <command>', severity: 'high', detail: 'exit: <code>, stderr: <output>'}` (`high` is conservative initial severity pending Q2/Q3 verification); and review findings (`id`/`severity`/`detail`/`reason`). Each fresh invocation counts against the two-retry bound. After 2 failed retries, fail node, skip dependents, and report unresolved failures. Never retry review/verification nodes; consume their verdict.
+- **Node acceptance** — Accept/commit an implementation node only if (1) eval task agent output compiles/runs, (2) `quality_checks` pass (see **quality_checks contract**), and (3) eval finds `to_act == 0` (see **Convergence rule + termination**). On failure, spawn a fresh agent(agent='task') with the original implementation prompt PLUS the combined diagnostics/findings as feedback: compile/run diagnostics; failed shell checks as `{id: 'qc:<name>', file: '<quality-check>', title: 'quality_check failed: <command>', severity: 'high', detail: 'exit: <code>, stderr: <output>'}` (`high` is conservative initial severity pending Q2/Q3 verification); and review findings (`id`/`file`/`title`/`severity`/`detail`, plus the verdict's `reason`). Each fresh invocation counts against the two-retry bound. After 2 failed retries, fail node, skip dependents, and report unresolved failures. Never retry review/verification nodes; consume their verdict.
 </execution>
 </system-notice>
