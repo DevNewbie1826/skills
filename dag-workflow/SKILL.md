@@ -30,15 +30,15 @@ Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 
 A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than trivial inline work (see Routing), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
 
 1. Keep step 1 (scope) and step 4 (per-slice `agent`/`skills`/`quality_checks`); skip the slice and `depends_on` steps (2–3) — one node covers the whole change.
-2. Dispatch **one** implementation agent via eval `agent(agent='task')` (Step 2 delegation discipline).
+2. Dispatch **one** implementation agent via eval `agent(agent='task')` (Step 2 delegation discipline) — only after the pre-implementation baseline from the end of Step 1 is established.
 3. Verify through the normal machinery — Step 2 eval verification (`agent(agent='reviewer', …)`/`parallel()`) refutes the single slice's output, then Step 3 quality loop runs its `quality_checks` plus the integrated whole-output pass.
 
 Single-slice is a shortcut in **decomposition** only, never in **verification**: one eval task agent implements, eval agents verify, and the same agent never plays both roles.
 
 A **small task** — roughly ≤3 files and ≤50 lines of change — is the fourth path: it shortens the whole loop, not just decomposition. The single-slice path still runs the full machinery (Step 2 eval verification, Step 3 K-round loop); a small task skips most of it:
 
-1. **Skip decomposition entirely** — no slice table, no `depends_on`. Confirm it at the scope/scale gate. Record the one node's skills and quality_checks before dispatch, then dispatch one eval `agent(agent='task')` (per Step 2 delegation discipline).
-2. **Scope with targeted search, not a completeness fan-out** — two or three focused searches (`grep` + `read` on the touched files and their call sites) are faster and more accurate than a full completeness sweep for a small task: the sweep exists to catch unknown unknowns in broad work, and a small change has few. Run targeted first; fan out only if a search reveals an unexpected surface.
+1. **Scope with targeted search, not a completeness fan-out** — two or three focused searches (`grep` + `read` on the touched files and their call sites) are faster and more accurate than a full completeness sweep for a small task: the sweep exists to catch unknown unknowns in broad work, and a small change has few. Run targeted first; fan out only if a search reveals an unexpected surface.
+2. **Skip decomposition entirely** — no slice table, no `depends_on`. Confirm it at the scope/scale gate. Record the one node's skills and quality_checks before dispatch, then dispatch one eval `agent(agent='task')` (per Step 2 delegation discipline).
 3. One reviewer per round (not a council) — run the slice's `quality_checks`, then one independent eval reviewer (`agent(agent="reviewer", ...)`) refutes the whole output. LIGHT K=1 means repeat this single-reviewer round until one CLEAN round (`to_act==0`): if the reviewer confirms a real finding (any severity), remediate and re-run. Escalation to FULL only triggers on HIGH/CRITICAL.
 
 The small path pairs with **LIGHT mode (K=1)** from the verification state contract: a small, low-risk task is the natural light-mode candidate — single-vote verify for every finding, no council, one clean round converges. Escalate to FULL only if a HIGH/CRITICAL finding surfaces (sticky escalation, see orchestration.md).
