@@ -53,7 +53,7 @@ Execute the DAG. At each decision, verify via the mode-appropriate adversarial p
 
 **Eval is the execution engine.** All delegated work — implementation, finder, verifier, review, council, and sweep — runs through eval `agent()` calls; no external subagent mechanisms. Orchestrator-side routing, searches, baselines, and shell gates remain direct. Implementation runs via `agent(agent='task')`, verification via `agent(agent='reviewer')`; the same agent never plays both roles.
 
-1. Dispatch each ready node (deps satisfied) by role (per Step 2 delegation discipline): implementation via eval `agent(agent='task')`, planning/review/verification/council via eval `agent()`/`parallel()`. Inject upstream outputs and assigned skill names into the prompt. Run independent nodes concurrently. The same agent never plays both roles in one node.
+1. Dispatch each ready node (deps satisfied) by role (per Step 2 delegation discipline): implementation via eval `agent(agent='task')`, planning/review/verification/council via eval `agent(agent='reviewer')`/`parallel()`. Inject upstream outputs and assigned skill names into the prompt. Run independent nodes concurrently. The same agent never plays both roles in one node.
 2. Results that survive the eval verification are committed. Results that fail ANY acceptance gate (compile/run, quality_checks, or review) retry with combined diagnostics/findings as feedback (up to 2 retries). Unconverged nodes fail — their dependents are skipped. Node acceptance = ALL gates pass (compile + quality_checks + to_act==0); retry bound 2 with findings as feedback; see orchestration.md.
 
 ## Step 3 — Quality loop
