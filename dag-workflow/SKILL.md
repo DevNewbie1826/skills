@@ -1,6 +1,6 @@
 ---
 name: dag-workflow
-description: "Use for any nontrivial task that benefits from implementation delegation or independent verification — from a single focused change to a large multi-slice migration: decompose and cover in parallel via eval-based subagents (requires the `eval` tool — `parallel()`/`agent()`), and apply independent/adversarial cross-checking before you commit. Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, or a one-step answer — work needing no verification machinery"
+description: "Use for any nontrivial task that benefits from implementation delegation or independent verification — from a single focused change to a large migration: dispatch eval-based subagents (requires the eval tool), apply independent/adversarial cross-checking before you commit. Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, or a one-step answer — work needing no verification machinery"
 ---
 
 # dag-workflow
