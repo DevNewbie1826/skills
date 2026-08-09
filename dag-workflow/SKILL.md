@@ -58,6 +58,8 @@ Execute the DAG. At each decision run a council-of-subagents (independent review
 
 Outside the DAG. Follow orchestration.md.
 
+**Step 2→3 gate:** Enter Step 3 only after ALL required DAG nodes have succeeded (accepted per the node acceptance predicate). If any required node FAILED (after retries exhausted), STOP — report the failed nodes and their unresolved findings; do NOT quality-check incomplete work. For the single-slice and small paths (one node), this gate is satisfied when that one node is accepted; for review/sweep, the gate is satisfied when all required finder/verifier/synthesis nodes return their structured output (findings/verdicts) — a node that crashed or returned nothing is a failure that blocks Step 3.
+
 1. For code, establish green regression-test baseline first.
 2. One round = run every slice's `quality_checks` once, then one integrated whole-output pass across all slices (cross-slice consistency, duplication, conflicts, overall slop).
 3. Classify each finding from its verdict (not by feel): **real** = actionable & confirmed (`actionable_severity != "none"` and `verification_confidence != "low"`); **borderline** = verifier uncertain (`verification_confidence == "low"`). Resolve real findings before the next round; record borderlines. Accepted tradeoffs (orchestrator/user policy) stay real but skip remediation — see orchestration.md for the accepted registry.
