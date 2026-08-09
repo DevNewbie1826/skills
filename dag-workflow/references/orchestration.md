@@ -230,6 +230,46 @@ Compose the harness the task calls for:
 - **Loop-until-dry (discovery)** — keep spawning finders until **K consecutive rounds surface nothing new** (default K=2); dedup against everything SEEN, not just what was confirmed, or it never converges.
 - **Persist round findings** — right after `dedupe`, write the round's findings to a `local://` file so you can re-read the results without re-running the finder (the expensive step): Python `write(f"local://round{N}_findings.json", json.dumps(findings))`, JavaScript `await write(\`local://round${N}_findings.json\`, JSON.stringify(findings))`. Merge the round's findings into the cumulative canonical registry/SEEN set, then persist the cumulative set (optionally keeping per-round snapshots separately) — a per-round file alone can't serve as the registry, since SEEN must span every prior round or re-finds read as "new" and convergence never triggers. This feeds the cross-stage ID namespace, so canonical ids and SEEN tracking survive across `eval` calls without re-finding.
 - **Convergence rule (quality / slop loops)** — classify each finding from its verdict, not by feel. Three disjoint, schema-only buckets: **real** = `actionable_severity != "none"` AND `verification_confidence != "low"` (confirmed, actionable now); **borderline** = `verification_confidence == "low"` (the verifier is genuinely uncertain — REPORTED, never silently lost); **dropped** = `actionable_severity == "none"` AND `verification_confidence != "low"` (confidently nothing to do — log it, *no silent caps*). Convergence = **K consecutive rounds with zero real findings** (default K=2). Borderlines do NOT reset the counter — but the final report lists every unresolved borderline. (Uncertainty is its OWN axis: `partial` stays a claim-status value, not a proxy for "unsure".) If the user set N rounds, run exactly N regardless of early convergence, and report what's left.
+- **Accepted tradeoffs (policy, not a fourth bucket)** — the orchestrator (or the user) maintains a durable `accepted_tradeoffs` registry as POLICY, outside any single round: each entry = `{tradeoff_id` (stable — anchored to the cross-stage ID namespace, never re-minted per round), `inject_selector` (context only — finders do NOT suppress matching findings, and it is NOT a match key for acceptance), `rationale`, `owner}`. Each round derives `accepted_this_round(findings, approved)` from explicit orchestrator/user approvals `{finding_id: tradeoff_id}` validated against that registry — never by auto-matching a selector, since a canonical ID is a stable content-independent anchor that no selector can match. Accepted findings still run through verification (never skipped) — only ACTION is suppressed: they are reported and logged separately from `real`, visible but not blocking convergence. This is NOT a fourth bucket alongside `real`/`borderline`/`dropped`: those come from the verdict, `accepted` comes from policy, so an accepted finding is NOT subtracted from `real` — but it IS excluded from the convergence count: convergence = **K consecutive rounds with zero real findings whose canonical IDs are not in the accepted registry** (`to_act = [f for f in real if f.id not in accepted]`; check `len(to_act) == 0`, never `len(real)`), so a recurring accepted tradeoff can't reset K forever. Only the orchestrator or the user may mark a finding accepted — a reviewer/scope check cannot (that would be policy-making, not a verdict), so a reviewer asserting "this is accepted" is a scope violation, not a policy change.
+
+```python
+accepted_tradeoffs = [  # DURABLE registry — orchestrator/user POLICY; survives rounds
+    {"tradeoff_id": "a11y-emoji", "finding_id": "sec:5", "rationale": "intentional: screenReaderMode disables emoji", "owner": "user"},
+]
+def accepted_this_round(findings, approved):
+    # approved = explicit {finding_id: tradeoff_id} from orchestrator/user this round
+    registry_by_tid = {t["tradeoff_id"]: t for t in accepted_tradeoffs}
+    accepted_ids = {t["finding_id"] for t in accepted_tradeoffs}  # persisted entries
+    for fid, tid in approved.items():
+        if tid in registry_by_tid:   # validate tradeoff_id exists — reject unknown
+            accepted_ids.add(fid)
+        # unknown tid → silently rejected (not added)
+    return {f["id"] for f in findings if f["id"] in accepted_ids}
+accepted = accepted_this_round(findings, {})
+to_act = [f for f in real if f["id"] not in accepted]  # exclude accepted from action AND convergence
+# convergence checks len(to_act) == 0, NOT len(real) == 0
+```
+
+```js
+const acceptedTradeoffs = [  // DURABLE registry — orchestrator/user POLICY; survives rounds
+    { tradeoffId: "a11y-emoji", findingId: "sec:5", rationale: "intentional: screenReaderMode disables emoji", owner: "user" },
+];
+function acceptedThisRound(findings, approved) {
+    // approved = explicit {finding_id: tradeoff_id} from orchestrator/user this round
+    const registryByTid = new Map(acceptedTradeoffs.map((t) => [t.tradeoffId, t]));
+    const acceptedIds = new Set(acceptedTradeoffs.map((t) => t.findingId));
+    for (const [fid, tid] of Object.entries(approved)) {
+        if (registryByTid.has(tid)) acceptedIds.add(fid);  // validate tradeoff_id exists — reject unknown
+    }
+    return new Set(findings.filter((f) => acceptedIds.has(f.id)).map((f) => f.id));
+}
+const accepted = acceptedThisRound(findings, {});
+const toAct = real.filter((f) => !accepted.has(f.id));  // exclude accepted from action AND convergence
+// convergence checks toAct.length === 0, NOT real.length === 0
+```
+
+Four cases: (1) **persisted canonical acceptance** — `sec:5` is in the registry, so it derives accepted every round (no re-approval) and is excluded from convergence; (2) **unknown tradeoff rejection** — a finding absent from both `approved` and the registry is NOT accepted and stays in `real`; (3) **to_act/convergence exclusion** — accepted findings drop out of `to_act` and out of the convergence count; (4) **unknown tradeoff_id rejection** — an approval whose `tradeoff_id` is not in the registry (e.g. `{"new:id": "unknown"}`) is silently rejected: the finding is NOT accepted and stays in `real`.
+
 - **Multi-modal sweep** — parallel finders each searching a different way (by-container, by-content, by-entity, by-time), each blind to the others.
 - **Completeness critic** — a final agent that asks "what's missing — modality not run, claim unverified, file unread?"; its answer is the next round.
 - **Budget/count loops** — Python: `while len(bugs) < 10:`; JavaScript: `while (bugs.length < 10) { … }`. In Python, gate an explicit budget with `budget.total` and `budget.remaining()`; in JavaScript, use `await budget.total()` and `await budget.remaining()`. `log()` each round.
