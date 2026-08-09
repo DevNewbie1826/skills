@@ -141,8 +141,10 @@ def dedupe(xs):
         by_content[sig] = x; out.append(x)
     return out
 def verify_prompt(f): return f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}]"
-entries = [{"id": "x", "verdict": {"original_claim_status": "refuted", "actionable_severity": "low", "verification_confidence": "high", "reason": "downgraded residual"}},
-           {"id": "y", "verdict": {"original_claim_status": "refuted", "actionable_severity": "none", "verification_confidence": "high", "reason": "nothing actionable"}}]  # joined finding+verdict list (e.g. results/verdicts from above)
+entries = [{"id": "x", "file": "src/auth.py", "title": "plaintext transport", "severity": "high", "detail": "uses HTTP not HTTPS for auth tokens", "verdict": {"original_claim_status": "refuted", "actionable_severity": "low", "verification_confidence": "high", "reason": "downgraded residual"}},
+           {"id": "y", "file": "src/cache.ts", "title": "stale cache entry", "severity": "medium", "detail": "cache TTL not enforced on eviction", "verdict": {"original_claim_status": "refuted", "actionable_severity": "none", "verification_confidence": "high", "reason": "nothing actionable"}}]
+findings = entries  # finder output joined with verdicts
+real = [f for f in entries if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]
 ```
 
 ```js
@@ -188,8 +190,10 @@ function dedupe(xs) {
     return out;
 }
 function verifyPrompt(f) { return `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}]`; }
-const entries = [{ id: "x", verdict: { original_claim_status: "refuted", actionable_severity: "low", verification_confidence: "high", reason: "downgraded residual" } },
-                 { id: "y", verdict: { original_claim_status: "refuted", actionable_severity: "none", verification_confidence: "high", reason: "nothing actionable" } }];
+const entries = [{ id: "x", file: "src/auth.py", title: "plaintext transport", severity: "high", detail: "uses HTTP not HTTPS for auth tokens", verdict: { original_claim_status: "refuted", actionable_severity: "low", verification_confidence: "high", reason: "downgraded residual" } },
+                 { id: "y", file: "src/cache.ts", title: "stale cache entry", severity: "medium", detail: "cache TTL not enforced on eviction", verdict: { original_claim_status: "refuted", actionable_severity: "none", verification_confidence: "high", reason: "nothing actionable" } }];
+const findings = entries;
+const real = entries.filter((f) => f.verdict.actionable_severity !== "none" && f.verdict.verification_confidence !== "low");
 ```
 
 - **Q1** `original_claim_status` — does the CLAIM hold AS STATED, at its original severity? `upheld` / `refuted` / `partial` (`partial` = the claim *partly* holds — a property of the claim, NOT a proxy for "I'm unsure"; uncertainty is Q3).
