@@ -1,7 +1,7 @@
 <system-notice>
 This task involves multi-step reasoning. Think carefully through the problem before responding.
 
-Drive this task as a deterministic multi-subagent workflow. Author the orchestration in the `eval` tool and fan out subagents — to be comprehensive (decompose and cover in parallel), to be confident (independent perspectives and adversarial checks before you commit), or to take on scale one context can't hold (audits, migrations, broad sweeps). This overrides any default tendency to do the whole task inline when fanning out would be more thorough.
+Drive this task as a deterministic multi-subagent workflow (see SKILL.md for the fan-out/schema/adversarial-verify contract). Author the orchestration in the `eval` tool. This overrides any default tendency to do the whole task inline when fanning out would be more thorough.
 
 <when>
 Worth it when the task benefits from decomposition + parallel coverage, or from independent/adversarial cross-checking before you commit. For trivial work, stay inline (see SKILL.md Routing) — don't spin up agents. Scout inline FIRST (list the files, scope the diff, find the call sites) to discover the work-list, then fan out over it — you don't need to know the shape before the *task*, only before the *fan-out*. Common shapes, each a well-scoped `eval` call you can chain across turns:
@@ -320,7 +320,7 @@ Scale to the ask: "find any bugs" → a few finders, single-vote verify. "thorou
 
 <execution>
 - Decompose the surface first; capture it in `todo` when it spans phases.
-- Prefer `schema=` for any agent whose output you branch on.
+- Prefer `schema=` (per SKILL.md contract).
 - After a fan-out returns, YOU own correctness: read the artifacts, run the gate, verify before acting. Subagents do the legwork; they don't get the last word.
 - **Checkpoint discipline** — Commit one independently specified, independently verifiable change per atomic commit as soon as it passes; never let uncommitted edits accumulate across rounds. When git is unavailable (see **No-git fallback**), snapshot each verified change to a `local://` file as the checkpoint equivalent — the principle (don't accumulate uncommitted changes) holds regardless of git availability. Uncommitted changes that tangle are extremely hard to recover: once you can't tell which change broke what, disentangling the edits ranges from difficult to impossible, and a backup restores saved state but can't tell you which of the tangled edits was correct — the last clean commit is the primary recovery point. Prefer rolling back one commit at a time, though reverting a range or restoring a known-good checkpoint is valid when an entire run is invalid.
 - **Todo stability across turns** — Keep the task content stable — it IS the identifier: the harness targets tasks by exact content, not a separate ID. If you must reword a task, `init` a fresh list rather than trying to update by the old text. Embed any stable identifier you need IN the content string itself, and always `view` the latest todo list before mutating — a continuation turn may show a stale snapshot.
