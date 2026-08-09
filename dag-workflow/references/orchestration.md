@@ -271,12 +271,12 @@ to_act = [f for f in real if f["id"] not in accepted]  # exclude accepted from a
 
 ```js
 const acceptedTradeoffs = [  // DURABLE registry — orchestrator/user POLICY; survives rounds
-    { tradeoffId: "a11y-emoji", findingId: "sec:5", rationale: "intentional: screenReaderMode disables emoji", owner: "user" },
+    { tradeoff_id: "a11y-emoji", finding_id: "sec:5", rationale: "intentional: screenReaderMode disables emoji", owner: "user" },
 ];
 function acceptedThisRound(findings, approved) {
     // approved = explicit {finding_id: tradeoff_id} from orchestrator/user this round
-    const registryByTid = new Map(acceptedTradeoffs.map((t) => [t.tradeoffId, t]));
-    const acceptedIds = new Set(acceptedTradeoffs.map((t) => t.findingId));
+    const registryByTid = new Map(acceptedTradeoffs.map((t) => [t.tradeoff_id, t]));
+    const acceptedIds = new Set(acceptedTradeoffs.map((t) => t.finding_id));
     for (const [fid, tid] of Object.entries(approved)) {
         if (registryByTid.has(tid)) acceptedIds.add(fid);  // validate tradeoff_id exists — reject unknown
     }
