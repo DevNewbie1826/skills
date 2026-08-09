@@ -30,7 +30,7 @@ Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 
 A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than trivial inline work (see Routing), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
 
 1. Keep step 1 (scope) and step 4 (per-slice `agent`/`skills`/`quality_checks`); skip the slice and `depends_on` steps (2–3) — one node covers the whole change.
-2. Dispatch **one** implementation agent via the session `task` tool (Step 2 delegation discipline: target files, acceptance criteria, skills, non-goals — the orchestrator never implements inline).
+2. Dispatch **one** implementation agent via the session `task` tool (Step 2 delegation discipline).
 3. Verify through the normal machinery — Step 2 eval verification (`agent(agent='reviewer', …)`/`parallel()`) refutes the single slice's output, then Step 3 quality loop runs its `quality_checks` plus the integrated whole-output pass.
 
 Single-slice is a shortcut in **decomposition** only, never in **verification**: one session task agent implements, eval agents verify, and the same agent never plays both roles.
