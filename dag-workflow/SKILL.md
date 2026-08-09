@@ -43,6 +43,8 @@ A **small task** — roughly ≤3 files and ≤50 lines of change — is the fou
 
 The small path pairs with **LIGHT mode (K=1)** from the verification state contract: a small, low-risk task is the natural light-mode candidate — single-vote verify for every finding, no council, one clean round converges. Escalate to FULL only if a HIGH/CRITICAL finding surfaces (sticky escalation, see orchestration.md). If a small task keeps needing full council scrutiny, it is not actually small. If a task qualifies as both single-slice and small, the small-task path takes precedence — it is the more specific shortcut and subsumes the single-slice path's one-agent shape with a lighter verification loop.
 
+**Pre-implementation baseline:** For code tasks, establish a green regression-test baseline NOW (before Step 2 dispatches any implementation). A red baseline observed after implementation cannot distinguish pre-existing failures from regressions.
+
 ## Step 2 — Execute
 
 Execute the DAG. At each decision, verify via the mode-appropriate adversarial pass — FULL mode uses a multi-vote council for HIGH/CRITICAL findings and single-vote verify for MEDIUM/LOW; LIGHT mode uses single-vote verify for all findings (see orchestration.md vote_count). Keep only what survives the refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
@@ -62,7 +64,7 @@ Outside the DAG. Follow orchestration.md.
 
 **Audit/review exit (replaces items 1–5 for review/sweep paths):** For review/sweep paths (zero implementation), canonical findings joined with their verifier verdicts are reported — items 1–5 do NOT apply. Instead, each convergence round runs: (1) each lens's quality_checks (assigned in Step 1), (2) an integrated synthesis pass across all lenses (cross-lens consistency, duplication, coverage), and (3) a completeness critic ("what modality was not run, what claim is unverified?"). New findings from each round are deduped against the cumulative SEEN set. Convergence = K consecutive rounds surfacing zero NEW findings (default K=2); if the user specified N rounds, run exactly N and stop. Findings are never remediated inline — acting on them starts a SEPARATE implementation DAG.
 
-1. For code, establish green regression-test baseline first.
+1. Confirm the green regression-test baseline (established at Step 1→2 transition) still passes.
 2. One round = run every slice's `quality_checks` once, then one integrated whole-output pass across all slices (cross-slice consistency, duplication, conflicts, overall slop).
 3. Classify each finding from its verdict (not by feel): **real** = actionable & confirmed (`actionable_severity != "none"` and `verification_confidence != "low"`); **borderline** = verifier uncertain (`verification_confidence == "low"`). Resolve real findings before the next round; record borderlines. Accepted tradeoffs (orchestrator/user policy) stay real but skip remediation — see orchestration.md for the accepted registry.
 4. Repeat until **K consecutive rounds surface zero unaccepted real findings** (default K=2). Borderlines and accepted findings don't reset K. If the user specified N rounds, run exactly N and stop, reporting unresolved findings.
