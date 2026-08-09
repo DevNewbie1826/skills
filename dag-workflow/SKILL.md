@@ -1,12 +1,22 @@
 ---
 name: dag-workflow
-description: "Use for a task genuinely too big for one pass: decompose and cover in parallel via eval-based subagents (requires the `eval` tool — `parallel()`/`agent()`), apply independent/adversarial cross-checking before you commit, or take on scale one context can't hold. Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a single edit, a quick lookup, or a task one agent can finish — do those directly."
+description: "Use for a task genuinely too big for one pass: decompose and cover in parallel via eval-based subagents (requires the `eval` tool — `parallel()`/`agent()`), apply independent/adversarial cross-checking before you commit, or take on scale one context can't hold. Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, or a one-step answer — work needing no verification machinery"
 ---
 
 # dag-workflow
 
-Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; a quick lookup, a single edit, or anything one agent finishes stays inline (see orchestration.md `<when>`).**
+Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; a quick lookup, a trivial edit, or a one-step answer that needs neither decomposition nor the quality loop stays inline (see orchestration.md `<when>`).**
 orchestration.md is sectioned (`<when>`, `<helpers>`, `<structure>`, `<patterns>`, `<execution>`). Read it in full on first use; on subsequent runs, skim the section headers and deep-read only the section your step needs — `<when>` for the scale gate, `<structure>` for schemas/examples, `<patterns>` for review/convergence patterns, `<execution>` for dispatch discipline. If the reference grows past ~400 lines, split `<patterns>` into its own file (deferred per project decision).
+
+## Routing — pick a path before Step 1
+
+Ask in order:
+1. **Inline** — trivial work needing no verification machinery (quick lookup, single trivial edit, one-step answer). Not "anything one agent finishes" — single-slice also uses one agent but needs the quality loop.
+2. **Review/sweep** — analysis-only (finder + verifier, zero implementation): produces findings, not code changes. Work-kind branch, orthogonal to size.
+3. **Implementation** — size-based, precedence small > single-slice > full-DAG:
+   - **Small** (≤3 files, ≤50 lines, low-risk) → LIGHT mode, K=1; if not low-risk, use single-slice or full-DAG with FULL mode
+   - **Single-slice** (one cohesive change, no cross-step deps)
+   - **Full-DAG** (multi-slice with real dependencies)
 
 ## Step 1 — Plan
 
