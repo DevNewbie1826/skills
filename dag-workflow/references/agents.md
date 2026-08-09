@@ -4,7 +4,7 @@
 
 Pick via `agent="..."` in the `agent()` call.
 
-This table lists EVAL agent types for `agent()` calls. Implementation nodes are dispatched via the separate session `task` TOOL (Step 2), not through this table — the `agent` field in Step 1 for an implementation node specifies its VERIFICATION agent (the eval reviewer that will refute its output), not the implementer.
+This table lists EVAL agent types for `agent()` calls. Implementation nodes are dispatched via the separate session `task` TOOL (see SKILL.md Step 2), not through this table — the `agent` field in Step 1 for an implementation node specifies its VERIFICATION agent (the eval reviewer that will refute its output), not the implementer.
 
 | agent | when to use |
 |---|---|

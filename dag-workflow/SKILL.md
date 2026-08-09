@@ -37,7 +37,7 @@ Single-slice is a shortcut in **decomposition** only, never in **verification**:
 
 A **small task** — roughly ≤3 files and ≤50 lines of change — is the fourth path: it shortens the whole loop, not just decomposition. The single-slice path still runs the full machinery (Step 2 eval verification, Step 3 K-round loop); a small task skips most of it:
 
-1. **Skip decomposition entirely** — no slice table, no `depends_on`. Confirm it at the scope/scale gate, then dispatch one session task agent with the Step 2 delegation discipline (target files, acceptance criteria, skills, non-goals).
+1. **Skip decomposition entirely** — no slice table, no `depends_on`. Confirm it at the scope/scale gate, then dispatch one session task agent (per Step 2 delegation discipline).
 2. **Scope with targeted search, not a completeness fan-out** — two or three focused searches (`grep` + `read` on the touched files and their call sites) are faster and more accurate than a full completeness sweep for a small task: the sweep exists to catch unknown unknowns in broad work, and a small change has few. Run targeted first; fan out only if a search reveals an unexpected surface.
 3. One reviewer per round (not a council) — run the slice's `quality_checks`, then one independent eval reviewer (`agent(agent="reviewer", ...)`) refutes the whole output. LIGHT K=1 means repeat this single-reviewer round until one CLEAN round (`to_act==0`): if the reviewer confirms a real finding (any severity), remediate and re-run. Escalation to FULL only triggers on HIGH/CRITICAL.
 
@@ -53,7 +53,7 @@ Execute the DAG. At each decision, verify via the mode-appropriate adversarial p
 
 **Eval is evaluation-only.** eval `agent()`/`parallel()` exist to verify, review, council, and sweep — never to implement. Implementation — writing or editing code — goes through the session `task` tool only. eval's `agent(agent='task')` is the eval-internal general-purpose worker for analysis and multi-step verification that needs tool access, not for code-editing implementation. Handoff: a session task agent implements, then an eval agent verifies (`agent(agent='reviewer', …)`/`parallel()`); the same agent never plays both roles.
 
-1. Dispatch each ready node (deps satisfied) by role: implementation nodes via the session `task` tool; planning/review/verification/council nodes via eval `agent()`/`parallel()`. Inject upstream outputs and assigned skill names into the prompt (instruct the subagent to read and follow those skills). Run independent nodes concurrently. The same agent never plays both roles in one node.
+1. Dispatch each ready node (deps satisfied) by role (per Step 2 delegation discipline): implementation via session `task` tool, planning/review/verification/council via eval `agent()`/`parallel()`. Inject upstream outputs and assigned skill names into the prompt. Run independent nodes concurrently. The same agent never plays both roles in one node.
 2. Results that survive the eval verification are committed. Results that fail ANY acceptance gate (compile/run, quality_checks, or review) retry with combined diagnostics/findings as feedback (up to 2 retries). Unconverged nodes fail — their dependents are skipped. Node acceptance = ALL gates pass (compile + quality_checks + to_act==0); retry bound 2 with findings as feedback; see orchestration.md.
 
 ## Step 3 — Quality loop
