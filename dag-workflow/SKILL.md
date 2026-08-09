@@ -45,7 +45,7 @@ The small path pairs with **LIGHT mode (K=1)** from the verification state contr
 
 ## Step 2 — Execute
 
-Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
+Execute the DAG. At each decision, verify via the mode-appropriate adversarial pass — FULL mode uses a multi-vote council for HIGH/CRITICAL findings and single-vote verify for MEDIUM/LOW; LIGHT mode uses single-vote verify for all findings (see orchestration.md vote_count). Keep only what survives the refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
 
 **Delegation discipline.** Implementation — writing code, editing files — is delegated, never done inline by the orchestrator: dispatch every implementation node via the session `task` tool. Only orchestrator-side adjustments that don't touch the deliverable code (a prompt fix, a config tweak, a quick lookup) stay inline — implementation that writes or edits deliverable code always goes through the session task tool. Delegation prompts are explicit: target files, acceptance criteria, skills to read, non-goals — no vague "implement this" handoffs. The subagent never has the last word: the orchestrator verifies each result (adversarial review, compile/run check) before committing it.
 
