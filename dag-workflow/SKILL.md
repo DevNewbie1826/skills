@@ -13,10 +13,10 @@ orchestration.md is sectioned (`<when>`, `<helpers>`, `<structure>`, `<patterns>
 Ask in order:
 1. **Inline** — trivial work needing no verification machinery (quick lookup, single trivial edit, one-step answer). Not "anything one agent finishes" — single-slice also uses one agent but needs the quality loop.
 2. **Review/sweep** — analysis-only (finder + verifier, zero implementation): produces findings, not code changes. Work-kind branch, orthogonal to size.
-3. **Implementation** — size-based, precedence small > single-slice > full-DAG:
+3. **Implementation** — size-based, in precedence order: small > single-slice > full-DAG:
    - **Small** (≤3 files, ≤50 lines, low-risk) → LIGHT mode, K=1; if not low-risk, use single-slice or full-DAG with FULL mode
    - **Single-slice** (one cohesive change, no cross-step deps)
-   - **Full-DAG** (multi-slice — real cross-step dependencies get `depends_on`; multiple independent slices with none route here too, with empty `depends_on` and parallelism derived at execution time)
+   - **Full-DAG** (multi-slice — real cross-step dependencies get `depends_on`; multiple independent slices with no cross-step dependencies route here too, with empty `depends_on` and parallelism derived at execution time)
 
 ## Step 1 — Plan
 
@@ -49,12 +49,12 @@ The small path pairs with **LIGHT mode (K=1)** from the verification state contr
 
 Execute the DAG. At each decision, verify via the mode-appropriate adversarial pass — FULL mode uses a multi-vote council for HIGH/CRITICAL findings and single-vote verify for MEDIUM/LOW; LIGHT mode uses single-vote verify for all findings (see orchestration.md vote_count). Keep only what survives the refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
 
-**Delegation discipline.** Implementation — writing code, editing files — is delegated, never done inline by the orchestrator: dispatch every implementation node via eval `agent(agent='task')`. Only orchestrator-side adjustments that don't touch the deliverable code (a prompt fix, a config tweak, a quick lookup) stay inline — implementation that writes or edits deliverable code always goes through eval `agent(agent='task')`. Delegation prompts are explicit: target files, acceptance criteria, skills to read, non-goals — no vague "implement this" handoffs. The subagent never has the last word: the orchestrator verifies each result (adversarial review, compile/run check) before committing it.
+**Delegation discipline.** Implementation — writing code, editing files — is delegated, never done inline by the orchestrator: dispatch every implementation node via eval `agent(agent='task')`. Only orchestrator-side adjustments that don't touch the deliverable code (a prompt fix, a config tweak, a quick lookup) stay inline. Delegation prompts are explicit: target files, acceptance criteria, skills to read, non-goals — no vague "implement this" handoffs. The subagent never has the last word: the orchestrator verifies each result (adversarial review, compile/run check) before committing it.
 
 **Eval is the execution engine.** All delegated work — implementation, finder, verifier, review, council, and sweep — runs through eval `agent()` calls; no external subagent mechanisms. Orchestrator-side routing, searches, baselines, and shell gates remain direct. Implementation runs via `agent(agent='task')`, verification via `agent(agent='reviewer')`; the same agent never plays both roles.
 
 1. Dispatch each ready node (deps satisfied) by role (per Step 2 delegation discipline): implementation via eval `agent(agent='task')`, planning/review/verification/council via eval `agent(agent='reviewer')`/`parallel()`. Inject upstream outputs and assigned skill names into the prompt. Run independent nodes concurrently. The same agent never plays both roles in one node.
-2. Results that survive the eval verification are committed. Results that fail ANY acceptance gate (compile/run, quality_checks, or review) retry with combined diagnostics/findings as feedback (up to 2 retries). Unconverged nodes fail — their dependents are skipped. Node acceptance = ALL gates pass (compile + quality_checks + to_act==0); retry bound 2 with findings as feedback; see orchestration.md.
+2. Results that survive the eval verification are committed. Nodes that fail ANY acceptance gate (compile/run, quality_checks, or review) retry with combined diagnostics/findings as feedback (up to 2 retries). Unconverged nodes fail — their dependents are skipped. Node acceptance = ALL gates pass (compile + quality_checks + to_act==0); retry bound 2 with findings as feedback; see orchestration.md.
 
 ## Step 3 — Quality loop
 
