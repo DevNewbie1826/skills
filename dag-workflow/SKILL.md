@@ -24,6 +24,14 @@ A **single-slice** task is the third path — the work is one cohesive change (a
 
 Single-slice is a shortcut in **decomposition** only, never in **verification**: one session task agent implements, eval agents verify, and the same agent never plays both roles.
 
+A **small task** — roughly ≤3 files and ≤50 lines of change — is the fourth path: it shortens the whole loop, not just decomposition. The single-slice path still runs the full machinery (Step 2 eval council, Step 3 K-round loop); a small task skips most of it:
+
+1. **Skip decomposition entirely** — no slice table, no `depends_on`. Confirm it at the scope/scale gate, then dispatch one session task agent with the Step 2 delegation discipline (target files, acceptance criteria, skills, non-goals).
+2. **Scope with targeted search, not a completeness fan-out** — two or three focused searches (`grep` + `read` on the touched files and their call sites) are faster and more accurate than a full completeness sweep for a small task: the sweep exists to catch unknown unknowns in broad work, and a small change has few. Run targeted first; fan out only if a search reveals an unexpected surface.
+3. **One completeness sweep round and one review pass** — collapse the Step 3 loop to a single round: run the slice's `quality_checks` once, then one independent reviewer (eval `agent(agent='reviewer', …)`) refutes the whole output. That single pass stands in for both the council and the K-round loop.
+
+The small path pairs with **LIGHT mode (K=1)** from the verification state contract: a small, low-risk task is the natural light-mode candidate — single-vote verify for every finding, no council, one clean round converges. Escalate to FULL only if a HIGH/CRITICAL finding surfaces (sticky escalation, see orchestration.md). If a small task keeps needing full council scrutiny, it is not actually small.
+
 ## Step 2 — Execute
 
 Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
