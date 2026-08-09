@@ -6,6 +6,7 @@ description: "Use for a task genuinely too big for one pass: decompose and cover
 # dag-workflow
 
 Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; a quick lookup, a single edit, or anything one agent finishes stays inline (see orchestration.md `<when>`).**
+orchestration.md is sectioned (`<when>`, `<helpers>`, `<structure>`, `<patterns>`, `<execution>`). Read it in full on first use; on subsequent runs, skim the section headers and deep-read only the section your step needs — `<when>` for the scale gate, `<structure>` for schemas/examples, `<patterns>` for review/convergence patterns, `<execution>` for dispatch discipline. If the reference grows past ~400 lines, split `<patterns>` into its own file (deferred per project decision).
 
 ## Step 1 — Plan
 
