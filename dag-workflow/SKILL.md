@@ -50,6 +50,6 @@ Outside the DAG. Follow orchestration.md.
 
 1. For code, establish green regression-test baseline first.
 2. One round = run every slice's `quality_checks` once, then one integrated whole-output pass across all slices (cross-slice consistency, duplication, conflicts, overall slop).
-3. Classify each finding from its verdict (not by feel): **real** = actionable & confirmed (`actionable_severity != "none"` and `verification_confidence != "low"`); **borderline** = verifier uncertain (`verification_confidence == "low"`). Resolve real findings before the next round; record borderlines.
-4. Repeat until **K consecutive rounds surface zero real findings** (default K=2). Borderlines don't reset K. If the user specified N rounds, run exactly N and stop, reporting unresolved findings.
-5. Report each round's output. Never declare done unless the final round surfaced zero real findings.
+3. Classify each finding from its verdict (not by feel): **real** = actionable & confirmed (`actionable_severity != "none"` and `verification_confidence != "low"`); **borderline** = verifier uncertain (`verification_confidence == "low"`). Resolve real findings before the next round; record borderlines. Accepted tradeoffs (orchestrator/user policy) stay real but skip remediation — see orchestration.md for the accepted registry.
+4. Repeat until **K consecutive rounds surface zero unaccepted real findings** (default K=2). Borderlines and accepted findings don't reset K. If the user specified N rounds, run exactly N and stop, reporting unresolved findings.
+5. Report each round's output. Never declare done unless the final round surfaced zero unaccepted real findings.
