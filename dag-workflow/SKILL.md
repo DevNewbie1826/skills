@@ -5,7 +5,7 @@ description: "Use for a task genuinely too big for one pass: decompose and cover
 
 # dag-workflow
 
-Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; a quick lookup, a trivial edit, or a one-step answer that needs neither decomposition nor the quality loop stays inline (see orchestration.md `<when>`).**
+Read [references/orchestration.md](references/orchestration.md) in full before Step 1. **You MUST follow its primitives and patterns at every step — fan out via `parallel()`, branch on `schema=`, adversarially verify before you commit. Fan out when the task clears the scale gate; trivial work stays inline; everything else follows the Routing decision tree below (see orchestration.md `<when>` for the scale gate).**
 orchestration.md is sectioned (`<when>`, `<helpers>`, `<structure>`, `<patterns>`, `<execution>`). Read it in full on first use; on subsequent runs, skim the section headers and deep-read only the section your step needs — `<when>` for the scale gate, `<structure>` for schemas/examples, `<patterns>` for review/convergence patterns, `<execution>` for dispatch discipline. If the reference grows past ~400 lines, split `<patterns>` into its own file (deferred per project decision).
 
 ## Routing — pick a path before Step 1
@@ -27,7 +27,7 @@ Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 
 3. Record `depends_on` between slices. Parallelism is derived from `depends_on` at execution time.
 4. Per slice, assign: `agent` (eval agent that VERIFIES this slice's output — see [references/agents.md](references/agents.md); the implementation itself runs via the session task tool per Step 2), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3) (a shell command or eval reviewer call; pass = exit 0/zero unaccepted real findings (to_act==0), fail = findings enter the convergence loop — see orchestration.md).
 
-A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than a quick lookup or trivial edit needing no verification machinery (those stay inline), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
+A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than trivial inline work (see Routing), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
 
 1. Keep step 1 (scope) and step 4 (per-slice `agent`/`skills`/`quality_checks`); skip the slice and `depends_on` steps (2–3) — one node covers the whole change.
 2. Dispatch **one** implementation agent via the session `task` tool (Step 2 delegation discipline: target files, acceptance criteria, skills, non-goals — the orchestrator never implements inline).

@@ -4,7 +4,7 @@ This task involves multi-step reasoning. Think carefully through the problem bef
 Drive this task as a deterministic multi-subagent workflow. Author the orchestration in the `eval` tool and fan out subagents — to be comprehensive (decompose and cover in parallel), to be confident (independent perspectives and adversarial checks before you commit), or to take on scale one context can't hold (audits, migrations, broad sweeps). This overrides any default tendency to do the whole task inline when fanning out would be more thorough.
 
 <when>
-Worth it when the task benefits from decomposition + parallel coverage, or from independent/adversarial cross-checking before you commit. For a quick lookup or single edit, just do it directly — don't spin up agents. Scout inline FIRST (list the files, scope the diff, find the call sites) to discover the work-list, then fan out over it — you don't need to know the shape before the *task*, only before the *fan-out*. Common shapes, each a well-scoped `eval` call you can chain across turns:
+Worth it when the task benefits from decomposition + parallel coverage, or from independent/adversarial cross-checking before you commit. For trivial work, stay inline (see SKILL.md Routing) — don't spin up agents. Scout inline FIRST (list the files, scope the diff, find the call sites) to discover the work-list, then fan out over it — you don't need to know the shape before the *task*, only before the *fan-out*. Common shapes, each a well-scoped `eval` call you can chain across turns:
 - **Understand** — parallel readers over subsystems → structured map
 - **Design** — judge panel of N independent approaches → scored synthesis
 - **Review** — split into dimensions → find per dimension → adversarially verify each finding
