@@ -87,6 +87,13 @@ const verdicts = await parallel(findings.map((f) => async () => ({
 }))); // carry the join key, never positional
 ```
 Use ordinary code between calls to flatten/map/filter; don't add a barrier just for that. Nested `parallel()` pools each cap independently, so keep total fan-out sane.
+
+**f-string caveat (Python).** The f-strings in the examples above interpolate only plain identifiers (`d['key']`, `f['title']`, `i`), so their literal text stays brace-free and safe. Carry the pattern further, though, and drop CSS, JS, or JSON straight into an f-string: every literal `{`/`}` collides with f-string replacement-field syntax. If the braces don't form a valid replacement field, Python rejects the whole prompt at parse time with a `SyntaxError`; if they accidentally do parse (e.g. `{color}` or `{display}` reads as an expression), the prompt either raises a runtime error (`NameError`/`AttributeError` when the expression references an undefined name) or, when the name happens to be in scope, silently substitutes it — wrong content that only surfaces at runtime.
+
+When a prompt must embed such content, prefer one of: (1) plain string concatenation (adjacent literals or `+`) so the braces never meet f-string syntax; (2) a non-f template with `textwrap.dedent` and `.format()`, escaping every literal brace as `{{`/`}}`; or (3) a plain (non-f) triple-quoted string, where braces stay literal (prefix with `r` if backslashes must stay untouched too). If you must use an f-string, escape each literal brace as `{{`/`}}`.
+
+The point of this note: the examples here are safe as written — every f-string in this file is text/label-only — but the pattern invites embedding CSS/JS/JSON, which is exactly where the collision appears. Keep literal braces out of f-strings and the hazard never triggers.
+
 **Finder→verifier contract.** Define the schemas once (shared prelude below); each field answers exactly ONE question, and you aggregate on the field(s) whose question matches your decision. Every example above and below runs after this prelude.
 
 **Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the three schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, and a sample joined `entries` for the `to_act` snippet):
