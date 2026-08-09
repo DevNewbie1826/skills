@@ -4,11 +4,11 @@
 
 Pick via `agent="..."` in the `agent()` call.
 
-This table lists EVAL agent types for `agent()` calls. Implementation nodes are dispatched via the separate session `task` TOOL (see SKILL.md Step 2), not through this table — the `agent` field in Step 1 for an implementation node specifies its VERIFICATION agent (the eval reviewer that will refute its output), not the implementer.
+This table lists EVAL agent types for `agent()` calls. Implementation nodes are dispatched via eval `agent(agent='task')` (see SKILL.md Step 2) — the `agent` field in Step 1 for an implementation node specifies its VERIFICATION agent (the eval reviewer that will refute its output), not the implementer.
 
 | agent | when to use |
 |---|---|
-| `task` | general-purpose ANALYSIS and multi-step VERIFICATION within eval; never implementation (implementation uses the session task TOOL, a separate mechanism — see SKILL.md Step 2) |
+| `task` | general-purpose ANALYSIS, multi-step VERIFICATION, and implementation within eval (implementation uses `agent(agent='task')` — see SKILL.md Step 2) |
 | `scout` | read-only exploration, codebase research, file scanning (scope-only, no findings — see below) |
 | `reviewer` | code review, adversarial verification, quality checks |
 | `designer` | UI/UX design, visual refinement |
