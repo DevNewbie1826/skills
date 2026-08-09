@@ -8,7 +8,7 @@ This table lists EVAL agent types for `agent()` calls. Implementation nodes are 
 
 | agent | when to use |
 |---|---|
-| `task` | general-purpose ANALYSIS, multi-step VERIFICATION, and implementation within eval (implementation uses `agent(agent='task')` — see SKILL.md Step 2) |
+| `task` | general-purpose work including implementation and analysis within eval (implementation uses `agent(agent='task')` — see SKILL.md Step 2) |
 | `scout` | read-only exploration, codebase research, file scanning (scope-only, no findings — see below) |
 | `reviewer` | code review, adversarial verification, quality checks |
 | `designer` | UI/UX design, visual refinement |
