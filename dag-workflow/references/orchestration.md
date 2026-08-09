@@ -264,7 +264,7 @@ function voteCount(mode, severity) {
 
 ```python
 accepted_tradeoffs = [  # DURABLE registry — orchestrator/user POLICY; survives rounds
-    {"tradeoff_id": "a11y-emoji", "finding_id": "sec:5", "rationale": "intentional: screenReaderMode disables emoji", "owner": "user"},
+    {"tradeoff_id": "sec-plaintext", "finding_id": "sec:5", "rationale": "intentional: plaintext transport accepted for internal-only deployment", "owner": "user"},
 ]
 def accepted_this_round(findings, approved):
     # approved = explicit {finding_id: tradeoff_id} from orchestrator/user this round
@@ -282,7 +282,7 @@ to_act = [f for f in real if f["id"] not in accepted]  # exclude accepted from a
 
 ```js
 const acceptedTradeoffs = [  // DURABLE registry — orchestrator/user POLICY; survives rounds
-    { tradeoff_id: "a11y-emoji", finding_id: "sec:5", rationale: "intentional: screenReaderMode disables emoji", owner: "user" },
+    { tradeoff_id: "sec-plaintext", finding_id: "sec:5", rationale: "intentional: plaintext transport accepted for internal-only deployment", owner: "user" },
 ];
 function acceptedThisRound(findings, approved) {
     // approved = explicit {finding_id: tradeoff_id} from orchestrator/user this round
@@ -298,7 +298,7 @@ const toAct = real.filter((f) => !accepted.has(f.id));  // exclude accepted from
 // convergence checks toAct.length === 0, NOT real.length === 0
 ```
 
-Five cases: (1) **persisted canonical acceptance** — `sec:5` is in the registry, so it derives accepted every round (no re-approval) and is excluded from convergence; (2) **unknown tradeoff rejection** — a finding absent from both `approved` and the registry is NOT accepted and stays in `real`; (3) **to_act/convergence exclusion** — accepted findings drop out of `to_act` and out of the convergence count; (4) **unknown tradeoff_id rejection** — an approval whose `tradeoff_id` is not in the registry (e.g. `{"new:id": "unknown"}`) is silently rejected: the finding is NOT accepted and stays in `real`; (5) **mismatched pair rejection** — an approval whose `tradeoff_id` IS in the registry but whose `finding_id` does not match that entry's `finding_id` (e.g. `{"other:id": "a11y-emoji"}` where the registry maps `a11y-emoji` to `sec:5`, not `other:id`) is silently rejected: the finding is NOT accepted and stays in `real`.
+Five cases: (1) **persisted canonical acceptance** — `sec:5` is in the registry, so it derives accepted every round (no re-approval) and is excluded from convergence; (2) **unknown tradeoff rejection** — a finding absent from both `approved` and the registry is NOT accepted and stays in `real`; (3) **to_act/convergence exclusion** — accepted findings drop out of `to_act` and out of the convergence count; (4) **unknown tradeoff_id rejection** — an approval whose `tradeoff_id` is not in the registry (e.g. `{"new:id": "unknown"}`) is silently rejected: the finding is NOT accepted and stays in `real`; (5) **mismatched pair rejection** — an approval whose `tradeoff_id` IS in the registry but whose `finding_id` does not match that entry's `finding_id` (e.g. `{"other:id": "sec-plaintext"}` where the registry maps `sec-plaintext` to `sec:5`, not `other:id`) is silently rejected: the finding is NOT accepted and stays in `real`.
 
 - **Evidence registry (accepted facts, distinct from policy)** — Maintain durable `accepted_facts` beside, but distinct from, `accepted_tradeoffs`. Tradeoffs are POLICY (“risk accepted; won’t fix”); evidence-facts are evidence-backed advisor judgments that no risk exists. Store them separately or use a typed `kind` (`"policy"`/`"evidence"`); never conflate them because they answer different questions. Inject `accepted_facts` (EVIDENCE) into REFUTE/verifier prompts so verifiers weigh findings against proof rather than inherit a conclusion. Inject `accepted_tradeoffs` (POLICY) only into finder prompts; keep verifiers policy-blind because “won’t fix” context can bias Q2. Route advisor “not a risk” corrections through this registry per **Advisor corrections (captured via the evidence registry)**.
 
