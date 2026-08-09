@@ -127,12 +127,15 @@ VERDICT_SCHEMA = {                         # per-finding refuter; the ORCHESTRAT
 }
 REFUTE_SCHEMA = {"type": "object", "properties": {"refuted": {"type": "boolean"}, "reason": {"type": "string"}}, "required": ["refuted", "reason"]}
 def dedupe(xs):
+    # Same-round exact-duplicate merge: within ONE fan-out, two finders that report the
+    # same issue (identical file+title+detail+severity) collapse to one. Cross-round
+    # reconciliation is registry-mediated (see cross-stage ID namespace), not this helper.
     by_id, by_content, out = {}, {}, []
     for x in xs:
         if x["id"] in by_id: raise ValueError(f"duplicate finding id (collision): {x['id']} — ids must be globally unique (see finder→verifier contract)")
         by_id[x["id"]] = x                        # record EVERY id right after the collision check (before content dedup)
-        sig = (x.get("file"), x.get("title"), x.get("detail"), x.get("severity"))    # content fingerprint: same file + title + claim body + severity = same finding
-        if sig in by_content: continue            # legit duplicate (two finders, same issue) — merge to one
+        sig = (x.get("file"), x.get("title"), x.get("detail"), x.get("severity"))    # duplicate-CANDIDATE fingerprint — same-round exact-duplicate match only, not an identity claim
+        if sig in by_content: continue            # same-round exact duplicate — auto-merge (cross-round reconciliation is registry-mediated, not this helper)
         by_content[sig] = x; out.append(x)
     return out
 def verify_prompt(f): return f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}]"
@@ -168,7 +171,20 @@ const VERDICT_SCHEMA = {                         // per-finding refuter; the ORC
     "required": ["original_claim_status", "actionable_severity", "verification_confidence", "reason"],
 };
 const REFUTE_SCHEMA = { "type": "object", "properties": { "refuted": { "type": "boolean" }, "reason": { "type": "string" } }, "required": ["refuted", "reason"] };
-function dedupe(xs) { const byId = new Map(), byContent = new Map(), out = []; for (const x of xs) { if (byId.has(x.id)) throw new Error(`duplicate finding id (collision): ${x.id} — ids must be globally unique (see finder→verifier contract)`); byId.set(x.id, x); const sig = JSON.stringify([x.file, x.title, x.detail, x.severity]); if (byContent.has(sig)) continue; byContent.set(sig, x); out.push(x); } return out; }
+function dedupe(xs) {
+    // Same-round exact-duplicate merge: within ONE fan-out, two finders that report the
+    // same issue (identical file+title+detail+severity) collapse to one. Cross-round
+    // reconciliation is registry-mediated (see cross-stage ID namespace), not this helper.
+    const byId = new Map(), byContent = new Map(), out = [];
+    for (const x of xs) {
+        if (byId.has(x.id)) throw new Error(`duplicate finding id (collision): ${x.id} — ids must be globally unique (see finder→verifier contract)`);
+        byId.set(x.id, x);
+        const sig = JSON.stringify([x.file, x.title, x.detail, x.severity]);  // duplicate-CANDIDATE fingerprint — same-round exact-duplicate match only, not an identity claim
+        if (byContent.has(sig)) continue;  // same-round exact duplicate — auto-merge (cross-round reconciliation is registry-mediated, not this helper)
+        byContent.set(sig, x); out.push(x);
+    }
+    return out;
+}
 function verifyPrompt(f) { return `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}]`; }
 const entries = [{ id: "x", verdict: { original_claim_status: "refuted", actionable_severity: "low", verification_confidence: "high", reason: "downgraded residual" } },
                  { id: "y", verdict: { original_claim_status: "refuted", actionable_severity: "none", verification_confidence: "high", reason: "nothing actionable" } }];
@@ -196,6 +212,8 @@ Walkthrough — a high-severity "dangerous substitution" claim that's really a b
 Do **NOT** impose `refuted ⟹ severity:none`. That invariant deletes legitimate downgraded residuals (the case above) — claim status (Q1) never decides discard on its own. A finding is dropped only when it's *confidently* non-actionable: `actionable_severity == "none"` AND `verification_confidence != "low"`; if it's non-actionable but uncertain (`verification_confidence == "low"`) it's borderline and reported, not discarded. (`REFUTE_SCHEMA` is the Q1-only variant for pure majority-vote refutation, used when you don't track a residual — don't aggregate a mixed Q1/Q2 field from it.)
 
 **Finding `id` is the join key.** Make it globally unique across the WHOLE fan-out — `<lens>:<n>` (e.g. `sec:3`) or a uuid — never per-lens local indices like `S1`. Lens-initial IDs collide (`security`↔`streaming` both `S`; `concurrency`↔`contract` both `C`); collisions silently merge findings or drop verdicts at the join. **Attach the finding's `id` in the wrapper when you collect each verdict** — `{**f, "verdict": …}` or `{"id": f["id"], "verdict": …}`; the orchestrator owns the join key. Never reconstruct the pair by zipping `parallel()` output by position, and don't rely on a verifier to echo an `id` it wasn't given.
+
+**Cross-stage ID namespace (single registry).** Uniqueness within one fan-out isn't enough — when stages run as separate `eval` calls or turns, each can mint its own scheme (`sec:3` one round, `f7` the next), and the manual merge mis-pairs or collides silently. Keep ONE namespace: the orchestrator owns a single ID registry of **canonical** finding ids — assigned once at first discovery, persisted, and immutable. The `(file, title, detail, severity)` fingerprint the `dedupe` function matches on is NOT the identity: it is duplicate-*candidate* matching only, because verify mutates those attributes (a downgraded severity, a refined detail) and the id must not move. Anchor ids to something stable — a rule or location, e.g. `sec:plaintext-transport` (`<lens>:<stable-identifier>`); a monotonic `<lens>:<n>` minted once by the registry and never re-derived also works — never to mutable attributes, and never to the round: `r<N>:<lens>:<n>` mints a fresh id on every re-find, so SEEN-based dedupe (see loop-until-dry) sees a "new" finding forever and convergence never triggers. Discovery history stays provenance metadata (e.g. `occurrences: [{"round": 2, "lens": "sec"}]`), and when a re-find's refined description no longer fingerprints identically, reconcile it to the existing canonical id via candidate matching, recording an alias if the descriptions genuinely diverge. `dedupe()` handles same-round exact duplicates only; cross-round SEEN tracking and reconciliation use the canonical ID registry. The orchestrator tracks SEEN by canonical id: a re-find is an occurrence, never a new finding. Later stages (verify, merge) receive the registry or the previous round's persisted findings — they never mint a new scheme, so the ids established in round 1 stay the join key all the way through.
 </structure>
 
 <patterns>
