@@ -260,9 +260,9 @@ def accepted_this_round(findings, approved):
     registry_by_tid = {t["tradeoff_id"]: t for t in accepted_tradeoffs}
     accepted_ids = {t["finding_id"] for t in accepted_tradeoffs}  # persisted entries
     for fid, tid in approved.items():
-        if tid in registry_by_tid:   # validate tradeoff_id exists — reject unknown
+        if tid in registry_by_tid and registry_by_tid[tid]["finding_id"] == fid:   # validate tradeoff_id exists and finding_id matches — reject unknown or mismatched
             accepted_ids.add(fid)
-        # unknown tid → silently rejected (not added)
+        # unknown tid or mismatched finding_id → silently rejected (not added)
     return {f["id"] for f in findings if f["id"] in accepted_ids}
 accepted = accepted_this_round(findings, {})
 to_act = [f for f in real if f["id"] not in accepted]  # exclude accepted from action AND convergence
@@ -278,7 +278,7 @@ function acceptedThisRound(findings, approved) {
     const registryByTid = new Map(acceptedTradeoffs.map((t) => [t.tradeoff_id, t]));
     const acceptedIds = new Set(acceptedTradeoffs.map((t) => t.finding_id));
     for (const [fid, tid] of Object.entries(approved)) {
-        if (registryByTid.has(tid)) acceptedIds.add(fid);  // validate tradeoff_id exists — reject unknown
+        if (registryByTid.has(tid) && registryByTid.get(tid).finding_id === fid) acceptedIds.add(fid);  // validate tradeoff_id exists and finding_id matches — reject unknown or mismatched
     }
     return new Set(findings.filter((f) => acceptedIds.has(f.id)).map((f) => f.id));
 }
@@ -287,7 +287,7 @@ const toAct = real.filter((f) => !accepted.has(f.id));  // exclude accepted from
 // convergence checks toAct.length === 0, NOT real.length === 0
 ```
 
-Four cases: (1) **persisted canonical acceptance** — `sec:5` is in the registry, so it derives accepted every round (no re-approval) and is excluded from convergence; (2) **unknown tradeoff rejection** — a finding absent from both `approved` and the registry is NOT accepted and stays in `real`; (3) **to_act/convergence exclusion** — accepted findings drop out of `to_act` and out of the convergence count; (4) **unknown tradeoff_id rejection** — an approval whose `tradeoff_id` is not in the registry (e.g. `{"new:id": "unknown"}`) is silently rejected: the finding is NOT accepted and stays in `real`.
+Five cases: (1) **persisted canonical acceptance** — `sec:5` is in the registry, so it derives accepted every round (no re-approval) and is excluded from convergence; (2) **unknown tradeoff rejection** — a finding absent from both `approved` and the registry is NOT accepted and stays in `real`; (3) **to_act/convergence exclusion** — accepted findings drop out of `to_act` and out of the convergence count; (4) **unknown tradeoff_id rejection** — an approval whose `tradeoff_id` is not in the registry (e.g. `{"new:id": "unknown"}`) is silently rejected: the finding is NOT accepted and stays in `real`; (5) **mismatched pair rejection** — an approval whose `tradeoff_id` IS in the registry but whose `finding_id` does not match that entry's `finding_id` (e.g. `{"other:id": "a11y-emoji"}` where the registry maps `a11y-emoji` to `sec:5`, not `other:id`) is silently rejected: the finding is NOT accepted and stays in `real`.
 
 - **Evidence registry (accepted facts, distinct from policy)** — a durable `accepted_facts` registry alongside — but meaningfully different from — `accepted_tradeoffs`: a tradeoff is POLICY ("risk accepted, won't fix"), while an evidence-fact records the advisor's judgment that something is NOT a risk at all, backed by the evidence itself (e.g. "the weak cipher is not a risk — TLS terminates at the proxy"). Keep them in separate stores, or in one store with a typed `kind` field (`"policy"` vs `"evidence"`) — never conflate the two; they answer different questions. Injection follows the audience: `accepted_facts` (EVIDENCE) is injected into the REFUTE / verifier prompts so the verifier judges the finding against the supplied proof, while `accepted_tradeoffs` (POLICY) is injected ONLY into finder prompts — the verifier stays policy-blind, because a won't-fix tradeoff shown as context can bias Q2 ("already accepted, why flag it?"), whereas evidence is fact-based and safe to hand over: the verifier weighs it rather than inheriting it. Advisor corrections (a statement that a finding is not a risk) are one kind of evidence-fact and flow through this same registry.
 
