@@ -22,7 +22,7 @@ Ask in order:
 
 Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 1–4 below are the **execution-slice** path (work with real cross-step dependencies). A **parallel review/sweep** is an edge-less DAG instead — one node per lens, empty `depends_on`, no slicing: keep step 1 (scope) and step 4 (per-lens `agent`/`skills`/`quality_checks`), skip the slice/`depends_on` steps (2–3).
 
-1. Fan out parallel agents to define full task scope — every file, subsystem, call site.
+1. Fan out parallel agents to define full task scope — every file, subsystem, call site (scout inline first per orchestration.md `<when>`).
 2. Break the task into small slices.
 3. Record `depends_on` between slices. Parallelism is derived from `depends_on` at execution time.
 4. Per slice, assign: `agent` (eval agent that VERIFIES this slice's output — see [references/agents.md](references/agents.md); the implementation itself runs via the session task tool per Step 2), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3) (a shell command or eval reviewer call; pass = exit 0/zero unaccepted real findings (to_act==0), fail = findings enter the convergence loop — see orchestration.md).
