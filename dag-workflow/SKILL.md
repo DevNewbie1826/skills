@@ -16,6 +16,14 @@ Design one monolithic DAG workflow for the task. Follow orchestration.md. Steps 
 3. Record `depends_on` between slices. Parallelism is derived from `depends_on` at execution time.
 4. Per slice, assign: `agent` (who runs it — see [references/agents.md](references/agents.md)), `skills` (skill names to inject into the prompt), `quality_checks` (≥1 per slice, consumed by Step 3).
 
+A **single-slice** task is the third path — the work is one cohesive change (a single file or a tightly related cluster) where slicing would be ceremony. Confirm it at the scope/scale gate: larger than a quick lookup or single edit (those stay inline), yet with no real cross-step dependencies to record — decomposition would invent boundaries, not find them. The single-slice path omits decomposition only:
+
+1. Keep step 1 (scope) and step 4 (per-slice `agent`/`skills`/`quality_checks`); skip the slice and `depends_on` steps (2–3) — one node covers the whole change.
+2. Dispatch **one** implementation agent via the session `task` tool (Step 2 delegation discipline: target files, acceptance criteria, skills, non-goals — the orchestrator never implements inline).
+3. Verify through the normal machinery — Step 2 eval council (`agent(agent='reviewer', …)`/`parallel()`) refutes the single slice's output, then Step 3 quality loop runs its `quality_checks` plus the integrated whole-output pass.
+
+Single-slice is a shortcut in **decomposition** only, never in **verification**: one session task agent implements, eval agents verify, and the same agent never plays both roles.
+
 ## Step 2 — Execute
 
 Execute the DAG. At each decision run a council-of-subagents (independent reviewers in parallel) and keep only what survives an adversarial refute. For a Q1-only `REFUTE_SCHEMA` vote, default to `refuted` when unsure; for a structured `VERDICT_SCHEMA` verdict, encode uncertainty as `verification_confidence="low"` — never as claim status. Follow orchestration.md.
