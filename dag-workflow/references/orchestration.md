@@ -204,13 +204,13 @@ Give the verifier what Q1 asks for: pass `title`, `severity`, **and** `detail`/e
 Aggregate on **Q2 + Q3**, never Q1 alone — "is there confirmed work to do" is Q2∧Q3:
 
 ```python
-to_act = [f for f in entries if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]   # real = actionable AND confirmed; a downgraded residual (refuted + low severity + high confidence) still ships
+real = [f for f in entries if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]   # real = actionable AND confirmed; a downgraded residual (refuted + low severity + high confidence) still ships
 ```
 
 JavaScript:
 
 ```js
-const toAct = entries.filter((f) => f.verdict.actionable_severity !== "none" && f.verdict.verification_confidence !== "low"); // real = actionable AND confirmed
+const real = entries.filter((f) => f.verdict.actionable_severity !== "none" && f.verdict.verification_confidence !== "low"); // real = actionable AND confirmed
 ```
 
 Walkthrough — a high-severity "dangerous substitution" claim that's really a benign preempt-DoS: the refuter returns `original_claim_status="refuted"` (the high claim rejected) + `actionable_severity="low"` (a real low residual) + `verification_confidence="high"`. Aggregating on Q2 keeps it as `low` — correct. Aggregating on `original_claim_status == "upheld"` would have **dropped** real low-severity work.
