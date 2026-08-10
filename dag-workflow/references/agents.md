@@ -18,7 +18,7 @@ This table lists EVAL agent types for `agent()` calls. The Step 1 `agent` field 
 
 ## Finder / verifier role assignment
 
-When a workflow decomposes into finder and verifier slices, assign `agent` by role — do NOT unify them onto a single agent type:
+When a workflow decomposes into finder and verifier slices, assign `agent` by role — use separate agent() invocations for finder and verifier — the same invocation MUST NEVER both find and verify its own claims:
 
 | role | agent | scope |
 |---|---|---|
@@ -34,7 +34,7 @@ Rules:
 
 ## Skill matching
 
-Per slice, assign `skills` — pack skills the subagent must read+follow. The skill list is dynamic; discover and match at plan time:
+Per slice, assign `skills`: list the skills from the pack that the subagent must read and follow. The skill list is dynamic; discover and match at plan time:
 
 1. List available skills by scanning the pack for `SKILL.md` files.
 2. Read each skill's `description` (frontmatter) — it defines what the skill covers and when to use it.
@@ -43,6 +43,6 @@ Per slice, assign `skills` — pack skills the subagent must read+follow. The sk
 
 Rules:
 - Match by the slice's PRIMARY work type — don't stack skills speculatively.
-- Multiple skills OK when genuinely needed.
+- Multiple skills are OK when genuinely needed.
 - When unsure, omit — an unspecified skill is better than a wrong one.
 </agents>
