@@ -99,6 +99,14 @@ The point of this note: the examples here are safe as written — every f-string
 
 **Finder→verifier contract.** Define the schemas once (shared prelude below); each field answers exactly ONE question, and you aggregate on the field(s) whose question matches your decision. Every example above and below runs after this prelude.
 
+**Exhaustive discovery contract.** Any prompt that asks an agent to discover or review multiple issues in one call — regardless of what it is named (finder, completeness-review, convergence round, contract review, etc.) — MUST:
+- instruct: "Return ALL findings that satisfy the stated scope and quality predicate. Do not stop after the first finding — continue scanning until every aspect of your scope is covered. Return an empty findings array only after exhaustive coverage."
+- NOT contain quantity-limiting phrasing (`top N`, `single most critical`, `stop after first`). Quality and scope filters (`only in-scope`, `only actionable`) are permitted.
+
+Exception: when the USER explicitly requests bounded coverage (e.g. "top 5 bugs"), the agent honors that limit and reports the unexamined scope per **No silent caps** — but the orchestrator must not add such limits unprompted.
+
+**Per-finding verifier** prompts are exempt: each stays bounded to its single assigned claim and does not expand scope.
+
 **Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the three schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, and a sample joined `entries` for the `real` aggregation snippet):
 
 ```python
