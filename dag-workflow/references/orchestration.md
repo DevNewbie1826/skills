@@ -106,6 +106,7 @@ The point of this note: the examples here are safe as written — every f-string
 Exception: when the USER explicitly requests bounded coverage (e.g. "top 5 bugs"), the agent honors that limit and reports the unexamined scope per **No silent caps** — but the orchestrator must not add such limits unprompted.
 
 **Per-finding verifier** prompts are exempt: each stays bounded to its single assigned claim and does not expand scope.
+**Implementation slice review and integrated whole-output pass (Step 3) are multi-finding review prompts** — they MUST use `FINDINGS_SCHEMA` and return ALL findings, never boolean `REFUTE_SCHEMA`. `REFUTE_SCHEMA` is for per-finding refutation only, not whole-output review.
 
 **Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the three schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, and a sample joined `entries` for the `real` aggregation snippet):
 
