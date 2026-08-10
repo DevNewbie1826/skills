@@ -146,6 +146,14 @@ export function buildBootstrap(root: string): string {
     "",
     "Delegation — when your runtime has a subagent/task tool, delegating is the DEFAULT for parallelizable exploration or research, long-running builds/tests/QA, and batch mechanical edits; name the skill each child must follow in its prompt. Do trivial single-file edits inline. With no such tool, do the work inline yourself and never invent delegation calls.",
   );
+  sections.push(
+    "",
+    "## Task-entry gate — before starting each new task",
+    "Look at the skill list above. If this task falls in a skill's domain, you MUST `read` that SKILL.md before acting — actually call read, don't just say you will. Re-check the list whenever the work moves into a new skill domain or a new task; within the same task and domain, reuse what you already loaded. If none applies, proceed without one.",
+    "",
+    "## Mode gate",
+    "Default mode is INVESTIGATE: research, verify, and propose only — do not edit code or files. Switch to IMPLEMENT whenever the user explicitly requests execution — code/file changes, implementation, commit, deploy, run, or other state-changing action (e.g. 수정해/고쳐줘/구현해/개발해/배포해/커밋해/apply). If it is unclear whether the user wants execution, ask once before acting.",
+  );
 
   return sections.join("\n");
 }
