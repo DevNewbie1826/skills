@@ -27,17 +27,29 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 
 ## Install
 
-Clone the pack, then copy only the skills you need:
+This is an OMP skill pack. Install the whole pack with:
+
+```bash
+omp install https://github.com/DevNewbie1826/skills.git
+```
+
+### Use a single skill in another runtime
+
+The eight ported skills are portable and drop-anywhere, so you can copy an individual
+skill directory into another agent's skill location (a few route to a sibling skill —
+copy both where noted below). (`dag-workflow/` is
+OMP-native — it uses `eval`/`task`/`hub`/`local://` and runs only under OMP, so don't
+copy it into another runtime.) Clone the pack, then copy only the skills you need:
 
 ```bash
 git clone https://github.com/DevNewbie1826/skills.git
 cd skills
 ```
 
-Skills are individually self-contained: take only what you need. Commands install
-`frontend/`; replace it with another skill directory as needed. Note: `programming/`
-routes test-driven development to the standalone `tdd/` skill, so copy both if you
-want the full testing guidance.
+Take only what you need. Commands install `frontend/`; replace it with another skill
+directory as needed. Two skills route to a sibling: `programming/` sends test-driven-
+development work to the standalone `tdd/`, and `git-master/` sends decision-context
+commit messages to `lore/` — copy both members of such a pair for the full guidance.
 
 | Runtime | Install path | Copy one skill |
 |---|---|---|
@@ -51,7 +63,6 @@ want the full testing guidance.
 | Gemini CLI (workspace) | `.gemini/skills/` | `mkdir -p .gemini/skills && cp -R frontend .gemini/skills/` |
 | Cursor (user) | `~/.cursor/skills/` | `mkdir -p ~/.cursor/skills && cp -R frontend ~/.cursor/skills/` |
 | Cursor (project) | `.cursor/skills/` | `mkdir -p .cursor/skills && cp -R frontend .cursor/skills/` |
-| pi | `git:github.com/DevNewbie1826/skills` | `pi install git:github.com/DevNewbie1826/skills` |
 | Any agent / no loader | No standard path: `$SKILLS_DIR` you expose to the agent | `mkdir -p "$SKILLS_DIR" && cp -R frontend "$SKILLS_DIR"/` |
 
 `~/.agents/skills/` and `.agents/skills/` are interoperable paths: Codex uses them;
