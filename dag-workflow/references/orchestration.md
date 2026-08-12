@@ -1,3 +1,4 @@
+
 <system-notice>
 This task involves multi-step reasoning. Think carefully through the problem before responding.
 
@@ -35,9 +36,7 @@ For independent per-item chains (review → verify, fetch → extract → score)
 ```python
 def review_and_verify(d):
     found = agent(d["prompt"], agent="reviewer", label=f"review:{d['key']}", schema=FINDINGS_SCHEMA)
-    return parallel([lambda f=f: {**f, "verdict": agent(
-        f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep your best-guess status/severity but set verification_confidence=low)",
-        agent="reviewer", label=f"verify:{f['file']}", schema=VERDICT_SCHEMA)} for f in found["findings"]])
+    return verify_batched(d["key"], found["findings"], d["packet"])   # batch_verify + verify_batched are defined in the shared prelude; ≤15 findings per verifier call; packet = local:// reference (shared context handoff), threaded to every batch
 phase("Review")
 results = parallel([lambda d=d: review_and_verify(d) for d in DIMENSIONS])
 confirmed = [f for group in results for f in group if f["verdict"]["actionable_severity"] != "none" and f["verdict"]["verification_confidence"] != "low"]  # real = actionable AND confirmed (Q2+Q3) — see finder→verifier contract
@@ -52,13 +51,7 @@ async function reviewAndVerify(d) {
         label: `review:${d.key}`,
         schema: FINDINGS_SCHEMA,
     });
-    return await parallel(found.findings.map((f) => async () => ({
-        ...f,
-        verdict: await agent(
-            `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}] (confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep best-guess status/severity but set verification_confidence=low)`,
-            { agent: "reviewer", label: `verify:${f.file}`, schema: VERDICT_SCHEMA },
-        ),
-    })));
+    return verifyBatched(d.key, found.findings, d.packet);  // batchVerify + verifyBatched are defined in the shared prelude; ≤15 findings per verifier call; packet = local:// reference (shared context handoff), threaded to every batch
 }
 phase("Review");
 const results = await parallel(DIMENSIONS.map((d) => async () => reviewAndVerify(d)));
@@ -70,24 +63,24 @@ Reach for `pipeline()` only when a stage genuinely needs ALL of the previous sta
 
 ```python
 phase("Find")
-found = parallel([lambda d=d: agent(d["prompt"], agent="reviewer", schema=FINDINGS_SCHEMA) for d in DIMENSIONS])
-findings = dedupe([f for r in found for f in r["findings"]])   # needs everything at once
+found = parallel([lambda d=d: {"key": d["key"], "packet": d["packet"], "findings": agent(d["prompt"], agent="reviewer", schema=FINDINGS_SCHEMA)["findings"]} for d in DIMENSIONS])
 phase("Verify")
-verdicts = parallel([lambda f=f: {"id": f["id"], "verdict": agent(verify_prompt(f), agent="reviewer", schema=VERDICT_SCHEMA)} for f in findings])  # carry the join key, never positional
+verified = parallel([lambda r=r: verify_batched(r["key"], r["findings"], r["packet"]) for r in found])  # one batch verifier per lens (≤15 findings per call); join validated by id completeness, never by output position
+findings = dedupe([f for r in verified for f in r])   # needs everything at once
 ```
 
 **JavaScript (`eval`, JavaScript backend):**
 
 ```js
 phase("Find");
-const found = await parallel(DIMENSIONS.map((d) => async () =>
-    await agent(d.prompt, { agent: "reviewer", schema: FINDINGS_SCHEMA }),
-));
-const findings = dedupe(found.flatMap((r) => r.findings)); // needs everything at once
+const found = await parallel(DIMENSIONS.map((d) => async () => ({
+    key: d.key,
+    packet: d.packet,
+    findings: (await agent(d.prompt, { agent: "reviewer", schema: FINDINGS_SCHEMA })).findings,
+})));
 phase("Verify");
-const verdicts = await parallel(findings.map((f) => async () => ({
-    id: f.id, verdict: await agent(verifyPrompt(f), { agent: "reviewer", schema: VERDICT_SCHEMA }),
-}))); // carry the join key, never positional
+const verified = await parallel(found.map((r) => async () => verifyBatched(r.key, r.findings, r.packet))); // one batch verifier per lens (≤15 findings per call); join validated by id completeness, never by output position
+const findings = dedupe(verified.flat()); // needs everything at once
 ```
 Use ordinary code between calls to flatten/map/filter; don't add a barrier just for that. Nested `parallel()` pools each cap independently, so keep total fan-out sane.
 
@@ -99,19 +92,22 @@ The point of this note: the examples here are safe as written — every f-string
 
 **Finder→verifier contract.** Define the schemas once (shared prelude below); each field answers exactly ONE question, and you aggregate on the field(s) whose question matches your decision. Every example above and below runs after this prelude.
 
+**Batch verifier contract.** Verification runs ONE verifier agent per lens, not one per finding: the batch verifier receives the lens's full findings array (`id`, `file`, `title`, `severity`, `detail` for each — Q1 still needs `title`+`severity`+`detail`) plus the shared context packet, refutes each claim ("confident it's wrong→original_claim_status=refuted; if genuinely unsure→keep best-guess status/severity but set verification_confidence=low"), and returns ALL verdicts in one `VERDICTS_SCHEMA` call — exactly one verdict per submitted id, no skips, no extra ids. The ORCHESTRATOR validates completeness (every submitted id answered, no unknown ids); any violation re-runs THAT batch only, not the whole lens. Batch verification is single-attempt EXCEPT an id-completeness violation (missing, duplicate, or unknown verdict ids), which retries that batch exactly once; schema validation itself is enforced by the `agent()` `schema=` contract, and reviewer judgment failures remain single-attempt (SKILL.md Step 2). Batch cap: 15 findings per call, applied by the CALLER — the shared prelude's `verify_batched`/`verifyBatched` chunks a lens's findings into ≤15-per-call batches and runs each batch via `parallel()` (nested `parallel()` pools cap independently, so keep fan-out sane); a lens with more findings splits into multiple batches (each still one agent call). Independence is unchanged at lens level: a verifier sees only its own lens's claims.
+
 **Exhaustive discovery contract.** Any prompt that asks an agent to discover or review multiple issues in one call — regardless of what it is named (finder, completeness-review, convergence round, contract review, etc.) — MUST:
 - instruct: "Return ALL findings that satisfy the stated scope and quality predicate. Do not stop after the first finding — continue scanning until every aspect of your scope is covered. Return an empty findings array only after exhaustive coverage."
 - NOT contain quantity-limiting phrasing (`top N`, `single most critical`, `stop after first`). Quality and scope filters (`only in-scope`, `only actionable`) are permitted.
 
 Exception: when the USER explicitly requests bounded coverage (e.g. "top 5 bugs"), the agent honors that limit and reports the unexamined scope per **No silent caps** — but the orchestrator must not add such limits unprompted.
 
-**Per-finding verifier** prompts are exempt: each stays bounded to its single assigned claim and does not expand scope.
+**Per-lens batch verifier** prompts are exempt: each stays bounded to its assigned lens's claims and does not expand scope.
 **Implementation slice review and integrated whole-output pass (Step 3) are multi-finding review prompts** — they MUST use `FINDINGS_SCHEMA` and return ALL findings, never boolean `REFUTE_SCHEMA`. `REFUTE_SCHEMA` is for per-finding refutation only, not whole-output review.
 
-**Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the three schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, and a sample joined `entries` for the `real` aggregation snippet):
+**Shared prelude** — run once; the examples assume these are in scope (`DIMENSIONS`, the schemas, `dedupe`, `verify_prompt`/`verifyPrompt`, the batch helpers `batch_verify`/`verify_batched` (`batchVerify`/`verifyBatched`), and a sample joined `entries` for the `real` aggregation snippet):
 
 ```python
-DIMENSIONS = [{"key": "bugs", "prompt": "…"}, {"key": "perf", "prompt": "…"}]
+import json                                    # json.dumps the lens findings into the batch verifier prompt (below)
+DIMENSIONS = [{"key": "bugs", "prompt": "…", "packet": "local://packet.md"}, {"key": "perf", "prompt": "…", "packet": "local://packet.md"}]  # packet = local:// REFERENCE (shared context handoff — never a pasted copy)
 FINDINGS_SCHEMA = {                       # finder emits this
     "type": "object",
     "properties": {"findings": {"type": "array", "items": {
@@ -127,7 +123,7 @@ FINDINGS_SCHEMA = {                       # finder emits this
     }}},
     "required": ["findings"],
 }
-VERDICT_SCHEMA = {                         # per-finding refuter; the ORCHESTRATOR attaches the finding's id in the wrapper
+VERDICT_SCHEMA = {                         # per-verdict field reference; a per-lens batch verifier emits these inside VERDICTS_SCHEMA
     "type": "object",
     "properties": {
         "original_claim_status":   {"enum": ["upheld", "refuted", "partial"]},              # Q1 — does the CLAIM hold (partial = partly holds; NOT "I'm unsure")
@@ -138,6 +134,29 @@ VERDICT_SCHEMA = {                         # per-finding refuter; the ORCHESTRAT
     "required": ["original_claim_status", "actionable_severity", "verification_confidence", "reason"],
 }
 REFUTE_SCHEMA = {"type": "object", "properties": {"refuted": {"type": "boolean"}, "reason": {"type": "string"}}, "required": ["refuted", "reason"]}
+VERDICTS_SCHEMA = {                      # per-lens batch verifier emits this — one verdict per submitted finding id
+    "type": "object",
+    "properties": {"verdicts": {"type": "array", "items": {
+        "type": "object",
+        "properties": {
+            "id":                      {"type": "string", "minLength": 1},   # echoes the submitted finding id (the join key)
+            "original_claim_status":   {"enum": ["upheld", "refuted", "partial"]},
+            "actionable_severity":     {"enum": ["none", "low", "medium", "high", "critical"]},
+            "verification_confidence": {"enum": ["high", "medium", "low"]},
+            "reason":                  {"type": "string"},
+        },
+        "required": ["id", "original_claim_status", "actionable_severity", "verification_confidence", "reason"],
+    }}},
+    "required": ["verdicts"],
+}
+SYNTHESIS_SCHEMA = {                    # sweep convergence round: ONE reviewer call returns BOTH sections (see SKILL.md audit/review exit)
+    "type": "object",
+    "properties": {
+        "synthesis":       {"type": "string", "minLength": 1},              # integrated synthesis — cross-lens consistency/coverage
+        "uncovered_gaps":  {"type": "array", "items": {"type": "string"}},  # completeness critic — what's unverified; each gap becomes a next-round finder prompt
+    },
+    "required": ["synthesis", "uncovered_gaps"],
+}
 def dedupe(xs):
     # Same-round exact-duplicate merge: within ONE fan-out, two finders that report the
     # same issue (identical file+title+detail+severity) collapse to one. Cross-round
@@ -151,6 +170,31 @@ def dedupe(xs):
         by_content[sig] = x; out.append(x)
     return out
 def verify_prompt(f): return f"Refute if you can: {f['title']} [severity={f['severity']}, detail: {f['detail']}]"
+class BatchVerdictValidationError(ValueError):           # id-completeness violation — the ONLY retryable batch failure (JS mirror: tagged e.validation)
+    pass
+def batch_verify(r):                                     # one batch verifier per lens, carrying the lens key
+    for attempt in range(2):                             # retry THAT batch exactly ONCE, only on an id-completeness violation (see Batch verifier contract); any other failure stays single-attempt
+        try:
+            verdicts = agent(
+                "Refute each claim if you can — confident it's wrong→original_claim_status=refuted; "
+                "if genuinely unsure→keep your best-guess status/severity but set verification_confidence=low. "
+                "Return exactly one verdict per submitted id, no skips, no extra ids. "
+                "Shared context packet (read it first): " + r["packet"] + " " + json.dumps(r["findings"]),
+                agent="reviewer", label=f"verify:{r['key']}", schema=VERDICTS_SCHEMA)["verdicts"]
+            ids = [v["id"] for v in verdicts]            # extract the verdict id list FIRST
+            if len(ids) != len(r["findings"]) or len(set(ids)) != len(ids) or set(ids) != {f["id"] for f in r["findings"]}:
+                raise BatchVerdictValidationError("batch verifier must answer every submitted id exactly once and no others — re-run that batch only")
+            break
+        except BatchVerdictValidationError:              # id-completeness violation ONLY — retry THAT batch exactly once; any other failure (agent() schema errors and other ValueErrors included) stays single-attempt
+            if attempt == 0:
+                continue
+            raise
+    by_id = {v["id"]: v for v in verdicts}
+    return [{**f, "verdict": by_id[f["id"]]} for f in r["findings"]]
+
+def verify_batched(key, findings, packet):               # cap: ≤15 findings per verifier call — chunk, then run each batch via parallel() and flatten; packet = local:// reference (shared context handoff), threaded to every batch
+    chunks = [findings[i:i + 15] for i in range(0, len(findings), 15)]
+    return [f for group in parallel([lambda c=c: batch_verify({"key": key, "findings": c, "packet": packet}) for c in chunks]) for f in group]
 entries = [{"id": "sec:5", "file": "src/auth.py", "title": "plaintext transport", "severity": "high", "detail": "uses HTTP not HTTPS for auth tokens", "verdict": {"original_claim_status": "refuted", "actionable_severity": "low", "verification_confidence": "high", "reason": "downgraded residual"}},
            {"id": "y", "file": "src/cache.ts", "title": "stale cache entry", "severity": "medium", "detail": "cache TTL not enforced on eviction", "verdict": {"original_claim_status": "refuted", "actionable_severity": "none", "verification_confidence": "high", "reason": "nothing actionable"}}]
 findings = entries  # finder output joined with verdicts
@@ -158,7 +202,7 @@ real = [f for f in entries if f["verdict"]["actionable_severity"] != "none" and 
 ```
 
 ```js
-const DIMENSIONS = [{ key: "bugs", prompt: "…" }, { key: "perf", prompt: "…" }];
+const DIMENSIONS = [{ key: "bugs", prompt: "…", packet: "local://packet.md" }, { key: "perf", prompt: "…", packet: "local://packet.md" }]; // packet = local:// REFERENCE (shared context handoff — never a pasted copy)
 const FINDINGS_SCHEMA = {                       // finder emits this
     "type": "object",
     "properties": { "findings": { "type": "array", "items": {
@@ -174,7 +218,7 @@ const FINDINGS_SCHEMA = {                       // finder emits this
     }}},
     "required": ["findings"],
 };
-const VERDICT_SCHEMA = {                         // per-finding refuter; the ORCHESTRATOR attaches the finding's id in the wrapper
+const VERDICT_SCHEMA = {                         // per-verdict field reference; a per-lens batch verifier emits these inside VERDICTS_SCHEMA
     "type": "object",
     "properties": {
         "original_claim_status":   { "enum": ["upheld", "refuted", "partial"] },              // Q1 — does the CLAIM hold (partial = partly holds; NOT "I'm unsure")
@@ -185,6 +229,29 @@ const VERDICT_SCHEMA = {                         // per-finding refuter; the ORC
     "required": ["original_claim_status", "actionable_severity", "verification_confidence", "reason"],
 };
 const REFUTE_SCHEMA = { "type": "object", "properties": { "refuted": { "type": "boolean" }, "reason": { "type": "string" } }, "required": ["refuted", "reason"] };
+const VERDICTS_SCHEMA = {                // per-lens batch verifier emits this — one verdict per submitted finding id
+    "type": "object",
+    "properties": { "verdicts": { "type": "array", "items": {
+        "type": "object",
+        "properties": {
+            "id":                      { "type": "string", "minLength": 1 },   // echoes the submitted finding id (the join key)
+            "original_claim_status":   { "enum": ["upheld", "refuted", "partial"] },
+            "actionable_severity":     { "enum": ["none", "low", "medium", "high", "critical"] },
+            "verification_confidence": { "enum": ["high", "medium", "low"] },
+            "reason":                  { "type": "string" },
+        },
+        "required": ["id", "original_claim_status", "actionable_severity", "verification_confidence", "reason"],
+    }}},
+    "required": ["verdicts"],
+};
+const SYNTHESIS_SCHEMA = {              // sweep convergence round: ONE reviewer call returns BOTH sections (see SKILL.md audit/review exit)
+    "type": "object",
+    "properties": {
+        "synthesis":      { "type": "string", "minLength": 1 },              // integrated synthesis — cross-lens consistency/coverage
+        "uncovered_gaps": { "type": "array", "items": { "type": "string" } },  // completeness critic — what's unverified; each gap becomes a next-round finder prompt
+    },
+    "required": ["synthesis", "uncovered_gaps"],
+};
 function dedupe(xs) {
     // Same-round exact-duplicate merge: within ONE fan-out, two finders that report the
     // same issue (identical file+title+detail+severity) collapse to one. Cross-round
@@ -200,6 +267,39 @@ function dedupe(xs) {
     return out;
 }
 function verifyPrompt(f) { return `Refute if you can: ${f.title} [severity=${f.severity}, detail: ${f.detail}]`; }
+async function batchVerify(r) {                          // one batch verifier per lens, carrying the lens key
+    let verdicts;
+    for (let attempt = 0; attempt < 2; attempt++) {      // retry THAT batch exactly ONCE, only on an id-completeness violation (see Batch verifier contract); any other failure stays single-attempt
+        try {
+            verdicts = (await agent(
+                "Refute each claim if you can — confident it's wrong→original_claim_status=refuted; " +
+                "if genuinely unsure→keep your best-guess status/severity but set verification_confidence=low. " +
+                "Return exactly one verdict per submitted id, no skips, no extra ids. " +
+                "Shared context packet (read it first): " + r.packet + " " + JSON.stringify(r.findings),
+                { agent: "reviewer", label: `verify:${r.key}`, schema: VERDICTS_SCHEMA },
+            )).verdicts;
+            const verdictIds = verdicts.map((v) => v.id);  // extract the verdict id list FIRST
+            const submitted = new Set(r.findings.map((f) => f.id));
+            const uniqueIds = new Set(verdictIds);
+            if (verdictIds.length !== r.findings.length || uniqueIds.size !== verdictIds.length || uniqueIds.size !== submitted.size || ![...submitted].every((id) => uniqueIds.has(id))) {
+                const err = new Error("batch verifier must answer every submitted id exactly once and no others — re-run that batch only");
+                err.validation = true;                   // id-completeness marker — the ONE retryable failure
+                throw err;
+            }
+            break;
+        } catch (e) {
+            if (attempt === 0 && e.validation) continue; // id-completeness violation — retry THAT batch exactly once; other failures stay single-attempt
+            throw e;
+        }
+    }
+    const byId = new Map(verdicts.map((v) => [v.id, v]));
+    return r.findings.map((f) => ({ ...f, verdict: byId.get(f.id) }));
+}
+async function verifyBatched(key, findings, packet) {    // cap: ≤15 findings per verifier call — chunk, then run each batch via parallel() and flatten; packet = local:// reference (shared context handoff), threaded to every batch
+    const chunks = [];
+    for (let i = 0; i < findings.length; i += 15) chunks.push(findings.slice(i, i + 15));
+    return (await parallel(chunks.map((c) => async () => batchVerify({ key, findings: c, packet })))).flat();
+}
 const entries = [{ id: "sec:5", file: "src/auth.py", title: "plaintext transport", severity: "high", detail: "uses HTTP not HTTPS for auth tokens", verdict: { original_claim_status: "refuted", actionable_severity: "low", verification_confidence: "high", reason: "downgraded residual" } },
                  { id: "y", file: "src/cache.ts", title: "stale cache entry", severity: "medium", detail: "cache TTL not enforced on eviction", verdict: { original_claim_status: "refuted", actionable_severity: "none", verification_confidence: "high", reason: "nothing actionable" } }];
 const findings = entries;
@@ -227,14 +327,14 @@ Walkthrough — a high-severity "dangerous substitution" claim that's really a b
 
 Do **NOT** impose `refuted ⟹ severity:none`. That invariant deletes legitimate downgraded residuals (the case above) — claim status (Q1) alone never determines whether to discard a finding. A finding is dropped only when it's *confidently* non-actionable: `actionable_severity == "none"` AND `verification_confidence != "low"`; if it's non-actionable but uncertain (`verification_confidence == "low"`) it's borderline and reported, not discarded. (`REFUTE_SCHEMA` is the Q1-only variant for pure majority-vote refutation, used when you don't track a residual — don't aggregate a mixed Q1/Q2 field from it.)
 
-**Finding `id` is the join key.** Make it globally unique across the WHOLE fan-out — `<lens>:<n>` (e.g. `sec:3`) or a UUID — never per-lens local indices like `S1`. Lens-initial IDs collide (`security`↔`streaming` both `S`; `concurrency`↔`contract` both `C`); collisions silently merge findings or drop verdicts at the join. **Attach the finding's `id` in the wrapper when you collect each verdict** — `{**f, "verdict": …}` or `{"id": f["id"], "verdict": …}`; the orchestrator owns the join key. Never reconstruct the pair by zipping `parallel()` output by position, and don't rely on a verifier to echo an `id` it wasn't given.
+**Finding `id` is the join key.** Make it globally unique across the WHOLE fan-out — `<lens>:<n>` (e.g. `sec:3`) or a UUID — never per-lens local indices like `S1`. Lens-initial IDs collide (`security`↔`streaming` both `S`; `concurrency`↔`contract` both `C`); collisions silently merge findings or drop verdicts at the join. **Attach the finding's `id` in the wrapper when you collect each verdict** — `{**f, "verdict": …}` or `{"id": f["id"], "verdict": …}`; the orchestrator owns the join key. Never reconstruct the pair by zipping `parallel()` output by position — in batch mode the verifier echoes each submitted `id` (VERDICTS_SCHEMA) and the orchestrator validates id completeness (see **Batch verifier contract**).
 
 **Cross-stage ID namespace (single registry).** Uniqueness within one fan-out isn't enough — when stages run as separate `eval` calls or turns, each can mint its own scheme (`sec:3` one round, `f7` the next), and the manual merge mis-pairs or collides silently. Keep ONE namespace: the orchestrator owns a single ID registry of **canonical** finding ids — assigned once at first discovery, persisted, and immutable. The `(file, title, detail, severity)` fingerprint the `dedupe` function matches on is NOT the identity: it is duplicate-*candidate* matching only, because verification can mutate those attributes (a downgraded severity, a refined detail) and the id must not move. Anchor ids to something stable — a rule or location, e.g. `sec:plaintext-transport` (`<lens>:<stable-identifier>`); a monotonic `<lens>:<n>` minted once by the registry and never re-derived also works — never to mutable attributes, and never to the round: `r<N>:<lens>:<n>` mints a fresh id on every re-find, so SEEN-based dedupe (see loop-until-dry) sees a "new" finding forever and convergence never triggers. Discovery history stays provenance metadata (e.g. `occurrences: [{"round": 2, "lens": "sec"}]`), and when a re-find's refined description no longer fingerprints identically, reconcile it to the existing canonical id via candidate matching, recording an alias if the descriptions genuinely diverge. `dedupe()` handles same-round exact duplicates only; cross-round SEEN tracking and reconciliation use the canonical ID registry. The orchestrator tracks SEEN by canonical id: a re-find is an occurrence, never a new finding. Later stages (verify, merge) receive the registry or the previous round's persisted findings — they never mint a new scheme, so the ids established in round 1 stay the join key all the way through.
 </structure>
 
 <patterns>
 Compose the harness the task calls for:
-- **Adversarial verify** — N independent skeptics per finding, each prompted to REFUTE; keep it only if a majority survive. `votes = parallel([lambda i=i: agent(f"Refute: {claim}. refuted=true if unsure.", agent="reviewer", schema=REFUTE_SCHEMA) for i in range(3)])`, then keep when `sum(not v["refuted"] for v in votes) ≥ 2`. (Q1-only majority vote; pair with `VERDICT_SCHEMA` when you also track a residual — see finder→verifier contract.)
+- **Adversarial verify** — for HIGH/CRITICAL findings in FULL mode, independent skeptics each prompted to REFUTE; the per-lens batch verdict counts as council vote 1, so exactly 2 ADDITIONAL verifiers are spawned (total 3 — see **Severity-weighted verification + light/full mode**). Bind the finding, its claim, and the batch verdict first — `f = findings[0]  # current joined HIGH/CRITICAL finding`, `claim = f"{f['title']} [severity={f['severity']}, detail: {f['detail']}]"`, `batch_verdict = f["verdict"]  # council vote 1: the per-lens batch verdict on this finding` (all three defined before use; `findings` comes from the shared prelude) — then spawn the 2 additional verifiers, each returning a `VERDICT_SCHEMA` verdict (Q1/Q2/Q3 — not `REFUTE_SCHEMA`, because the council decides on ACTION, so every vote must carry Q2/Q3): `extra = parallel([lambda i=i: agent(f"Refute if you can: {claim}. If genuinely unsure, keep your best-guess status/severity but set verification_confidence=low.", agent="reviewer", schema=VERDICT_SCHEMA) for i in range(2)])`, `council = [batch_verdict, *extra]  # batch verdict + 2 additional (total 3)`, `confident_none = sum(v["actionable_severity"] == "none" and v["verification_confidence"] != "low" for v in council)`, `keep = confident_none < 2  # drop only when >=2 of 3 are confidently non-actionable — a Q2 majority, never refuted ⟹ none`, `confirmed_actionable = [v for v in council if v["actionable_severity"] != "none" and v["verification_confidence"] != "low"]  # votes that confirm an actionable residual`. The outcome aggregates on Q2∧Q3 exactly like the finder→verifier contract: the finding drops only when at least 2 of the 3 council votes are *confidently* non-actionable — never on Q1 refutation alone, because do **NOT** impose `refuted ⟹ severity:none` — so Q1 refutation alone never drops a finding; a refuted claim whose actionable residual the council confirms (e.g. a batch verdict of `refuted` + `actionable_severity=low` + `verification_confidence=high`, with at least one of the two additional votes also confirming that `low` residual) still ships at `low`, whereas two additional votes that are confidently non-actionable drop it. Q1 `original_claim_status` still reports whether the claim holds as stated; action is decided by Q2∧Q3. Final-severity synthesis: the finding's final severity is the majority `actionable_severity` among the confirmed actionable votes (`verification_confidence != "low"`); ties break conservative (highest severity). If `keep` is true but there are zero confirmed actionable votes (no vote confidently confirms an actionable residual, and fewer than two are confidently non-actionable), the finding is **borderline** — reported, not remediated as confirmed, and never assigned a fabricated severity (see **Convergence rule + termination**).
 - **Perspective-diverse verify** — give each verifier a distinct lens (correctness, security, perf, does-it-reproduce) instead of N identical refuters. If you build the lenses in a loop, a partial-binding bug (above) can make the **labels** look distinct while every thunk sends the same (last) **prompt**. Verify on what was **actually sent** — not the labels, and not the prompts you built (late binding defeats both): have each thunk capture the exact prompt it passes to `agent()` at call time and return it, then assert the returned prompts are distinct; or, where the runtime exposes it, read each agent's received prompt from the roster/history.
 - **Judge panel** — N attempts from different angles, scored by parallel judges; synthesize from the winner, graft the best of the rest.
 - **Parallel writes (fixes/migrations)** — pin the shared interface (a widened type, a header) as its OWN preemptive slice — land it first via eval agent(agent='task'), confirm it compiles — THEN fan out the consumer slices as concurrent eval agent(agent='task') calls. If the harness supports workspace isolation (isolated=True), use it: each writer gets its own workspace; changes auto-land (apply=True) when each writer returns — disjoint files prevent conflicts, and the orchestrator verifies cross-slice consistency after all return. If isolation is unavailable, concurrent writers may edit the main workspace directly ONLY under these conditions: (1) disjoint files — no two agents edit the same file in the same round; (2) shared paths or contract lines are SERIALIZED — the preemptive interface slice lands and compiles first, then consumer slices fan out. After all writers return, verify cross-slice consistency, then run the integrated eval cross-slice review pass (agent(agent='reviewer')/parallel()). Failure recovery: revert ONLY the failing writer's delta — snapshot each writer's touched files before dispatch and restore just those on failure, preserving all other workspace state. Retry with feedback (up to 2 retries per node acceptance).
@@ -242,26 +342,30 @@ Compose the harness the task calls for:
 - **Pre-code gates** — satisfy the project's pre-code requirements BEFORE dispatch, not after: the mandatory AGENTS.md (or equivalent) read, compliance with the project's coding standards, and confirmation that required build/lint config exists. A gate that is not met is resolved before fan-out — never dispatch past it; and state the gates explicitly in every subagent prompt so no agent bypasses them. The harness's advisor can enforce pre-code gates (blocking an edit until they're met); the skill anticipates this by treating gates as a dispatch precondition, so a gate failure surfaces as a pre-dispatch fix instead of a mid-round blocker that breaks the flow.
 - **No-git fallback** — all of the above assumes a `.git`. In a workspace without `.git` (e.g. a remote directory, a deployed snapshot) the git commands are unavailable, so the orchestrator can't diff — then the changed-file list must come from the USER (or a baseline snapshot the orchestrator keeps), and the orchestrator reads those files VERBATIM into the same `local://` packet (same allowlist/redaction/exclude/`log()` guards). Packet source = git-when-available, else user/baseline-provided file list — never a hand-summary. The packet and the **Workspace stability guard** are separate concerns: the guard's content hash rescans the same frozen owned-root scope regardless of git — see that pattern for the scan contract.
 - **Pinned-content review** — Immediately before fan-out, snapshot file contents at dispatch into the same `local://` packet per **Shared context handoff** / **No-git fallback**; it is the round's truth. Agents review pinned paths VERBATIM only from it, never live, avoiding mixed snapshots. Derive the packet and **Workspace stability guard** pre-round digest from one byte map captured in one read, closing any change-and-revert gap. The guard covers the full frozen owned-root scope; the packet renders its change-view subset, so their scopes stay distinct but share one capture. Live out-of-packet reads are for NAVIGATION only (locating code/mapping call sites), never finding EVIDENCE. If evidence needs an out-of-packet caller or dependency, add it to the capture/packet and restart the round, or mark it unverified. Rescan afterward per **Workspace stability guard**; drift makes results suspect: the pin fixes WHAT was reviewed, while the guard checks WHETHER the workspace moved. This includes git: `git diff` may build the packet, but agents review its pinned content, not live files.
-- **Loop-until-dry (discovery)** — keep spawning finders until **K consecutive rounds surface nothing new** (default K=2); dedup against everything SEEN, not just what was confirmed, or it never converges.
+- **Loop-until-dry (discovery)** — keep spawning finders until **K consecutive rounds surface nothing new** (K is mode-derived — LIGHT K=1, FULL K=2; see A6); dedup against everything SEEN, not just what was confirmed, or it never converges.
 - **Persist round findings** — right after `dedupe`, write the round's findings to a `local://` file so you can re-read the results without re-running the finder (the expensive step): Python `write(f"local://round{N}_findings.json", json.dumps(findings))`, JavaScript `await write(\`local://round${N}_findings.json\`, JSON.stringify(findings))`. Merge the round's findings into the cumulative canonical registry/SEEN set, then persist the cumulative set (optionally keeping per-round snapshots separately) — a per-round file alone can't serve as the registry, since SEEN must span every prior round or re-finds read as "new" and convergence never triggers. This feeds the cross-stage ID namespace, so canonical ids and SEEN tracking survive across `eval` calls without re-finding.
-- **Convergence rule + termination (what resets K, and when to stop)** — Classify by verdict, not feel, into three disjoint buckets: **real** = `actionable_severity != "none"` AND `verification_confidence != "low"`; **borderline** = `verification_confidence == "low"` (report, never lose); **dropped** = `actionable_severity == "none"` AND `verification_confidence != "low"` (log; **No silent caps**). Uncertainty is a separate axis: `partial` is claim status, not “unsure.” Convergence is **K consecutive rounds with zero actionable findings**: `len(to_act) == 0`, where `to_act = [f for f in real if f.id not in accepted]` (A4’s test; never `len(real) == 0`; default K=2). A zero-actionable round advances K; only a **real, unaccepted** finding resets it. Deduped (see **Cross-stage ID namespace**), accepted (see **Accepted tradeoffs**), dropped, and borderline findings never reset K; a round containing only them advances it. All are complementary; none conflict. Per **LOW severity is still verified**, a verified actionable LOW is real and resets K unless accepted; a LOW that is deduped, accepted, dropped, or borderline does not. If the user sets N rounds, run exactly N despite early convergence and report what remains. External blocker stop: if all remaining real findings are blocked beyond the orchestrator’s control (physical device, external API, or user decision), stop spinning; park each as `blocked`, record its dependency, and report it for resumption when cleared. K-dry means no new findings; parked-blocked means real work cannot proceed. Neither abandons findings; the final report includes unresolved borderlines and parked/blocked items.
+- **Convergence rule + termination (what resets K, and when to stop)** — Classify by verdict, not feel, into three disjoint buckets: **real** = `actionable_severity != "none"` AND `verification_confidence != "low"`; **borderline** = `verification_confidence == "low"` (report, never lose); **dropped** = `actionable_severity == "none"` AND `verification_confidence != "low"` (log; **No silent caps**). Uncertainty is a separate axis: `partial` is claim status, not “unsure.” Convergence is **K consecutive rounds with zero actionable findings**: `len(to_act) == 0`, where `to_act = [f for f in real if f.id not in accepted]` (A4’s test; never `len(real) == 0`; K is mode-derived — LIGHT K=1, FULL K=2; see A6). A zero-actionable round advances K; only a **real, unaccepted** finding resets it. Deduped (see **Cross-stage ID namespace**), accepted (see **Accepted tradeoffs**), dropped, and borderline findings never reset K; a round containing only them advances it. All are complementary; none conflict. Per **LOW severity is still verified**, a verified actionable LOW is real and resets K unless accepted; a LOW that is deduped, accepted, dropped, or borderline does not. If the user sets N rounds, run exactly N despite early convergence and report what remains. External blocker stop: if all remaining real findings are blocked beyond the orchestrator’s control (physical device, external API, or user decision), stop spinning; park each as `blocked`, record its dependency, and report it for resumption when cleared. K-dry means no new findings; parked-blocked means real work cannot proceed. Neither abandons findings; the final report includes unresolved borderlines and parked/blocked items.
 - **LOW severity is still verified (severity is not a skip gate)** — `actionable_severity` never decides whether a finding reaches the verifier: every finding, LOW included, is sent for verification — skipping a finding because it looks trivial would silently lose it before the three buckets ever run. Severity only weights the vote, per A6: a LOW finding gets a single-vote verification, not a council — but the vote still runs. A confirmed actionable LOW (`actionable_severity == "low"` AND `verification_confidence != "low"`) is **real**, exactly like any other confirmed finding, and resets K unless accepted under A4 (an accepted finding drops out of `to_act` and never resets K).
 - **Fix-regression resets K (a fix's side effects extend convergence)** — a fix applied in round N that surfaces a NEW real finding in round N+1 (a regression introduced by the fix) is a real finding like any other (unless accepted under A4), so it resets K; convergence holds only after K consecutive rounds with zero actionable findings *following* the fix. A regression is an unexpected side effect, so extending convergence is the safe direction — do NOT treat it as expected churn under the **Convergence rule + termination** rule.
-- **Severity-weighted verification + light/full mode (mode-state contract, A6)** — Mode is per-task state, not a per-finding choice: A6 selects it once per task, fixing verifier count and convergence K. **FULL (default):** HIGH/CRITICAL findings get a 3–5-vote adversarial council (see **Adversarial verify**); MEDIUM/LOW get one vote; K=2. **LIGHT:** select explicitly before round 1 only for small, low-risk tasks; all severities get one vote, no council, and K=1 (one clean round). LIGHT is provisional: a round-1 HIGH/CRITICAL finding triggers **Sticky escalation to FULL (A7)**; only A7 changes the effective mode, which persists across rounds. Per **LOW severity is still verified**, severity weights vote count, never whether verification runs: both modes verify every finding. Vote counts by severity:
+- **Severity-weighted verification + light/full mode (mode-state contract, A6)** — Mode is per-task state, not a per-finding choice: A6 selects it once per task, fixing verifier count and convergence K. **LIGHT (default):** all findings single-vote via the per-lens batch verifier; no council; K=1. **FULL:** select when the user explicitly asks for thorough/comprehensive coverage, or via sticky escalation (A7): HIGH/CRITICAL findings get 2 additional votes (total 3, per the batch-vote rule), MEDIUM/LOW stay single-vote; K=2. LIGHT is provisional: any round surfacing a HIGH/CRITICAL finding triggers **Sticky escalation to FULL (A7)**; only A7 changes the effective mode, which persists across rounds. Per **LOW severity is still verified**, severity weights vote count, never whether verification runs: both modes verify every finding. Vote counts by severity:
 
 ```python
 def vote_count(mode, severity):
     # Severity weights the VOTE, not the SKIP: it picks how many verifiers judge a
     # finding, never whether verification runs — every finding is verified (B15).
+    # Returns TOTAL votes per finding INCLUDING the per-lens batch verifier's vote;
+    # additional votes spawned = vote_count − 1.
     if mode == "light":
-        return 1                                          # light: single-vote verification for ALL findings, no council
-    return 3 if severity in ("high", "critical") else 1   # full: 3–5-vote council for HIGH/CRITICAL, single-vote for MEDIUM/LOW
+        return 1                                          # light (default): the batch verdict is the only vote, no council
+    return 3 if severity in ("high", "critical") else 1   # full: batch vote + 2 additional for HIGH/CRITICAL (total 3); MEDIUM/LOW get the batch vote only
 ```
 
 ```js
 function voteCount(mode, severity) {
     // Severity weights the VOTE, not the SKIP: it picks how many verifiers judge a
     // finding, never whether verification runs — every finding is verified (B15).
+    // Returns TOTAL votes per finding INCLUDING the per-lens batch verifier's vote;
+    // additional votes spawned = voteCount − 1.
     if (mode === "light") {
         return 1;
     }
@@ -323,9 +427,9 @@ Five cases: (1) **persisted canonical acceptance** — `sec:5` is in the registr
 - **Audit-only path (pure reverification)** — For zero-implementation audits, use only read-only finders and verifiers: no implementation slices, edits, patches, or fixes; output only findings joined to verdicts. Claim only “verified the issues found within the provided scope,” never “complete audit” or “no other issues”; completeness needs a separate finder/critic phase (see **Completeness critic**). Apply **Workspace stability guard** (B1) and **Pinned-content review** (B3) in full; per the guard’s terminal-drift rule, discard and report any drifted round. Report joined findings as results, not Step 3 remediation (see SKILL.md audit/review exit). Acting on them requires a separate implementation DAG.
 
 - **Functional/UI verification lane (browser QA)** — code review (adversarial verify) proves the CODE is correct; it does not prove a UI/feature change actually WORKS. For UI/feature changes, run a functional verification lane in the Step 3 quality loop as an additional round alongside (or after) the code-review round: drive the real surface with the browser tool (puppeteer/Chromium) — render, click, type, submit — and confirm the visual output with the visual-qa skill or `inspect_image`. Claim boundary: code review proves "the code is right," functional verify proves "it actually works" — BOTH are required for "done"; either alone is insufficient. Run the two rounds in parallel when the slices are independent, sequentially when the functional round depends on the review round's fixes.
-- **Advisory/council overlap** — If the harness advisor performs inline adversarial verification, adding the DAG council duplicates verdict work, roughly doubling cost for no signal; in the 197k-token retro, duplication dominated cost and the council added zero findings. The advisor may replace the council only when it emits the council's complete per-finding Q1/Q2/Q3 contract: `original_claim_status`, `actionable_severity`, and `verification_confidence` (see **finder→verifier contract**). Otherwise retain the council as the only structured verdict source and pass advisor output to its finders/verifiers as evidence. This is a format, not independence, gate: contract-complete advisor verdicts enter the existing finding-ID join, Q2∧Q3 aggregation, and convergence pipeline but do not reduce the mode's vote weight. In FULL, HIGH/CRITICAL still require a 3–5-vote adversarial council, where the advisor counts as at most one vote; one advisor verdict may replace only single-vote verification (MEDIUM/LOW in FULL; every severity in LIGHT).
+- **Advisory/council overlap** — If the harness advisor performs inline adversarial verification, adding the DAG council duplicates verdict work, roughly doubling cost for no signal; in the 197k-token retro, duplication dominated cost and the council added zero findings. The advisor may replace the council only when it emits the council's complete per-finding Q1/Q2/Q3 contract: `original_claim_status`, `actionable_severity`, and `verification_confidence` (see **finder→verifier contract**). Otherwise retain the council as the only structured verdict source and pass advisor output to its finders/verifiers as evidence. This is a format, not independence, gate: contract-complete advisor verdicts enter the existing finding-ID join, Q2∧Q3 aggregation, and convergence pipeline but do not reduce the mode's vote weight. In FULL, HIGH/CRITICAL still require a 3-vote council where the batch verdict counts as vote 1 and 2 additional votes are spawned (the advisor still counts as at most one vote); one advisor verdict may replace only single-vote verification (MEDIUM/LOW in FULL; every severity in LIGHT).
 
-Scale to the ask: "find any bugs" → a few finders, single-vote verification. "thoroughly audit / be comprehensive" → larger finder pool, 3–5-vote adversarial pass, a synthesis stage.
+Scale to the ask: "find any bugs" → a few finders, single-vote verification. "thoroughly audit / be comprehensive" → larger finder pool, FULL mode (HIGH/CRITICAL: batch verdict + 2 additional votes, total 3), a synthesis stage.
 </patterns>
 
 <execution>
