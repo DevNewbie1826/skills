@@ -451,6 +451,37 @@ def check_scripts(root: Path, skill: Path, texts: dict[Path, str], results: Resu
         else:
             check_js_imports(root, skill, path, text, dependencies, results)
 
+ROUTING_CUE_MESSAGE = "reference file needs a routing cue (frontmatter description, 'Primary role:', or 'Read this when ...')"
+ROUTING_PRIMARY_ROLE = re.compile(r"primary role:", re.IGNORECASE)
+# Blockquote markers are Markdown, not the cue. Existing references use `> Read this when`.
+ROUTING_READ_THIS_WHEN = re.compile(r"^(?:>\s*)*read this when\b", re.IGNORECASE)
+
+def has_routing_cue(lines: list[str]) -> bool:
+    parsed = frontmatter(lines)
+    if parsed is None:
+        body = lines
+    else:
+        front, closing = parsed
+        description = yaml_field(front, "description")
+        if description is not None and description[0].strip():
+            return True
+        body = lines[closing + 1:]
+    return any(
+        ROUTING_PRIMARY_ROLE.search(line) or ROUTING_READ_THIS_WHEN.match(line.strip())
+        for line in body[:15]
+    )
+
+def check_routing_cues(root: Path, skill: Path, texts: dict[Path, str], results: Results) -> None:
+    # PORTING.md Rule 4. Structure, not neutrality: OMP-native skills are checked too.
+    references = skill / "references"
+    for path, text in texts.items():
+        if path.suffix.lower() != ".md" or not is_inside(path, references):
+            continue
+        lines = text.splitlines()
+        if has_routing_cue(lines):
+            continue
+        add_failure(results, root, path, 1, "ROUTING-CUE", ROUTING_CUE_MESSAGE, lines[0] if lines else "")
+
 def is_omp_native(skill_text: str | None) -> bool:
     # OMP-native skills (PORTING.md Rule 8) are exempt from the Tier-A/Tier-B neutrality
     # checks. They mark themselves with `omp-native: true` in SKILL.md frontmatter.
@@ -487,6 +518,7 @@ def check_skill(root: Path, skill_name: str, allowlists: list[AllowlistEntry], r
         if not omp_native:
             check_tier_b(root, skill_file, texts[skill_file], results)
     check_links(root, skill, texts, results)
+    check_routing_cues(root, skill, texts, results)
     check_scripts(root, skill, texts, results)
 
 def run(root: Path, skills: list[str]) -> Results:

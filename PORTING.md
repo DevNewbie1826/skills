@@ -55,8 +55,13 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   triggers), body is a ROUTER: tables/bullets that say when to read which reference.
   No long tutorials, checklists, or category dumps inline - move them to references/.
 - references/: each file opens with a one-line routing cue and is self-contained.
-  Acceptable cue forms: a frontmatter `description` field, an opening "Primary role:"
-  line, or a literal "Read this when ..." line. Files with none of the three violate.
+  Acceptable cue forms: a non-empty frontmatter `description` field, a line containing
+  "Primary role:", or a line starting with "Read this when ..." (case-insensitive;
+  a leading Markdown `>` is fine), within the first 15 lines after any frontmatter.
+  `tools/check-skills.py` enforces this as ROUTING-CUE on every `*.md` under
+  `references/` (any depth) for every checked skill, including OMP-native skills.
+  SKILL.md and files outside `references/` are not checked. Files with none of the
+  three violate.
 - scripts/: bundled, self-contained, invoked via paths relative to the skill dir
   ($SKILL_DIR or "from the skill directory").
 
@@ -80,8 +85,10 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
 
 ## Verification
 - `python3 tools/check-skills.py` must exit 0 (tier A tokens, tier B routing balance,
-  frontmatter, SKILL.md length, link integrity including escaping `..` paths, script
-  self-containment, dangling skill refs). Allowlists live in `tools/allowlist/*.json`
+  frontmatter, SKILL.md length, reference routing cues (ROUTING-CUE: non-empty
+  frontmatter `description`, a "Primary role:" line, or a "Read this when ..." line
+  within the first 15 lines after frontmatter), link integrity including escaping
+  `..` paths, script self-containment, dangling skill refs). Allowlists live in `tools/allowlist/*.json`
   — add only CONTENT exceptions with a reason per entry, never to silence real violations.
 - Smoke: every bundled script entrypoint runs (`--help` or a tiny fixture invocation).
 

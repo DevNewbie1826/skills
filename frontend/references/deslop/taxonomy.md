@@ -1,4 +1,5 @@
 # The AI-slop taxonomy
+Read this when identifying or explaining a specific tell.
 
 34 tells, in two tiers. **Classic** = widely recognised. **Evolved** = newer
 defaults that already read as templated. For each: what it is, why it reads as

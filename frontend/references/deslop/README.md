@@ -1,4 +1,5 @@
 # Deslop — find and remove AI slop
+Read this when auditing or de-slopping visual/copy AI tells.
 
 This ruleset covers **visual and copy slop**: the generic, machine-default
 tells of vibe-coded products (indigo→violet gradients, gradient-clip headlines,

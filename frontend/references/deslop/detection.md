@@ -1,4 +1,5 @@
 # Detection patterns
+Read this when grepping/scanning for tells and false positives.
 
 Concrete signals for each tell. `$SKILL_DIR/references/deslop/scripts/scan.mjs` encodes these; this file is
 the human reference and the place to widen patterns for a specific stack.
