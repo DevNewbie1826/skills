@@ -54,21 +54,22 @@ Most non-trivial tasks load one Layer A style skill plus one Layer B brand refer
 | `output-skill.md` | Complete an unfinished implementation; it stacks on a style skill. |
 | `mockup-export-skill.md` | Export a portable `DESIGN.md` design specification; it stacks on a style skill. |
 | `image-gen-concepts-web.md` / `image-gen-concepts-mobile.md` / `image-gen-brandkit.md` | Image-only mockups, screen concepts, or identity boards. They do not write code. |
-| `layout-skill.md` | Dashboards, settings, inboxes, split panes, app shells, scroll ownership, or content-stress layout problems. `layout-skill.md` owns mechanics; `layout-patterns/` is the concrete catalog. |
+| `layout-skill.md` | Dashboards, settings, inboxes, split panes, app shells, scroll ownership, or content-stress layout problems. `layout-skill.md` owns mechanics; `stylegallery/patterns/` is the concrete catalog. |
 
 ### Pattern catalog & recipes
 
 | File | Read when |
 |---|---|
-| [`layout-patterns/CATALOG.md`](references/design/layout-patterns/CATALOG.md) | You need a concrete spatial pattern lookup for centering, stacking, sidebars/splits, grids, overlays, or scroll/shell problems. |
-| [`layout-recipes/index.md`](references/design/layout-recipes/index.md) | You need a whole-screen composition built from patterns, such as a homepage, dashboard, settings flow, article, list-detail view, form flow, or command surface. |
+| [`stylegallery/CATALOG.md`](references/stylegallery/CATALOG.md) | You need a concrete spatial pattern lookup for centering, stacking, sidebars/splits, grids, overlays, or scroll/shell problems. |
+| [`stylegallery/recipes/index.md`](references/stylegallery/recipes/index.md) | You need a whole-screen composition built from patterns, such as a homepage, dashboard, settings flow, article, list-detail view, form flow, or command surface. |
 
 ### Product-layer motion & craft
 
 | File | Read when |
 |---|---|
-| [`motion/index.md`](references/design/motion/index.md) | Naming, reviewing, or specifying product motion. It provides vocabulary and a review procedure; the shared motion axioms remain the law. |
-| [`design-engineering/index.md`](references/design/design-engineering/index.md) | Verifying product-layer craft decisions, interaction details, or their evidence. |
+| [`stylegallery/motion/index.md`](references/stylegallery/motion/index.md) | Naming, reviewing, or specifying product motion. It provides vocabulary and a review procedure; the shared motion axioms remain the law. |
+| [StyleGallery craft reference](references/stylegallery/design%2Dengineering/index.md) | Verifying product-layer craft decisions, interaction details, or their evidence. |
+| [`stylegallery/design-terminology/index.md`](references/stylegallery/design-terminology/index.md) | Comparing or reconciling design terms across named design systems. |
 
 ### Optional React lane
 
@@ -129,8 +130,8 @@ Narrow with `--only=01,06` / `--skip=19` / `--exclude=legacy`; extend with `--ru
 | Landing page with no direction | `design/README.md` + `design/_INDEX.md` shortlist + one Layer B reference + `design/taste-skill.md` + `perfection/README.md` |
 | Named brand or site | `design/README.md` + the matching Layer B reference + an appropriate Layer A style skill + `perfection/README.md` |
 | Improve an existing dashboard | `design/README.md` + `design/redesign-skill.md` + `perfection/README.md` |
-| Layout breaks with real content | [`design/layout-skill.md`](references/design/layout-skill.md) + [`design/layout-patterns/CATALOG.md`](references/design/layout-patterns/CATALOG.md) |
-| Review or standardize motion | [`design/motion/index.md`](references/design/motion/index.md) |
+| Layout breaks with real content | [`design/layout-skill.md`](references/design/layout-skill.md) + [`stylegallery/CATALOG.md`](references/stylegallery/CATALOG.md) |
+| Review or standardize motion | [`stylegallery/motion/index.md`](references/stylegallery/motion/index.md) |
 | Reproduce a screenshot or generated mockup | `design/README.md` + `design/image-to-code-skill.md` + `perfection/README.md` + `visual-qa` reference-fidelity mode |
 | Audit or speed up a site | `perfection/README.md` (+ `perfection/react-perf-tooling.md` for the optional React lane) |
 | Image-only mobile mockup | `design/image-gen-concepts-mobile.md` (+ a Layer B reference if named) |
@@ -141,13 +142,15 @@ Narrow with `--only=01,06` / `--skip=19` / `--exclude=legacy`; extend with `--ru
 | Looks AI-generated, de-slop a page, remove the AI look | `deslop/README.md` audit mode (scan, triage, report, fix) + `design/README.md` if tokens or `DESIGN.md` need rework |
 | Pre-done check on a new page | `deslop` scanner over the changed source + `perfection/README.md` audit + `visual-qa` |
 
+StyleGallery's domain map is [`stylegallery/index.md`](references/stylegallery/index.md).
+
 ## Shared axioms
 
 - **No design system, no UI work.** `DESIGN.md` exists before components; color, type, and spacing trace to tokens.
 - **Concrete reference means contract.** Match its pixels, copy, component structure, and responsive intent unless the user approves a deviation.
 - **Do not weaken UX to buy a score.** Preserve meaningful motion, content, and interaction while fixing architecture and assets.
 - **No emoji icons.** Use accessible SVG icon sets.
-- **Use composited animation for new code.** When writing new animation, prefer composited properties (`transform`, `opacity`, and `filter`); review-level edge cases follow [`references/design/motion/`](references/design/motion/).
+- **Use composited animation for new code.** When writing new animation, prefer composited properties (`transform`, `opacity`, and `filter`); review-level edge cases follow [`stylegallery/motion/`](references/stylegallery/motion/).
 - **Motion serves meaning.** Every animation or hover maps to an interaction, state change, or affordance.
 - **Done requires evidence.** Run `visual-qa` at 375, 768, and 1280px with states and motion exercised, then complete two independent review passes on fresh evidence.
 - **No machine-default tells.** New UI ships free of the 34 AI-slop tells in `references/deslop/taxonomy.md` - run the deslop scanner over new or changed source and triage every hit before the evidence gate. A defended, intentional choice documented in `DESIGN.md` is not slop.
@@ -158,8 +161,8 @@ Narrow with `--only=01,06` / `--skip=19` / `--exclude=legacy`; extend with `--ru
 |---|---|
 | A suitable brand/style is absent from the catalog | A larger local design library if available; otherwise the closest Layer A reference and project research. |
 | Driving a browser for design QA | A browser-driving capability. |
-| **Optional game UI / engine lane:** The work is a game HUD, menu, inventory, or another game interface. | [`design/game-ui/index.md`](references/design/game-ui/index.md) for engine-neutral hierarchy and named-engine guidance. |
-| **Optional platform-comparison lane:** A platform convention needs a bounded, current comparison before web adaptation. | [`design/platform-guides/index.md`](references/design/platform-guides/index.md). |
+| **Optional game UI / engine lane:** The work is a game HUD, menu, inventory, or another game interface. | [StyleGallery game interface reference](references/stylegallery/game%2Dui/index.md) for engine-neutral hierarchy and named-engine guidance. |
+| **Optional platform-comparison lane:** A platform convention needs a bounded, current comparison before web adaptation. | [StyleGallery platform reference](references/stylegallery/platform%2Dguides/index.md). |
 | Pure logic work with no visual surface | `programming` alone. |
 | Code-level AI slop (obvious comments, dead code, over-defensive code, needless abstraction) | `remove-ai-slops` - the `deslop` ruleset here covers visual and copy slop only. |
 

@@ -49,7 +49,7 @@ Start with the first matching route, then load only the references it names.
 | Image-only web, mobile, or brand imagery | The matching `image-gen-concepts-*` or [image-gen-brandkit.md](image-gen-brandkit.md) reference only. |
 | `DESIGN.md` export | [mockup-export-skill.md](mockup-export-skill.md) on top of the selected style skill. |
 | Incomplete implementation or placeholder debt | [output-skill.md](output-skill.md) on top of the selected style skill. |
-| Dashboard, settings, inbox, split pane, app shell, or content-stress layout | [layout-skill.md](layout-skill.md) plus [layout-patterns/CATALOG.md](layout-patterns/CATALOG.md); select a project-appropriate system separately. Do not use `taste-skill.md` for this route. |
+| Dashboard, settings, inbox, split pane, app shell, or content-stress layout | [layout-skill.md](layout-skill.md) plus [StyleGallery pattern catalog](../stylegallery/CATALOG.md); select a project-appropriate system separately. Do not use `taste-skill.md` for this route. |
 
 For a named brand absent from the catalog, use the closest mood shortcut in [_INDEX.md](_INDEX.md), then select a compatible Layer A skill. A concrete screenshot or generated mockup is a contract: use [image-to-code-skill.md](image-to-code-skill.md), extract its tokens and responsive intent into `DESIGN.md`, and run `visual-qa` in reference-fidelity mode. Use [clone-from-url.md](clone-from-url.md) instead for a live URL.
 
@@ -57,12 +57,13 @@ For a named brand absent from the catalog, use the closest mood shortcut in [_IN
 
 | Need | Read |
 |---|---|
-| Concrete centering, stacking, containment, grid, overlay, split, or shell pattern | [layout-patterns/CATALOG.md](layout-patterns/CATALOG.md). |
-| Whole-screen composition | [layout-recipes/index.md](layout-recipes/index.md). |
-| Motion naming, specification, or review | [motion/index.md](motion/index.md). Production defaults are in `SKILL.md`; review-level edge cases follow this motion reference. |
-| Product-layer craft decision or evidence | [design-engineering/index.md](design-engineering/index.md). |
-| Game HUD, menu, inventory, or game interface | [game-ui/index.md](game-ui/index.md). |
-| Bounded platform-convention comparison | [platform-guides/index.md](platform-guides/index.md). |
+| Concrete centering, stacking, containment, grid, overlay, split, or shell pattern | [StyleGallery pattern catalog](../stylegallery/CATALOG.md). |
+| Whole-screen composition | [StyleGallery layout recipes](../stylegallery/recipes/index.md). |
+| Motion naming, specification, or review | [StyleGallery motion](../stylegallery/motion/index.md). Production defaults are in `SKILL.md`; review-level edge cases follow this motion reference. |
+| Product-layer craft decision or evidence | [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md). |
+| Game HUD, menu, inventory, or game interface | [StyleGallery Game UI](../stylegallery/game%2Dui/index.md). |
+| Bounded platform-convention comparison | [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md). |
+| Comparing or reconciling design terms across named systems | [StyleGallery Design Terminology](../stylegallery/design-terminology/index.md). |
 
 ## Stacking rules
 
