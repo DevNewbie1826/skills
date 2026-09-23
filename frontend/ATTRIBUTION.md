@@ -20,6 +20,8 @@ The Layer B brand design references under `references/design/` are derived from 
 
 The style, image-to-code, image-concept, output, and design-spec references under `references/design/` are derived from a third-party design-guidance collection. This includes `taste-skill.md`, `cinematic-taste-skill.md`, `minimalist-skill.md`, `brutalist-skill.md`, `soft-skill.md`, `redesign-skill.md`, `image-to-code-skill.md`, `output-skill.md`, `mockup-export-skill.md`, `image-gen-concepts-web.md`, `image-gen-concepts-mobile.md`, `image-gen-brandkit.md`, and `mockup-export-example.md`.
 
+`taste-skill.md`, `image-to-code-skill.md`, `image-gen-concepts-web.md`, `image-gen-concepts-mobile.md`, and `image-gen-brandkit.md` are each split into a core file and section files under their corresponding references/design/<same-name>/ directory. Their content was moved verbatim, with added routing lines and a Contents table. The section directories are references/design/taste-skill/, references/design/image-to-code-skill/, references/design/image-gen-concepts-web/, references/design/image-gen-concepts-mobile/, and references/design/image-gen-brandkit/.
+
 ```text
 MIT License
 
@@ -48,7 +50,7 @@ SOFTWARE.
 
 ## UI/UX design intelligence
 
-The search engine, dataset, and documentation under `references/ui-ux-db/` are derived from a third-party UI/UX design-intelligence collection and adapted for self-contained use.
+The search engine, dataset, and documentation under `references/ui-ux-db/` are derived from a third-party UI/UX design-intelligence collection and adapted for self-contained use. Its README guidance is split into `references/ui-ux-db/guide/`.
 
 ```text
 MIT License
