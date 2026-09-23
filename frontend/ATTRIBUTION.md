@@ -80,7 +80,7 @@ SOFTWARE.
 
 ## Design operating references
 
-The role and skill-reference corpus under `references/designpowers/vendor/` is derived from third-party design operating guidance. It remains reference input only; it does not install a runtime, automation, or separate workflow.
+The design operating reference corpus under `references/designpowers/` is derived from third-party design operating guidance. Retained references were moved out of the former vendor tree into `direction/`, `execution/`, `review/`, and `memory/`; lane files organize the references by phase. Changes include merging design-review with designpowers-critique, heuristic-evaluation as a self-contained guide, and design-retrospective with taste-report; duplicated guidance and the ten role-reference files were removed. See `references/designpowers/UPSTREAM.md` for the removal and merge manifest. The corpus remains reference input only; it does not install a runtime, automation, or separate workflow.
 
 ```text
 MIT License
