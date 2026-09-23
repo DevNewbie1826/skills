@@ -104,6 +104,10 @@ Landing pages fail on taste; app shells fail on *content*. Before declaring any 
 
 A layout that only holds the happy-path mock is not finished. Drive these states in `visual-qa` alongside the interaction states the style skill requires.
 
+## Responsive Text and Viewport Checks
+
+Keep body text at least 16px, target a readable line length of 45–75 characters, and verify no horizontal scrolling at 200% zoom (WCAG 1.4.10). Check at 320px, one pixel below each breakpoint, 200% zoom at 1280px, landscape-phone dimensions, and real devices. (from designpowers responsive-patterns)
+
 ## Boundary
 
 This file owns spatial structure only. It never sets color, typography, shadow, radius, or motion values — those trace to `DESIGN.md` and the loaded style skill. If you find yourself adding a brand color to a layout primitive, stop: the primitive stays layout-only and the styling wraps or composes around it.
