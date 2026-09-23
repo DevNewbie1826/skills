@@ -463,8 +463,9 @@ def _single_line_description(front: list[str]) -> str | None:
     """Inner text of one single-line description, or None when it is not a cue.
 
     The key line must match description:. An indented non-blank next line is not
-    a cue. A quoted value is one matching pair with no other quote and no
-    backslash. A plain value is cut at the first whitespace-then-# and is not
+    a cue. A quoted value is one matching pair with no backslash inside,
+    optionally followed by a whitespace-then-# comment. Indented comment-only
+    lines are not continuations. A plain value is cut at the first whitespace-then-# and is not
     empty, null, or a block, alias, tag, or flow marker.
     """
     for index, line in enumerate(front):
@@ -472,7 +473,7 @@ def _single_line_description(front: list[str]) -> str | None:
         if not found:
             continue
         for nxt in front[index + 1:]:
-            if not nxt.strip():
+            if not nxt.strip() or nxt.lstrip(" \t").startswith("#"):
                 continue
             if nxt[:1] in " 	":
                 return None
@@ -481,8 +482,9 @@ def _single_line_description(front: list[str]) -> str | None:
         value = value.rstrip(" 	")
         if value[:1] in {"'", '"'}:
             quote = value[0]
-            inner = value[1:-1]
-            if len(value) >= 2 and value.endswith(quote) and quote not in inner and "\\" not in inner:
+            close = value.find(quote, 1)
+            inner, rest = value[1:close], value[close + 1:]
+            if close > 0 and "\\" not in inner and (not rest or re.match(r"[ \t]+#", rest)):
                 return inner
             return None
         if value.startswith("#"):
