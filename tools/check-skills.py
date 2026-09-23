@@ -455,177 +455,171 @@ ROUTING_CUE_MESSAGE = "reference file needs a routing cue (frontmatter descripti
 ROUTING_PRIMARY_ROLE = re.compile(r"primary role:", re.IGNORECASE)
 # Blockquote markers are Markdown, not the cue. Existing references use `> Read this when`.
 ROUTING_READ_THIS_WHEN = re.compile(r"^(?:>\s*)*read this when\b", re.IGNORECASE)
-# Description cues need a YAML string. yaml_field() stays a line matcher for other callers.
+# Description cues need a non-empty string. yaml_field() stays a line matcher.
 _DESCRIPTION_KEY = re.compile(
-    r"""^(?:description|"description"|'description')[ \t]*:[ \t]*(.*)$"""
+    r"""^(?:description|"description"|'description')[ \t]*:(.*)$"""
 )
-_BLOCK_HEADER = re.compile(r"^([|>])(?:([+-])([1-9])|([1-9])([+-])|([+-])|([1-9]))?$")
-_NESTED_KEY = re.compile(
-    r"""^[ \t]+(?:"(?:[^"\\]|\\.)*"|'(?:[^']|'')*'|[^ \t:#][^:#]*?)\s*:(?:\s|$)"""
-)
-_NESTED_SEQ = re.compile(r"^[ \t]+-(?:\s|$)")
-_YAML_NULL = {"~", "null", "Null", "NULL"}
 
-def _leading_indent(line: str) -> int:
-    return len(line) - len(line.lstrip(" \t"))
-
-def _strip_yaml_comment(text: str) -> str:
+def _strip_unquoted_comment(text: str) -> str:
     quote = ""
     index = 0
     while index < len(text):
         char = text[index]
-        if quote == "'":
-            if char == "'":
-                if index + 1 < len(text) and text[index + 1] == "'":
-                    index += 2
-                    continue
-                quote = ""
-            index += 1
-            continue
-        if quote == '"':
-            if char == "\\" and index + 1 < len(text):
-                index += 2
-                continue
-            if char == '"':
+        if quote:
+            if char == quote:
                 quote = ""
             index += 1
             continue
         if char in "\"'":
             quote = char
-            index += 1
-            continue
-        if char == "#" and (index == 0 or text[index - 1].isspace()):
-            return text[:index].rstrip()
+        elif char == "#" and (index == 0 or text[index - 1].isspace()):
+            return text[:index]
         index += 1
-    return text.rstrip()
+    return text
 
-def _decode_double_quoted(body: str) -> str:
-    simple = {
-        "0": "\0", "a": "\a", "b": "\b", "t": "\t", "n": "\n", "v": "\v", "f": "\f", "r": "\r",
-        "e": "\x1b", " ": " ", '"': '"', "/": "/", "\\": "\\", "N": "\u0085", "_": "\u00a0",
-        "L": "\u2028", "P": "\u2029",
-    }
+_YAML_NULL = {"~", "null", "Null", "NULL"}
+_BLOCK_HEADER = re.compile(r"^[|>](?:[+-][1-9]|[1-9][+-]|[+-]|[1-9])?$")
+_NESTED_KEY = re.compile(r"[^:#\s][^:#]*:(?:\s|$)")
+
+def _quote_end(text: str, quote: str) -> int | None:
+    index = 0
+    while index < len(text):
+        if quote == '"' and text[index] == "\\" and index + 1 < len(text):
+            index += 2
+            continue
+        if quote == "'" and text[index] == "'" and index + 1 < len(text) and text[index + 1] == "'":
+            index += 2
+            continue
+        if text[index] == quote:
+            return index
+        index += 1
+    return None
+
+# YAML 1.2 double-quoted escapes. A malformed escape is kept literal, backslash included.
+_DOUBLE_ESCAPES = {
+    "0": "\0",
+    "a": "\a",
+    "b": "\b",
+    "t": "\t",
+    "n": "\n",
+    "v": "\v",
+    "f": "\f",
+    "r": "\r",
+    "e": "\x1b",
+    " ": " ",
+    '"': '"',
+    "/": "/",
+    "\\": "\\",
+    "N": "\u0085",
+    "_": "\u00a0",
+    "L": "\u2028",
+    "P": "\u2029",
+}
+_HEX_ESCAPE_WIDTH = {"x": 2, "u": 4, "U": 8}
+
+
+def _decode_double_escape(body: str, index: int) -> tuple[str, int]:
+    """Decode the double-quoted escape starting at body[index] == backslash."""
+    nxt = body[index + 1]
+    if nxt in _DOUBLE_ESCAPES:
+        return _DOUBLE_ESCAPES[nxt], index + 2
+    width = _HEX_ESCAPE_WIDTH.get(nxt)
+    if width is not None:
+        hexpart = body[index + 2:index + 2 + width]
+        if len(hexpart) == width and all(char in "0123456789abcdefABCDEF" for char in hexpart):
+            code = int(hexpart, 16)
+            if code <= 0x10FFFF:
+                return chr(code), index + 2 + width
+    return "\\", index + 1
+
+
+def _decode_quoted(body: str, quote: str) -> str:
     chars: list[str] = []
     index = 0
     while index < len(body):
         char = body[index]
-        if char != "\\" or index + 1 >= len(body):
-            chars.append(char)
+        if char == "\n":
             index += 1
+            while index < len(body) and body[index] in " \t":
+                index += 1
+            chars.append(" ")
             continue
-        escaped = body[index + 1]
-        if escaped in simple:
-            chars.append(simple[escaped])
+        if quote == "'" and char == "'" and index + 1 < len(body) and body[index + 1] == "'":
+            chars.append("'")
             index += 2
             continue
-        width = {"x": 2, "u": 4, "U": 8}.get(escaped)
-        if width is not None:
-            hexpart = body[index + 2:index + 2 + width]
-            if len(hexpart) == width and all(item in "0123456789abcdefABCDEF" for item in hexpart):
-                chars.append(chr(int(hexpart, 16)))
-                index += 2 + width
+        if quote == '"' and char == "\\" and index + 1 < len(body):
+            nxt = body[index + 1]
+            if nxt == "\n":
+                index += 2
+                while index < len(body) and body[index] in " \t":
+                    index += 1
                 continue
-        chars.append(escaped)
-        index += 2
+            decoded, index = _decode_double_escape(body, index)
+            chars.append(decoded)
+            continue
+        chars.append(char)
+        index += 1
     return "".join(chars)
 
-def _quoted_scalar(text: str) -> tuple[str, str] | None:
-    if not text or text[0] not in "\"'":
-        return None
-    quote = text[0]
-    index = 1
-    if quote == "'":
-        chars: list[str] = []
-        while index < len(text):
-            if text[index] == "'":
-                if index + 1 < len(text) and text[index + 1] == "'":
-                    chars.append("'")
-                    index += 2
-                    continue
-                return "".join(chars), text[index + 1:]
-            chars.append(text[index])
-            index += 1
-        return None
-    while index < len(text):
-        if text[index] == "\\" and index + 1 < len(text):
-            index += 2
-            continue
-        if text[index] == '"':
-            return _decode_double_quoted(text[1:index]), text[index + 1:]
-        index += 1
-    return None
 
-def _explicit_block_indent(header: re.Match[str]) -> int | None:
-    for group in (3, 4, 7):
-        value = header.group(group)
-        if value:
-            return int(value)
-    return None
-
-def _block_scalar(front: list[str], index: int, explicit: int | None) -> str:
-    content_indent = explicit
-    parts: list[str] = []
+def _quoted_value(front: list[str], index: int, raw: str) -> str:
+    quote = raw[0]
+    lines = [raw[1:]]
+    end = _quote_end(lines[0], quote)
+    if end is not None:
+        return _decode_quoted(lines[0][:end], quote)
     for line in front[index + 1:]:
-        if line.strip() == "":
-            if content_indent is not None:
+        end = _quote_end(line, quote)
+        if end is None:
+            lines.append(line)
+            continue
+        lines.append(line[:end])
+        return _decode_quoted("\n".join(lines), quote)
+    return _decode_quoted("\n".join(lines), quote)
+
+def _following_value(front: list[str], index: int, block: bool) -> str:
+    parts: list[str] = []
+    start = index + 1
+    for offset, line in enumerate(front[start:], start=start):
+        commented = _strip_unquoted_comment(line).strip()
+        if not line.strip() or (not block and not commented):
+            if block and parts and not line.strip():
                 parts.append("")
             continue
-        indent = _leading_indent(line)
-        if content_indent is None:
-            if indent == 0:
-                break
-            content_indent = indent
-        if indent < content_indent:
+        if line[0] not in " \t":
             break
-        if line.startswith(" " * content_indent):
-            parts.append(line[content_indent:])
-        else:
-            parts.append(line.lstrip(" \t"))
-    return "\n".join(parts)
-
-def _following_plain(front: list[str], index: int) -> str | None:
-    parts: list[str] = []
-    started = False
-    for line in front[index + 1:]:
-        if line.strip() == "":
-            if started:
-                parts.append("")
-            continue
-        stripped = line.lstrip(" \t")
-        if stripped.startswith("#"):
-            continue
-        if _leading_indent(line) == 0:
+        item = line.strip() if block else commented
+        if not block and not parts:
+            if item in _YAML_NULL or item[0] in "{[" or item == "-" or item.startswith("- "):
+                return ""
+            if _NESTED_KEY.match(item):
+                return ""
+            if item[0] in "\"'":
+                return _quoted_value(front, offset, item)
+            if _BLOCK_HEADER.match(item):
+                return _following_value(front, offset, True)
+        if not block and (item == "-" or item.startswith("- ") or _NESTED_KEY.match(item)):
             break
-        if not started and (_NESTED_KEY.match(line) or _NESTED_SEQ.match(line)):
-            return None
-        started = True
-        parts.append(stripped)
-    if not started:
-        return ""
-    return " ".join(part for part in parts if part)
+        parts.append(item)
+    return ("\n" if block else " ").join(parts)
 
 def routing_description(front: list[str]) -> str | None:
-    """Return the top-level description string, or None when it is absent or not a string."""
+    """Return a top-level description string, or None when that key is absent."""
     for index, line in enumerate(front):
         found = _DESCRIPTION_KEY.match(line)
         if not found:
             continue
-        stripped = _strip_yaml_comment(found.group(1)).strip()
-        if not stripped:
-            return _following_plain(front, index)
-        quoted = _quoted_scalar(stripped)
-        if quoted is not None:
-            value, remainder = quoted
-            if not _strip_yaml_comment(remainder).strip():
-                return value
-        header = _BLOCK_HEADER.match(stripped)
-        if header is not None:
-            return _block_scalar(front, index, _explicit_block_indent(header))
-        if stripped[0] in "{[":
-            return None
-        if stripped in _YAML_NULL:
+        value = _strip_unquoted_comment(found.group(1)).strip()
+        if not value:
+            return _following_value(front, index, False)
+        if value[0] in "\"'":
+            return _quoted_value(front, index, value)
+        if _BLOCK_HEADER.match(value):
+            return _following_value(front, index, True)
+        if value in _YAML_NULL or value[0] in "{[":
             return ""
-        return stripped
+        return value
     return None
 
 def has_routing_cue(lines: list[str]) -> bool:
@@ -635,7 +629,7 @@ def has_routing_cue(lines: list[str]) -> bool:
     else:
         front, closing = parsed
         description = routing_description(front)
-        if description is not None and description.strip():
+        if description is not None and re.search(r"\w", description):
             return True
         body = lines[closing + 1:]
     return any(
