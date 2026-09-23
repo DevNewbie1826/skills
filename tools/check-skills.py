@@ -471,11 +471,14 @@ def _single_line_description(front: list[str]) -> str | None:
         found = _DESCRIPTION_LINE.match(line)
         if not found:
             continue
-        if index + 1 < len(front):
-            nxt = front[index + 1]
-            if nxt[:1] in " 	" and nxt.strip():
+        for nxt in front[index + 1:]:
+            if not nxt.strip():
+                continue
+            if nxt[:1] in " 	":
                 return None
+            break
         value = found.group(1)
+        value = value.rstrip(" 	")
         if value[:1] in {"'", '"'}:
             quote = value[0]
             inner = value[1:-1]
