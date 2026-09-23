@@ -78,7 +78,7 @@ When evaluating a live website, discover real URLs before attempting to fetch an
 | `contact` | `https://example.test/catalog/items/contact` |
 | `/contact` | `https://example.test/contact` |
 
-Href types: relative hrefs (for example, `/acheter`, `../contact`) resolve against the effective document base URL before fetching; hash hrefs (`#section`) stay on the same page — note them but do not fetch; JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
+Href types: relative hrefs (for example, `/acheter`, `../contact`) resolve against the effective document base URL before fetching; fragment hrefs (`#section`) are classified after resolution — skip one as same-document only when its resolved URL without the fragment equals the current document URL (on `https://example.test/catalog/items/`, `#section` resolves to `…/catalog/items/#section`, same document; with `<base href="../docs/">` it resolves to `…/catalog/docs/#section`, a different document that follows the normal fetch policy); JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
 
 ## Guardrails
 
