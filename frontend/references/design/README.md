@@ -63,6 +63,8 @@ For a named brand absent from the catalog, use the closest mood shortcut in [_IN
 | Product-layer craft decision or evidence | [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md). |
 | Game HUD, menu, inventory, or game interface | [StyleGallery Game UI](../stylegallery/game%2Dui/index.md). |
 | Bounded platform-convention comparison | [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md). |
+| Layout patterns, recipes, and planning guides | [StyleGallery Layout hub](../stylegallery/layout/index.md). |
+| Browse StyleGallery domains | [StyleGallery domain map](../stylegallery/index.md). |
 | Comparing or reconciling design terms across named systems | [StyleGallery Design Terminology](../stylegallery/design-terminology/index.md). |
 
 ## Stacking rules
