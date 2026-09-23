@@ -98,6 +98,8 @@ Before finalising any content, verify:
 - [ ] Reading level is appropriate for the audience
 - [ ] Content works when translated (avoid idioms, cultural references that do not travel)
 
+For each empty state, check what belongs here, why it is empty (first use versus filtered/no results), and the next action (from former content-writer).
+
 ## Integration
 
 - **Called by:** `writing-design-plans`, `ui-composition`, `interaction-design`

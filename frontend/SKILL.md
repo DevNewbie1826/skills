@@ -108,7 +108,7 @@ Domains and stacks are enumerated in its README; choose the stack matching the p
 
 ## Ruleset 4 - designpowers (`references/designpowers/`)
 
-Use this internal reference for design operating guidance. Start at `README.md`, then load the relevant lane: `lane-a-direction.md` for planning, `lane-b-execution.md` for implementation, `lane-c-review.md` for critique and testing, or `lane-d-memory.md` for design records, debt, and handoff. It complements frontend routing and does not create a separate runtime or workflow.
+Use this internal reference for design operating guidance. Load the relevant lane directly: `lane-a-direction.md` for planning, `lane-b-execution.md` for implementation, `lane-c-review.md` for critique and testing, or `lane-d-memory.md` for design records, debt, and handoff. `README.md` is an optional overview. It complements frontend routing and does not create a separate runtime or workflow.
 
 ## Ruleset 5 - deslop (`references/deslop/`)
 
@@ -138,7 +138,7 @@ Narrow with `--only=01,06` / `--skip=19` / `--exclude=legacy`; extend with `--ru
 | Palette, fonts, or UX guidance | `ui-ux-db/README.md` then its search CLI |
 | Shipped-product research | `design/lazyweb.md` when available + `design/_INDEX.md` shortlist |
 | React setup | `design/README.md` + optional `design/react-dev-tooling-skill.md` |
-| Personas, accessibility, critique, debt, or handoff | `design/README.md` + `designpowers/README.md` (+ perfection if implementation follows) |
+| Personas, accessibility, critique, debt, or handoff | `design/README.md` + the matching `designpowers/lane-*.md` (+ perfection if implementation follows); `designpowers/README.md` is an optional overview |
 | Looks AI-generated, de-slop a page, remove the AI look | `deslop/README.md` audit mode (scan, triage, report, fix) + `design/README.md` if tokens or `DESIGN.md` need rework |
 | Pre-done check on a new page | `deslop` scanner over the changed source + `perfection/README.md` audit + `visual-qa` |
 
