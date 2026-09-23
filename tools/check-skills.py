@@ -455,170 +455,41 @@ ROUTING_CUE_MESSAGE = "reference file needs a routing cue (frontmatter descripti
 ROUTING_PRIMARY_ROLE = re.compile(r"primary role:", re.IGNORECASE)
 # Blockquote markers are Markdown, not the cue. Existing references use `> Read this when`.
 ROUTING_READ_THIS_WHEN = re.compile(r"^(?:>\s*)*read this when\b", re.IGNORECASE)
-# Description cues need a non-empty string. yaml_field() stays a line matcher.
-_DESCRIPTION_KEY = re.compile(
-    r"""^(?:description|"description"|'description')[ \t]*:(.*)$"""
-)
+# Single-line description cue (PORTING.md Rule 4). Not a YAML parser.
+_DESCRIPTION_LINE = re.compile(r"^description:[ 	]*(.*)$")
+_PLAIN_NULLS = {"null", "Null", "NULL", "~"}
 
-def _strip_unquoted_comment(text: str) -> str:
-    quote = ""
-    index = 0
-    while index < len(text):
-        char = text[index]
-        if quote:
-            if char == quote:
-                quote = ""
-            index += 1
-            continue
-        if char in "\"'":
-            quote = char
-        elif char == "#" and (index == 0 or text[index - 1].isspace()):
-            return text[:index]
-        index += 1
-    return text
+def _single_line_description(front: list[str]) -> str | None:
+    """Inner text of one single-line description, or None when it is not a cue.
 
-_YAML_NULL = {"~", "null", "Null", "NULL"}
-_BLOCK_HEADER = re.compile(r"^[|>](?:[+-][1-9]|[1-9][+-]|[+-]|[1-9])?$")
-_NESTED_KEY = re.compile(r"[^:#\s][^:#]*:(?:\s|$)")
-
-def _quote_end(text: str, quote: str) -> int | None:
-    index = 0
-    while index < len(text):
-        if quote == '"' and text[index] == "\\" and index + 1 < len(text):
-            index += 2
-            continue
-        if quote == "'" and text[index] == "'" and index + 1 < len(text) and text[index + 1] == "'":
-            index += 2
-            continue
-        if text[index] == quote:
-            return index
-        index += 1
-    return None
-
-# YAML 1.2 double-quoted escapes. A malformed escape is kept literal, backslash included.
-_DOUBLE_ESCAPES = {
-    "0": "\0",
-    "a": "\a",
-    "b": "\b",
-    "t": "\t",
-    "n": "\n",
-    "v": "\v",
-    "f": "\f",
-    "r": "\r",
-    "e": "\x1b",
-    " ": " ",
-    '"': '"',
-    "/": "/",
-    "\\": "\\",
-    "N": "\u0085",
-    "_": "\u00a0",
-    "L": "\u2028",
-    "P": "\u2029",
-}
-_HEX_ESCAPE_WIDTH = {"x": 2, "u": 4, "U": 8}
-
-
-def _decode_double_escape(body: str, index: int) -> tuple[str, int]:
-    """Decode the double-quoted escape starting at body[index] == backslash."""
-    nxt = body[index + 1]
-    if nxt in _DOUBLE_ESCAPES:
-        return _DOUBLE_ESCAPES[nxt], index + 2
-    width = _HEX_ESCAPE_WIDTH.get(nxt)
-    if width is not None:
-        hexpart = body[index + 2:index + 2 + width]
-        if len(hexpart) == width and all(char in "0123456789abcdefABCDEF" for char in hexpart):
-            code = int(hexpart, 16)
-            if code <= 0x10FFFF:
-                return chr(code), index + 2 + width
-    return "\\", index + 1
-
-
-def _decode_quoted(body: str, quote: str) -> str:
-    chars: list[str] = []
-    index = 0
-    while index < len(body):
-        char = body[index]
-        if char == "\n":
-            index += 1
-            while index < len(body) and body[index] in " \t":
-                index += 1
-            chars.append(" ")
-            continue
-        if quote == "'" and char == "'" and index + 1 < len(body) and body[index + 1] == "'":
-            chars.append("'")
-            index += 2
-            continue
-        if quote == '"' and char == "\\" and index + 1 < len(body):
-            nxt = body[index + 1]
-            if nxt == "\n":
-                index += 2
-                while index < len(body) and body[index] in " \t":
-                    index += 1
-                continue
-            decoded, index = _decode_double_escape(body, index)
-            chars.append(decoded)
-            continue
-        chars.append(char)
-        index += 1
-    return "".join(chars)
-
-
-def _quoted_value(front: list[str], index: int, raw: str) -> str:
-    quote = raw[0]
-    lines = [raw[1:]]
-    end = _quote_end(lines[0], quote)
-    if end is not None:
-        return _decode_quoted(lines[0][:end], quote)
-    for line in front[index + 1:]:
-        end = _quote_end(line, quote)
-        if end is None:
-            lines.append(line)
-            continue
-        lines.append(line[:end])
-        return _decode_quoted("\n".join(lines), quote)
-    return _decode_quoted("\n".join(lines), quote)
-
-def _following_value(front: list[str], index: int, block: bool) -> str:
-    parts: list[str] = []
-    start = index + 1
-    for offset, line in enumerate(front[start:], start=start):
-        commented = _strip_unquoted_comment(line).strip()
-        if not line.strip() or (not block and not commented):
-            if block and parts and not line.strip():
-                parts.append("")
-            continue
-        if line[0] not in " \t":
-            break
-        item = line.strip() if block else commented
-        if not block and not parts:
-            if item in _YAML_NULL or item[0] in "{[" or item == "-" or item.startswith("- "):
-                return ""
-            if _NESTED_KEY.match(item):
-                return ""
-            if item[0] in "\"'":
-                return _quoted_value(front, offset, item)
-            if _BLOCK_HEADER.match(item):
-                return _following_value(front, offset, True)
-        if not block and (item == "-" or item.startswith("- ") or _NESTED_KEY.match(item)):
-            break
-        parts.append(item)
-    return ("\n" if block else " ").join(parts)
-
-def routing_description(front: list[str]) -> str | None:
-    """Return a top-level description string, or None when that key is absent."""
+    The key line must match description:. An indented non-blank next line is not
+    a cue. A quoted value is one matching pair with no other quote and no
+    backslash. A plain value is cut at the first whitespace-then-# and is not
+    empty, null, or a block, alias, tag, or flow marker.
+    """
     for index, line in enumerate(front):
-        found = _DESCRIPTION_KEY.match(line)
+        found = _DESCRIPTION_LINE.match(line)
         if not found:
             continue
-        value = _strip_unquoted_comment(found.group(1)).strip()
-        if not value:
-            return _following_value(front, index, False)
-        if value[0] in "\"'":
-            return _quoted_value(front, index, value)
-        if _BLOCK_HEADER.match(value):
-            return _following_value(front, index, True)
-        if value in _YAML_NULL or value[0] in "{[":
-            return ""
+        if index + 1 < len(front):
+            nxt = front[index + 1]
+            if nxt[:1] in " 	" and nxt.strip():
+                return None
+        value = found.group(1)
+        if value[:1] in {"'", '"'}:
+            quote = value[0]
+            inner = value[1:-1]
+            if len(value) >= 2 and value.endswith(quote) and quote not in inner and "\\" not in inner:
+                return inner
+            return None
+        if value.startswith("#"):
+            return None
+        comment = re.search(r"[ 	]#", value)
+        if comment:
+            value = value[:comment.start()]
+        value = value.rstrip(" 	")
+        if value == "" or value in _PLAIN_NULLS or value[:1] in "|>&*!{[":
+            return None
         return value
     return None
 
@@ -628,8 +499,8 @@ def has_routing_cue(lines: list[str]) -> bool:
         body = lines
     else:
         front, closing = parsed
-        description = routing_description(front)
-        if description is not None and re.search(r"\w", description):
+        inner = _single_line_description(front)
+        if inner is not None and any(ch.isalnum() for ch in inner):
             return True
         body = lines[closing + 1:]
     return any(
