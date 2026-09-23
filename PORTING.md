@@ -58,7 +58,7 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   Acceptable cue forms: a frontmatter `description` field, a line containing
   "Primary role:", or a line starting with "Read this when ..." (case-insensitive;
   a leading Markdown `>` is fine), within the first 15 lines after any frontmatter.
-  A description counts only if it contains at least one letter or digit after YAML decoding.
+  A frontmatter description counts as a cue only when it is a single-line plain or simply quoted value (no escapes, no block or multi-line scalars) containing at least one letter or digit; otherwise add a 'Read this when ...' line.
   `tools/check-skills.py` enforces this as ROUTING-CUE on every `*.md` under
   `references/` (any depth) for every checked skill, including OMP-native skills.
   SKILL.md and files outside `references/` are not checked. Files with none of the
