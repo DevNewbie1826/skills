@@ -15,7 +15,7 @@ Most Layer A and Layer B references live flat in this directory; focused task do
 
 | File | Purpose | Load when |
 |---|---|---|
-| `design-system-architecture.md` | Defines the `DESIGN.md` structure — 8 sections plus a greenfield-only `## 0. Research Log` (atmosphere, color tokens, typography scale, spacing system, components, motion, depth, accessibility constraints & accepted debt). Creation workflow for new and existing projects. Validation rules and memory management. | Phase 0 fires and no `DESIGN.md` exists in the project. Also load when extracting a design system from existing code. |
+| [`design-system-architecture.md`](design-system-architecture.md) | Defines the `DESIGN.md` structure — 8 sections plus a greenfield-only `## 0. Research Log` (atmosphere, color tokens, typography scale, spacing system, components, motion, depth, accessibility constraints & accepted debt). Creation workflow for new and existing projects. Validation rules and memory management. | Phase 0 fires and no `DESIGN.md` exists in the project. Also load when extracting a design system from existing code. |
 
 ---
 
@@ -41,23 +41,23 @@ From [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill).
 
 | File | Purpose | Load when |
 |---|---|---|
-| `taste-skill.md` | Deliberate, restrained visual direction for landing pages, portfolios, and redesigns; excludes dashboards, data tables, and multi-step product UI. Has 3 dials: DESIGN_VARIANCE, MOTION_INTENSITY, VISUAL_DENSITY. | A landing page, portfolio, or redesign needs a good-looking direction without a narrow named aesthetic. |
-| `cinematic-taste-skill.md` | Stricter, more opinionated. High-variance layouts, stronger GSAP motion, and more aggressive anti-slop. | The user wants something genuinely *Awwwards-tier* - bold layouts, magnetic interactions, scroll-triggered scenes. Or `taste-skill.md` results felt "too safe". |
-| `image-to-code-skill.md` | Image-first workflow: generate premium reference images → analyze → implement to match. | The user says "generate the design first, then code it", or visual quality is the main challenge. Pair with `image-gen-concepts-web.md`. |
-| `redesign-skill.md` | Audits existing UI and surgically fixes weak layout, spacing, hierarchy, color, type. Does NOT rewrite from scratch. | Existing project + "make this better", "improve the UI", "redesign", "this looks bad". DO NOT use on greenfield. |
-| `soft-skill.md` | Polished, calm, expensive-looking. Softer contrast, generous whitespace, premium fonts (Geist, Inter Display), spring motion. | The user says "premium", "luxurious", "calm", "expensive", "spa", "wellness", "boutique", "editorial". Or shows references like Linear, Vercel, Stripe, Apple marketing. |
-| `minimalist-skill.md` | Editorial product UI inspired by Notion/Linear. Restrained monochrome palette, crisp structure, generous whitespace. | The user says "minimal", "clean", "Notion-style", "Linear-style", "editorial", "boring is good", "remove decoration". |
-| `brutalist-skill.md` | BETA. Mechanical visual language. Swiss typography, sharp contrast, raw structure, experimental composition. | The user says "brutalist", "raw", "Swiss", "experimental", "industrial", "unstyled", "anti-design". |
-| `output-skill.md` | Pushes for complete output: no placeholder comments, no `// TODO`, no skipped implementation, no half-done components. | Stack on top of any other skill when the agent has been lazy or the user complains "you keep leaving things undone". Do not use alone. |
-| `mockup-export-skill.md` | Portable semantic design-spec rules. Includes a `DESIGN.md` export format and a complete worked export in `mockup-export-example.md`. | The user wants a portable `DESIGN.md` alongside the code. |
+| [`taste-skill.md`](taste-skill.md) | Deliberate, restrained visual direction for landing pages, portfolios, and redesigns; excludes dashboards, data tables, and multi-step product UI. Has 3 dials: DESIGN_VARIANCE, MOTION_INTENSITY, VISUAL_DENSITY. | A landing page, portfolio, or redesign needs a good-looking direction without a narrow named aesthetic. |
+| [`cinematic-taste-skill.md`](cinematic-taste-skill.md) | Stricter, more opinionated. High-variance layouts, stronger GSAP motion, and more aggressive anti-slop. | The user wants something genuinely *Awwwards-tier* - bold layouts, magnetic interactions, scroll-triggered scenes. Or `taste-skill.md` results felt "too safe". |
+| [`image-to-code-skill.md`](image-to-code-skill.md) | Image-first workflow: generate premium reference images → analyze → implement to match. | The user says "generate the design first, then code it", or visual quality is the main challenge. Pair with `image-gen-concepts-web.md`. |
+| [`redesign-skill.md`](redesign-skill.md) | Audits existing UI and surgically fixes weak layout, spacing, hierarchy, color, type. Does NOT rewrite from scratch. | Existing project + "make this better", "improve the UI", "redesign", "this looks bad". DO NOT use on greenfield. |
+| [`soft-skill.md`](soft-skill.md) | Polished, calm, expensive-looking. Softer contrast, generous whitespace, premium fonts (Geist, Inter Display), spring motion. | The user says "premium", "luxurious", "calm", "expensive", "spa", "wellness", "boutique", "editorial". Or shows references like Linear, Vercel, Stripe, Apple marketing. |
+| [`minimalist-skill.md`](minimalist-skill.md) | Editorial product UI inspired by Notion/Linear. Restrained monochrome palette, crisp structure, generous whitespace. | The user says "minimal", "clean", "Notion-style", "Linear-style", "editorial", "boring is good", "remove decoration". |
+| [`brutalist-skill.md`](brutalist-skill.md) | BETA. Mechanical visual language. Swiss typography, sharp contrast, raw structure, experimental composition. | The user says "brutalist", "raw", "Swiss", "experimental", "industrial", "unstyled", "anti-design". |
+| [`output-skill.md`](output-skill.md) | Pushes for complete output: no placeholder comments, no `// TODO`, no skipped implementation, no half-done components. | Stack on top of any other skill when the agent has been lazy or the user complains "you keep leaving things undone". Do not use alone. |
+| [`mockup-export-skill.md`](mockup-export-skill.md) | Portable semantic design-spec rules. Includes a `DESIGN.md` export format and a complete worked export in `mockup-export-example.md`. | The user wants a portable `DESIGN.md` alongside the code. |
 
 ### Image-generation skills (do NOT write code, only produce reference imagery)
 
 | File | Purpose | Load when |
 |---|---|---|
-| `image-gen-concepts-web.md` | Generates Awwwards-level website design reference *images*. Strong typography, generous spacing, anti-slop visual discipline. | "Generate a mockup", "design reference image", "show me what it could look like", before any code. Pair with `image-to-code-skill.md` for the full image-to-code flow. |
-| `image-gen-concepts-mobile.md` | Generates premium mobile app screen concepts and flows. iOS, Android, cross-platform. Phone mockup framing, multi-screen consistency. | Mobile app screen mockups, app flow images, iOS/Android UI references - image only, no code. |
-| `image-gen-brandkit.md` | Generates premium brand-kit overview images: logo concepts, color systems, typography specimens, mockups, identity boards. | Brand identity moodboard, logo direction, full brand-kit board. Image only. |
+| [`image-gen-concepts-web.md`](image-gen-concepts-web.md) | Generates Awwwards-level website design reference *images*. Strong typography, generous spacing, anti-slop visual discipline. | "Generate a mockup", "design reference image", "show me what it could look like", before any code. Pair with `image-to-code-skill.md` for the full image-to-code flow. |
+| [`image-gen-concepts-mobile.md`](image-gen-concepts-mobile.md) | Generates premium mobile app screen concepts and flows. iOS, Android, cross-platform. Phone mockup framing, multi-screen consistency. | Mobile app screen mockups, app flow images, iOS/Android UI references - image only, no code. |
+| [`image-gen-brandkit.md`](image-gen-brandkit.md) | Generates premium brand-kit overview images: logo concepts, color systems, typography specimens, mockups, identity boards. | Brand identity moodboard, logo direction, full brand-kit board. Image only. |
 
 ### Layer A stacking rules
 
@@ -93,115 +93,115 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 | File | Aesthetic |
 |---|---|
 | [`cl&#97;ude.md`](cl%61ude.md) | Terracotta accent, parchment canvas, literary salon mood, clean editorial layout. |
-| `cohere.md` | Enterprise AI platform. Vibrant gradients, data-rich dashboard aesthetic. |
-| `elevenlabs.md` | AI voice platform. Dark cinematic UI, audio-waveform aesthetics. |
-| `minimax.md` | AI model provider. Bold dark interface with neon accents. |
-| `mistral.ai.md` | Open-weight LLM provider. French-engineered minimalism, purple-toned. |
-| `ollama.md` | Run LLMs locally. Terminal-first, monochrome simplicity. |
-| `terminal-dark.md` | Terminal-oriented dark theme. Developer-centric, monospace-forward treatment. |
-| `replicate.md` | Run ML models via API. Clean white canvas, code-forward. |
-| `runwayml.md` | AI video generation. Cinematic dark UI, media-rich layout. |
-| `together.ai.md` | Open-source AI infrastructure. Technical, blueprint-style design. |
-| `voltagent.md` | AI agent framework. Void-black canvas, emerald accent, terminal-native. |
-| `x.ai.md` | Elon Musk's AI lab. Stark monochrome, futuristic minimalism. |
+| [`cohere.md`](cohere.md) | Enterprise AI platform. Vibrant gradients, data-rich dashboard aesthetic. |
+| [`elevenlabs.md`](elevenlabs.md) | AI voice platform. Dark cinematic UI, audio-waveform aesthetics. |
+| [`minimax.md`](minimax.md) | AI model provider. Bold dark interface with neon accents. |
+| [`mistral.ai.md`](mistral.ai.md) | Open-weight LLM provider. French-engineered minimalism, purple-toned. |
+| [`ollama.md`](ollama.md) | Run LLMs locally. Terminal-first, monochrome simplicity. |
+| [`terminal-dark.md`](terminal-dark.md) | Terminal-oriented dark theme. Developer-centric, monospace-forward treatment. |
+| [`replicate.md`](replicate.md) | Run ML models via API. Clean white canvas, code-forward. |
+| [`runwayml.md`](runwayml.md) | AI video generation. Cinematic dark UI, media-rich layout. |
+| [`together.ai.md`](together.ai.md) | Open-source AI infrastructure. Technical, blueprint-style design. |
+| [`voltagent.md`](voltagent.md) | AI agent framework. Void-black canvas, emerald accent, terminal-native. |
+| [`x.ai.md`](x.ai.md) | Elon Musk's AI lab. Stark monochrome, futuristic minimalism. |
 
 ### Developer Tools & IDEs (8)
 
 | File | Aesthetic |
 |---|---|
-| `aside.md` | Bright product-app marketing, custom display type, soft squircle controls, browser-product framing. |
+| [`aside.md`](aside.md) | Bright product-app marketing, custom display type, soft squircle controls, browser-product framing. |
 | [`cursor.md`](cursor.md) | Sleek dark interface with gradient accents. |
-| `expo.md` | React Native platform. Dark theme, tight letter-spacing, code-centric. |
-| `lovable.md` | AI full-stack builder. Playful gradients, friendly dev aesthetic. |
-| `raycast.md` | Productivity launcher. Sleek dark chrome, vibrant gradient accents. |
-| `superhuman.md` | Fast email client. Premium dark UI, keyboard-first, purple glow. |
-| `vercel.md` | Frontend deployment platform. Black and white precision, Geist font. |
-| `warp.md` | Modern terminal. Dark IDE-like interface, block-based command UI. |
+| [`expo.md`](expo.md) | React Native platform. Dark theme, tight letter-spacing, code-centric. |
+| [`lovable.md`](lovable.md) | AI full-stack builder. Playful gradients, friendly dev aesthetic. |
+| [`raycast.md`](raycast.md) | Productivity launcher. Sleek dark chrome, vibrant gradient accents. |
+| [`superhuman.md`](superhuman.md) | Fast email client. Premium dark UI, keyboard-first, purple glow. |
+| [`vercel.md`](vercel.md) | Frontend deployment platform. Black and white precision, Geist font. |
+| [`warp.md`](warp.md) | Modern terminal. Dark IDE-like interface, block-based command UI. |
 
 ### Backend, Database & DevOps (8)
 
 | File | Aesthetic |
 |---|---|
-| `clickhouse.md` | Fast analytics database. Yellow-accented, technical documentation style. |
-| `composio.md` | Tool integration platform. Modern dark with colorful integration icons. |
-| `hashicorp.md` | Infrastructure automation. Enterprise-clean, black and white. |
-| `mongodb.md` | Document database. Green leaf branding, developer documentation focus. |
-| `posthog.md` | Product analytics. Playful hedgehog branding, developer-friendly dark UI. |
-| `sanity.md` | Headless CMS. Red accent, content-first editorial layout. |
-| `sentry.md` | Error monitoring. Dark dashboard, data-dense, pink-purple accent. |
-| `supabase.md` | Open-source Firebase alternative. Dark emerald theme, code-first. |
+| [`clickhouse.md`](clickhouse.md) | Fast analytics database. Yellow-accented, technical documentation style. |
+| [`composio.md`](composio.md) | Tool integration platform. Modern dark with colorful integration icons. |
+| [`hashicorp.md`](hashicorp.md) | Infrastructure automation. Enterprise-clean, black and white. |
+| [`mongodb.md`](mongodb.md) | Document database. Green leaf branding, developer documentation focus. |
+| [`posthog.md`](posthog.md) | Product analytics. Playful hedgehog branding, developer-friendly dark UI. |
+| [`sanity.md`](sanity.md) | Headless CMS. Red accent, content-first editorial layout. |
+| [`sentry.md`](sentry.md) | Error monitoring. Dark dashboard, data-dense, pink-purple accent. |
+| [`supabase.md`](supabase.md) | Open-source Firebase alternative. Dark emerald theme, code-first. |
 
 ### Productivity & SaaS (7)
 
 | File | Aesthetic |
 |---|---|
-| `cal.md` | Open-source scheduling. Clean neutral UI, developer-oriented simplicity. |
-| `intercom.md` | Customer messaging. Friendly blue palette, conversational UI patterns. |
-| `linear.app.md` | Project management for engineers. Ultra-minimal, precise, purple accent. |
-| `mintlify.md` | Documentation platform. Clean, green-accented, reading-optimized. |
-| `notion.md` | All-in-one workspace. Warm minimalism, serif headings, soft surfaces. |
-| `resend.md` | Email API for developers. Minimal dark theme, monospace accents. |
-| `zapier.md` | Automation platform. Warm orange, friendly illustration-driven. |
+| [`cal.md`](cal.md) | Open-source scheduling. Clean neutral UI, developer-oriented simplicity. |
+| [`intercom.md`](intercom.md) | Customer messaging. Friendly blue palette, conversational UI patterns. |
+| [`linear.app.md`](linear.app.md) | Project management for engineers. Ultra-minimal, precise, purple accent. |
+| [`mintlify.md`](mintlify.md) | Documentation platform. Clean, green-accented, reading-optimized. |
+| [`notion.md`](notion.md) | All-in-one workspace. Warm minimalism, serif headings, soft surfaces. |
+| [`resend.md`](resend.md) | Email API for developers. Minimal dark theme, monospace accents. |
+| [`zapier.md`](zapier.md) | Automation platform. Warm orange, friendly illustration-driven. |
 
 ### Design & Creative Tools (6)
 
 | File | Aesthetic |
 |---|---|
-| `airtable.md` | Spreadsheet-database hybrid. Colorful, friendly, structured data aesthetic. |
-| `clay.md` | Creative agency. Organic shapes, soft gradients, art-directed layout. |
-| `figma.md` | Collaborative design tool. Vibrant multi-color, playful yet professional. |
-| `framer.md` | Website builder. Bold black and blue, motion-first, design-forward. |
-| `miro.md` | Visual collaboration. Bright yellow accent, infinite canvas aesthetic. |
-| `webflow.md` | Visual web builder. Blue-accented, polished marketing site aesthetic. |
+| [`airtable.md`](airtable.md) | Spreadsheet-database hybrid. Colorful, friendly, structured data aesthetic. |
+| [`clay.md`](clay.md) | Creative agency. Organic shapes, soft gradients, art-directed layout. |
+| [`figma.md`](figma.md) | Collaborative design tool. Vibrant multi-color, playful yet professional. |
+| [`framer.md`](framer.md) | Website builder. Bold black and blue, motion-first, design-forward. |
+| [`miro.md`](miro.md) | Visual collaboration. Bright yellow accent, infinite canvas aesthetic. |
+| [`webflow.md`](webflow.md) | Visual web builder. Blue-accented, polished marketing site aesthetic. |
 
 ### Fintech & Crypto (7)
 
 | File | Aesthetic |
 |---|---|
-| `binance.md` | Crypto exchange. Bold Binance Yellow on monochrome, trading-floor urgency. |
-| `coinbase.md` | Crypto exchange. Clean blue identity, trust-focused, institutional feel. |
-| `kraken.md` | Crypto trading platform. Purple-accented dark UI, data-dense dashboards. |
-| `mastercard.md` | Global payments network. Warm cream canvas, orbital pill shapes, editorial warmth. |
-| `revolut.md` | Digital banking. Sleek dark interface, gradient cards, fintech precision. |
-| `stripe.md` | Payment infrastructure. Signature purple gradients, weight-300 elegance. |
-| `wise.md` | International money transfer. Bright green accent, friendly and clear. |
+| [`binance.md`](binance.md) | Crypto exchange. Bold Binance Yellow on monochrome, trading-floor urgency. |
+| [`coinbase.md`](coinbase.md) | Crypto exchange. Clean blue identity, trust-focused, institutional feel. |
+| [`kraken.md`](kraken.md) | Crypto trading platform. Purple-accented dark UI, data-dense dashboards. |
+| [`mastercard.md`](mastercard.md) | Global payments network. Warm cream canvas, orbital pill shapes, editorial warmth. |
+| [`revolut.md`](revolut.md) | Digital banking. Sleek dark interface, gradient cards, fintech precision. |
+| [`stripe.md`](stripe.md) | Payment infrastructure. Signature purple gradients, weight-300 elegance. |
+| [`wise.md`](wise.md) | International money transfer. Bright green accent, friendly and clear. |
 
 ### E-commerce & Retail (5)
 
 | File | Aesthetic |
 |---|---|
-| `airbnb.md` | Travel marketplace. Warm coral accent, photography-driven, rounded UI. |
-| `meta.md` | Tech retail store. Photography-first, binary light/dark surfaces, Meta Blue CTAs. |
-| `nike.md` | Athletic retail. Monochrome UI, massive uppercase Futura, full-bleed photography. |
-| `shopify.md` | E-commerce platform. Dark-first cinematic, neon green accent, ultra-light display type. |
-| `starbucks.md` | Coffee retail flagship. Four-tier earth-green system, warm cream canvas, SoDoSans typography. |
+| [`airbnb.md`](airbnb.md) | Travel marketplace. Warm coral accent, photography-driven, rounded UI. |
+| [`meta.md`](meta.md) | Tech retail store. Photography-first, binary light/dark surfaces, Meta Blue CTAs. |
+| [`nike.md`](nike.md) | Athletic retail. Monochrome UI, massive uppercase Futura, full-bleed photography. |
+| [`shopify.md`](shopify.md) | E-commerce platform. Dark-first cinematic, neon green accent, ultra-light display type. |
+| [`starbucks.md`](starbucks.md) | Coffee retail flagship. Four-tier earth-green system, warm cream canvas, SoDoSans typography. |
 
 ### Media & Consumer Tech (11)
 
 | File | Aesthetic |
 |---|---|
-| `apple.md` | Consumer electronics. Premium white space, SF Pro, cinematic imagery. |
-| `ibm.md` | Enterprise technology. Carbon design system, structured blue palette. |
-| `nvidia.md` | GPU computing. Green-black energy, technical power aesthetic. |
-| `pinterest.md` | Visual discovery platform. Red accent, masonry grid, image-first. |
-| `playstation.md` | Gaming console retail. Three-surface channel layout, cyan hover-scale interaction. |
-| `spacex.md` | Space technology. Stark black and white, full-bleed imagery, futuristic. |
-| `spotify.md` | Music streaming. Vibrant green on dark, bold type, album-art-driven. |
-| `theverge.md` | Tech editorial media. Acid-mint and ultraviolet accents, Manuka display type. |
-| `uber.md` | Mobility platform. Bold black and white, tight type, urban energy. |
-| `vodafone.md` | Global telecom brand. Monumental uppercase display, Vodafone Red chapter bands. |
-| `wired.md` | Tech magazine. Paper-white broadsheet density, custom serif, ink-blue links. |
+| [`apple.md`](apple.md) | Consumer electronics. Premium white space, SF Pro, cinematic imagery. |
+| [`ibm.md`](ibm.md) | Enterprise technology. Carbon design system, structured blue palette. |
+| [`nvidia.md`](nvidia.md) | GPU computing. Green-black energy, technical power aesthetic. |
+| [`pinterest.md`](pinterest.md) | Visual discovery platform. Red accent, masonry grid, image-first. |
+| [`playstation.md`](playstation.md) | Gaming console retail. Three-surface channel layout, cyan hover-scale interaction. |
+| [`spacex.md`](spacex.md) | Space technology. Stark black and white, full-bleed imagery, futuristic. |
+| [`spotify.md`](spotify.md) | Music streaming. Vibrant green on dark, bold type, album-art-driven. |
+| [`theverge.md`](theverge.md) | Tech editorial media. Acid-mint and ultraviolet accents, Manuka display type. |
+| [`uber.md`](uber.md) | Mobility platform. Bold black and white, tight type, urban energy. |
+| [`vodafone.md`](vodafone.md) | Global telecom brand. Monumental uppercase display, Vodafone Red chapter bands. |
+| [`wired.md`](wired.md) | Tech magazine. Paper-white broadsheet density, custom serif, ink-blue links. |
 
 ### Automotive (6)
 
 | File | Aesthetic |
 |---|---|
-| `bmw.md` | Luxury automotive. Dark premium surfaces, precise German engineering aesthetic. |
-| `bugatti.md` | Luxury hypercar. Cinema-black canvas, monochrome austerity, monumental display type. |
-| `ferrari.md` | Luxury automotive. Chiaroscuro black-white editorial, Ferrari Red with extreme sparseness. |
-| `lamborghini.md` | Luxury automotive. True black cathedral, gold accent, LamboType custom Neo-Grotesk. |
-| `renault.md` | French automotive. Vivid aurora gradients, NouvelR proprietary typeface, zero-radius buttons. |
-| `tesla.md` | Electric vehicles. Radical subtraction, cinematic full-viewport photography, Universal Sans. |
+| [`bmw.md`](bmw.md) | Luxury automotive. Dark premium surfaces, precise German engineering aesthetic. |
+| [`bugatti.md`](bugatti.md) | Luxury hypercar. Cinema-black canvas, monochrome austerity, monumental display type. |
+| [`ferrari.md`](ferrari.md) | Luxury automotive. Chiaroscuro black-white editorial, Ferrari Red with extreme sparseness. |
+| [`lamborghini.md`](lamborghini.md) | Luxury automotive. True black cathedral, gold accent, LamboType custom Neo-Grotesk. |
+| [`renault.md`](renault.md) | French automotive. Vivid aurora gradients, NouvelR proprietary typeface, zero-radius buttons. |
+| [`tesla.md`](tesla.md) | Electric vehicles. Radical subtraction, cinematic full-viewport photography, Universal Sans. |
 
 ### Mood- and task-based shortcuts (when user describes feeling or task, not naming a brand)
 
