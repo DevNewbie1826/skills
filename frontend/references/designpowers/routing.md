@@ -23,7 +23,7 @@ When planning is needed, supply design-specific context to the project's plannin
 - inclusive personas and assistive or cognitive constraints;
 - taste direction, anti-references, and design-system constraints;
 - content tone and plain-language requirements;
-- motion, responsive, and adaptive-interface requirements;
+- responsive, motion, and user-preference requirements (detailed guidance lives in `references/stylegallery/` platform and motion domains);
 - verification expectations: frontend checks, visual QA artifacts, persona walkthroughs, and independent review; and
 - explicit constraints, including prohibited bridge or canvas tooling.
 
@@ -39,7 +39,7 @@ When a plan is approved, the implementation workflow owns execution. Enrich impl
 
 ## UI build through frontend design and perfection
 
-The frontend skill owns UI build quality. This reference may point it to user taste and anti-reference notes, target personas and success criteria, content and state expectations, cognitive-accessibility and adaptive-preference requirements, and design-token constraints. It does not replace the `DESIGN.md` gate, taste routing, real-browser QA, or performance discipline.
+The frontend skill owns UI build quality. This reference may point it to user taste and anti-reference notes, target personas and success criteria, content and state expectations, and cognitive-accessibility requirements. Design-system and token constraints come from `references/design/design-system-architecture.md`; layout, motion, interaction, and platform-adaptive mechanics come from `references/stylegallery/`. It does not replace the `DESIGN.md` gate, taste routing, real-browser QA, or performance discipline.
 
 ## Visual checks
 

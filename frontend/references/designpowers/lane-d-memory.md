@@ -4,18 +4,26 @@ Read this when a project needs an optional design record, debt register, handoff
 
 Lane D records design context around frontend work. It can maintain a project-local design record, design debt, handoff notes, retrospective notes, and observational taste memory. It has no hooks or independent automation path.
 
+## Leaves in this lane
+
+| Leaf | Read when |
+|---|---|
+| [design-debt-tracker.md](memory/design-debt-tracker.md) | critique or review defers findings — maintain the living debt register so promises stay visible |
+| [design-handoff.md](memory/design-handoff.md) | completed design work must be communicated to engineering with specs, rationale, and accessibility requirements |
+| [design-retrospective.md](memory/design-retrospective.md) | after completion — reflect on what worked, debt health, and how the person's design decisions evolve (includes the longitudinal taste reflection) |
+
 ## Phase owner
 
-| Capability | Source boundary | Owner | Mapping |
-|---|---|---|---|
-| Track deferred design and accessibility findings | `design-debt-tracker` | Project design record + review workflow | Maintain ID, date, source, severity, issue, affected users, suggested fix, status, and notes. |
-| Package rationale for implementers or reviewers | `design-handoff` | Implementation and review workflows | Record component, interaction, accessibility, content, and rationale notes. |
-| Reflect after completion | `design-retrospective` | Final handoff | Record what worked, what did not, fix rounds, debt health, and lessons. |
-| Maintain observational design memory | Authored memory guidance | Optional project record or user-facing report | Store observations descriptively; do not feed them back as future project constraints. |
-| Produce a taste reflection on request | `taste-report` | User-facing handoff | Summarize personal-layer observations only when evidence exists or the user asks. |
-| Route concepts into frontend | Authored router semantics | Frontend reference context | Frontend owns routing and mode language; no separate runtime is available. |
+| Capability | Owner | Mapping |
+|---|---|---|
+| Track deferred design and accessibility findings | [design-debt-tracker.md](memory/design-debt-tracker.md) | Maintain ID, date, source, severity, issue, affected users, suggested fix, status, and notes. |
+| Package rationale for implementers or reviewers | [design-handoff.md](memory/design-handoff.md) | Record component, interaction, accessibility, content, and rationale notes. |
+| Reflect after completion | [design-retrospective.md](memory/design-retrospective.md) | Record what worked, what did not, fix rounds, debt health, and lessons. |
+| Maintain observational design memory | Authored memory guidance | Store observations descriptively; do not feed them back as future project constraints. |
+| Produce a taste reflection on request | [design-retrospective.md](memory/design-retrospective.md) — longitudinal section | Summarize personal-layer observations only when evidence exists or the user asks. |
+| Route concepts into frontend | Frontend reference context | Frontend owns routing and mode language; no separate runtime is available. |
 
-Role references are not primary in this lane. Lane D records outputs when earlier design roles contributed useful evidence.
+Lane D records outputs when earlier phases contributed useful evidence.
 
 ## Optional project record
 

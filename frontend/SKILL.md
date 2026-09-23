@@ -14,7 +14,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | Any UI implementation, styling, redesign, mockup, or visual decision | `references/design/README.md` first. It routes the design-system gate, taste and brand references, and framework-matched development tooling. |
 | Frontend code, performance, SEO, accessibility, or quality auditing | Also `references/perfection/README.md` for real-browser audits and root-cause remediation. |
 | A concrete style, palette, font pairing, chart, landing structure, UX guideline, or generated project design system | `references/ui-ux-db/README.md` on demand. It is a lookup tool, not a visual-direction substitute. |
-| An implementation or redesign that creates or updates `DESIGN.md`, or needs personas, critique, debt, handoff, or synthetic testing | `references/designpowers/README.md` and `lane-c-review.md`; load other lanes only for their applicable phase. |
+| An implementation or redesign that creates or updates `DESIGN.md`, or needs personas, critique, debt, handoff, or synthetic testing | `references/designpowers/README.md`; load `lane-a-direction.md`, `lane-b-execution.md`, `lane-c-review.md`, or `lane-d-memory.md` for the applicable phase. |
 | A de-slop request ("looks AI-generated", "remove the AI look", feels templated), or any build/redesign approaching done | `references/deslop/README.md`. A 34-tell visual and copy AI-slop taxonomy with a dependency-free scanner: audit workflow for explicit requests, a creation-time checklist during builds, and a final scan before the visual-evidence gate. |
 
 For implementation work, load design and perfection together. A fast page that looks generic, or a beautiful page with an avoidable performance cost, has not met the bar.
@@ -108,7 +108,7 @@ Domains and stacks are enumerated in its README; choose the stack matching the p
 
 ## Ruleset 4 - designpowers (`references/designpowers/`)
 
-Use this internal reference for design operating guidance. It complements frontend routing and can inform planning, implementation, visual evidence, independent critique, design debt, and handoff; it does not create a separate runtime or workflow.
+Use this internal reference for design operating guidance. Start at `README.md`, then load the relevant lane: `lane-a-direction.md` for planning, `lane-b-execution.md` for implementation, `lane-c-review.md` for critique and testing, or `lane-d-memory.md` for design records, debt, and handoff. It complements frontend routing and does not create a separate runtime or workflow.
 
 ## Ruleset 5 - deslop (`references/deslop/`)
 
