@@ -1,0 +1,21 @@
+{
+  "design-engineering/index.md": "Read this when you need product-layer craft decisions, prototyping, or verification for interface details.",
+  "design-engineering/state-management/index.md": "Read this when you need to select state ownership, persistence, request coordination, or recovery patterns for an interface.",
+  "design-engineering/state-management/recipes/index.md": "Read this when you need a worked state-management recipe for forms, search, settings, or delete-and-undo flows.",
+  "design-terminology/index.md": "Read this when you need to distinguish design concepts, relationships, or interaction terminology.",
+  "game-ui/index.md": "Read this when you need game UI classification, screen hierarchy, reference records, or engine implementation guidance.",
+  "layout/index.md": "Read this when you need layout principles, spatial constraints, or a route into patterns and recipes.",
+  "motion/index.md": "Read this when you need motion terminology, evidence-first review, or a way to classify animation claims.",
+  "patterns/centering/index.md": "Read this when you need to center a block while keeping a maximum measure, or center one region on both axes.",
+  "patterns/containment/index.md": "Read this when you need to wrap content, limit prose width, clamp a card, or let a region fill available width without overgrowing.",
+  "patterns/grid-repetition/index.md": "Read this when you need repeated cards, page grids, text columns, or dense/masonry-style item layouts.",
+  "patterns/in-line-grouping/index.md": "Read this when you need a wrapping row for nav, breadcrumbs, tabs, pagination, badges, or controls.",
+  "patterns/index.md": "Read this when you need to choose a layout pattern category or route to the catalog, planning guide, or pattern guides.",
+  "patterns/media-fit/index.md": "Read this when you need an icon slot or media frame that keeps content aligned and aspect ratio intact.",
+  "patterns/overlay-exception/index.md": "Read this when you need to overlay one region on a parent or stack several regions in the same cell.",
+  "patterns/split-sidebar/index.md": "Read this when you need a sidebar, split-screen, list-detail, supporting-pane, or main-with-rail layout.",
+  "patterns/stacking/index.md": "Read this when you need vertical rhythm for stacks, feeds, card footers, or step navigation.",
+  "patterns/viewport-shell/index.md": "Read this when you need a viewport shell with headers, footers, sidebars, sticky regions, or scroll-body containment.",
+  "platform-guides/index.md": "Read this when working on a platform-specific interface.",
+  "recipes/index.md": "Read this when you need a screen-level recipe for a homepage, dashboard, settings flow, article page, list-detail, form flow, or command surface."
+}
