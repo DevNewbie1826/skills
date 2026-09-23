@@ -1,5 +1,6 @@
 # The AI-slop taxonomy
 Read this when identifying or explaining a specific tell.
+Adapted from yetone/kill-ai-slop (Apache-2.0); modified for this pack: routing cue and this notice added, upstream text otherwise unchanged.
 
 34 tells, in two tiers. **Classic** = widely recognised. **Evolved** = newer
 defaults that already read as templated. For each: what it is, why it reads as

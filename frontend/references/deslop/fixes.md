@@ -1,5 +1,6 @@
 # Fix patterns
 Read this when applying before/after patches.
+Adapted from yetone/kill-ai-slop (Apache-2.0); modified for this pack: routing cue and this notice added, upstream text otherwise unchanged.
 
 Before→after for each tell. These are *directions*, not find-and-replace rules —
 adapt to the project's tokens and framework. Prefer changing a shared token or

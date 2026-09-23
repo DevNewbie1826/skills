@@ -1,5 +1,6 @@
 # Detection patterns
 Read this when grepping/scanning for tells and false positives.
+Adapted from yetone/kill-ai-slop (Apache-2.0); modified for this pack: routing cue added, two inline paths prefixed with `$SKILL_DIR`, and the tell-11 font-size regex rewritten; upstream text otherwise unchanged.
 
 Concrete signals for each tell. `$SKILL_DIR/references/deslop/scripts/scan.mjs` encodes these; this file is
 the human reference and the place to widen patterns for a specific stack.
