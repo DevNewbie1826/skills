@@ -45,17 +45,6 @@ Neither mode creates hooks, background schedulers, fabricated direct calls, or a
 - Keep prohibited bridge and canvas tooling out of the workflow.
 - For significant implementation work, finish through independent review; for visual work, run `visual-qa` first.
 
-## Role references
-
-Role names in `vendor/agents/` are prompt-composition perspectives only. They can help phrase an assignment such as "act as a design critic" or "act as an accessibility reviewer," but they are not installed roles, selectable runtime types, or a separate runtime.
-
-When using a role reference:
-
-- name the perspective in prompt text;
-- include a self-contained task, deliverable, scope, and verification expectation;
-- route phase ownership to frontend design/perfection, the project workflow, `visual-qa`, or independent review; and
-- record findings only when backed by artifacts or located observations.
-
 ## Reconciliation ladder
 
 Resolve conflicting findings in this order:

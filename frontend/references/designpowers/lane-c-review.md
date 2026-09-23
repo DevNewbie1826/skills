@@ -4,19 +4,32 @@ Read this when UI implementation needs evidence-based visual, accessibility, heu
 
 Lane C runs after implementation and before final sign-off. It requires objective `visual-qa` evidence first, then applies designpowers judgment to the same artifact, then hands reconciled context to the project's review workflow. Measurements and screenshots anchor the review; designpowers adds human-centered judgment that metrics alone do not encode.
 
+## Leaves in this lane
+
+| Leaf | Read when |
+|---|---|
+| [design-review.md](review/design-review.md) | an existing or built surface must be evaluated — one reconciled craft, accessibility, and usability critique |
+| [heuristic-evaluation.md](review/heuristic-evaluation.md) | a usability check is needed — Nielsen H1–H10 with evidence plus per-task cognitive walkthroughs |
+| [synthetic-user-testing.md](review/synthetic-user-testing.md) | a built design needs validation by walking key tasks as each inclusive persona |
+| [usability-testing.md](review/usability-testing.md) | planning or running usability tests with real participants |
+
 ## Phase owner
 
-| Capability | Materialized source | Owner | Mapping |
-|---|---|---|---|
-| Review an existing surface without rerunning discovery | `design-review` | `visual-qa` + review workflow | Use for critique context while still capturing objective artifacts. |
-| Critique against brief, plan, personas, principles, taste, and craft | `designpowers-critique` | `visual-qa` evidence + review workflow | Run after screenshots and objective checks so findings cite the built surface. |
-| WCAG, COGA, keyboard, screen reader, motion, content, and adaptive needs | `accessibility-reviewer` role | `visual-qa` evidence + review workflow | Name affected users and exact fixes. |
-| Nielsen heuristics and cognitive walkthroughs | `heuristic-evaluation` + `heuristic-evaluator` role | `visual-qa` evidence + review workflow | Walk key tasks and classify H1-H10 findings with severity. |
-| Persona and task walkthroughs | `synthetic-user-testing` | `visual-qa` evidence + review workflow | Validate that inclusive personas can complete real tasks in assistive or situational contexts. |
-| Human testing plan when needed | `usability-testing` | Review workflow | Produce a participant-test plan or follow-up recommendation when synthetic testing is insufficient. |
-| Completion evidence discipline | `verification-before-shipping` | Review workflow | Summarize completion, accessibility, persona, content, and debt status. |
+| Capability | Owner | Mapping |
+|---|---|---|
+| Review an existing surface without rerunning discovery | [design-review.md](review/design-review.md) | Use for critique context while still capturing objective artifacts. |
+| Critique against brief, plan, personas, principles, taste, and craft | [design-review.md](review/design-review.md) — intent and craft lenses | Run after screenshots and objective checks so findings cite the built surface. |
+| WCAG, COGA, keyboard, screen reader, motion, content, and adaptive needs | [design-review.md](review/design-review.md) — accessibility lens | Name affected users and exact fixes. |
+| Nielsen heuristics and cognitive walkthroughs | [heuristic-evaluation.md](review/heuristic-evaluation.md) | Walk key tasks and classify H1-H10 findings with severity. |
+| Persona and task walkthroughs | [synthetic-user-testing.md](review/synthetic-user-testing.md) | Validate that inclusive personas can complete real tasks in assistive or situational contexts. |
+| Human testing plan when needed | [usability-testing.md](review/usability-testing.md) | Produce a participant-test plan or follow-up recommendation when synthetic testing is insufficient. |
+| Completion evidence discipline | Review workflow (salvage below) | Summarize completion, accessibility, persona, content, and debt status. |
 
-The `design-critic`, `accessibility-reviewer`, and `heuristic-evaluator` files are role-reference material.
+## Salvaged from removed references
+
+Short items whose full source documents were removed as duplicated elsewhere:
+
+- **From former ui-composition:** test colour-dependent information with simulated colour-vision deficiency (protanopia, deuteranopia, tritanopia) — not only contrast ratios.
 
 ## Prompt injection
 
@@ -49,6 +62,17 @@ Lane C requires:
 - persona walkthrough results with task, steps, outcome, and barriers;
 - a repair decision for every Critical or Major issue; and
 - deferred Minor or Note findings routed to design debt with final review context.
+
+## URL Discovery Protocol
+
+When evaluating a live website, discover real URLs before attempting to fetch any sub-pages. Follow this protocol in order. **Never infer or guess a URL from a nav label, button text, or any other interface element** — a label "Vendre" does not mean the URL is `/vendre`. Guessed URLs produce false 404 findings and damage the credibility of the evaluation.
+
+1. **Extract hrefs from the page source.** Use only the URLs returned as actual hrefs for any follow-up fetches. Discard any URL you constructed yourself.
+2. **Try the sitemaps.** Fetch `[origin]/sitemap.xml`; if that returns 404, also try `[origin]/sitemap_index.xml`. If a sitemap is found, use it as the authoritative URL list for the site.
+3. **Check robots.txt.** Look for any `Sitemap:` directives — these point to the canonical sitemap location even when the default `/sitemap.xml` path doesn't exist.
+4. **Accept the limit.** If all three steps fail to yield sub-page URLs, stop trying to fetch sub-pages and state explicitly in the evaluation: "Sub-page structure could not be verified — evaluation is based on homepage content only."
+
+Href types: relative hrefs (`/acheter`, `../contact`) resolve against the origin before fetching; hash hrefs (`#section`) stay on the same page — note them but do not fetch; JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
 
 ## Guardrails
 

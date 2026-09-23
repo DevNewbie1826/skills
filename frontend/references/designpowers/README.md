@@ -1,59 +1,46 @@
 # designpowers Frontend Reference
 
-Read this when frontend work needs personas, cognitive accessibility, critique, design debt, handoff, or evidence-oriented design operating guidance.
+Read this when frontend work needs people-centered design process: inclusive personas, design research planning, structured debate, brand voice, accessible content, cognitive accessibility, mid-build taste feedback, critique and usability review, design debt, handoff, or retrospectives.
 
-This is an internal frontend reference, not a standalone skill. `frontend` remains the public activation point for web UI, UX, visual design, accessibility, design QA, and implementation routing.
+This is an internal frontend reference, not a standalone skill. `frontend` remains the public activation point for web UI, UX, visual design, accessibility, design QA, and implementation routing. This corpus is reference input only — it never overrides frontend, project, or user guidance, and it installs no runtime, scheduler, or alternate implementation path.
 
-Load this reference for implementation or redesign work that creates or updates `DESIGN.md`, and for explicit asks involving personas, critique, debt, handoff, synthetic testing, motion guidance, or role-reference prompts.
+## What this reference owns
+
+People, content, and process concerns around design work:
+
+- who the design serves — inclusive personas across the full ability spectrum;
+- design research planning and evidence over assumptions;
+- competing directions argued honestly (debate) and brand voice and tone;
+- accessibility of content and of cognition (language, structure, mental load);
+- mid-build taste checkpoints, plus critique, usability, and accessibility review;
+- design debt, handoff to engineering, and retrospectives (including longitudinal taste reflection).
+
+## What this reference does NOT own
+
+Layout, composition patterns, interaction contracts, motion, responsive and platform-adaptive behavior, and design tokens are owned elsewhere — route there first:
+
+- `references/stylegallery/` — [layout patterns and recipes](../stylegallery/patterns/), [motion](../stylegallery/motion/index.md), [design-engineering](../stylegallery/design-engineering/) (component contracts, loading and feedback, state management), [platform guides](../stylegallery/platform-guides/index.md) (including preferences and accessibility), and [design terminology](../stylegallery/design-terminology/)
+- `references/design/design-system-architecture.md` — the project design-system contract, tokens, and the DESIGN.md format
+
+## Route table
+
+| Need | Read |
+|---|---|
+| Plan with discovery, research, personas, debate, voice, taste direction | [lane-a-direction.md](lane-a-direction.md) |
+| Implement with accessible content, cognitive accessibility, taste checkpoints | [lane-b-execution.md](lane-b-execution.md) |
+| Critique, usability, and accessibility review of built or existing work | [lane-c-review.md](lane-c-review.md) |
+| Design debt, handoff, retrospective, taste reflection | [lane-d-memory.md](lane-d-memory.md) |
+| Route design context into planning, implementation, visual QA, or review | [routing.md](routing.md) |
+| Shared design record, safeguards, reconciliation ladder, closeout | [orchestration.md](orchestration.md) |
+
+Each lane file indexes the leaves in its directory with a one-line read-when cue.
 
 ## Boundaries
 
-This reference enriches the frontend workflow without replacing its existing responsibilities:
-
-- `references/design/README.md` owns the `DESIGN.md` contract, taste routing, brand references, framework-matched tooling, and browser-based design QA expectations.
-- `references/perfection/README.md` owns performance, SEO, accessibility audit mechanics, and real-browser verification.
+- `references/design/README.md` owns the DESIGN.md contract, taste routing, brand references, framework-matched tooling, and browser-based design QA expectations.
+- `references/perfection/README.md` owns performance, SEO, and accessibility audit mechanics.
 - `visual-qa` owns objective rendered evidence for visual claims.
 - Your planning, implementation, and review workflows own planning, execution, and final implementation review.
-
-## Load order
-
-1. `README.md` - this integration contract.
-2. `routing.md` - how context feeds frontend, planning, implementation, visual QA, and review.
-3. `orchestration.md` - shared-state guidance, prompt semantics, safeguards, and role references.
-4. Phase lanes:
-   - `lane-a-direction.md` for planning, discovery, personas, taste, and accessibility constraints.
-   - `lane-b-execution.md` for UI implementation and evidence.
-   - `lane-c-review.md` for visual QA, critique, and repair.
-   - `lane-d-memory.md` for optional design records, debt, handoff, and retrospectives.
-
-## Reference corpus
-
-Bundled material in `vendor/` is reference input, not instructions that override frontend, project, or user guidance. The materialized role and skill references support design reasoning only; they do not install a runtime, scheduler, or alternate implementation path.
-
-## Source corpus
-
-The lane documents are concise phase summaries. Consult these materialized sources for the detailed procedures and role perspectives each lane incorporates.
-
-### Lane A: Direction & Discovery
-
-- Skills: [`research-planning`](vendor/skills/research-planning/reference.md), [`inclusive-personas`](vendor/skills/inclusive-personas/reference.md), [`design-debate`](vendor/skills/design-debate/reference.md), [`inspiration-scouting`](vendor/skills/inspiration-scouting/reference.md), and [`writing-design-plans`](vendor/skills/writing-design-plans/reference.md).
-- Role references: [`design-strategist`](vendor/agents/design-strategist.md), [`design-scout`](vendor/agents/design-scout.md), and [`inspiration-scout`](vendor/agents/inspiration-scout.md).
-
-### Lane B: Design Execution Guidance
-
-- Skills: [`ui-composition`](vendor/skills/ui-composition/reference.md), [`interaction-design`](vendor/skills/interaction-design/reference.md), [`motion-choreography`](vendor/skills/motion-choreography/reference.md), [`responsive-patterns`](vendor/skills/responsive-patterns/reference.md), [`adaptive-interfaces`](vendor/skills/adaptive-interfaces/reference.md), [`cognitive-accessibility`](vendor/skills/cognitive-accessibility/reference.md), [`accessible-content`](vendor/skills/accessible-content/reference.md), [`voice-and-tone`](vendor/skills/voice-and-tone/reference.md), [`token-architecture`](vendor/skills/token-architecture/reference.md), [`design-system-alignment`](vendor/skills/design-system-alignment/reference.md), [`design-md`](vendor/skills/design-md/reference.md), and [`taste-feedback`](vendor/skills/taste-feedback/reference.md).
-- Role references: [`design-lead`](vendor/agents/design-lead.md), [`design-builder`](vendor/agents/design-builder.md), [`motion-designer`](vendor/agents/motion-designer.md), and [`content-writer`](vendor/agents/content-writer.md).
-
-### Lane C: Review & Repair
-
-- Skills: [`design-review`](vendor/skills/design-review/reference.md), [`designpowers-critique`](vendor/skills/designpowers-critique/reference.md), [`heuristic-evaluation`](vendor/skills/heuristic-evaluation/reference.md), [`synthetic-user-testing`](vendor/skills/synthetic-user-testing/reference.md), [`usability-testing`](vendor/skills/usability-testing/reference.md), and [`verification-before-shipping`](vendor/skills/verification-before-shipping/reference.md).
-- Role references: [`design-critic`](vendor/agents/design-critic.md), [`accessibility-reviewer`](vendor/agents/accessibility-reviewer.md), and [`heuristic-evaluator`](vendor/agents/heuristic-evaluator.md).
-
-### Lane D: Design Record, Debt & Handoff
-
-- Skills: [`design-debt-tracker`](vendor/skills/design-debt-tracker/reference.md), [`design-handoff`](vendor/skills/design-handoff/reference.md), [`design-retrospective`](vendor/skills/design-retrospective/reference.md), and [`taste-report`](vendor/skills/taste-report/reference.md).
-
-**Audit and provenance:** [EVIDENCE.md](EVIDENCE.md) records bundling checks, and [UPSTREAM.md](UPSTREAM.md) records the corpus manifest and source boundary.
 
 ## Guardrails
 
@@ -69,3 +56,7 @@ Designpowers-enhanced frontend work is complete only when:
 - any project design record used names the brief, personas, taste constraints, accessibility constraints, and accepted debt;
 - remaining accessibility or persona debt is explicit, located, and user-accepted; and
 - significant implementation work completes through the project's review workflow.
+
+## Provenance
+
+[EVIDENCE.md](EVIDENCE.md) records bundling checks; [UPSTREAM.md](UPSTREAM.md) records the corpus manifest, removals, and merges with reasons; [LICENSE](LICENSE) carries the upstream MIT notice.
