@@ -32,40 +32,15 @@ Do not compose product screens until `DESIGN.md` Section 5 names reusable primit
 
 For a React project, read [react-dev-tooling-skill.md](react-dev-tooling-skill.md) when optional source inspection, render diagnostics, or static analysis fit its dependency policy. Keep runtime tools dev-only and do not add dependencies without a project need or consent. Other stacks use comparable tooling when available.
 
-## Routing decisions
+## Choosing within design/
 
-Start with the first matching route, then load only the references it names.
+SKILL.md owns the request-to-reference routes; this note only records the choices those routes leave open.
 
-| Request | Load |
-|---|---|
-| Named brand, site, or visual direction | [_INDEX.md](_INDEX.md), the matching Layer B reference, and one compatible Layer A style skill. |
-| Landing page, portfolio, or redesign without a narrow named style | [taste-skill.md](taste-skill.md). It does not cover dashboards, data tables, or multi-step product UI. |
-| Expressive, premium, glossy, or high-craft marketing surface | [soft-skill.md](soft-skill.md) or [cinematic-taste-skill.md](cinematic-taste-skill.md), plus a high-craft Layer B reference. |
-| Minimal, clean, editorial, or restrained surface | [minimalist-skill.md](minimalist-skill.md). |
-| Brutalist, raw, Swiss, experimental, or anti-design surface | [brutalist-skill.md](brutalist-skill.md). |
-| Existing UI that needs an audit before visual changes | [redesign-skill.md](redesign-skill.md), plus a Layer B reference only when a target aesthetic is named. |
-| Live URL or runtime-faithful clone | [clone-from-url.md](clone-from-url.md). |
-| Image-first implementation or expressive greenfield concepts | [image-to-code-skill.md](image-to-code-skill.md) plus [image-gen-concepts-web.md](image-gen-concepts-web.md) or [image-gen-concepts-mobile.md](image-gen-concepts-mobile.md). |
-| Image-only web, mobile, or brand imagery | The matching `image-gen-concepts-*` or [image-gen-brandkit.md](image-gen-brandkit.md) reference only. |
-| `DESIGN.md` export | [mockup-export-skill.md](mockup-export-skill.md) on top of the selected style skill. |
-| Incomplete implementation or placeholder debt | [output-skill.md](output-skill.md) on top of the selected style skill. |
-| Dashboard, settings, inbox, split pane, app shell, or content-stress layout | [layout-skill.md](layout-skill.md) plus [StyleGallery pattern catalog](../stylegallery/CATALOG.md); select a project-appropriate system separately. Do not use `taste-skill.md` for this route. |
-
-For a named brand absent from the catalog, use the closest mood shortcut in [_INDEX.md](_INDEX.md), then select a compatible Layer A skill. A concrete screenshot or generated mockup is a contract: use [image-to-code-skill.md](image-to-code-skill.md), extract its tokens and responsive intent into `DESIGN.md`, and run `visual-qa` in reference-fidelity mode. Use [clone-from-url.md](clone-from-url.md) instead for a live URL.
-
-## Focused task routes
-
-| Need | Read |
-|---|---|
-| Concrete centering, stacking, containment, grid, overlay, split, or shell pattern | [StyleGallery pattern catalog](../stylegallery/CATALOG.md). |
-| Whole-screen composition | [StyleGallery layout recipes](../stylegallery/recipes/index.md). |
-| Motion naming, specification, or review | [StyleGallery motion](../stylegallery/motion/index.md). Production defaults are in `SKILL.md`; review-level edge cases follow this motion reference. |
-| Product-layer craft decision or evidence | [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md). |
-| Game HUD, menu, inventory, or game interface | [StyleGallery Game UI](../stylegallery/game%2Dui/index.md). |
-| Bounded platform-convention comparison | [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md). |
-| Layout patterns, recipes, and planning guides | [StyleGallery Layout hub](../stylegallery/layout/index.md). |
-| Browse StyleGallery domains | [StyleGallery domain map](../stylegallery/index.md). |
-| Comparing or reconciling design terms across named systems | [StyleGallery Design Terminology](../stylegallery/design-terminology/index.md). |
+- Apply the first matching route and load only the references it names. Do not stack extra references "just in case".
+- Named brand absent from the catalog: take the closest mood shortcut in [_INDEX.md](_INDEX.md), then select a compatible Layer A style skill.
+- A concrete screenshot or generated mockup is a contract: use [image-to-code-skill.md](image-to-code-skill.md), extract its tokens and responsive intent into `DESIGN.md`, and run `visual-qa` in reference-fidelity mode. For a live URL use [clone-from-url.md](clone-from-url.md) instead.
+- Dashboard, settings, inbox, split pane, and app-shell routes select a project-appropriate system separately. Do not use [taste-skill.md](taste-skill.md) for these routes.
+- The [StyleGallery motion](../stylegallery/motion/index.md) reference covers motion naming, specification, and review-level edge cases. Production motion defaults live in SKILL.md's shared axioms.
 
 ## Stacking rules
 
