@@ -23,12 +23,13 @@ Most Layer A and Layer B references live flat in this directory; focused task do
 
 | Directory | Purpose | Load when |
 |---|---|---|
-| [`layout-patterns/`](layout-patterns/CATALOG.md) | Concrete spatial pattern catalog for centering, stacking, containment, grids, overlays, splits, media, and shells. `layout-skill.md` owns mechanics; `layout-patterns/` is the concrete catalog. | A component or screen needs a named spatial solution, especially a content-stress or scroll-ownership fix. |
-| [`layout-recipes/`](layout-recipes/index.md) | Screen-level spatial compositions built from reusable patterns. | Planning a homepage, dashboard, settings flow, article, list-detail view, form flow, or command surface. |
-| [`motion/`](motion/index.md) | Product-motion terminology, evidence-first review procedure, and bounded practice reference. | Naming, reviewing, or specifying declared product motion. |
-| [`design-engineering/`](design-engineering/index.md) | Product-layer craft decisions and verification questions. | Reviewing interaction detail, product purpose, implementation constraints, or evidence. |
-| [`game-ui/`](game-ui/index.md) | **Optional game UI / engine lane.** Engine-neutral game-interface classification, hierarchy, and named-engine guides. | Building or reviewing a game HUD, menu, inventory, overlay, or game-interface reference. |
-| [`platform-guides/`](platform-guides/index.md) | **Optional platform-comparison lane.** Bounded, current platform-convention comparisons for local adaptation. | A platform convention needs comparison before adapting it to the product surface. |
+| [StyleGallery patterns](../stylegallery/CATALOG.md) | Concrete spatial pattern catalog for centering, stacking, containment, grids, overlays, splits, media, and shells. `layout-skill.md` owns mechanics; StyleGallery provides the concrete catalog. | A component or screen needs a named spatial solution, especially a content-stress or scroll-ownership fix. |
+| [StyleGallery recipes](../stylegallery/recipes/index.md) | Screen-level spatial compositions built from reusable patterns. | Planning a homepage, dashboard, settings flow, article, list-detail view, form flow, or command surface. |
+| [StyleGallery Motion](../stylegallery/motion/index.md) | Product-motion terminology, evidence-first review procedure, and bounded practice reference. | Naming, reviewing, or specifying declared product motion. |
+| [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md) | Product-layer craft decisions and verification questions. | Reviewing interaction detail, product purpose, implementation constraints, or evidence. |
+| [StyleGallery Game UI](../stylegallery/game%2Dui/index.md) | **Optional game UI / engine lane.** Engine-neutral game-interface classification, hierarchy, and named-engine guides. | Building or reviewing a game HUD, menu, inventory, overlay, or game-interface reference. |
+| [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md) | **Optional platform-comparison lane.** Bounded, current platform-convention comparisons for local adaptation. | A platform convention needs comparison before adapting it to the product surface. |
+| [StyleGallery Design Terminology](../stylegallery/design-terminology/index.md) | Compare or reconcile design terms across named design systems. | A term has different meanings across named systems. |
 
 ---
 
@@ -214,9 +215,9 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 - **"Data-dense / dashboard"** → `sentry.md`, `kraken.md`, `posthog.md`, `clickhouse.md`
 - **"Bold / sporty / monochrome punch"** → `nike.md`, `uber.md`, `tesla.md`, `binance.md`
 - **"Playful / colorful / friendly"** → `figma.md`, `airtable.md`, `zapier.md`, `lovable.md`
-- **"Layout breaks with real content"** → [`layout-skill.md`](layout-skill.md) + [`layout-patterns/CATALOG.md`](layout-patterns/CATALOG.md)
-- **"Compose a whole homepage, dashboard, settings, or command screen"** → [`layout-recipes/index.md`](layout-recipes/index.md)
-- **"Name, review, or specify motion"** → [`motion/index.md`](motion/index.md)
-- **"Verify product-layer craft"** → [`design-engineering/index.md`](design-engineering/index.md)
-- **"Game HUD, menu, or inventory"** → optional [`game-ui/index.md`](game-ui/index.md)
-- **"Compare a platform convention before adaptation"** → optional [`platform-guides/index.md`](platform-guides/index.md)
+- **"Layout breaks with real content"** → [`layout-skill.md`](layout-skill.md) + [StyleGallery patterns](../stylegallery/CATALOG.md)
+- **"Compose a whole homepage, dashboard, settings, or command screen"** → [StyleGallery recipes](../stylegallery/recipes/index.md)
+- **"Name, review, or specify motion"** → [StyleGallery Motion](../stylegallery/motion/index.md)
+- **"Verify product-layer craft"** → [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md)
+- **"Game HUD, menu, or inventory"** → optional [StyleGallery Game UI](../stylegallery/game%2Dui/index.md)
+- **"Compare a platform convention before adaptation"** → optional [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md)

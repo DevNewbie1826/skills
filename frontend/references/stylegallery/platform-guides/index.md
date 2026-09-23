@@ -1,0 +1,44 @@
+# Platform Guides
+Read this when working on a platform-specific interface.
+
+Platform Guides own bounded comparison with named platform conventions and their version, authority, adaptation, and freshness limits.
+
+## Scope Boundary
+
+In scope: comparative vocabulary, interaction questions, current official-source requirements, and locally verified adaptation notes.
+
+Out of scope: affiliation, brand imitation, unsupported platform equivalence, and authority over web standards, accessibility, or Layout contracts.
+
+## Start Here
+
+| Task | Route |
+| --- | --- |
+| Record native facts, target decisions, and fallbacks. | [Platform Adaptation Workflow](adaptation-workflow.md) |
+| Compare Back and adaptive window behavior. | [Android Interaction As A Comparative Reference](android-interaction.md) |
+| Compare keyboard, focus, and commands. | [Windows Interaction As A Comparative Reference](windows-interaction.md) |
+| Select target and fallback verification cases. | [Platform Compatibility Matrix](compatibility-matrix.md) |
+
+These workflows and worked cases are usable experimental guidance. Expected-result tables are test designs; actual product, engine, and reader evidence must be recorded separately. Review on a failed task, a source change, or a changed ownership contract.
+
+## Available Guides
+
+- [Apple Interaction As A Comparative Reference](apple-interaction.md) turns selected interaction themes into questions for web adaptation without claiming platform equivalence.
+
+## Comparison, Not Imitation
+
+A platform guide names the platform, source authority, version or review date, web-adaptation boundary, and local verification protocol. Similar appearance or behavior does not establish affiliation or correctness.
+
+## Source-Backed Deep Dives
+
+- [Adaptive Navigation Across Platforms](adaptive-navigation.md). Preserve task state across window and navigation transformations.
+- [Preferences And Accessibility Across Platforms](preferences-and-accessibility.md). Compare text scaling, contrast, motion, and transparency independently.
+- [Input And Focus Across Platforms](input-and-focus.md). Compare keyboard, pointer, drag alternatives, and focus contracts.
+
+## Domain Contract
+
+See [StyleGallery Domains](https://github.com/changeroa/StyleGallery/blob/2a9ae14e1ed1e6ebc9ec525a7c305a7cc9830b34/DOMAINS.md) for lifecycle, provenance, page membership, and staleness rules.
+
+## IA Navigation
+
+Parent: [StyleGallery](../index.md).
+Next: [Platform Adaptation Workflow](adaptation-workflow.md).
