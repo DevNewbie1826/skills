@@ -23,6 +23,9 @@ Lane A feeds the project's planning workflow. It does not write a parallel plan 
 | Represent the full ability spectrum | [inclusive-personas.md](direction/inclusive-personas.md) | Require personas and stress cases, including permanent, temporary, and situational contexts. |
 | Calibrate current-project taste and quality bar | Planning workflow | Add project-specific taste constraints; do not import cross-project memory as a design rule. |
 | Surface competing directions and trade-offs | [design-debate.md](direction/design-debate.md) | Present two or three options with accessibility and usability trade-offs before selecting defaults. |
+| Assess competitors when competitive research is undertaken | [research-planning.md](direction/research-planning.md) | Compare UX and accessibility; distinguish observed evidence from speculation, and state implications for this project. Competitive research is optional, not a requirement for every task. |
+| Validate proposed navigation and information architecture | [research-planning.md](direction/research-planning.md) | Include a findability task probe to check whether users can locate key destinations. |
+| Produce journey maps when useful | [research-planning.md](direction/research-planning.md) | For each journey stage, capture goals, actions, thoughts, emotions, pain points, opportunities, and ability considerations. Journey maps are not required for every task. |
 | Define and apply brand voice and tone | [voice-and-tone.md](direction/voice-and-tone.md) | Carry voice attributes, tone-by-context, and vocabulary into content acceptance checks. |
 | Curate references without copying | Planning workflow (salvage below) | Add evidence-backed notes describing what to take and what to leave. |
 | Maintain shared design state | Optional project design record | Read or update it only when the project already uses one or the user requests durable state. |

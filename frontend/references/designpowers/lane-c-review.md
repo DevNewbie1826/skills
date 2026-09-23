@@ -67,12 +67,18 @@ Lane C requires:
 
 When evaluating a live website, discover real URLs before attempting to fetch any sub-pages. Follow this protocol in order. **Never infer or guess a URL from a nav label, button text, or any other interface element** — a label "Vendre" does not mean the URL is `/vendre`. Guessed URLs produce false 404 findings and damage the credibility of the evaluation.
 
-1. **Extract hrefs from the page source.** Use only the URLs returned as actual hrefs for any follow-up fetches. Discard any URL you constructed yourself.
+1. **Extract hrefs from the page source.** Resolve each actual href against the effective document base URL: the page URL unless the document declares a `<base href>`, in which case use that base URL. Use only those resolved URLs for follow-up fetches; discard any URL you constructed from interface labels or other guesses. *(from former heuristic-evaluator)*
 2. **Try the sitemaps.** Fetch `[origin]/sitemap.xml`; if that returns 404, also try `[origin]/sitemap_index.xml`. If a sitemap is found, use it as the authoritative URL list for the site.
 3. **Check robots.txt.** Look for any `Sitemap:` directives — these point to the canonical sitemap location even when the default `/sitemap.xml` path doesn't exist.
 4. **Accept the limit.** If all three steps fail to yield sub-page URLs, stop trying to fetch sub-pages and state explicitly in the evaluation: "Sub-page structure could not be verified — evaluation is based on homepage content only."
 
-Href types: relative hrefs (`/acheter`, `../contact`) resolve against the origin before fetching; hash hrefs (`#section`) stay on the same page — note them but do not fetch; JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
+| href at `https://example.test/catalog/items/` | Resolved against the document URL |
+|---|---|
+| `../contact` | `https://example.test/catalog/contact` |
+| `contact` | `https://example.test/catalog/items/contact` |
+| `/contact` | `https://example.test/contact` |
+
+Href types: relative hrefs (for example, `/acheter`, `../contact`) resolve against the effective document base URL before fetching; hash hrefs (`#section`) stay on the same page — note them but do not fetch; JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
 
 ## Guardrails
 

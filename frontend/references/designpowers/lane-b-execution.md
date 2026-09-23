@@ -24,13 +24,13 @@ Visual-system mechanics — layout, composition, interaction states, motion, res
 | Visual hierarchy, layout, color, typography, touch targets, and WCAG contrast | `references/stylegallery/` patterns, recipes, and guides | Carry their constraints as acceptance checks; do not restate their guidance here. |
 | States, feedback, loading, error, keyboard, touch, and recovery behavior | `references/stylegallery/design-engineering/` | Require default, hover, focus, active, disabled, loading, empty, success, and error states where applicable. |
 | Purposeful motion and reduced-motion alternatives | `references/stylegallery/motion/` | Explain what changed, what to notice, or how elements relate; provide safe alternatives. |
-| Content-driven breakpoints and user-preference adaptation | `references/stylegallery/platform-guides/` | Prove narrow, mid, desktop, and 200-percent zoom behavior when the surface is visual; support relevant preferences. |
+| Content-driven breakpoints and user-preference adaptation | `references/stylegallery/platform-guides/` | Prove narrow, mid, desktop, and 200-percent zoom behavior when the surface is visual; support relevant preferences. Application-level choices such as density persist across sessions, and users are never asked to justify a preference (from former adaptive-interfaces). |
 | Tokens and design-system consistency | `references/design/design-system-architecture.md` | Use real tokens and existing components before one-off styling. |
 
 ### Motion numbers (from the former motion-designer role reference)
 
 - **Duration discipline** — micro-interactions: 100–200ms. Transitions: 200–400ms. Complex choreography: 400–700ms. Nothing over 1 second unless it is a loading indicator
-- **Reduced motion is not no motion** — `prefers-reduced-motion: reduce` means reduce, not remove. Fade and opacity changes are usually safe. Cross-fades instead of slides. Instant state changes instead of animated ones where needed
+- **Reduced-motion alternatives** — for `prefers-reduced-motion: reduce`, reduce, remove, or substitute non-essential motion as appropriate while preserving equivalent state and feedback. A fade is not automatically safe or a pass; verify the alternative against the task and device evidence, following the StyleGallery motion owner (`references/stylegallery/motion/`). Numeric duration and easing examples below are subordinate to that evidence and owner (from former motion-designer).
 - **Test at 6x slow-motion** — if an animation looks wrong at 6x slowdown, the timing is wrong
 
 | Context | Easing | Why |

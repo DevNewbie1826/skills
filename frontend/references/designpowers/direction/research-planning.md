@@ -51,6 +51,10 @@ Match methods to questions:
 | "How does our offering compare?" | Competitive analysis, heuristic evaluation |
 | "Who are we designing for?" | Persona development, ability spectrum mapping |
 
+When competitive research is undertaken, assess competitors' UX and accessibility, label findings as observed evidence or speculation, and explain the implications for this project. Competitive research is optional; do not add it to every task by default.
+
+When proposing navigation or information architecture, include a findability task probe: give representative users realistic destination-finding tasks and record whether they locate the intended content. If a journey map is produced, capture each stage's goals, actions, thoughts, emotions, pain points, opportunities, and ability considerations. A journey map is an optional method, not a required deliverable for every task. *(from former design-scout and design-strategist roles)*
+
 ### Step 4: Plan for Inclusion
 
 Every research plan must address:
