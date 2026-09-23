@@ -16,7 +16,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | Existing project that already has `DESIGN.md` or a component system | Read and follow it; update it only for a needed token, primitive, state, motion rule, accessibility constraint, accepted debt, or fidelity requirement |
 | Existing UI with neither `DESIGN.md` nor a component system | Ask whether to preserve the current look with local styling or first extract a design system ([`design/design-system-architecture.md`](references/design/design-system-architecture.md)); do not silently choose |
 | No `DESIGN.md`, or extracting a system from existing UI | [`design/design-system-architecture.md`](references/design/design-system-architecture.md) |
-| A concrete visual reference (screenshot, mockup, Figma export) as the contract | [`design/image-to-code-skill.md`](references/design/image-to-code-skill.md); extract tokens, geometry, states, motion into `DESIGN.md` |
+| A concrete visual reference (screenshot, mockup, Figma export) as the contract, or generating/analyzing a visual direction before implementing it | [`design/image-to-code-skill.md`](references/design/image-to-code-skill.md); extract tokens, geometry, states, motion into `DESIGN.md`. For image-only concepts (no code): [`design/image-gen-concepts-web.md`](references/design/image-gen-concepts-web.md) or the mobile/brandkit variants. |
 | A live URL as the contract | [`design/clone-from-url.md`](references/design/clone-from-url.md) |
 | Landing page, portfolio, or redesign needing visual direction | [`design/taste-skill.md`](references/design/taste-skill.md). Not dashboards or multi-step product UI. |
 | Expressive cinematic, high-variance, scroll-led marketing surface | [`design/cinematic-taste-skill.md`](references/design/cinematic-taste-skill.md) |
@@ -26,7 +26,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | Improving existing UI | [`design/redesign-skill.md`](references/design/redesign-skill.md); audit first, never greenfield |
 | Completing an unfinished implementation | [`design/output-skill.md`](references/design/output-skill.md), stacked on a style skill |
 | Exporting a portable `DESIGN.md` specification | [`design/mockup-export-skill.md`](references/design/mockup-export-skill.md), stacked on a style skill; worked example: [`design/mockup-export-example.md`](references/design/mockup-export-example.md) |
-| Image-only mockups, screen concepts, identity boards | [`design/image-gen-concepts-web.md`](references/design/image-gen-concepts-web.md) / [`image-gen-concepts-mobile.md`](references/design/image-gen-concepts-mobile.md) / [`image-gen-brandkit.md`](references/design/image-gen-brandkit.md). They do not write code. |
+| Image-only mockups, screen concepts, identity boards (no code) | [`design/image-gen-concepts-web.md`](references/design/image-gen-concepts-web.md) / [`image-gen-concepts-mobile.md`](references/design/image-gen-concepts-mobile.md) / [`image-gen-brandkit.md`](references/design/image-gen-brandkit.md) |
 | Layer B brand reference for a named brand or site | [`design/_INDEX.md`](references/design/_INDEX.md) for the catalog and mood shortcuts; apply extracted principles, never copy logos or assets |
 | Shipped-product research | [`design/lazyweb.md`](references/design/lazyweb.md) when available, plus the [`design/_INDEX.md`](references/design/_INDEX.md) shortlist |
 | Layout mechanics: dashboards, settings, inboxes, split panes, app shells, scroll ownership | [`design/layout-skill.md`](references/design/layout-skill.md) plus the concrete pattern catalog below |
@@ -38,6 +38,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | Domain map of all StyleGallery areas | [`stylegallery/index.md`](references/stylegallery/index.md); synced revision and resync procedure: [`stylegallery/UPSTREAM.md`](references/stylegallery/UPSTREAM.md) |
 | Frontend code, performance, SEO, accessibility, or quality auditing | [`perfection/README.md`](references/perfection/README.md); build for production, then run the lighthouse audit (Commands below) |
 | Concrete style, palette, font pairing, chart, UX guideline, or generated design system lookup | [`ui-ux-db/README.md`](references/ui-ux-db/README.md); a lookup tool, not a visual-direction substitute. Search CLI: Commands below. |
+| Creating or updating `DESIGN.md`, or any implementation/redesign needing personas, critique, debt, or handoff | Load the applicable lane(s) below. |
 | Personas, discovery, research, voice (planning) | [`designpowers/lane-a-direction.md`](references/designpowers/lane-a-direction.md) |
 | Accessible content, cognitive accessibility, taste checkpoints (building) | [`designpowers/lane-b-execution.md`](references/designpowers/lane-b-execution.md) |
 | Critique, heuristics, persona and usability testing (reviewing) | [`designpowers/lane-c-review.md`](references/designpowers/lane-c-review.md) |
