@@ -455,6 +455,178 @@ ROUTING_CUE_MESSAGE = "reference file needs a routing cue (frontmatter descripti
 ROUTING_PRIMARY_ROLE = re.compile(r"primary role:", re.IGNORECASE)
 # Blockquote markers are Markdown, not the cue. Existing references use `> Read this when`.
 ROUTING_READ_THIS_WHEN = re.compile(r"^(?:>\s*)*read this when\b", re.IGNORECASE)
+# Description cues need a YAML string. yaml_field() stays a line matcher for other callers.
+_DESCRIPTION_KEY = re.compile(
+    r"""^(?:description|"description"|'description')[ \t]*:[ \t]*(.*)$"""
+)
+_BLOCK_HEADER = re.compile(r"^([|>])(?:([+-])([1-9])|([1-9])([+-])|([+-])|([1-9]))?$")
+_NESTED_KEY = re.compile(
+    r"""^[ \t]+(?:"(?:[^"\\]|\\.)*"|'(?:[^']|'')*'|[^ \t:#][^:#]*?)\s*:(?:\s|$)"""
+)
+_NESTED_SEQ = re.compile(r"^[ \t]+-(?:\s|$)")
+_YAML_NULL = {"~", "null", "Null", "NULL"}
+
+def _leading_indent(line: str) -> int:
+    return len(line) - len(line.lstrip(" \t"))
+
+def _strip_yaml_comment(text: str) -> str:
+    quote = ""
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote == "'":
+            if char == "'":
+                if index + 1 < len(text) and text[index + 1] == "'":
+                    index += 2
+                    continue
+                quote = ""
+            index += 1
+            continue
+        if quote == '"':
+            if char == "\\" and index + 1 < len(text):
+                index += 2
+                continue
+            if char == '"':
+                quote = ""
+            index += 1
+            continue
+        if char in "\"'":
+            quote = char
+            index += 1
+            continue
+        if char == "#" and (index == 0 or text[index - 1].isspace()):
+            return text[:index].rstrip()
+        index += 1
+    return text.rstrip()
+
+def _decode_double_quoted(body: str) -> str:
+    simple = {
+        "0": "\0", "a": "\a", "b": "\b", "t": "\t", "n": "\n", "v": "\v", "f": "\f", "r": "\r",
+        "e": "\x1b", " ": " ", '"': '"', "/": "/", "\\": "\\", "N": "\u0085", "_": "\u00a0",
+        "L": "\u2028", "P": "\u2029",
+    }
+    chars: list[str] = []
+    index = 0
+    while index < len(body):
+        char = body[index]
+        if char != "\\" or index + 1 >= len(body):
+            chars.append(char)
+            index += 1
+            continue
+        escaped = body[index + 1]
+        if escaped in simple:
+            chars.append(simple[escaped])
+            index += 2
+            continue
+        width = {"x": 2, "u": 4, "U": 8}.get(escaped)
+        if width is not None:
+            hexpart = body[index + 2:index + 2 + width]
+            if len(hexpart) == width and all(item in "0123456789abcdefABCDEF" for item in hexpart):
+                chars.append(chr(int(hexpart, 16)))
+                index += 2 + width
+                continue
+        chars.append(escaped)
+        index += 2
+    return "".join(chars)
+
+def _quoted_scalar(text: str) -> tuple[str, str] | None:
+    if not text or text[0] not in "\"'":
+        return None
+    quote = text[0]
+    index = 1
+    if quote == "'":
+        chars: list[str] = []
+        while index < len(text):
+            if text[index] == "'":
+                if index + 1 < len(text) and text[index + 1] == "'":
+                    chars.append("'")
+                    index += 2
+                    continue
+                return "".join(chars), text[index + 1:]
+            chars.append(text[index])
+            index += 1
+        return None
+    while index < len(text):
+        if text[index] == "\\" and index + 1 < len(text):
+            index += 2
+            continue
+        if text[index] == '"':
+            return _decode_double_quoted(text[1:index]), text[index + 1:]
+        index += 1
+    return None
+
+def _explicit_block_indent(header: re.Match[str]) -> int | None:
+    for group in (3, 4, 7):
+        value = header.group(group)
+        if value:
+            return int(value)
+    return None
+
+def _block_scalar(front: list[str], index: int, explicit: int | None) -> str:
+    content_indent = explicit
+    parts: list[str] = []
+    for line in front[index + 1:]:
+        if line.strip() == "":
+            if content_indent is not None:
+                parts.append("")
+            continue
+        indent = _leading_indent(line)
+        if content_indent is None:
+            if indent == 0:
+                break
+            content_indent = indent
+        if indent < content_indent:
+            break
+        if line.startswith(" " * content_indent):
+            parts.append(line[content_indent:])
+        else:
+            parts.append(line.lstrip(" \t"))
+    return "\n".join(parts)
+
+def _following_plain(front: list[str], index: int) -> str | None:
+    parts: list[str] = []
+    started = False
+    for line in front[index + 1:]:
+        if line.strip() == "":
+            if started:
+                parts.append("")
+            continue
+        stripped = line.lstrip(" \t")
+        if stripped.startswith("#"):
+            continue
+        if _leading_indent(line) == 0:
+            break
+        if not started and (_NESTED_KEY.match(line) or _NESTED_SEQ.match(line)):
+            return None
+        started = True
+        parts.append(stripped)
+    if not started:
+        return ""
+    return " ".join(part for part in parts if part)
+
+def routing_description(front: list[str]) -> str | None:
+    """Return the top-level description string, or None when it is absent or not a string."""
+    for index, line in enumerate(front):
+        found = _DESCRIPTION_KEY.match(line)
+        if not found:
+            continue
+        stripped = _strip_yaml_comment(found.group(1)).strip()
+        if not stripped:
+            return _following_plain(front, index)
+        quoted = _quoted_scalar(stripped)
+        if quoted is not None:
+            value, remainder = quoted
+            if not _strip_yaml_comment(remainder).strip():
+                return value
+        header = _BLOCK_HEADER.match(stripped)
+        if header is not None:
+            return _block_scalar(front, index, _explicit_block_indent(header))
+        if stripped[0] in "{[":
+            return None
+        if stripped in _YAML_NULL:
+            return ""
+        return stripped
+    return None
 
 def has_routing_cue(lines: list[str]) -> bool:
     parsed = frontmatter(lines)
@@ -462,8 +634,8 @@ def has_routing_cue(lines: list[str]) -> bool:
         body = lines
     else:
         front, closing = parsed
-        description = yaml_field(front, "description")
-        if description is not None and description[0].strip():
+        description = routing_description(front)
+        if description is not None and description.strip():
             return True
         body = lines[closing + 1:]
     return any(
