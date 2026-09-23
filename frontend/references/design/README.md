@@ -36,7 +36,7 @@ For a React project, read [react-dev-tooling-skill.md](react-dev-tooling-skill.m
 
 SKILL.md owns the request-to-reference routes; this note only records the choices those routes leave open.
 
-- Combine all applicable rows: load the design gate, then add task-specific lanes (layout, motion, perfection, etc.) and any style reference. Apply first-match only within the mutually exclusive Layer A style choices below. Do not stack extra references "just in case".
+- Combine all applicable rows: load the design gate, then add task-specific lanes (layout, motion, perfection, etc.) and any style reference. Among the mutually exclusive Layer A style rows in `SKILL.md`, a named style (cinematic, minimalist, brutalist, soft) wins over the generic `taste-skill.md` fallback; load only one style reference. Do not stack extra references "just in case".
 - Named brand absent from the catalog: take the closest mood shortcut in [_INDEX.md](_INDEX.md), then select a compatible Layer A style skill.
 - A concrete screenshot or generated mockup is a contract: use [image-to-code-skill.md](image-to-code-skill.md), extract its tokens and responsive intent into `DESIGN.md`, and run `visual-qa` in reference-fidelity mode. For a live URL use [clone-from-url.md](clone-from-url.md) instead.
 - Dashboard, settings, inbox, split pane, and app-shell routes select a project-appropriate system separately. Do not use [taste-skill.md](taste-skill.md) for these routes.

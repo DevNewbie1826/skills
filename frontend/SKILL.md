@@ -18,7 +18,7 @@ This file is a router, not a rulebook. Load the smallest set of references that 
 | No `DESIGN.md`, or extracting a system from existing UI | [`design/design-system-architecture.md`](references/design/design-system-architecture.md) |
 | A concrete visual reference (screenshot, mockup, Figma export) as the contract, or generating/analyzing a visual direction before implementing it | [`design/image-to-code-skill.md`](references/design/image-to-code-skill.md); extract tokens, geometry, states, motion into `DESIGN.md`. For image-only concepts (no code): [`design/image-gen-concepts-web.md`](references/design/image-gen-concepts-web.md) or the mobile/brandkit variants. |
 | A live URL as the contract | [`design/clone-from-url.md`](references/design/clone-from-url.md) |
-| Landing page, portfolio, or redesign needing visual direction | [`design/taste-skill.md`](references/design/taste-skill.md). Not dashboards or multi-step product UI. |
+| Landing page, portfolio, or redesign needing visual direction with no narrower named style | [`design/taste-skill.md`](references/design/taste-skill.md) as the fallback. If the request names a style (cinematic, minimalist, brutalist, soft), use that row instead, not both. Not dashboards or multi-step product UI. |
 | Expressive cinematic, high-variance, scroll-led marketing surface | [`design/cinematic-taste-skill.md`](references/design/cinematic-taste-skill.md) |
 | Minimal, clean, editorial, restrained work | [`design/minimalist-skill.md`](references/design/minimalist-skill.md) |
 | Brutalist, raw, Swiss, experimental, anti-design | [`design/brutalist-skill.md`](references/design/brutalist-skill.md) |
