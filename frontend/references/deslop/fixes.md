@@ -1,4 +1,5 @@
 # Fix patterns
+Read this when applying before/after patches.
 
 Before→after for each tell. These are *directions*, not find-and-replace rules —
 adapt to the project's tokens and framework. Prefer changing a shared token or
