@@ -1,6 +1,6 @@
 # Pattern Vocabulary and Page Workflow
 
-Read this when selecting layout patterns, redesigning an existing page, defining reusable blocks, or running the final pre-flight.
+Read this when selecting layout patterns, redesigning an existing page, or defining reusable blocks.
 
 Part of [Anti-Slop Frontend Skill](../taste-skill.md)
 
@@ -190,7 +190,7 @@ stack: ["react", "next", "tailwind", "motion"]
 ### 12.D Block-Library Discipline
 * One block per file. No multi-block files.
 * Every block must work standalone (drop it into a page, it renders).
-* Every block must pass the Pre-Flight Check (Section 14).
+* Every block must pass the [Pre-Flight Check (Section 14)](pre-flight.md).
 * Blocks that depend on a design system from Section 2.A live under `blocks/<category>/<name>--<system>.md` (e.g. `feature/bento-grid--material.md`).
 
 ---

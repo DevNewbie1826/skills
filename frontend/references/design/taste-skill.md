@@ -172,6 +172,6 @@ Before importing ANY 3rd-party library, check `package.json`. If the package is 
 |---|---|
 | [Design engineering and accessibility](taste-skill/engineering.md) | Implementing layout, assets, interaction, performance, or accessibility details. |
 | [Dial reference, theme, and anti-patterns](taste-skill/dials-and-tells.md) | Calibrating visual dials, theme behavior, or avoiding common design tells. |
-| [Pattern vocabulary and page workflow](taste-skill/workflow-and-patterns.md) | Choosing patterns, redesigning, defining blocks, or running final pre-flight. |
+| [Pattern vocabulary and page workflow](taste-skill/workflow-and-patterns.md) | Choosing patterns, redesigning, or defining blocks. |
 | [Final pre-flight check](taste-skill/pre-flight.md) | Auditing a completed page against the complete launch checklist. |
 | [Implementation sources and appendices](taste-skill/source-appendices.md) | Installing a system, checking canonical sources, or approximating Liquid Glass. |

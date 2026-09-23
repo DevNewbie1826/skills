@@ -1,6 +1,6 @@
 # Platform, Screen Count, and Flow
 
-Read this when choosing a mobile platform mode, screen count, onboarding structure, or believable screen-to-screen navigation.
+Read this when choosing a mobile platform mode and screen count, or rendering a fresh standalone screen for a mobile app.
 
 Part of [image-gen-concepts-mobile](../image-gen-concepts-mobile.md)
 
