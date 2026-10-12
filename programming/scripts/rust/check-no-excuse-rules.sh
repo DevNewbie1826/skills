@@ -3,6 +3,21 @@
 # Mirrors the philosophy of python-programmer / typescript-programmer scripts:
 # only rules that can be enforced via pure text matching live here.
 # Everything semantic is on clippy + miri + nextest.
+#
+# Rules:
+#   unwrap / expect         outside tests, unless the previous line carries
+#                           #[expect(clippy::unwrap_used|expect_used, reason = "...")]
+#   placeholder-macro       todo!/unimplemented!/unreachable! in committed code
+#   box-dyn-error           Box<dyn Error> in non-test code
+#   lib-panic               panic!() in library code
+#   discarded-result        `let _ = call(...)`, unless the previous line carries
+#                           #[expect(clippy::let_underscore_must_use, reason = "...")]
+#   blocking-in-async       std::thread::sleep / std::fs / reqwest::blocking /
+#                           .blocking_*() inside an async fn or async block
+#   unsafe-no-safety        unsafe { without // SAFETY: in the preceding 5 lines
+#   allow-attribute         #[allow(...)] - silence lints with #[expect(lint, reason)]
+#   expect-without-reason   #[expect(...)] with no `reason = "..."`
+#   narrowing-as-cast       possible narrowing numeric `as` cast
 
 set -euo pipefail
 
@@ -30,6 +45,11 @@ is_test_path() {
     return 1
 }
 
+count_char() {
+    local only="${1//[^$2]/}"
+    echo "${#only}"
+}
+
 for file in "$@"; do
     [ -f "$file" ] || continue
     case "$file" in
@@ -46,14 +66,24 @@ for file in "$@"; do
         in_test_file=0
     fi
 
-    # Track #[cfg(test)] regions for per-line exemptions.
+    # Track #[cfg(test)] and async regions per line; a region starts at its
+    # marker line and ends once the braces it opened are closed again.
     in_cfg_test=0
     cfg_test_brace_depth=0
+    in_async=0
+    async_brace_depth=0
+    async_opened=0
     line_no=0
 
     while IFS= read -r raw_line || [ -n "$raw_line" ]; do
         line_no=$((line_no + 1))
         line="$raw_line"
+
+        # Strip line comments before pattern checks - so doc comments and
+        # explanatory prose do not trip the regexes.
+        code_only="${line%%//*}"
+        opens=$(count_char "$code_only" "{")
+        closes=$(count_char "$code_only" "}")
 
         # Crude #[cfg(test)] region tracker: when we see #[cfg(test)] on a
         # line followed by a mod with `{`, count braces until depth returns
@@ -63,38 +93,43 @@ for file in "$@"; do
             cfg_test_brace_depth=0
         fi
         if [ "$in_cfg_test" -eq 1 ]; then
-            opens=$(printf '%s' "$line" | tr -cd '{' | wc -c)
-            closes=$(printf '%s' "$line" | tr -cd '}' | wc -c)
             cfg_test_brace_depth=$((cfg_test_brace_depth + opens - closes))
             if [ "$cfg_test_brace_depth" -le 0 ] && [[ ! "$line" =~ \#\[cfg\(test\)\] ]]; then
                 in_cfg_test=0
             fi
         fi
 
+        # Same brace tracking for `async fn` / `async {` blocks, so blocking
+        # calls are only flagged inside async code.
+        if [ "$in_async" -eq 0 ] && [[ "$code_only" =~ (^|[^[:alnum:]_])async([[:space:]]+(move[[:space:]]*)?\{|[[:space:]]+(unsafe[[:space:]]+)?fn[[:space:]]) ]]; then
+            in_async=1
+            async_brace_depth=0
+            async_opened=0
+        fi
+        async_line=$in_async
+        if [ "$in_async" -eq 1 ]; then
+            async_brace_depth=$((async_brace_depth + opens - closes))
+            [ "$opens" -gt 0 ] && async_opened=1
+            if [ "$async_opened" -eq 1 ] && [ "$async_brace_depth" -le 0 ]; then in_async=0; fi
+        fi
+
         exempt=0
         [ "$in_test_file" -eq 1 ] && exempt=1
         [ "$in_cfg_test" -eq 1 ] && exempt=1
 
-        # Strip line comments before pattern checks - so doc comments and
-        # explanatory prose do not trip the regexes.
-        code_only="${line%%//*}"
+        # The line above this one, where the #[expect(...)] opt-outs live.
+        prev_line=""
+        [ "$line_no" -gt 1 ] && prev_line=$(sed -n "$((line_no - 1))p" "$file" 2>/dev/null || true)
 
         if [ "$exempt" -eq 0 ]; then
-            # .unwrap()
-            if [[ "$code_only" =~ \.unwrap\(\) ]]; then
-                # Allow if previous line had // SAFE-UNWRAP: comment
-                prev_line=$(sed -n "$((line_no - 1))p" "$file" 2>/dev/null || true)
-                if [[ ! "$prev_line" =~ //[[:space:]]*SAFE-UNWRAP: ]]; then
-                    report "$file" "$line_no" "unwrap" ".unwrap() outside tests - use ? / ok_or / pattern match or annotate previous line with // SAFE-UNWRAP: <reason>"
-                fi
+            # .unwrap() - a proven invariant uses .expect() behind #[expect(clippy::expect_used, ...)]
+            if [[ "$code_only" =~ \.unwrap\(\) ]] && [[ ! "$prev_line" =~ \#\[expect\(clippy::unwrap_used,.*reason ]]; then
+                report "$file" "$line_no" "unwrap" ".unwrap() outside tests - use ? / ok_or / let-else, or for a proven invariant use .expect() behind #[expect(clippy::expect_used, reason = \"...\")]"
             fi
 
-            # .expect("...")
-            if [[ "$code_only" =~ \.expect\( ]]; then
-                prev_line=$(sed -n "$((line_no - 1))p" "$file" 2>/dev/null || true)
-                if [[ ! "$prev_line" =~ //[[:space:]]*SAFE-EXPECT: ]]; then
-                    report "$file" "$line_no" "expect" ".expect() outside tests - use ? or annotate previous line with // SAFE-EXPECT: <reason>"
-                fi
+            # .expect("...") - allowed only for a proven invariant
+            if [[ "$code_only" =~ \.expect\( ]] && [[ ! "$prev_line" =~ \#\[expect\(clippy::expect_used,.*reason ]]; then
+                report "$file" "$line_no" "expect" ".expect() outside tests - use ?, or for a proven invariant annotate the previous line with #[expect(clippy::expect_used, reason = \"...\")]"
             fi
 
             # todo!() / unimplemented!() / unreachable!()
@@ -113,6 +148,16 @@ for file in "$@"; do
                     report "$file" "$line_no" "lib-panic" "panic!() in library code - return Result"
                 fi
             fi
+
+            # let _ = call(...) drops the error
+            if [[ "$code_only" =~ let[[:space:]]+_[[:space:]]*=[[:space:]]*[^\;]*\( ]] && [[ ! "$prev_line" =~ \#\[expect\(clippy::let_underscore_must_use,.*reason ]]; then
+                report "$file" "$line_no" "discarded-result" "let _ = call() drops its result - propagate or handle the error; log it on a best-effort path"
+            fi
+
+            # Blocking calls inside async code
+            if [ "$async_line" -eq 1 ] && [[ "$code_only" =~ (thread::sleep\(|std::fs::|reqwest::blocking::|\.blocking_(recv|send|lock|read|write)\() ]]; then
+                report "$file" "$line_no" "blocking-in-async" "blocking call inside async code - use tokio::time::sleep / tokio::fs / the async client, or move it into spawn_blocking"
+            fi
         fi
 
         # unsafe { without preceding // SAFETY: in the last 5 lines (always enforced)
@@ -124,18 +169,22 @@ for file in "$@"; do
             fi
         fi
 
-        # #[allow(clippy::...)] without preceding // CLIPPY-ALLOW: justification
-        if [[ "$code_only" =~ \#\[allow\(clippy:: ]]; then
-            prev_line=$(sed -n "$((line_no - 1))p" "$file" 2>/dev/null || true)
-            if [[ ! "$prev_line" =~ //[[:space:]]*CLIPPY-ALLOW: ]]; then
-                report "$file" "$line_no" "unjustified-clippy-allow" "#[allow(clippy::...)] without // CLIPPY-ALLOW: <reason> on previous line"
+        # #[allow(...)] - silence lints with #[expect(lint, reason)] instead
+        if [[ "$code_only" =~ \#!?\[allow\( ]]; then
+            report "$file" "$line_no" "allow-attribute" "#[allow(...)] - use #[expect(lint, reason = \"...\")] so the exception fails once the lint stops firing"
+        fi
+
+        # #[expect(...)] without `reason = "..."` on the attribute
+        if [[ "$code_only" =~ \#!?\[expect\( ]]; then
+            attr=$(sed -n "${line_no},$((line_no + 3))p" "$file" 2>/dev/null || true)
+            if [[ ! "$attr" =~ reason[[:space:]]*= ]]; then
+                report "$file" "$line_no" "expect-without-reason" "#[expect(...)] needs reason = \"...\" naming why the lint does not apply"
             fi
         fi
 
         # Narrowing numeric `as` casts - heuristic flag for human review.
         # Catches the common shapes; precise type analysis belongs to clippy::cast_possible_truncation.
-        if [[ "$code_only" =~ as[[:space:]]+(u8|u16|u32|i8|i16|i32) ]] && \
-           [[ "$code_only" =~ (u16|u32|u64|u128|usize|i16|i32|i64|i128|isize)[[:space:]]+as[[:space:]]+(u8|u16|u32|i8|i16|i32) ]]; then
+        if [[ "$code_only" =~ (u16|u32|u64|u128|usize|i16|i32|i64|i128|isize)[[:space:]]+as[[:space:]]+(u8|u16|u32|i8|i16|i32)([^[:alnum:]_]|$) ]]; then
             report "$file" "$line_no" "narrowing-as-cast" "possible narrowing 'as' cast - use TryFrom / try_into() for fallible conversion"
         fi
     done < "$file"
@@ -148,7 +197,7 @@ if [ "$violations" -gt 0 ]; then
     echo "Then run the full toolchain gate:" >&2
     echo "  cargo +stable fmt --all -- --check" >&2
     echo "  cargo +stable clippy --all-targets --all-features -- -D warnings" >&2
-    echo "  cargo nextest run --all-targets --all-features" >&2
+    echo "  cargo nextest run --all-targets --all-features && cargo test --doc" >&2
     echo "  cargo +nightly miri nextest run --all-features    # if unsafe touched" >&2
     echo "  cargo machete" >&2
     echo "  cargo deny check" >&2

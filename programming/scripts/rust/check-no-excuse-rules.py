@@ -14,20 +14,24 @@
 # Everything semantic is on clippy + miri + nextest.
 #
 # Rules:
-#   unwrap            .unwrap() outside tests without // SAFE-UNWRAP:
-#   expect            .expect() outside tests without // SAFE-EXPECT:
+#   unwrap            .unwrap() outside tests without a #[expect(clippy::unwrap_used, reason = "...")]
+#   expect            .expect() outside tests without a #[expect(clippy::expect_used, reason = "...")]
 #   placeholder-macro todo!/unimplemented!/unreachable!/unreachable_unchecked! in committed code
 #   box-dyn-error     Box<dyn Error> in non-test code
 #   lib-panic         panic!() in library code
+#   discarded-result  `let _ = call(...)` without a #[expect(clippy::let_underscore_must_use, reason = "...")]
+#   blocking-in-async blocking calls (thread::sleep / std::fs / reqwest::blocking / .blocking_*()) in async code
 #   unsafe-no-safety  unsafe { without // SAFETY: in preceding 5 lines
-#   unjustified-clippy-allow  #[allow(clippy::...)] without // CLIPPY-ALLOW:
+#   allow-attribute   #[allow(...)] - silence lints with #[expect(lint, reason)]
+#   expect-without-reason  #[expect(...)] with no `reason = "..."`
 #   narrowing-as-cast possible narrowing 'as' cast
 #
-# Opt-out: place the appropriate comment on the previous line:
-#   // SAFE-UNWRAP: <reason>
-#   // SAFE-EXPECT: <reason>
+# Opt-out: a proven invariant is expressed with the attribute the compiler also sees,
+# on the statement or the line above it:
+#   #[expect(clippy::unwrap_used, reason = "...")]
+#   #[expect(clippy::expect_used, reason = "...")]
+#   #[expect(clippy::let_underscore_must_use, reason = "...")]
 #   // SAFETY: <reason>          (for unsafe blocks, within 5 lines above)
-#   // CLIPPY-ALLOW: <reason>
 #
 # Test paths (exempt from unwrap/expect/placeholder/box-dyn-error/lib-panic):
 #   tests/, benches/, examples/, build.rs, *_test.rs, #[cfg(test)] regions
@@ -44,24 +48,32 @@ from pathlib import Path
 
 RE_UNWRAP = re.compile(r"\.unwrap\(\)")
 RE_EXPECT = re.compile(r"\.expect\(")
+RE_UNWRAP_OPT_OUT = re.compile(r"#\[expect\(clippy::unwrap_used,.*reason")
+RE_EXPECT_OPT_OUT = re.compile(r"#\[expect\(clippy::expect_used,.*reason")
+RE_DISCARDED_RESULT = re.compile(r"let\s+_\s*=\s*[^;]*\(")
+RE_DISCARDED_OPT_OUT = re.compile(r"#\[expect\(clippy::let_underscore_must_use,.*reason")
 RE_PLACEHOLDER = re.compile(r"\b(todo!|unimplemented!|unreachable!|unreachable_unchecked!)")
 RE_BOX_DYN_ERROR = re.compile(r"Box<dyn\s+Error")
 RE_PANIC = re.compile(r"\bpanic!\(")
+RE_BLOCKING_CALL = re.compile(
+    r"(thread::sleep\(|std::fs::|reqwest::blocking::|\.blocking_(recv|send|lock|read|write)\()"
+)
+RE_ASYNC_REGION = re.compile(
+    r"(^|[^A-Za-z0-9_])async(\s+(move\s*)?\{|\s+(unsafe\s+)?fn\s)"
+)
 RE_UNSAFE_BLOCK = re.compile(r"\bunsafe\s*\{")
-RE_CLIPPY_ALLOW = re.compile(r"#\[allow\(clippy::")
-RE_CFG_TEST = re.compile(r"#\[cfg\(test\)\]")
-RE_SAFE_UNWRAP = re.compile(r"//\s*SAFE-UNWRAP:")
-RE_SAFE_EXPECT = re.compile(r"//\s*SAFE-EXPECT:")
 RE_SAFETY = re.compile(r"//\s*SAFETY:")
-RE_CLIPPY_ALLOW_JUST = re.compile(r"//\s*CLIPPY-ALLOW:")
+RE_ALLOW_ATTRIBUTE = re.compile(r"#!?\[allow\(")
+RE_EXPECT_ATTRIBUTE = re.compile(r"#!?\[expect\(")
+RE_REASON = re.compile(r"reason\s*=")
+RE_CFG_TEST = re.compile(r"#\[cfg\(test\)\]")
 
-# Narrowing cast: (wider) as (narrower)
-# Wider types that lose bits when cast to narrower targets.
-# No leading \b — must match e.g. `999u64 as u32` where a digit precedes the type.
+# Narrowing cast: (wider) as (narrower). No leading \b - must match e.g.
+# `999u64 as u32` where a digit precedes the type.
 _WIDER = r"(?:u16|u32|u64|u128|usize|i16|i32|i64|i128|isize)"
 _NARROWER = r"(?:u8|u16|u32|i8|i16|i32)"
 RE_NARROWING_CAST = re.compile(
-    rf"{_WIDER}\s+as\s+{_NARROWER}"
+    rf"{_WIDER}\s+as\s+{_NARROWER}(?:[^A-Za-z0-9_]|$)"
 )
 
 # Test-path fragments.
@@ -97,24 +109,17 @@ def is_test_path(path: Path) -> bool:
 
 def is_lib_path(file: Path) -> bool:
     """Heuristic: is this file library code (not main.rs, not src/bin/*)."""
-    parts = path_parts_str(file)
+    parts = list(file.parts)
     # Must live under src/
     if "src" not in parts:
         return False
     if file.name == "main.rs":
         return False
     # src/bin/* is binary code
-    try:
-        src_idx = parts.index("src")
-        if src_idx + 1 < len(parts) and parts[src_idx + 1] == "bin":
-            return False
-    except ValueError:
+    src_idx = parts.index("src")
+    if src_idx + 1 < len(parts) and parts[src_idx + 1] == "bin":
         return False
     return True
-
-
-def path_parts_str(p: Path) -> list[str]:
-    return list(p.parts)
 
 
 def strip_line_comment(line: str) -> str:
@@ -151,6 +156,9 @@ def check_file(file: Path) -> None:
     in_test_file = is_test_path(file)
     in_cfg_test = False
     cfg_test_brace_depth = 0
+    in_async = False
+    async_brace_depth = 0
+    async_opened = False
 
     try:
         lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -160,6 +168,9 @@ def check_file(file: Path) -> None:
 
     for line_no_0, raw_line in enumerate(lines):
         line_no = line_no_0 + 1  # 1-indexed
+        code_only = strip_line_comment(raw_line)
+        opens = code_only.count("{")
+        closes = code_only.count("}")
 
         # --- #[cfg(test)] region tracker ---
         if RE_CFG_TEST.search(raw_line):
@@ -167,35 +178,44 @@ def check_file(file: Path) -> None:
             cfg_test_brace_depth = 0
 
         if in_cfg_test:
-            opens = raw_line.count("{")
-            closes = raw_line.count("}")
             cfg_test_brace_depth += opens - closes
             if cfg_test_brace_depth <= 0 and not RE_CFG_TEST.search(raw_line):
                 in_cfg_test = False
 
+        # --- async region tracker (async fn / async block) ---
+        if not in_async and RE_ASYNC_REGION.search(code_only):
+            in_async = True
+            async_brace_depth = 0
+            async_opened = False
+        async_line = in_async
+        if in_async:
+            async_brace_depth += opens - closes
+            if opens > 0:
+                async_opened = True
+            if async_opened and async_brace_depth <= 0:
+                in_async = False
+
         exempt = in_test_file or in_cfg_test
-        code_only = strip_line_comment(raw_line)
+        prev = lines[line_no_0 - 1] if line_no_0 > 0 else ""
 
         if not exempt:
-            # .unwrap()
-            if RE_UNWRAP.search(code_only):
-                prev = lines[line_no_0 - 1] if line_no_0 > 0 else ""
-                if not RE_SAFE_UNWRAP.search(prev):
-                    report(
-                        str(file), line_no, "unwrap",
-                        ".unwrap() outside tests - use ? / ok_or / pattern match "
-                        "or annotate previous line with // SAFE-UNWRAP: <reason>",
-                    )
+            # .unwrap() — a proven invariant uses .expect() behind #[expect(clippy::expect_used, ...)]
+            if RE_UNWRAP.search(code_only) and not RE_UNWRAP_OPT_OUT.search(prev):
+                report(
+                    str(file), line_no, "unwrap",
+                    ".unwrap() outside tests - use ? / ok_or / let-else, or for a "
+                    "proven invariant use .expect() behind "
+                    '#[expect(clippy::expect_used, reason = "...")]',
+                )
 
-            # .expect(...)
-            if RE_EXPECT.search(code_only):
-                prev = lines[line_no_0 - 1] if line_no_0 > 0 else ""
-                if not RE_SAFE_EXPECT.search(prev):
-                    report(
-                        str(file), line_no, "expect",
-                        ".expect() outside tests - use ? or annotate previous "
-                        "line with // SAFE-EXPECT: <reason>",
-                    )
+            # .expect("...") — allowed only for a proven invariant
+            if RE_EXPECT.search(code_only) and not RE_EXPECT_OPT_OUT.search(prev):
+                report(
+                    str(file), line_no, "expect",
+                    ".expect() outside tests - use ?, or for a proven invariant "
+                    "annotate the previous line with "
+                    '#[expect(clippy::expect_used, reason = "...")]',
+                )
 
             # todo!/unimplemented!/unreachable!/unreachable_unchecked!
             if RE_PLACEHOLDER.search(code_only):
@@ -219,6 +239,22 @@ def check_file(file: Path) -> None:
                     "panic!() in library code - return Result",
                 )
 
+            # let _ = call(...) drops the error
+            if RE_DISCARDED_RESULT.search(code_only) and not RE_DISCARDED_OPT_OUT.search(prev):
+                report(
+                    str(file), line_no, "discarded-result",
+                    "let _ = call() drops its result - propagate or handle the "
+                    "error; log it on a best-effort path",
+                )
+
+            # Blocking calls inside async code
+            if async_line and RE_BLOCKING_CALL.search(code_only):
+                report(
+                    str(file), line_no, "blocking-in-async",
+                    "blocking call inside async code - use tokio::time::sleep / "
+                    "tokio::fs / the async client, or move it into spawn_blocking",
+                )
+
         # unsafe { without // SAFETY: — always enforced, even in tests
         if RE_UNSAFE_BLOCK.search(code_only):
             start = max(0, line_no_0 - 5)
@@ -229,14 +265,22 @@ def check_file(file: Path) -> None:
                     "unsafe block without // SAFETY: comment in preceding 5 lines",
                 )
 
-        # #[allow(clippy::...)] without // CLIPPY-ALLOW: — always enforced
-        if RE_CLIPPY_ALLOW.search(code_only):
-            prev = lines[line_no_0 - 1] if line_no_0 > 0 else ""
-            if not RE_CLIPPY_ALLOW_JUST.search(prev):
+        # #[allow(...)] — silence lints with #[expect(lint, reason)] instead
+        if RE_ALLOW_ATTRIBUTE.search(code_only):
+            report(
+                str(file), line_no, "allow-attribute",
+                '#[allow(...)] - use #[expect(lint, reason = "...")] so the '
+                "exception fails once the lint stops firing",
+            )
+
+        # #[expect(...)] without `reason = "..."` on the attribute
+        if RE_EXPECT_ATTRIBUTE.search(code_only):
+            attr = "\n".join(lines[line_no_0 : line_no_0 + 4])
+            if not RE_REASON.search(attr):
                 report(
-                    str(file), line_no, "unjustified-clippy-allow",
-                    "#[allow(clippy::...)] without // CLIPPY-ALLOW: <reason> on "
-                    "previous line",
+                    str(file), line_no, "expect-without-reason",
+                    '#[expect(...)] needs reason = "..." naming why the lint does '
+                    "not apply",
                 )
 
         # Narrowing numeric `as` casts
@@ -280,7 +324,10 @@ def main() -> None:
             "  cargo +stable clippy --all-targets --all-features -- -D warnings",
             file=sys.stderr,
         )
-        print("  cargo nextest run --all-targets --all-features", file=sys.stderr)
+        print(
+            "  cargo nextest run --all-targets --all-features && cargo test --doc",
+            file=sys.stderr,
+        )
         print(
             "  cargo +nightly miri nextest run --all-features    # if unsafe touched",
             file=sys.stderr,
