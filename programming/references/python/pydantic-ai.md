@@ -135,7 +135,7 @@ async def stream_response(workflow: Agent, prompt: str) -> str:
         return response.output
 ```
 
-`run_sync()` is a convenience wrapper that drives the async run on a fresh event loop. Do not call it from an active async context.
+`run_sync()` is a convenience wrapper over `loop.run_until_complete(self.run(...))`. Do not call it from an active async context.
 
 ## 6. Dependencies
 
@@ -222,12 +222,12 @@ def inspect_failure(workflow: Agent) -> None:
 
 ## 8. Observability integration
 
-The full `pydantic-ai` package includes the Logfire integration by default; with the `pydantic-ai-slim` package it is the optional `logfire` extra. Configure it through the project's normal settings and instrument the workflow API there:
+The `logfire` extra is included in the default `pydantic-ai` package. Configure it through the project's normal settings and instrument the workflow API there:
 
 ```python
 import logfire
 
-logfire.configure()               # reads the configured credentials/token
+logfire.configure()               # reads token from .logfire directory
 logfire.instrument_pydantic_ai()  # auto-traces every workflow run
 ```
 
