@@ -27,8 +27,9 @@ This table mirrors `SKILL.md`, Agents per stage, which is the binding list — a
 |---|---|
 | Discovery | one `scout` per open question per wave, in parallel |
 | Plan review | exactly one `reviewer` |
-| Execution | one `task` per implementation node, `sonic` for strictly mechanical nodes |
-| Batch verification | one `reviewer` verification node per parallel batch, plus a `security-reviewer` for a batch that touches security-sensitive code |
+| Execution | one `task` per implementation node, `sonic` for strictly mechanical nodes; no council on this route — each node's quality checks run inside its batch's single verification node, no extra reviewer calls per node |
+| Batch verification | one `reviewer` verification node per parallel batch (it also runs each node's quality checks), plus a `security-reviewer` for a batch that touches security-sensitive code |
+| Review/sweep route | per lens, one finder `reviewer` (plus a `security-reviewer` for a security lens), one batch verifier per 15 or fewer findings, one synthesis `reviewer` per round; in FULL mode or batch-local escalation, 2 additional batch verifiers per batch containing HIGH/CRITICAL findings (3 votes per HIGH/CRITICAL finding — never per-finding councils) |
 | Final review and each delta re-review | a NEW `reviewer` |
 
 ## Finder / verifier role assignment
