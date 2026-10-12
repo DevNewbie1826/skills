@@ -24,7 +24,7 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | `remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
 | `git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
 | `lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
-| `dag-workflow/` | OMP-native: a task too big for one pass — decompose into a validated dependency DAG and run it across parallel subagents with a quality loop |
+| `dag-workflow/` | OMP-native: a task too big for one pass — decompose into a validated dependency DAG and run it through a staged, bounded flow: one plan review, verified batches of subagents in a worktree, one final review |
 
 ## Install
 
@@ -44,7 +44,8 @@ omp install https://github.com/DevNewbie1826/skills.git
 `PORTING.md` states the contract: this is an OMP pack — **ported** skills are neutralized
 (framework/model/agent/language-neutral), **OMP-native** skills are exempt (Rule 8).
 `tools/check-skills.py` (python3 stdlib only) enforces the machine-checkable subset for
-ported skills:
+ported skills, and now also checks the OMP-native `dag-workflow` (its `omp-native: true`
+frontmatter skips the Tier-A/HAZARDS checks for it):
 
 ```bash
 python3 tools/check-skills.py            # full pack, exit 0 = compliant
