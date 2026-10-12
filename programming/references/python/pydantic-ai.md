@@ -24,7 +24,7 @@ def build_workflow(model: str | Model) -> Agent:
         retries=1,                     # default retries for tools and output validation
         output_retries=None,           # override retries for output validation only
         tools=[my_tool],               # Tool objects or plain functions
-        defer_model_check=False,       # delay configuration validation only when necessary
+        defer_model_check=False,       # set True to skip the environment-variable check at init time
         end_strategy="early",         # "early" | "graceful" | "exhaustive"
     )
 ```
@@ -135,7 +135,7 @@ async def stream_response(workflow: Agent, prompt: str) -> str:
         return response.output
 ```
 
-`run_sync()` wraps the async path. Do not call it from an active async context.
+`run_sync()` is a convenience wrapper that drives the async run on a fresh event loop. Do not call it from an active async context.
 
 ## 6. Dependencies
 
@@ -211,7 +211,7 @@ def inspect_failure(workflow: Agent) -> None:
         try:
             workflow.run_sync("Calculate the volume for size 6.")
         except UnexpectedModelBehavior as error:
-            print("Error:", error)
+            print("Error:", error)   # e.g. "Tool 'calc_volume' exceeded max retries count of 3"
             print("Cause:", error.__cause__)
             print("Messages:", messages)
 ```
@@ -222,13 +222,13 @@ def inspect_failure(workflow: Agent) -> None:
 
 ## 8. Observability integration
 
-If the optional `logfire` extra is installed, configure it through the project's normal settings and instrument the workflow API there:
+The full `pydantic-ai` package includes the Logfire integration by default; with the `pydantic-ai-slim` package it is the optional `logfire` extra. Configure it through the project's normal settings and instrument the workflow API there:
 
 ```python
 import logfire
 
-logfire.configure()
-logfire.instrument_pydantic_ai()
+logfire.configure()               # reads the configured credentials/token
+logfire.instrument_pydantic_ai()  # auto-traces every workflow run
 ```
 
 Alternatively, set `instrument=True` when constructing the workflow:
@@ -314,6 +314,6 @@ async def main(model: str | Model) -> None:
 
 ## Version notes
 
-- Version 1 established a stable public API; breaking changes are reserved for the next major version.
+- Version 1 reached a stable public API in September 2025; breaking changes are reserved for the next major version.
 - Version 1.88.0 renamed `result_type` to `output_type` and removed the older result-tool fields.
 - Read run results through `result.output`, not the older `result.data` field.
