@@ -36,6 +36,14 @@ Use the language lane for exact syntax and libraries. These principles apply in 
 | Parameters | Prefer a typed domain value when related inputs outgrow a small, coherent signature. |
 | Abstractions | Do not create a helper, class, trait, or interface for a single trivial use with no second caller. |
 
+## Dependency upgrades
+
+Semver promises nothing below 1.0, and version knowledge lives in more files than the manifest:
+
+- **`0.x` minor = major.** Treat `0.N → 0.N+1` as a breaking upgrade: read the changelog, build, and run the full suite before trusting it. A required field appearing in a public options type is a routine `0.x` "minor".
+- **Version literals live outside the manifest.** Before committing a bump, search the repository for the old version string: Dockerfiles pinning a global CLI, CI workflows, and docs all carry copies. A bump that updates only the package manifest ships a split-brain deploy.
+- **Never hand-merge a lockfile.** On conflict, take either side whole and regenerate with the package manager — the resolver owns that file, not you.
+
 ## Code-smell escalation
 
 Read [Code smells](code-smells.md) when any of these triggers fires.
@@ -71,7 +79,7 @@ Run this review after every substantive code change.
 9. **Names:** are names positive and direct?
 10. **Logging:** if logs changed, are they consistent with the local practice and useful to their consumer?
 
-Fix a failed answer before declaring the change complete. For a structural change, use a safe refactoring workflow: map callers, make one behavior-preserving step at a time, and run the narrowest relevant verification after each step.
+Fix a failed answer before declaring the change complete. For a structural change, use a safe refactoring workflow: map callers, make one behavior-preserving step at a time, and run the narrowest relevant verification after each step. When the change inherits AI-authored patterns (broad catches, redundant null checks, vague TODOs, dead helpers, redundant post-action verification), use the `remove-ai-slops` skill: pin regression tests first, then do the categorized cleanup.
 
 ## Verification commands and fallbacks
 

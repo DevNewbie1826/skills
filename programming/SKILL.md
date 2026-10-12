@@ -1,6 +1,6 @@
 ---
 name: programming
-description: "MUST USE for work on Python, Rust, TypeScript, or Go source files and project manifests. Triggers: write or edit code; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI."
+description: "MUST USE for work on Python, Rust, TypeScript, or Go source files and project manifests. Triggers: write or edit code; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI; Rust public API design or macros."
 ---
 
 # Programming
@@ -36,6 +36,7 @@ Before writing or editing code, identify the language and read its entry point. 
 | Test-driven development, test shape, fakes or mocks, or test quality | the `tdd` skill (Test-Driven Delivery) |
 | Adding or changing logs, logger setup, or boundary error handling | [Logging](references/logging.md) |
 | A file exceeds 200 pure LOC, a function has more than three parameters, verification is redundant, or names are negative-form | [Code smells](references/code-smells.md) |
+| Upgrading a dependency, bumping a version, or resolving a lockfile conflict | [Shared programming philosophy](references/philosophy.md) |
 | Rust memory safety, FFI, or concurrent primitive audit | [Rust soundness lane](references/rust-ub/README.md) and its linked taxonomy |
 
 ## Python lane
@@ -72,6 +73,8 @@ Read [Rust lane](references/rust/README.md) first, then select the relevant deta
 | Concurrency primitives | [Rust concurrency](references/rust/concurrency.md) |
 | HTTP service implementation | [Rust HTTP service](references/rust/axum-stack.md) |
 | Command-line application | [Rust CLI](references/rust/clap-stack.md) |
+| Public API design, traits, and semver | [Rust API design](references/rust/api-design.md) |
+| Declarative or procedural macros | [Rust macros](references/rust/macros.md) |
 | Property and snapshot testing | [Rust testing](references/rust/proptest-insta.md) |
 | Disposable scripts | [Rust one-liners](references/rust/one-liners.md) |
 | Libraries, allocation, compile-time, or zero-allocation work | [Rust library defaults](references/rust/libraries.md) and [Rust zero-cost safety](references/rust/zero-cost-safety.md) |
