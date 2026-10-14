@@ -3,7 +3,7 @@
 An **OMP (Oh My Pi) skill pack**. It holds two kinds of skills:
 
 - **Ported skills** (frontend, programming, tdd, debugging, visual-qa, remove-ai-slops,
-  git-master, lore) — content neutralized per `PORTING.md` (skill prose makes no
+  git-master, lore, seo-html) — content neutralized per `PORTING.md` (skill prose makes no
   framework/model/agent/language presuppositions). Each `SKILL.md` is a thin router;
   detail lives in `references/`.
 - **OMP-native skills** (`dag-workflow`) — written for OMP, may use OMP
@@ -24,6 +24,7 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | `remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
 | `git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
 | `lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
+| `seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
 | `dag-workflow/` | OMP-native: a task too big for one pass — decompose into a validated dependency DAG and run it through a staged, bounded flow: one plan review, verified batches of subagents in a worktree, one final review |
 
 ## Install

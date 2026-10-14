@@ -1,0 +1,7 @@
+[
+ {
+  "path_glob": "seo-html/ATTRIBUTION.md",
+  "token": "claude",
+  "reason": "names the upstream claude-seo repository in its MIT notice"
+ }
+]

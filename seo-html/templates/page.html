@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <meta name="theme-color" content="#0f172a">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="{{OG_IMAGE_URL}}">
+  <meta property="og:image:alt" content="{{OG_IMAGE_ALT}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:site_name" content="{{SITE_NAME}}">
+  <meta property="og:locale" content="{{OG_LOCALE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE_URL}}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "{{SITE_URL}}#org",
+        "name": "{{SITE_NAME}}",
+        "url": "{{SITE_URL}}",
+        "logo": {"@type": "ImageObject", "url": "{{OG_IMAGE_URL}}"}
+      },
+      {
+        "@type": "WebSite",
+        "@id": "{{SITE_URL}}#website",
+        "name": "{{SITE_NAME}}",
+        "url": "{{SITE_URL}}"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "{{CANONICAL_URL}}#webpage",
+        "name": "{{TITLE}}",
+        "url": "{{CANONICAL_URL}}"
+      },
+      {
+        "@type": "Article",
+        "@id": "{{CANONICAL_URL}}#article",
+        "headline": "{{H1}}",
+        "author": {"@type": "Person", "name": "{{AUTHOR_NAME}}"},
+        "publisher": {"@id": "{{SITE_URL}}#org"},
+        "datePublished": "{{PUBLISHED_ISO}}",
+        "dateModified": "{{MODIFIED_ISO}}",
+        "image": "{{OG_IMAGE_URL}}",
+        "mainEntityOfPage": "{{CANONICAL_URL}}"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "{{SITE_NAME}}", "item": "{{SITE_URL}}"},
+          {"@type": "ListItem", "position": 2, "name": "{{BREADCRUMB_2}}", "item": "{{SITE_URL}}/{{BREADCRUMB_2_SLUG}}"},
+          {"@type": "ListItem", "position": 3, "name": "{{H1}}"}
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <p><a href="{{SITE_URL}}">{{SITE_NAME}}</a></p>
+  </header>
+  <nav aria-label="site menu">
+    <a href="{{SITE_URL}}/{{BREADCRUMB_2_SLUG}}">{{BREADCRUMB_2}}</a>
+  </nav>
+  <main>
+    <article>
+      <h1>{{H1}}</h1>
+      <p><time datetime="{{PUBLISHED_ISO}}">{{PUBLISHED_DISPLAY}}</time> {{AUTHOR_NAME}}</p>
+      <p>{{LEAD_ANSWER}}</p>
+      <section id="section-1">
+        <h2>{{SECTION_1_TITLE}}</h2>
+        <p>{{SECTION_1_BODY}}</p>
+        <p>{{STAT_SENTENCE}} <sup><a href="{{STAT_SOURCE_URL}}">{{STAT_SOURCE_NAME}}</a></sup></p>
+        <figure>
+          <img src="{{FIGURE_IMAGE_URL}}" alt="{{FIGURE_IMAGE_ALT}}" width="1200" height="675" fetchpriority="high">
+          <figcaption>{{FIGURE_CAPTION}}</figcaption>
+        </figure>
+      </section>
+      <section id="section-2">
+        <h2>{{SECTION_2_TITLE}}</h2>
+        <p>{{SECTION_2_BODY}}</p>
+      </section>
+      <section id="section-3">
+        <h2>{{SECTION_3_TITLE}}</h2>
+        <p>{{SECTION_3_BODY}}</p>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>© 2026 {{SITE_NAME}}</p>
+  </footer>
+</body>
+</html>

@@ -1,6 +1,6 @@
 // Regression harness for extensions/wf-goal.ts — drives the REAL module
 // through a stubbed ExtensionAPI and asserts the input→rewrite contract.
-// Run: bun tools/wf-goal.test.ts  (wired into tools/verify.sh section F)
+// Run: bun tools/wf-goal.test.ts
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 import wfGoalExtension from "../extensions/wf-goal.ts";
 
