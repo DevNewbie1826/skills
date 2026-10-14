@@ -53,6 +53,44 @@ from urllib.parse import urlsplit
 _NUMERIC_CHARREF = re.compile(r"&(#[0-9]+;?|#[xX][0-9a-fA-F]+;?)")
 _CPYTHON_UNESCAPE = html.unescape
 
+# A numeric reference whose stripped decimal spelling is longer than 7
+# digits, or whose stripped hexadecimal spelling is longer than 6, is
+# necessarily above U+10FFFF and HTML5-replaced with U+FFFD; every
+# shorter spelling keeps its exact value once the leading zeroes are
+# dropped. Bounding the spelling first matters because CPython 3.11
+# raises ValueError from int(str) and html.unescape once a decimal
+# digit string passes the interpreter's int-max-str-digits limit (4300
+# by default, leading zeroes included) while 3.9 converts the same
+# string: an unbounded reference both diverges between the supported
+# interpreters and, through build_tree's parse boundary, silently
+# truncated the document at the reference. After the rewrite no digit
+# string longer than 7 characters reaches any conversion.
+_MAX_DECIMAL_DIGITS = 7        # 0x10FFFF = 1114111 fits in 7 digits
+_MAX_HEX_DIGITS = 6            # 0x10FFFF fits in 6 hex digits
+
+
+def _bound_numeric_charrefs(text):
+    """Rewrite every numeric character reference to its zero-stripped
+    spelling, or to U+FFFD when the stripped spelling is necessarily
+    above U+10FFFF. Leading zeroes never change a reference's value and
+    HTML5 replaces out-of-range values with U+FFFD, so the decoded
+    result is unchanged; only what the numeric conversions see is
+    bounded."""
+    def replace(match):
+        ref = match.group(1)
+        semicolon = ";" if ref.endswith(";") else ""
+        if ref[1] in "xX":
+            prefix, digits, limit = ref[:2], ref[2:], _MAX_HEX_DIGITS
+        else:
+            prefix, digits, limit = "#", ref[1:], _MAX_DECIMAL_DIGITS
+        if semicolon:
+            digits = digits[:-1]
+        digits = digits.lstrip("0")
+        if len(digits) > limit:
+            return "\ufffd"
+        return "&" + prefix + (digits or "0") + semicolon
+    return _NUMERIC_CHARREF.sub(replace, text)
+
 
 def _decode_charrefs(text):
     """html.unescape() with one HTML5 correction: a numeric character
@@ -60,6 +98,7 @@ def _decode_charrefs(text):
     itself; everything else is delegated unchanged."""
     if "&" not in text:
         return text
+    text = _bound_numeric_charrefs(text)
     parts = []
     pos = 0
     kept = False
@@ -534,14 +573,19 @@ class TreeBuilder(HTMLParser):
 
 
 def build_tree(text):
+    """Parse text into an element tree. Markup the parser cannot get
+    through degrades to a partial tree instead of a crash - but never
+    silently: the return value is (root, parse_error), where
+    parse_error is the exception that stopped the parse (the tree then
+    holds only the markup before it, and the caller must report the
+    truncation) or None after a complete parse."""
     builder = TreeBuilder()
     try:
         builder.feed(text)
         builder.close()
-    except Exception:
-        # Malformed markup must degrade to a partial tree, never crash.
-        pass
-    return builder.root
+    except Exception as error:
+        return builder.root, error
+    return builder.root, None
 
 
 def ld_scripts(root):
@@ -662,7 +706,7 @@ class PageChecker:
         self.lang_arg = lang_arg
         self.keyword = keyword
         self.allow_noindex = allow_noindex
-        self.root = build_tree(text)
+        self.root, self.parse_error = build_tree(text)
         self.findings = []
         self.lang = "en"
         self.og = {}
@@ -1550,6 +1594,16 @@ class PageChecker:
         description_text = collapse_ws(descriptions[0].attrs.get("content", "")) \
             if descriptions else ""
 
+        if self.parse_error is not None:
+            # The parse stopped before the end of the document, so every
+            # check below runs on a truncated tree; the truncation is
+            # reported through the same internal-error boundary as a
+            # failing check (info severity, so the exit contract moves
+            # only with what the surviving checks find), attributed to
+            # LD-01 - the catalog's parse rule, the id check_jsonld
+            # already uses for parser-level failures.
+            self._internal_error_finding("LD-01", "build_tree",
+                                         self.parse_error)
         for method_name, owner_id in self.CHECK_STEPS:
             try:
                 getattr(self, method_name)()

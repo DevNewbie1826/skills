@@ -1123,7 +1123,9 @@ class TestHardenedParsing(RuleCase):
                 self.assert_rule("LD-12", self.result_for(text))
 
     def test_r5_text_content_interleaves_children_in_source_order(self):
-        root = cp.build_tree("<p>On-Page <span>SEO Basics</span>: Titles</p>")
+        root, parse_error = cp.build_tree(
+            "<p>On-Page <span>SEO Basics</span>: Titles</p>")
+        self.assertIsNone(parse_error)
         self.assertEqual(root.find("p").text_content(),
                          "On-Page SEO Basics: Titles")
 
@@ -1721,6 +1723,119 @@ class TestHtml5CharacterReferenceDecoder(RuleCase):
                 self.assertEqual(cp._decode_charrefs(text), expected)
 
 
+# Delta re-review round 5, required change 1: a numeric character
+# reference spelled with arbitrarily many digits must decode without
+# ever handing an unbounded digit string to int() or html.unescape -
+# CPython 3.11 raises ValueError from those conversions once a decimal
+# string passes the interpreter's 4300-digit int-str limit (leading
+# zeroes included) while 3.9 converts it, and the raised error used to
+# truncate the document at build_tree's silent boundary, hiding every
+# finding after the reference. The decoder strips leading zeroes and
+# bounds the spelling first: a stripped decimal spelling longer than 7
+# digits or hex spelling longer than 6 digits is above U+10FFFF and
+# decodes to U+FFFD per HTML5; every other value decodes exactly as
+# before, and the rest of the document keeps parsing and checking.
+LONG_CONTROL_REF = "&#" + "0" * 5000 + "1;"
+LONG_VALID_A_REF = "&#" + "0" * 5000 + "65;"
+LONG_OUT_OF_RANGE_REF = "&#" + "9" * 5001 + ";"
+LONG_HEX_A_REF = "&#x" + "0" * 5000 + "41;"
+LONG_HEX_OUT_OF_RANGE_REF = "&#x" + "F" * 5000 + ";"
+
+
+class TestBoundedNumericReferences(RuleCase):
+    """Arbitrarily long numeric references decode identically on every
+    supported interpreter, and the document after them survives to be
+    checked."""
+
+    def test_decoder_long_references_with_and_without_semicolon(self):
+        cases = (
+            (LONG_CONTROL_REF, "\x01"),
+            (LONG_CONTROL_REF[:-1], "\x01"),
+            (LONG_VALID_A_REF, "A"),
+            (LONG_VALID_A_REF[:-1], "A"),
+            (LONG_OUT_OF_RANGE_REF, "\ufffd"),
+            (LONG_OUT_OF_RANGE_REF[:-1], "\ufffd"),
+            (LONG_HEX_A_REF, "A"),
+            (LONG_HEX_A_REF[:-1], "A"),
+            (LONG_HEX_OUT_OF_RANGE_REF, "\ufffd"),
+            (LONG_HEX_OUT_OF_RANGE_REF[:-1], "\ufffd"),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text[-8:]):
+                self.assertEqual(cp._decode_charrefs(text), expected)
+                self.assertEqual(cp._decode_charrefs("x" + text + "y"),
+                                 "x" + expected + "y")
+
+    def test_decoder_int_limit_transition_spellings(self):
+        # 4300 digits still converts on 3.11; 4301 raised there before
+        # the bound. Both must decode by value, and an equally long
+        # out-of-range value must reach the HTML5 replacement.
+        self.assertEqual(cp._decode_charrefs("&#" + "0" * 4299 + "1;"), "\x01")
+        self.assertEqual(cp._decode_charrefs("&#" + "0" * 4300 + "1;"), "\x01")
+        self.assertEqual(cp._decode_charrefs("&#" + "9" * 4300 + ";"), "\ufffd")
+        self.assertEqual(cp._decode_charrefs("&#" + "9" * 4301 + ";"), "\ufffd")
+
+    def test_decoder_bounded_values_keep_exact_mapping(self):
+        cases = (
+            ("&#0000065;", "A"),
+            ("&#x000041;", "A"),
+            ("&#X000041;", "A"),
+            ("&#0000000;", "\ufffd"),
+            ("&#x0;", "\ufffd"),
+            ("&#1114111;", "\U0010ffff"),
+            ("&#x10FFFF;", "\U0010ffff"),
+            ("&#1234567;", "\ufffd"),
+            ("&#x110000;", "\ufffd"),
+            ("&#0000001;", "\x01"),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text):
+                self.assertEqual(cp._decode_charrefs(text), expected)
+
+    def test_long_reference_decodes_in_url_context(self):
+        url = "https://exa" + LONG_CONTROL_REF + "mple.com/"
+        self.assertEqual(cp._decode_charrefs(url), "https://exa\x01mple.com/")
+        self.assertFalse(cp.is_absolute_http_url(cp._decode_charrefs(url)))
+
+    def test_long_reference_keeps_later_document_checked_cli(self):
+        # The reviewer's reproduction: each reference variant in an
+        # attribute before </body>, followed by a JSON-LD Thing whose
+        # image URL has malformed userinfo. The later block must still
+        # be parsed (Thing extracted) and LD-13/warn must still fire,
+        # with the normal exit 0 / strict exit 1 contract, on any
+        # interpreter - before the bound, 3.11 returned a clean report
+        # (no findings, score 100, Thing lost).
+        ld = ('<script type="application/ld+json">'
+              '{"@context":"https://schema.org","@type":"Thing",'
+              '"image":"https://bad|user@example.com/"}</script>')
+        for name, ref in (("short-control", "&#1;"),
+                          ("long-control", LONG_CONTROL_REF),
+                          ("long-valid-A", LONG_VALID_A_REF),
+                          ("long-out-of-range", LONG_OUT_OF_RANGE_REF),
+                          ("long-hex-A", LONG_HEX_A_REF),
+                          ("long-hex-out-of-range", LONG_HEX_OUT_OF_RANGE_REF)):
+            with self.subTest(reference=name):
+                page = fixture_text("good-en.html").replace(
+                    "</body>",
+                    '<div data-probe="%s"></div>%s</body>' % (ref, ld))
+                self.assertEqual(page.count("</body>"), 1)
+                path = write_temp_page(page, prefix="charref-")
+                try:
+                    normal = run_checker_cli([path, "--json"])
+                    strict = run_checker_cli([path, "--json", "--strict"])
+                finally:
+                    Path(path).unlink()
+                self.assertNotIn(b"Traceback", normal.stderr)
+                self.assertNotIn(b"Traceback", strict.stderr)
+                self.assertEqual(normal.returncode, 0)
+                self.assertEqual(strict.returncode, 1)
+                report = json.loads(normal.stdout.decode("utf-8"))
+                pairs = {(finding["id"], finding["severity"])
+                         for finding in report["findings"]}
+                self.assertIn(("LD-13", "warn"), pairs)
+                self.assertIn("Thing", report["extracted"]["jsonld_types"])
+
+
 class TestSafeReportOutput(RuleCase):
     """Delta re-review round 2, required change 1: printing the report
     (JSON and text mode, and the stderr file-echo messages) never raises
@@ -1872,6 +1987,43 @@ class TestRobustnessBoundary(RuleCase):
         self.assertEqual(internal[0]["severity"], "info")
         self.assertIn("KeyError", internal[0]["message"])
         self.assertEqual(report["summary"]["error"], 0)
+
+    def test_forced_parse_exception_yields_internal_error_finding(self):
+        # Delta re-review round 5, required change 1 (truncation half):
+        # a parser exception must not return a silent partial tree. The
+        # internal-error convention fires with the parse rule's id, and
+        # the remaining checks still run over the truncated tree.
+        text = fixture_text("good-en.html")
+        with unittest.mock.patch.object(
+                cp.TreeBuilder, "feed", side_effect=ValueError("burst")):
+            result = self.result_for(text)
+        internal = [finding for finding in result["findings"]
+                    if finding["message"].startswith("internal error:")]
+        self.assertEqual(len(internal), 1)
+        self.assertEqual(internal[0]["id"], "LD-01")
+        self.assertEqual(internal[0]["severity"], "info")
+        self.assertIn("ValueError", internal[0]["message"])
+        self.assertIn("build_tree", internal[0]["message"])
+        # the remaining checks still ran on the truncated (here empty) tree
+        self.assert_rule("HEAD-01", result)
+        self.assert_rule("CONT-01", result)
+
+    def test_forced_parse_exception_main_prints_parseable_json(self):
+        text = fixture_text("good-en.html")
+        with unittest.mock.patch.object(
+                cp.TreeBuilder, "feed", side_effect=RuntimeError("boom")):
+            code, report = self.run_main(text)
+        self.assertEqual(code, 1)
+        internal = [finding for finding in report["findings"]
+                    if finding["message"].startswith("internal error:")]
+        self.assertEqual(len(internal), 1)
+        self.assertEqual(internal[0]["id"], "LD-01")
+        self.assertEqual(internal[0]["severity"], "info")
+        self.assertIn("build_tree", internal[0]["message"])
+        # checks after the failed parse still produced their findings
+        self.assertIn("SEM-01", {finding["id"] for finding in report["findings"]})
+        self.assertIn("HEAD-01", {finding["id"] for finding in report["findings"]})
+        self.assertGreater(report["summary"]["error"], 0)
 
     def test_a_json_report_parses_for_extreme_dimension_inputs(self):
         cases = [
