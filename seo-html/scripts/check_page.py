@@ -1003,12 +1003,14 @@ class PageChecker:
 
         for img in self.root.find_all("img"):
             if img.has_ancestor(("main",)):
-                if img.attrs.get("loading", "").strip().lower() != "lazy":
+                if img.attrs.get("loading", "").strip().lower() == "lazy":
                     self.emit("IMG-04", img.line,
-                              'the first <img> inside <main> has no '
+                              'the first <img> inside <main> has '
                               'loading="lazy"',
                               "loading=%s" % img.attrs.get("loading", "absent"),
-                              'add loading="lazy" to below-the-fold images')
+                              'remove loading="lazy" from the first '
+                              '(above-the-fold) image; keep it on later '
+                              "images")
                 break
 
     def check_links(self):

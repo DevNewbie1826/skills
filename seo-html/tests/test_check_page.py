@@ -408,6 +408,31 @@ class TestImageRules(RuleCase):
     def test_img_04(self):
         self.assert_rule("IMG-04", self.fixture_result("bad-images.html"))
 
+    def test_img_04_fires_when_first_main_image_is_lazy(self):
+        text = self.mutated(
+            "good-ko.html",
+            ('width="1200" height="675">',
+             'width="1200" height="675" loading="lazy">'))
+        self.assert_rule("IMG-04", self.result_for(text))
+
+    def test_img_04_silent_when_first_main_image_is_not_lazy(self):
+        result = self.fixture_result("good-ko.html")
+        self.assertNotIn(
+            "IMG-04", {finding["id"] for finding in result["findings"]})
+
+    def test_img_04_silent_when_lazy_image_is_not_first_in_main(self):
+        text = self.mutated(
+            "good-ko.html",
+            ("같은 이야기를 하게 됩니다.</p>",
+             "같은 이야기를 하게 됩니다.</p>\n"
+             "        <img "
+             'src="https://example.com/images/seo-basics-diagram-ko.png" '
+             'alt="구조화 데이터 그래프 예시" width="800" height="450" '
+             'loading="lazy">'))
+        result = self.result_for(text)
+        self.assertNotIn(
+            "IMG-04", {finding["id"] for finding in result["findings"]})
+
 
 class TestLinkA11yPerfRules(RuleCase):
 
