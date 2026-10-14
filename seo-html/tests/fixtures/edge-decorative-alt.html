@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>On-Page SEO Basics: Titles, Meta Tags, and Clean Structure</title>
+  <meta name="description" content="Search optimization starts on the page: a sharp title and description, a canonical URL, social preview cards, semantic HTML, and structured data step by step.">
+  <link rel="canonical" href="https://example.com/guide/seo-basics">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <meta name="theme-color" content="#0f172a">
+  <meta property="og:title" content="On-Page SEO Basics: Titles, Meta Tags, and Clean Structure">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://example.com/images/seo-basics.png">
+  <meta property="og:image:alt" content="Checklist card listing on-page SEO basics from titles to structured data">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://example.com/guide/seo-basics">
+  <meta property="og:description" content="Search optimization starts on the page: a sharp title and description, a canonical URL, social preview cards, semantic HTML, and structured data step by step.">
+  <meta property="og:site_name" content="Example Notes">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="On-Page SEO Basics: Titles, Meta Tags, and Clean Structure">
+  <meta name="twitter:description" content="Search optimization starts on the page: a sharp title and description, a canonical URL, social preview cards, semantic HTML, and structured data step by step.">
+  <meta name="twitter:image" content="https://example.com/images/seo-basics.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://example.com/#org",
+        "name": "Example Notes",
+        "url": "https://example.com/",
+        "logo": {"@type": "ImageObject", "url": "https://example.com/images/logo.png"}
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://example.com/#website",
+        "name": "Example Notes",
+        "url": "https://example.com/"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://example.com/guide/seo-basics#webpage",
+        "name": "On-Page SEO Basics: Titles, Meta Tags, and Clean Structure",
+        "url": "https://example.com/guide/seo-basics"
+      },
+      {
+        "@type": "Article",
+        "@id": "https://example.com/guide/seo-basics#article",
+        "headline": "On-Page SEO Basics: Titles, Meta Tags, and Clean Structure",
+        "author": {"@type": "Person", "name": "Dana Lee"},
+        "publisher": {"@id": "https://example.com/#org"},
+        "datePublished": "2026-09-01",
+        "dateModified": "2026-10-05",
+        "image": "https://example.com/images/seo-basics.png",
+        "mainEntityOfPage": "https://example.com/guide/seo-basics"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "Example Notes", "item": "https://example.com/"},
+          {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://example.com/guides"},
+          {"@type": "ListItem", "position": 3, "name": "On-Page SEO Basics: Titles, Meta Tags, and Clean Structure"}
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <p><a href="https://example.com/">Example Notes</a></p>
+  </header>
+  <nav aria-label="site">
+    <a href="https://example.com/guides">Guides</a>
+    <a href="https://example.com/about">About the site</a>
+  </nav>
+  <main>
+    <article>
+      <h1>On-Page SEO Basics: Titles, Meta Tags, and Clean Structure</h1>
+      <p><time datetime="2026-09-01">September 1, 2026</time> by Dana Lee</p>
+      <p>Search optimization starts on the page itself: the head metadata, the body structure, and the structured data a crawler reads before it renders anything. This guide answers the question directly: fix the head first, keep one topic per page, and let the markup describe the content.</p>
+      <section>
+        <h2>Write the head metadata</h2>
+        <p>The charset declaration comes first so the parser never guesses an encoding. The viewport meta makes the page usable on phones, the title names the topic, and the description summarizes the promise of the page in one or two sentences. A canonical link tells crawlers which URL owns the content.</p>
+        <p>In a 2026 reader survey, 47% of respondents said they rewrite the title last, after the body copy is final. <sup><a href="https://example.com/survey/title-habits">reader survey</a></sup></p>
+      </section>
+      <section>
+        <h2>Structure the page semantically</h2>
+        <p>One main landmark, one h1, and headings that step down without skipping levels give both readers and crawlers a clean outline. Wrap the primary content in an article, put captions under figures, and give dates a time element with a machine-readable datetime attribute.</p>
+        <figure>
+          <img src="https://example.com/images/seo-basics-figure.png" alt="Annotated head section showing title, description, canonical, and social preview tags in order" width="1200" height="675" loading="lazy">
+          <figcaption>The head of a well-optimized page, annotated from charset to structured data.</figcaption>
+        </figure>
+        <img src="https://example.com/images/divider.png" alt="" width="600" height="10">
+      </section>
+      <section>
+        <h2>Ship structured data that machines trust</h2>
+        <p>A single JSON-LD block with a schema.org graph links the organization, the website, the page, the article, and its breadcrumb trail. Every URL is absolute, every date is ISO 8601, and the article headline matches the visible h1, so the markup and the page tell the same story.</p>
+      </section>
+    </article>
+  </main>
+  <footer>
+    <p>© 2026 Example Notes. Guides are reviewed before publishing.</p>
+  </footer>
+</body>
+</html>
