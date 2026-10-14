@@ -352,9 +352,13 @@ class Node:
         self.parts = []
 
     def iter_tree(self):
-        yield self
-        for child in self.children:
-            yield from child.iter_tree()
+        # Explicit stack, children pushed reversed: pre-order document
+        # order identical to the recursive form, with unbounded depth.
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            yield node
+            stack.extend(reversed(node.children))
 
     def find_all(self, tag):
         for node in self.iter_tree():
@@ -368,15 +372,19 @@ class Node:
 
     def text_content(self, skip=SKIP_TEXT_TAGS):
         """Visible text of this element in source order: direct text
-        chunks interleaved with child elements as the markup orders them."""
+        chunks interleaved with child elements as the markup orders them.
+        Flattened with an explicit stack so element depth is unbounded;
+        a child inside a skip tag contributes nothing, as before."""
         if self.tag in skip:
             return ""
         parts = []
-        for part in self.parts:
+        stack = list(reversed(self.parts))
+        while stack:
+            part = stack.pop()
             if isinstance(part, str):
                 parts.append(part)
-            else:
-                parts.append(part.text_content(skip))
+            elif part.tag not in skip:
+                stack.extend(reversed(part.parts))
         return "".join(parts)
 
     def has_ancestor(self, tags):
@@ -458,29 +466,35 @@ def node_types(node):
 
 def iter_ld_nodes(obj, top_level=True):
     """Yield (value, is_top_level) for root objects and @graph members;
-    non-object values are yielded as-is so the caller can report them."""
-    if isinstance(obj, dict):
-        yield obj, top_level
-        graph = obj.get("@graph")
-        if isinstance(graph, list):
-            for member in graph:
-                yield from iter_ld_nodes(member, top_level=False)
-    elif isinstance(obj, list):
-        for member in obj:
-            yield from iter_ld_nodes(member, top_level=top_level)
-    else:
-        yield obj, top_level
+    non-object values are yielded as-is so the caller can report them.
+    Explicit stack (members pushed reversed) keeps the recursive form's
+    yield order with unbounded JSON nesting depth."""
+    stack = [(obj, top_level)]
+    while stack:
+        value, is_top = stack.pop()
+        if isinstance(value, dict):
+            yield value, is_top
+            graph = value.get("@graph")
+            if isinstance(graph, list):
+                stack.extend(reversed([(member, False) for member in graph]))
+        elif isinstance(value, list):
+            stack.extend(reversed([(member, is_top) for member in value]))
+        else:
+            yield value, is_top
 
 
 def iter_strings(value):
-    if isinstance(value, str):
-        yield value
-    elif isinstance(value, list):
-        for item in value:
-            yield from iter_strings(item)
-    elif isinstance(value, dict):
-        for item in value.values():
-            yield from iter_strings(item)
+    # Explicit stack: strings yield in the recursive form's order
+    # (list items and dict values left to right) at any nesting depth.
+    stack = [value]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, str):
+            yield item
+        elif isinstance(item, list):
+            stack.extend(reversed(item))
+        elif isinstance(item, dict):
+            stack.extend(reversed(list(item.values())))
 
 
 def placeholder_in_node(node):
@@ -979,6 +993,14 @@ class PageChecker:
                           % (index, error.msg, error.lineno),
                           body[:80],
                           "fix the JSON syntax so the block parses")
+                continue
+            except RecursionError:
+                self.emit("LD-01", script.line,
+                          "ld+json block %d does not parse: nesting is "
+                          "too deep for the JSON parser" % index,
+                          body[:80],
+                          "reduce the nesting depth of the block so it "
+                          "parses")
                 continue
             if not isinstance(data, (dict, list)):
                 self.emit("LD-03", script.line,

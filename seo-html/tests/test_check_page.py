@@ -1082,6 +1082,68 @@ class TestHardenedParsing(RuleCase):
         self.assertEqual(bad, [])
 
 
+class TestDeepNesting(RuleCase):
+    """FU-4: markup and JSON-LD nested far past the interpreter recursion
+    limit are walked with explicit stacks, so the CLI keeps its exit
+    contract, the JSON report stays parseable, and extracted text keeps
+    its source order."""
+
+    DEPTH = 5000
+
+    def run_deep_cli(self, text):
+        path = write_temp_page(text, prefix="deep-")
+        try:
+            return run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+
+    def test_main_with_5000_nested_divs_reports_clean(self):
+        text = self.mutated(
+            "good-en.html",
+            ("  </main>",
+             "  %s%s\n  </main>"
+             % ("<div>" * self.DEPTH, "</div>" * self.DEPTH)))
+        process = self.run_deep_cli(text)
+        self.assertNotIn(b"Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout.decode("utf-8"))
+        self.assertEqual(report["summary"],
+                         {"error": 0, "warn": 0, "info": 0, "score": 100})
+
+    def test_h1_in_5000_nested_spans_extracts_in_source_order(self):
+        text = self.mutated(
+            "good-en.html",
+            ("<h1>%s</h1>" % GOOD_EN_TITLE,
+             "<h1>%s%s%s</h1>"
+             % ("<span>" * self.DEPTH, GOOD_EN_TITLE,
+                "</span>" * self.DEPTH)))
+        process = self.run_deep_cli(text)
+        self.assertNotIn(b"Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout.decode("utf-8"))
+        self.assertEqual(report["extracted"]["h1"], GOOD_EN_TITLE)
+        bad = [finding for finding in report["findings"]
+               if finding["severity"] in ("error", "warn")]
+        self.assertEqual(bad, [])
+
+    def test_jsonld_nested_5000_levels_fires_ld_01_error(self):
+        deep_block = ('<script type="application/ld+json">'
+                      + '{"n":' * self.DEPTH + "1" + "}" * self.DEPTH
+                      + "</script>")
+        text = self.mutated(
+            "good-en.html",
+            ('<script type="application/ld+json">',
+             deep_block + '<script type="application/ld+json">'))
+        process = self.run_deep_cli(text)
+        self.assertNotIn(b"Traceback", process.stderr)
+        self.assertEqual(process.returncode, 1)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LD-01"), "error")
+        self.assertEqual(report["summary"]["error"], 1)
+
+
 class TestAuthorityValidation(RuleCase):
     """Delta re-review round 2, required change 2: the shared URL
     validator checks the complete raw authority - brackets, userinfo,
