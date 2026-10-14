@@ -63,7 +63,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | LINK-04 | I | S | `<a>` with empty or `#` href | CS | unverified: reference repo only |
 | A11Y-01 | W | S | form control without label[for], wrapping label, aria-label, or aria-labelledby | CS | unverified: accessibility best practice; reference repo only |
 | PERF-01 | I | S | `<script src>` in head without async/defer/type=module | SUS head-tags; CS | unverified: reference repo only |
-| CONT-01 | E | S | visible text inside `<main>` under 300 code points (thin) | CS | unverified: owner value; no official minimum length |
+| CONT-01 | E | S | visible text inside `<main>` under 300 code points (thin); the count covers all visible text in `<main>`, including headings, byline and figure captions | CS | unverified: owner value; no official minimum length |
 | CONT-02 | W | S | with `--keyword K`: density outside 1-3% | CS | unverified: owner value; no official density target |
 | CONT-03 | I | S | paragraph with a number+%/unit and no `<a>`, `<cite>`, or `<sup>` | FYSA geo.md | unverified: reference repo only |
 | W-01 | - | M | answer-first: first paragraph answers the page question in 1-2 sentences | FYSA aeo.md | unverified: reference repo only |

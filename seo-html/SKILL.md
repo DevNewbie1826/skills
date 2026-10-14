@@ -13,7 +13,7 @@ This skill writes one complete, static, SEO-ready HTML page and then proves it. 
 |---|---|---|
 | 1. Brief | Pin topic, audience, language (ko/en), canonical URL, primary keyword, page type, author, dates, image | [workflow](references/workflow.md) |
 | 2. Write | Fill `templates/page.html`; write the body answer-first | [head-meta](references/head-meta.md), [semantic-html](references/semantic-html.md), [structured-data](references/structured-data.md), [writing](references/writing.md), plus [korean-naver](references/korean-naver.md) or [english](references/english.md) |
-| 3. Script check | From the skill directory: `python3 scripts/check_page.py page.html --json --lang ko` (or `--lang en`) | [rules](references/rules.md) |
+| 3. Script check | From the skill directory: `python3 scripts/check_page.py path/to/page.html --json --lang ko` (or `--lang en`); the page is the user's file and can live anywhere | [rules](references/rules.md) |
 | 4. Model check | Walk the M rules and record pass/fail with a reason each | [model-checklist](references/model-checklist.md) |
 | 5. Fix and report | Fix every error, re-run steps 3 and 4, at most 3 rounds; then report what's left | [workflow](references/workflow.md), [report-format](references/report-format.md) |
 

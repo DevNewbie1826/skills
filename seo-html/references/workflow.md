@@ -21,7 +21,7 @@ Collect these before writing. If the user didn't give one, pick a sensible value
 
 ## 2. Write
 
-Copy `templates/page.html` to `page.html` and replace every placeholder. Placeholders left in JSON-LD fail LD-05, so search for `[`, `TODO`, and `REPLACE_` before checking.
+Copy `templates/page.html` to a working page and replace every placeholder. The working page is the user's file, not part of the skill, so it can live anywhere. Pass it to the checker by path, for example `python3 scripts/check_page.py path/to/page.html --json --lang ko` run from the skill directory. Placeholders left in JSON-LD fail LD-05, so search for `[`, `TODO`, and `REPLACE_` before checking.
 
 - Head: [head-meta.md](head-meta.md)
 - Body layout: [semantic-html.md](semantic-html.md)
