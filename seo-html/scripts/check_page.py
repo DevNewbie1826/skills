@@ -27,7 +27,9 @@ import json
 import re
 import sys
 import unicodedata
+from datetime import date, time
 from html.parser import HTMLParser
+from urllib.parse import urlsplit
 
 # Thresholds (module constants; tests import them).
 
@@ -127,11 +129,12 @@ BAD_ANCHOR_TEXTS = ("click here", "here", "read more", "more", "여기", "클릭
 
 WS_RE = re.compile(r"\s+")
 VIEWPORT_RE = re.compile(r"width\s*=\s*device-width", re.IGNORECASE)
-ABSOLUTE_URL_RE = re.compile(r"^https?://", re.IGNORECASE)
+ASCII_INT_RE = re.compile(r"^[0-9]+$")
 HREFLANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z][A-Za-z0-9]{1,7})*$")
 ISO_8601_RE = re.compile(
-    r"^\d{4}-\d{2}-\d{2}"
-    r"(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$"
+    r"^(\d{4})-(\d{2})-(\d{2})"
+    r"(?:[T ](\d{2}):(\d{2})(?::(\d{2})(\.\d+)?)?"
+    r"(Z|[+-]\d{2}:?\d{2})?)?$"
 )
 FILENAME_LIKE_RE = re.compile(r"\.(?:jpe?g|png|gif|webp|avif|svg|bmp|ico)\b", re.IGNORECASE)
 # Number followed by a percent sign or a magnitude unit, in either language.
@@ -180,10 +183,66 @@ def is_hangul_letter(ch):
             or "\u3130" <= ch <= "\u318f")
 
 
+def parse_dimension(value):
+    """Parse a declared pixel dimension (og:image:width/height, img
+    width/height). Only plain ASCII digit strings are usable; anything
+    else ("", "12px", "-5", "1e3", digit lookalikes such as the
+    superscript two) is unusable and counts as not declared."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not ASCII_INT_RE.match(text):
+        return None
+    return int(text)
+
+
+def is_absolute_http_url(value):
+    """True when value is an absolute http(s) URL: an http/https scheme and
+    a non-empty host. A bare scheme such as "https://" is not a URL."""
+    if not isinstance(value, str):
+        return False
+    try:
+        parts = urlsplit(value.strip())
+        host = parts.hostname
+    except ValueError:
+        return False
+    return parts.scheme in ("http", "https") and bool(host)
+
+
+def is_valid_iso8601(value):
+    """True when value is an ISO 8601 date or date-time with real calendar
+    values. The regex fixes the shape; this rejects impossible dates
+    (2026-02-30, 2026-13-01), impossible times (25:00), and out-of-range
+    offsets (+99:99)."""
+    if not isinstance(value, str):
+        return False
+    match = ISO_8601_RE.match(value.strip())
+    if match is None:
+        return False
+    try:
+        date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    except ValueError:
+        return False
+    if match.group(4) is None:
+        return True
+    zone = match.group(8)
+    if zone not in (None, "Z"):
+        offset_hours = int(zone[1:3])
+        offset_minutes = int(zone[-2:])
+        if offset_hours > 23 or offset_minutes > 59:
+            return False
+    try:
+        time(int(match.group(4)), int(match.group(5)),
+             int(match.group(6) or 0))
+    except ValueError:
+        return False
+    return True
+
+
 class Node:
     """One element: position, attributes, children, and direct text chunks."""
 
-    __slots__ = ("tag", "attrs", "line", "col", "children", "parent", "text_parts")
+    __slots__ = ("tag", "attrs", "line", "col", "children", "parent", "parts")
 
     def __init__(self, tag, attrs, line, col):
         self.tag = tag
@@ -196,7 +255,7 @@ class Node:
         self.col = col
         self.children = []
         self.parent = None
-        self.text_parts = []
+        self.parts = []
 
     def iter_tree(self):
         yield self
@@ -214,11 +273,16 @@ class Node:
         return None
 
     def text_content(self, skip=SKIP_TEXT_TAGS):
+        """Visible text of this element in source order: direct text
+        chunks interleaved with child elements as the markup orders them."""
+        if self.tag in skip:
+            return ""
         parts = []
-        if self.tag not in skip:
-            parts.extend(self.text_parts)
-            for child in self.children:
-                parts.extend(child.text_content(skip))
+        for part in self.parts:
+            if isinstance(part, str):
+                parts.append(part)
+            else:
+                parts.append(part.text_content(skip))
         return "".join(parts)
 
     def has_ancestor(self, tags):
@@ -250,6 +314,7 @@ class TreeBuilder(HTMLParser):
         node = Node(tag, attrs, line, col)
         node.parent = self.stack[-1]
         self.stack[-1].children.append(node)
+        self.stack[-1].parts.append(node)
         if tag not in VOID_ELEMENTS:
             self.stack.append(node)
 
@@ -258,6 +323,7 @@ class TreeBuilder(HTMLParser):
         node = Node(tag, attrs, line, col)
         node.parent = self.stack[-1]
         self.stack[-1].children.append(node)
+        self.stack[-1].parts.append(node)
 
     def handle_endtag(self, tag):
         for index in range(len(self.stack) - 1, 0, -1):
@@ -266,7 +332,7 @@ class TreeBuilder(HTMLParser):
                 return
 
     def handle_data(self, data):
-        self.stack[-1].text_parts.append(data)
+        self.stack[-1].parts.append(data)
 
 
 def build_tree(text):
@@ -339,28 +405,29 @@ def placeholder_in_node(node):
 
 def absolute_url_violations(node):
     """Yield (key, value) where a url-shaped property holds a string that is
-    not an absolute http(s) URL; dicts are followed into their url/@id."""
+    not an absolute http(s) URL (scheme http/https plus a non-empty host);
+    dicts are followed into their url/@id."""
     for key in URL_KEYS:
         if key not in node:
             continue
         value = node[key]
         if isinstance(value, str):
-            if not ABSOLUTE_URL_RE.match(value.strip()):
+            if not is_absolute_http_url(value):
                 yield key, value
         elif isinstance(value, list):
             for item in value:
                 if isinstance(item, str):
-                    if not ABSOLUTE_URL_RE.match(item.strip()):
+                    if not is_absolute_http_url(item):
                         yield key, item
                 elif isinstance(item, dict):
                     inner = item.get("url") if isinstance(item.get("url"), str) \
                         else item.get("@id")
-                    if isinstance(inner, str) and not ABSOLUTE_URL_RE.match(inner.strip()):
+                    if isinstance(inner, str) and not is_absolute_http_url(inner):
                         yield key, inner
         elif isinstance(value, dict):
             inner = value.get("url") if isinstance(value.get("url"), str) \
                 else value.get("@id")
-            if isinstance(inner, str) and not ABSOLUTE_URL_RE.match(inner.strip()):
+            if isinstance(inner, str) and not is_absolute_http_url(inner):
                 yield key, inner
 
 
@@ -398,11 +465,32 @@ class PageChecker:
             "fix": fix,
         })
 
-    def byte_offset(self, node):
-        char_index = 0
+    def char_offset(self, node):
+        """Zero-based character offset of the node's "<" in the source."""
         if node.line - 1 < len(self.line_starts):
-            char_index = self.line_starts[node.line - 1] + node.col
-        return len(self.text[:char_index].encode("utf-8"))
+            return self.line_starts[node.line - 1] + node.col
+        return 0
+
+    def byte_offset(self, node):
+        return len(self.text[:self.char_offset(node)].encode("utf-8"))
+
+    def tag_end_byte(self, node):
+        """UTF-8 byte offset one past the ">" that closes the node's start
+        tag, honoring quoted attribute values; the document length when no
+        closing ">" exists."""
+        index = self.char_offset(node)
+        quote = None
+        while index < len(self.text):
+            char = self.text[index]
+            if quote is not None:
+                if char == quote:
+                    quote = None
+            elif char in ('"', "'"):
+                quote = char
+            elif char == ">":
+                return len(self.text[:index + 1].encode("utf-8"))
+            index += 1
+        return len(self.text.encode("utf-8"))
 
     def resolve_lang(self):
         if self.lang_arg in ("ko", "en"):
@@ -445,11 +533,12 @@ class PageChecker:
             self.emit("HEAD-01", charset_node.line, "charset is not utf-8",
                       'charset="%s"' % charset_value,
                       'declare utf-8: <meta charset="utf-8">')
-        elif self.byte_offset(charset_node) >= CHARSET_MAX_BYTES:
+        elif self.tag_end_byte(charset_node) > CHARSET_MAX_BYTES:
             self.emit("HEAD-01", charset_node.line,
-                      "charset declaration is beyond the first %d bytes"
+                      "charset declaration ends beyond the first %d bytes"
                       % CHARSET_MAX_BYTES,
-                      "byte offset %d" % self.byte_offset(charset_node),
+                      "declaration ends at byte %d"
+                      % self.tag_end_byte(charset_node),
                       'move <meta charset="utf-8"> to the top of <head>, '
                       "before any long comment")
 
@@ -607,8 +696,8 @@ class PageChecker:
 
         width_text = og.get("og:image:width", "").strip()
         height_text = og.get("og:image:height", "").strip()
-        width = int(width_text) if width_text.isdigit() else None
-        height = int(height_text) if height_text.isdigit() else None
+        width = parse_dimension(width_text)
+        height = parse_dimension(height_text)
         if collapse_ws(og.get("og:image", "")):
             if width is not None and height is not None:
                 if width < OG_IMAGE_MIN[0] or height < OG_IMAGE_MIN[1]:
@@ -654,7 +743,11 @@ class PageChecker:
                       % ("ko_KR" if self.lang == "ko" else "en_US"))
 
         og_url = collapse_ws(og.get("og:url", ""))
-        if og_url and canonical and og_url != canonical:
+        if og_url and canonical and not is_absolute_http_url(og_url):
+            self.emit("OG-06", 1, "og:url is not an absolute http(s) URL",
+                      "og:url=%s" % og_url,
+                      "set og:url to the same absolute URL as the canonical link")
+        elif og_url and canonical and og_url != canonical:
             self.emit("OG-06", 1, "og:url differs from the canonical URL",
                       "og:url=%s canonical=%s" % (og_url, canonical),
                       "set og:url to the same absolute URL as the canonical link")
@@ -713,7 +806,7 @@ class PageChecker:
 
         for time_tag in self.root.find_all("time"):
             value = time_tag.attrs.get("datetime", "").strip()
-            if not value or not ISO_8601_RE.match(value):
+            if not value or not is_valid_iso8601(value):
                 message = ('<time datetime="%s"> is not ISO 8601' % value
                            if value else "<time> has no datetime attribute")
                 self.emit("SEM-06", time_tag.line, message,
@@ -759,7 +852,8 @@ class PageChecker:
                       'add a <script type="application/ld+json"> with a '
                       "schema.org @graph")
         for index, script in enumerate(scripts, start=1):
-            body = "".join(script.text_parts).strip()
+            body = "".join(part for part in script.parts
+                           if isinstance(part, str)).strip()
             try:
                 data = json.loads(body)
             except json.JSONDecodeError as error:
@@ -897,7 +991,7 @@ class PageChecker:
             for key in DATE_KEYS:
                 if key in node:
                     value = node.get(key)
-                    if not isinstance(value, str) or not ISO_8601_RE.match(value.strip()):
+                    if not is_valid_iso8601(value):
                         self.emit("LD-12", script.line,
                                   "%s: %s is not ISO 8601: %r" % (block, key, value),
                                   "%s=%r" % (key, value),
@@ -993,7 +1087,8 @@ class PageChecker:
                                   "alt=%s" % alt[:80],
                                   "describe the image content instead of the "
                                   "file name")
-            if "width" not in img.attrs or "height" not in img.attrs:
+            if parse_dimension(img.attrs.get("width", "")) is None \
+                    or parse_dimension(img.attrs.get("height", "")) is None:
                 self.emit("IMG-03", img.line,
                           '<img src="%s"> does not declare width and height' % src,
                           "width=%s height=%s"
@@ -1025,7 +1120,7 @@ class PageChecker:
                       'href="https://example.com/page">')
         else:
             href = canonicals[0].attrs.get("href", "").strip()
-            if not ABSOLUTE_URL_RE.match(href):
+            if not is_absolute_http_url(href):
                 self.emit("LINK-01", canonicals[0].line,
                           'canonical href="%s" is not an absolute http(s) URL'
                           % href,
@@ -1045,6 +1140,14 @@ class PageChecker:
                               "hreflang=%s" % code,
                               "use a language-region code like ko-KR, en, "
                               "or x-default")
+                href = link.attrs.get("href", "").strip()
+                if not is_absolute_http_url(href):
+                    self.emit("LINK-02", link.line,
+                              'hreflang href="%s" is not an absolute http(s) URL'
+                              % (href or "(empty)"),
+                              "hreflang=%s href=%s" % (code, href or "(empty)"),
+                              "point every hreflang entry at the absolute https "
+                              "URL of that language version")
             if len(canonicals) == 1:
                 canonical = canonicals[0].attrs.get("href", "").strip()
                 hrefs = {link.attrs.get("href", "").strip() for link in alternates}

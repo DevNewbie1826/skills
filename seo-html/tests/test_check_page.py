@@ -672,6 +672,208 @@ class TestTemplate(RuleCase):
         self.assertGreater(result["summary"]["error"], 0)
 
 
+class TestHardenedParsing(RuleCase):
+    """Regressions for the five review-blocker classes (R1-R5): malformed
+    numeric strings, hostless absolute URLs, the complete charset byte
+    extent, impossible calendar dates, and source-order text extraction."""
+
+    def run_json_cli(self, text):
+        with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".html", delete=False, encoding="utf-8") as handle:
+            handle.write(text)
+            path = handle.name
+        try:
+            return subprocess.run(
+                [sys.executable, str(CHECKER_PATH), path, "--json"],
+                capture_output=True, text=True)
+        finally:
+            Path(path).unlink()
+
+    def test_r1_og_image_width_superscript_yields_parseable_json(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<meta property="og:image:width" content="1200">',
+             '<meta property="og:image:width" content="\u00b2">'))
+        process = self.run_json_cli(text)
+        self.assertNotIn("Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout)
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("OG-07"), "info")
+        self.assertNotIn("OG-04", severities)
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_r1_unusable_og_dimensions_count_as_missing(self):
+        for junk in ("", " ", "12px", "-5", "1e3", "\u00b2", "\uff11\uff12"):
+            with self.subTest(junk=junk):
+                text = self.mutated(
+                    "good-en.html",
+                    ('<meta property="og:image:width" content="1200">',
+                     '<meta property="og:image:width" content="%s">' % junk))
+                result = self.result_for(text)
+                self.assert_rule("OG-07", result)
+                self.assertNotIn(
+                    "OG-04", {finding["id"] for finding in result["findings"]})
+
+    def test_r1_img_width_superscript_yields_parseable_json(self):
+        text = self.mutated(
+            "good-en.html",
+            ('width="1200" height="675"', 'width="\u00b2" height="675"'))
+        process = self.run_json_cli(text)
+        self.assertNotIn("Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout)
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("IMG-03"), "warn")
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_r1_unusable_img_dimensions_fire_img_03(self):
+        for junk in ("", "12px", "1e3", "-5"):
+            with self.subTest(junk=junk):
+                text = self.mutated(
+                    "good-en.html",
+                    ('width="1200" height="675"',
+                     'width="%s" height="675"' % junk))
+                self.assert_rule("IMG-03", self.result_for(text))
+
+    def test_r2_hostless_canonical_fires_link_01(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
+             '<link rel="canonical" href="https://">'),
+            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
+             '<meta property="og:url" content="https://">'))
+        result = self.result_for(text)
+        self.assert_rule("LINK-01", result)
+        self.assert_rule("OG-06", result)
+
+    def test_r2_hostless_ld_image_fires_ld_13(self):
+        text = self.mutated(
+            "good-en.html",
+            ('"image": "https://example.com/images/seo-basics.png",',
+             '"image": "https://",'))
+        self.assert_rule("LD-13", self.result_for(text))
+
+    def test_r2_hreflang_href_must_be_absolute(self):
+        canonical_line = ('  <link rel="canonical" '
+                          'href="https://example.com/guide/seo-basics">\n')
+        hreflang_lines = (
+            '  <link rel="alternate" hreflang="en" '
+            'href="https://example.com/guide/seo-basics">\n'
+            '  <link rel="alternate" hreflang="ko-KR" '
+            'href="https://example.com/ko/guide/seo-basics">\n'
+            '  <link rel="alternate" hreflang="x-default" '
+            'href="https://example.com/guide/seo-basics">\n')
+        text = self.mutated(
+            "good-en.html", (canonical_line, canonical_line + hreflang_lines))
+        self.assertEqual(self.result_for(text)["summary"]["warn"], 0)
+        for broken_href in ("/ko/guide/seo-basics", "https://"):
+            with self.subTest(href=broken_href):
+                broken = text.replace(
+                    'hreflang="ko-KR" href="https://example.com/ko/guide/seo-basics"',
+                    'hreflang="ko-KR" href="%s"' % broken_href)
+                self.assert_rule("LINK-02", self.result_for(broken))
+
+    def shifted_charset_page(self, tag_start_byte):
+        """good-en.html with an ASCII comment prepended so the charset
+        start tag's "<" lands on the given UTF-8 byte offset."""
+        text = fixture_text("good-en.html")
+        start = text.index("<meta charset")
+        prefix_bytes = len(text[:start].encode("utf-8"))
+        pad = tag_start_byte - prefix_bytes
+        self.assertGreaterEqual(pad, 7, "padding comment must fit")
+        comment = "<!--" + "x" * (pad - 7) + "-->"
+        self.assertEqual(len(comment.encode("utf-8")), pad)
+        return comment + text
+
+    def test_r3_charset_ending_exactly_at_limit_passes(self):
+        text = fixture_text("good-en.html")
+        start = text.index("<meta charset")
+        end = text.index(">", start) + 1
+        tag_bytes = len(text[start:end].encode("utf-8"))
+        page = self.shifted_charset_page(cp.CHARSET_MAX_BYTES - tag_bytes)
+        result = self.result_for(page)
+        self.assertNotIn(
+            "HEAD-01", {finding["id"] for finding in result["findings"]})
+        bad = [finding for finding in result["findings"]
+               if finding["severity"] in ("error", "warn")]
+        self.assertEqual(bad, [])
+
+    def test_r3_charset_starting_before_limit_ending_after_fires(self):
+        page = self.shifted_charset_page(cp.CHARSET_MAX_BYTES - 1)
+        self.assert_rule("HEAD-01", self.result_for(page))
+
+    def test_r4_sem_06_impossible_calendar_date_fires(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<time datetime="2026-09-01">', '<time datetime="2026-02-30">'))
+        self.assert_rule("SEM-06", self.result_for(text))
+
+    def test_r4_sem_06_impossible_date_time_and_offset_fire(self):
+        for value in ("2026-13-01", "2026-01-01T25:00",
+                      "2026-01-01T09:30+99:99", "2026", "2026-02"):
+            with self.subTest(value=value):
+                text = self.mutated(
+                    "good-en.html",
+                    ('<time datetime="2026-09-01">',
+                     '<time datetime="%s">' % value))
+                self.assert_rule("SEM-06", self.result_for(text))
+
+    def test_r4_sem_06_valid_forms_still_pass(self):
+        for value in ("2026-02-28", "2026-02-28T09:30", "2026-02-28T09:30:45",
+                      "2026-02-28T09:30:45.25Z", "2026-02-28 09:30+09:00",
+                      "2026-12-31T23:59:59-05:30"):
+            with self.subTest(value=value):
+                text = self.mutated(
+                    "good-en.html",
+                    ('<time datetime="2026-09-01">',
+                     '<time datetime="%s">' % value))
+                result = self.result_for(text)
+                self.assertNotIn(
+                    "SEM-06",
+                    {finding["id"] for finding in result["findings"]})
+
+    def test_r4_ld_12_impossible_calendar_date_fires(self):
+        text = self.mutated(
+            "good-en.html",
+            ('"datePublished": "2026-09-01",',
+             '"datePublished": "2026-02-30",'))
+        self.assert_rule("LD-12", self.result_for(text))
+
+    def test_r4_ld_12_impossible_time_and_month_fire(self):
+        for value in ("2026-13-01T10:00", "2026-01-01T25:00+09:00",
+                      "2026-02-30T00:00:00Z"):
+            with self.subTest(value=value):
+                text = self.mutated(
+                    "good-en.html",
+                    ('"datePublished": "2026-09-01",',
+                     '"datePublished": "%s",' % value))
+                self.assert_rule("LD-12", self.result_for(text))
+
+    def test_r5_text_content_interleaves_children_in_source_order(self):
+        root = cp.build_tree("<p>On-Page <span>SEO Basics</span>: Titles</p>")
+        self.assertEqual(root.find("p").text_content(),
+                         "On-Page SEO Basics: Titles")
+
+    def test_r5_h1_with_inline_span_extracts_in_source_order(self):
+        text = self.mutated(
+            "good-en.html",
+            ("<h1>On-Page SEO Basics: Titles, Meta Tags, and Clean Structure</h1>",
+             "<h1>On-Page <span>SEO Basics</span>: Titles, Meta Tags, "
+             "and Clean Structure</h1>"))
+        result = self.result_for(text)
+        self.assertEqual(
+            result["extracted"]["h1"],
+            "On-Page SEO Basics: Titles, Meta Tags, and Clean Structure")
+        self.assertNotIn(
+            "LD-14", {finding["id"] for finding in result["findings"]})
+        bad = [finding for finding in result["findings"]
+               if finding["severity"] in ("error", "warn")]
+        self.assertEqual(bad, [])
+
+
 class TestUnionCoverage(RuleCase):
 
     def test_every_rule_has_a_failing_case(self):
