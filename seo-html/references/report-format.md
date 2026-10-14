@@ -25,17 +25,19 @@ Read this when you write the final report or need to parse the checker's JSON ou
     "title": "Passport renewal time in 2026",
     "title_len": 29,
     "description_len": 151,
-    "h1": ["Passport renewal time in 2026"],
+    "h1": "Passport renewal time in 2026",
     "og": { "og:title": "Passport renewal time in 2026" },
     "twitter": { "twitter:card": "summary_large_image" },
     "canonical": "https://example.com/guides/passport-renewal",
     "jsonld_types": ["Organization", "WebSite", "WebPage", "Article", "BreadcrumbList"],
-    "images": 3
+    "images": [
+      { "src": "https://example.com/images/passport-form.png", "alt": "Passport renewal form with the photo box highlighted", "width": "1200", "height": "675", "loading": "lazy" }
+    ]
   }
 }
 ```
 
-`severity` is `error`, `warn`, or `info`. Score = max(0, 100 - 10 x errors - 3 x warnings). Exit code: 0 = no errors (and no warnings with `--strict`), 1 = errors (or warnings with `--strict`), 2 = unreadable file or usage error. `title_len` and `description_len` are weighted display width units, not character counts: after whitespace collapse each wide or fullwidth code point (East Asian Width W or F, such as Hangul) counts 2.0 and every other code point 1.0. The example values are illustrative; read the real shape of `extracted` from your run.
+`severity` is `error`, `warn`, or `info`. Score = max(0, 100 - 10 x errors - 3 x warnings). Exit code: 0 = no errors (and no warnings with `--strict`), 1 = errors (or warnings with `--strict`), 2 = unreadable file or usage error. `title_len` and `description_len` are weighted display width units, not character counts: after whitespace collapse each wide or fullwidth code point (East Asian Width W or F, such as Hangul) counts 2.0 and every other code point 1.0. `h1` is the text of the first `<h1>`, or `null` when the page has none. `images` lists each `<img>` as an object with `src`, `alt`, `width`, `height`, and `loading`, where a missing `alt` is `null` and any other missing attribute is an empty string. The example values are illustrative; read the real shape of `extracted` from your run.
 
 ## Final report (output)
 
