@@ -133,6 +133,12 @@ WS_RE = re.compile(r"\s+")
 VIEWPORT_RE = re.compile(r"width\s*=\s*device-width", re.IGNORECASE)
 ASCII_INT_RE = re.compile(r"^[0-9]+$")
 HOST_LABEL_RE = re.compile(r"[A-Za-z0-9-]+")
+# RFC 3986 IPv6address characters only: hex digits, ":", and "." (the
+# embedded IPv4 form). Zone identifiers ("%25eth0") are not URI syntax:
+# RFC 9844 (August 2025) obsoleted RFC 6874 and removed them, while
+# ipaddress.IPv6Address accepts any non-empty scope text, so bracket
+# contents are charset-checked before the ipaddress parse.
+IPV6_LITERAL_RE = re.compile(r"^[0-9A-Fa-f:.]+$")
 HREFLANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z][A-Za-z0-9]{1,7})*$")
 ISO_8601_RE = re.compile(
     r"^(\d{4})-(\d{2})-(\d{2})"
@@ -240,15 +246,24 @@ def is_valid_host(host):
 
 def _is_valid_port_text(port_text):
     """True when the text after ":" is an absent or usable port: empty
-    text counts as no port (RFC 3986 allows one), otherwise 1-5 ASCII
-    digits only - no sign, no whitespace, no digit lookalikes such as
-    full-width digits, which int() would accept - with a value in
-    1-65535."""
+    text counts as no port (RFC 3986 allows one), otherwise one or more
+    ASCII digits - no sign, no whitespace, no digit lookalikes such as
+    full-width digits, which int() would accept - of any length. The
+    value, not the spelling, must be 1-65535: leading zeros are
+    stripped before any numeric conversion, so "000443" is port 443
+    and stays usable, an all-zero spelling is port 0 and is rejected,
+    and the stripped value is rejected when it has more than 5 digits
+    or exceeds 65535. Stripping first also means int() never sees more
+    than 5 digits, so arbitrarily long zero padding cannot trip Python
+    3.11's 4300-digit int(str) limit."""
     if not port_text:
         return True
-    if len(port_text) > 5 or not ASCII_INT_RE.fullmatch(port_text):
+    if not ASCII_INT_RE.fullmatch(port_text):
         return False
-    return 1 <= int(port_text) <= 65535
+    digits = port_text.lstrip("0")
+    if not digits or len(digits) > 5:
+        return False
+    return int(digits) <= 65535
 
 
 def is_valid_authority(netloc):
@@ -256,9 +271,12 @@ def is_valid_authority(netloc):
     .hostname and .port accessors discard the bracket, userinfo, and
     original port text, so the netloc is validated as-is here: optional
     userinfo up to the last "@"; then either a bracketed IP literal,
-    which must be exactly "[" + a valid IPv6 address (ipaddress.IPv6Address
-    rejects bracketed IPv4 and DNS names) + nothing or ":" + port, or an
-    unbracketed host (see is_valid_host) + nothing or ":" + port."""
+    which must be exactly "[" + a valid IPv6 address written only in
+    RFC 3986 IPv6address characters (hex digits, ":", and "."; a zone
+    identifier such as "%25eth0" is not URI syntax since RFC 9844
+    obsoleted RFC 6874, and ipaddress would otherwise accept it) +
+    nothing or ":" + port, or an unbracketed host (see is_valid_host) +
+    nothing or ":" + port."""
     if not netloc:
         return False
     _, _, hostinfo = netloc.rpartition("@")
@@ -268,6 +286,8 @@ def is_valid_authority(netloc):
         literal, bracket, tail = hostinfo.partition("]")
         if not bracket:
             return False            # unterminated IP literal
+        if not IPV6_LITERAL_RE.fullmatch(literal[1:]):
+            return False            # zone ID or non-IPv6 characters
         try:
             ipaddress.IPv6Address(literal[1:])
         except ValueError:

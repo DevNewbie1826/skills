@@ -141,6 +141,32 @@ DELTA2_GOOD_AUTHORITIES = (
     "https://192.0.2.1:8000/path",
 )
 
+# Delta re-review round 3, required change 1: scoped IPv6 literals.
+# RFC 9844 (August 2025) obsoleted RFC 6874 and removed zone
+# identifiers from URI syntax, and ipaddress.IPv6Address accepts any
+# non-empty scope text, so every "%" (and any other character outside
+# RFC 3986 IPv6address) must be rejected by the shared validator.
+DELTA3_ZONE_AUTHORITIES = (
+    "https://[::1%25bad scope]/",
+    "https://[::1%25bad|scope]/",
+    "https://[::1%25bad\\scope]/",
+    "https://[fe80::1%25eth0]/",
+)
+# Delta re-review round 3, required change 2: RFC 3986 port is *DIGIT,
+# so zero padding is spelling, not value; the value stays bounded.
+DELTA3_PADDED_GOOD_AUTHORITIES = (
+    "https://example.com:000443/",
+    "https://[2001:db8::1]:000443/",
+    "https://user:pass@example.com:065535/",
+    "http://example.com:000080/",
+    "https://example.com:" + "0" * 5000 + "443/",
+)
+DELTA3_PADDED_BAD_AUTHORITIES = (
+    "https://example.com:0000/",
+    "https://example.com:065536/",
+    "https://example.com:" + "0" * 5000 + "65536/",
+)
+
 
 def run_checker_cli(args, env_extra=None):
     """Run the real CLI as a subprocess and capture raw bytes, so tests
@@ -1254,6 +1280,92 @@ class TestAuthorityValidation(RuleCase):
                 bad = [finding for finding in result["findings"]
                        if finding["severity"] in ("error", "warn")]
                 self.assertEqual(bad, [])
+
+    def test_shared_validator_rejects_zone_identifier_literals(self):
+        for url in DELTA3_ZONE_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+
+    def test_shared_validator_keeps_pure_ipv6_literals_valid(self):
+        self.assertTrue(cp.is_absolute_http_url("https://[2001:db8::1]:443/path"))
+        self.assertTrue(cp.is_absolute_http_url("https://[::1]/"))
+        self.assertTrue(cp.is_absolute_http_url("https://[::ffff:192.0.2.1]:80/"))
+
+    def test_canonical_and_og_url_reject_zone_identifiers(self):
+        for url in DELTA3_ZONE_AUTHORITIES:
+            with self.subTest(url=url):
+                result = self.result_for(self.page_with_urls(url))
+                self.assert_rule("LINK-01", result)
+                self.assert_rule("OG-06", result)
+
+    def test_canonical_and_og_url_cli_rejects_zone_identifier(self):
+        path = write_temp_page(self.page_with_urls(DELTA3_ZONE_AUTHORITIES[0]))
+        try:
+            process = run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LINK-01"), "error")
+        self.assertEqual(severities.get("OG-06"), "warn")
+
+    def test_hreflang_href_rejects_zone_identifiers(self):
+        for url in DELTA3_ZONE_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assert_rule(
+                    "LINK-02", self.result_for(self.hreflang_page_with_ko_href(url)))
+
+    def test_ld13_article_image_shapes_reject_zone_identifier(self):
+        image_anchor = '"image": "https://example.com/images/seo-basics.png",'
+        zone = DELTA3_ZONE_AUTHORITIES[0]
+        shapes = ('"%s"' % zone,
+                  '["%s"]' % zone,
+                  '{"@id": "%s"}' % zone,
+                  '[{"@id": "%s"}]' % zone,
+                  '{"url": "%s"}' % zone,
+                  '[{"url": "%s"}]' % zone)
+        for shape in shapes:
+            with self.subTest(shape=shape):
+                text = self.mutated(
+                    "good-en.html",
+                    (image_anchor, '"image": %s,' % shape))
+                self.assert_rule("LD-13", self.result_for(text))
+
+    def test_shared_validator_accepts_zero_padded_ports(self):
+        for url in DELTA3_PADDED_GOOD_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assertTrue(cp.is_absolute_http_url(url), url)
+
+    def test_shared_validator_rejects_zero_value_and_oversized_padded_ports(self):
+        for url in DELTA3_PADDED_BAD_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+
+    def test_canonical_and_og_url_stay_clean_for_padded_ports(self):
+        for url in DELTA3_PADDED_GOOD_AUTHORITIES:
+            with self.subTest(url=url):
+                result = self.result_for(self.page_with_urls(url))
+                bad = [finding for finding in result["findings"]
+                       if finding["severity"] in ("error", "warn")]
+                self.assertEqual(bad, [])
+
+    def test_canonical_and_og_url_cli_accepts_5000_zero_padded_port(self):
+        url = "https://example.com:" + "0" * 5000 + "443/"
+        path = write_temp_page(self.page_with_urls(url))
+        try:
+            process = run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 0)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        pairs = {(finding["id"], finding["severity"])
+                 for finding in report["findings"]}
+        self.assertNotIn(("LINK-01", "error"), pairs)
+        self.assertNotIn(("OG-06", "warn"), pairs)
 
 
 class TestSafeReportOutput(RuleCase):
