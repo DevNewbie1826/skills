@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import random
 import subprocess
 import sys
@@ -118,6 +119,45 @@ TEMPLATE_FILL = {
 
 def fixture_text(name):
     return (FIXTURES_DIR / name).read_text(encoding="utf-8")
+
+
+# Delta re-review round 2: the surviving malformed authorities from the
+# review table, and the positive controls that must stay clean.
+DELTA2_BAD_AUTHORITIES = (
+    "https://[2001:db8::1]junk/",
+    "https://[2001:db8::1]junk:443/",
+    "https://[127.0.0.1]/",
+    "https://[example.com]/",
+    "https://example.com:+443/",
+    "https://example.com: 443/",
+    "https://example.com:\uff14\uff14\uff14/",
+)
+DELTA2_GOOD_AUTHORITIES = (
+    "https://[2001:db8::1]:443/path",
+    "https://\uc608\uc2dc.\ud55c\uad6d/\uacbd\ub85c",
+    "https://xn--9n2bp8qxa.example/",
+    "https://example.com./path",
+    "https://user:pass@example.com:65535/path",
+    "https://192.0.2.1:8000/path",
+)
+
+
+def run_checker_cli(args, env_extra=None):
+    """Run the real CLI as a subprocess and capture raw bytes, so tests
+    control the stdout/stderr decoding (UTF-8) exactly."""
+    env = dict(os.environ)
+    env.update(env_extra or {})
+    return subprocess.run(
+        [sys.executable, str(CHECKER_PATH)] + [str(a) for a in args],
+        capture_output=True, env=env)
+
+
+def write_temp_page(text, prefix="page"):
+    with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".html", delete=False, encoding="utf-8",
+            prefix=prefix) as handle:
+        handle.write(text)
+        return handle.name
 
 
 class RuleCase(unittest.TestCase):
@@ -1040,6 +1080,218 @@ class TestHardenedParsing(RuleCase):
         bad = [finding for finding in result["findings"]
                if finding["severity"] in ("error", "warn")]
         self.assertEqual(bad, [])
+
+
+class TestAuthorityValidation(RuleCase):
+    """Delta re-review round 2, required change 2: the shared URL
+    validator checks the complete raw authority - brackets, userinfo,
+    and the original port text - instead of the flattened hostname and
+    coerced integer port that urlsplit's accessors return."""
+
+    canonical_anchor = ('<link rel="canonical" '
+                        'href="https://example.com/guide/seo-basics">')
+    og_url_anchor = ('<meta property="og:url" '
+                     'content="https://example.com/guide/seo-basics">')
+
+    def page_with_urls(self, url):
+        return self.mutated(
+            "good-en.html",
+            (self.canonical_anchor,
+             '<link rel="canonical" href="%s">' % url),
+            (self.og_url_anchor,
+             '<meta property="og:url" content="%s">' % url))
+
+    def test_shared_validator_rejects_malformed_authorities(self):
+        for url in DELTA2_BAD_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+
+    def test_shared_validator_accepts_valid_authorities(self):
+        for url in DELTA2_GOOD_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assertTrue(cp.is_absolute_http_url(url), url)
+
+    def test_shared_validator_still_rejects_previous_classes(self):
+        self.assertFalse(cp.is_absolute_http_url("http://2001:db8::1:443/"))
+        self.assertFalse(cp.is_absolute_http_url("https://example.com:0/"))
+        self.assertFalse(cp.is_absolute_http_url("https://\ud800.example/"))
+
+    def test_canonical_and_og_url_reject_malformed_authorities(self):
+        for url in DELTA2_BAD_AUTHORITIES:
+            with self.subTest(url=url):
+                result = self.result_for(self.page_with_urls(url))
+                self.assert_rule("LINK-01", result)
+                self.assert_rule("OG-06", result)
+
+    def test_canonical_and_og_url_cli_exits_1(self):
+        path = write_temp_page(
+            self.page_with_urls(DELTA2_BAD_AUTHORITIES[0]))
+        try:
+            process = run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LINK-01"), "error")
+        self.assertEqual(severities.get("OG-06"), "warn")
+
+    def hreflang_page_with_ko_href(self, url):
+        canonical_line = ('  <link rel="canonical" '
+                          'href="https://example.com/guide/seo-basics">\n')
+        hreflang_lines = (
+            '  <link rel="alternate" hreflang="en" '
+            'href="https://example.com/guide/seo-basics">\n'
+            '  <link rel="alternate" hreflang="ko-KR" '
+            'href="https://example.com/ko/guide/seo-basics">\n'
+            '  <link rel="alternate" hreflang="x-default" '
+            'href="https://example.com/guide/seo-basics">\n')
+        complete = self.mutated(
+            "good-en.html", (canonical_line, canonical_line + hreflang_lines))
+        self.assertEqual(self.result_for(complete)["summary"]["warn"], 0)
+        broken = complete.replace(
+            'hreflang="ko-KR" href="https://example.com/ko/guide/seo-basics"',
+            'hreflang="ko-KR" href="%s"' % url)
+        self.assertNotEqual(broken, complete)
+        return broken
+
+    def test_hreflang_href_rejects_malformed_authorities(self):
+        for url in DELTA2_BAD_AUTHORITIES:
+            with self.subTest(url=url):
+                self.assert_rule(
+                    "LINK-02", self.result_for(self.hreflang_page_with_ko_href(url)))
+
+    def test_ld13_article_image_shapes_reject_malformed_authority(self):
+        image_anchor = '"image": "https://example.com/images/seo-basics.png",'
+        shapes = ('"https://[2001:db8::1]junk/"',
+                  '["https://[2001:db8::1]junk/"]',
+                  '{"@id": "https://[2001:db8::1]junk/"}',
+                  '[{"url": "https://[2001:db8::1]junk/"}]')
+        for shape in shapes:
+            with self.subTest(shape=shape):
+                text = self.mutated(
+                    "good-en.html",
+                    (image_anchor, '"image": %s,' % shape))
+                self.assert_rule("LD-13", self.result_for(text))
+
+    def test_ld13_article_image_rejects_every_malformed_authority(self):
+        image_anchor = '"image": "https://example.com/images/seo-basics.png",'
+        for url in DELTA2_BAD_AUTHORITIES:
+            with self.subTest(url=url):
+                text = self.mutated(
+                    "good-en.html",
+                    (image_anchor, '"image": "%s",' % url))
+                self.assert_rule("LD-13", self.result_for(text))
+
+    def test_authority_positive_controls_stay_clean(self):
+        for url in DELTA2_GOOD_AUTHORITIES:
+            with self.subTest(url=url):
+                result = self.result_for(self.page_with_urls(url))
+                bad = [finding for finding in result["findings"]
+                       if finding["severity"] in ("error", "warn")]
+                self.assertEqual(bad, [])
+
+
+class TestSafeReportOutput(RuleCase):
+    """Delta re-review round 2, required change 1: printing the report
+    (JSON and text mode, and the stderr file-echo messages) never raises
+    on content the stream encoding cannot represent - a lone surrogate
+    inside a finding, Korean text under an ASCII stdout encoding - and
+    the JSON stays parseable UTF-8 with severities unchanged."""
+
+    surrogate_image = ('"image": "https://example.com/images/seo-basics.png",',
+                       '"image": "https://\\ud800.example/",')
+
+    def surrogate_page(self):
+        # The ld+json block carries the literal escape \ud800; json.loads
+        # turns it into a lone surrogate inside the emitted LD-13 finding.
+        return self.mutated("good-en.html", self.surrogate_image)
+
+    def run_surrogate_cli(self, *args):
+        path = write_temp_page(self.surrogate_page())
+        try:
+            # A strict UTF-8 stdout reproduces the crash surface: the raw
+            # surrogate must never reach the stream encoder.
+            return run_checker_cli([path] + list(args),
+                                   {"PYTHONIOENCODING": "utf-8"})
+        finally:
+            Path(path).unlink()
+
+    def test_surrogate_finding_json_mode_exits_0_with_ld13_warn(self):
+        process = self.run_surrogate_cli("--json")
+        self.assertEqual(process.returncode, 0)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LD-13"), "warn")
+        self.assertEqual(report["summary"],
+                         {"error": 0, "warn": 1, "info": 0, "score": 97})
+
+    def test_surrogate_finding_json_mode_strict_exits_1(self):
+        process = self.run_surrogate_cli("--json", "--strict")
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LD-13"), "warn")
+
+    def test_surrogate_finding_text_mode_exits_0(self):
+        process = self.run_surrogate_cli()
+        self.assertEqual(process.returncode, 0)
+        self.assertNotIn(b"Traceback", process.stderr)
+        text = process.stdout.decode("utf-8")
+        self.assertIn("WARN LD-13 line", text)
+        self.assertIn("summary: file=", text)
+
+    def test_surrogate_finding_text_mode_strict_exits_1(self):
+        process = self.run_surrogate_cli("--strict")
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        self.assertIn("WARN LD-13 line", process.stdout.decode("utf-8"))
+
+    def test_ascii_stdout_keeps_json_utf8_and_korean_intact(self):
+        process = run_checker_cli(
+            [FIXTURES_DIR / "good-ko.html", "--json"],
+            {"PYTHONIOENCODING": "ascii"})
+        self.assertEqual(process.returncode, 0)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        self.assertEqual(report["extracted"]["title"], GOOD_KO_TITLE)
+        self.assertEqual(report["summary"]["error"], 0)
+        self.assertEqual(report["summary"]["warn"], 0)
+
+    def test_ascii_stdout_text_mode_prints_korean_finding_text(self):
+        # Text mode prints each finding's message; H-03 echoes the heading
+        # text itself, so an ASCII stdout must still receive the Hangul.
+        text = self.mutated(
+            "good-ko.html",
+            ("<h2>\uba54\ud0c0 \uc815\ubcf4\ub97c \uba3c\uc800 \uc815\ub9ac\ud558\uc138\uc694</h2>",
+             "<h2>\uac00\ub098</h2>"))
+        path = write_temp_page(text)
+        try:
+            process = run_checker_cli([path], {"PYTHONIOENCODING": "ascii"})
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 0)
+        self.assertNotIn(b"Traceback", process.stderr)
+        out = process.stdout.decode("utf-8")
+        self.assertIn("WARN H-03 line", out)
+        self.assertIn("\uac00\ub098", out)
+        self.assertIn("summary: file=", out)
+
+    def test_cannot_read_echoes_utf8_name_on_ascii_stderr(self):
+        process = run_checker_cli(
+            [FIXTURES_DIR / "\ud398\uc774\uc9c0-\uc5c6\uc74c.html"],
+            {"PYTHONIOENCODING": "ascii:strict"})
+        self.assertEqual(process.returncode, 2)
+        self.assertNotIn(b"Traceback", process.stderr)
+        err = process.stderr.decode("utf-8")
+        self.assertIn("cannot read", err)
+        self.assertIn("\ud398\uc774\uc9c0-\uc5c6\uc74c", err)
 
 
 class TestRobustnessBoundary(RuleCase):

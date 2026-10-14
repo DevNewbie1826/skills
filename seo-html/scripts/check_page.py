@@ -207,16 +207,19 @@ def parse_dimension(value):
 
 
 def is_valid_host(host):
-    """True when host is a usable http(s) destination host: an IPv4/IPv6
-    literal accepted by ipaddress, or a dotted host whose labels are 1-63
-    characters of letters, digits, and hyphens with no empty labels (no
-    whitespace or other out-of-label characters). Internationalized hosts
-    are validated on their IDNA-encoded ASCII form; one optional trailing
-    root dot is allowed."""
+    """True when host is a usable unbracketed http(s) destination host: a
+    dotted IPv4 literal accepted by ipaddress, or a dotted host whose
+    labels are 1-63 characters of letters, digits, and hyphens with no
+    empty labels (no whitespace or other out-of-label characters).
+    Internationalized hosts are validated on their IDNA-encoded ASCII
+    form; one optional trailing root dot is allowed. IPv6 literals are
+    authority hosts only inside brackets, where is_valid_authority
+    checks them with ipaddress.IPv6Address, so a colon-bearing host
+    text never passes the label checks here."""
     if not host:
         return False
     try:
-        ipaddress.ip_address(host)
+        ipaddress.IPv4Address(host)
         return True
     except ValueError:
         pass
@@ -235,24 +238,69 @@ def is_valid_host(host):
     return True
 
 
+def _is_valid_port_text(port_text):
+    """True when the text after ":" is an absent or usable port: empty
+    text counts as no port (RFC 3986 allows one), otherwise 1-5 ASCII
+    digits only - no sign, no whitespace, no digit lookalikes such as
+    full-width digits, which int() would accept - with a value in
+    1-65535."""
+    if not port_text:
+        return True
+    if len(port_text) > 5 or not ASCII_INT_RE.fullmatch(port_text):
+        return False
+    return 1 <= int(port_text) <= 65535
+
+
+def is_valid_authority(netloc):
+    """True when the complete raw authority is usable. urlsplit's
+    .hostname and .port accessors discard the bracket, userinfo, and
+    original port text, so the netloc is validated as-is here: optional
+    userinfo up to the last "@"; then either a bracketed IP literal,
+    which must be exactly "[" + a valid IPv6 address (ipaddress.IPv6Address
+    rejects bracketed IPv4 and DNS names) + nothing or ":" + port, or an
+    unbracketed host (see is_valid_host) + nothing or ":" + port."""
+    if not netloc:
+        return False
+    _, _, hostinfo = netloc.rpartition("@")
+    if not hostinfo:
+        return False
+    if hostinfo.startswith("["):
+        literal, bracket, tail = hostinfo.partition("]")
+        if not bracket:
+            return False            # unterminated IP literal
+        try:
+            ipaddress.IPv6Address(literal[1:])
+        except ValueError:
+            return False            # bracketed IPv4/DNS name or bad IPv6
+        if not tail:
+            return True
+        if not tail.startswith(":"):
+            return False            # junk after the closing bracket
+        return _is_valid_port_text(tail[1:])
+    if ":" in hostinfo:
+        host, _, port_text = hostinfo.rpartition(":")
+    else:
+        host, port_text = hostinfo, ""
+    if not _is_valid_port_text(port_text):
+        return False
+    return is_valid_host(host)
+
+
 def is_absolute_http_url(value):
     """True when value is an absolute http(s) URL with a usable authority:
-    an http/https scheme, a present and syntactically valid host (see
-    is_valid_host), and a port that parses and lies within 1-65535 when
-    present. A bare scheme such as "https://" is not a URL."""
+    an http/https scheme plus a complete, syntactically valid authority
+    in the raw netloc (see is_valid_authority; brackets, userinfo, and
+    port text are checked intact). A bare scheme such as "https://" is
+    not a URL."""
     if not isinstance(value, str):
         return False
     try:
         parts = urlsplit(value.strip())
-        host = parts.hostname
-        port = parts.port
     except ValueError:
         return False
     if parts.scheme not in ("http", "https"):
         return False
-    if port is not None and not 1 <= port <= 65535:
-        return False
-    return is_valid_host(host)
+    return is_valid_authority(parts.netloc)
 
 
 def is_valid_iso8601(value):
@@ -1435,6 +1483,22 @@ def run_check(text, file_label="<page>", lang="auto", keyword=None,
                        allow_noindex=allow_noindex).run()
 
 
+def _write_line(stream, text):
+    """Append one line to a real output stream without ever raising on
+    string content the stream encoding cannot represent (lone
+    surrogates, non-ASCII text, a non-UTF-8 PYTHONIOENCODING): UTF-8
+    bytes go to the stream's binary buffer, with unencodable code points
+    backslash-escaped so the bytes stay valid UTF-8 and a JSON report
+    stays parseable. Streams without a buffer (StringIO in tests) get
+    the text itself."""
+    out = getattr(stream, "buffer", None)
+    if out is not None:
+        out.write((text + "\n").encode("utf-8", "backslashreplace"))
+        out.flush()
+    else:
+        stream.write(text + "\n")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="check_page.py",
@@ -1457,28 +1521,31 @@ def main(argv=None):
         with open(args.file, "rb") as handle:
             raw = handle.read()
     except OSError as error:
-        print("cannot read %s: %s" % (args.file, error), file=sys.stderr)
+        _write_line(sys.stderr, "cannot read %s: %s" % (args.file, error))
         return 2
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as error:
-        print("cannot decode %s as utf-8: %s" % (args.file, error), file=sys.stderr)
+        _write_line(sys.stderr,
+                    "cannot decode %s as utf-8: %s" % (args.file, error))
         return 2
 
     result = run_check(text, args.file, lang=args.lang, keyword=args.keyword,
                        allow_noindex=args.allow_noindex)
 
     if args.json:
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        _write_line(sys.stdout, json.dumps(result, ensure_ascii=False, indent=2))
     else:
         for finding in result["findings"]:
-            print("%s %s line %d: %s -> %s"
-                  % (finding["severity"].upper(), finding["id"],
-                     finding["line"], finding["message"], finding["fix"]))
+            _write_line(sys.stdout,
+                        "%s %s line %d: %s -> %s"
+                        % (finding["severity"].upper(), finding["id"],
+                           finding["line"], finding["message"], finding["fix"]))
         summary = result["summary"]
-        print("summary: file=%s lang=%s error=%d warn=%d info=%d score=%d"
-              % (result["file"], result["lang"], summary["error"],
-                 summary["warn"], summary["info"], summary["score"]))
+        _write_line(sys.stdout,
+                    "summary: file=%s lang=%s error=%d warn=%d info=%d score=%d"
+                    % (result["file"], result["lang"], summary["error"],
+                       summary["warn"], summary["info"], summary["score"]))
 
     if result["summary"]["error"]:
         return 1
