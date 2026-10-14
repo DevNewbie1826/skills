@@ -143,6 +143,7 @@ check_entrypoint_smoke() {
     smoke_help "Rust project scaffolder" uv run --with typer --with rich programming/scripts/rust/new-project.py --help
     smoke_help "Python script generator" python3 programming/scripts/python/new-script.py --help
     smoke_help "Python no-excuse checker" python3 programming/scripts/python/check-no-excuse-rules.py --help
+    smoke_help "SEO HTML checker" python3 seo-html/scripts/check_page.py --help
 
     for script in programming/scripts/{go,rust}/check-no-excuse-rules.{sh,py}; do
         [[ -f "$script" ]] || continue
@@ -338,6 +339,11 @@ check_skill_line_cap() {
     printf '  %d SKILL.md file(s) are within the 200-line cap\n' "$found"
 }
 
+check_seo_html_fixtures() {
+    require_command python3
+    python3 -m unittest discover -s seo-html/tests -v
+}
+
 if (( fast )); then
     printf 'Running fast pre-commit subset (contract checker and SKILL.md cap).\n'
     run_section 'A. portable skill contract' check_skill_contract
@@ -348,6 +354,7 @@ else
     run_section 'C. UI/UX database matrix' check_ui_ux_db_matrix
     run_section 'D. visual-qa functional check' check_visual_qa_functional
     run_section 'E. SKILL.md line cap' check_skill_line_cap
+    run_section 'F. seo-html checker golden fixtures' check_seo_html_fixtures
 fi
 
 printf '\nPASS: verification gate\n'
