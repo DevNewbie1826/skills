@@ -8,11 +8,15 @@ local script.
 """
 from __future__ import annotations
 
+import io
 import json
+import random
 import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
+from contextlib import redirect_stdout
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
@@ -1036,6 +1040,113 @@ class TestHardenedParsing(RuleCase):
         bad = [finding for finding in result["findings"]
                if finding["severity"] in ("error", "warn")]
         self.assertEqual(bad, [])
+
+
+class TestRobustnessBoundary(RuleCase):
+    """Owner scope addition A and C: one check failing unexpectedly
+    degrades to an internal-error info finding instead of a traceback,
+    and seeded page mutations never break the JSON report or its exit
+    contract."""
+
+    def run_main(self, text, *args):
+        """Run the CLI main() entry in-process on a temp file; return
+        (exit code, parsed JSON report) with stdout captured."""
+        with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".html", delete=False, encoding="utf-8") as handle:
+            handle.write(text)
+            path = handle.name
+        try:
+            buffer = io.StringIO()
+            with redirect_stdout(buffer):
+                code = cp.main([path, "--json"] + list(args))
+            return code, json.loads(buffer.getvalue())
+        finally:
+            Path(path).unlink()
+
+    def test_a_forced_check_exception_yields_internal_error_finding(self):
+        text = fixture_text("good-en.html")
+        with unittest.mock.patch.object(
+                cp.PageChecker, "check_twitter",
+                side_effect=RuntimeError("boom")):
+            result = self.result_for(text)
+        self.assertEqual(len(result["findings"]), 1)
+        finding = result["findings"][0]
+        self.assertEqual(finding["id"], "TW-01")
+        self.assertEqual(finding["severity"], "info")
+        self.assertTrue(finding["message"].startswith(
+            "internal error: RuntimeError"))
+        self.assertEqual(result["summary"]["error"], 0)
+        self.assertEqual(result["summary"]["info"], 1)
+
+    def test_a_forced_check_exception_main_prints_parseable_json(self):
+        text = fixture_text("good-en.html")
+        with unittest.mock.patch.object(
+                cp.PageChecker, "check_semantic",
+                side_effect=KeyError("burst")):
+            code, report = self.run_main(text)
+        self.assertIn(code, (0, 1))
+        self.assertEqual(code, 0)
+        internal = [finding for finding in report["findings"]
+                    if finding["message"].startswith("internal error:")]
+        self.assertEqual(len(internal), 1)
+        self.assertEqual(internal[0]["id"], "SEM-01")
+        self.assertEqual(internal[0]["severity"], "info")
+        self.assertIn("KeyError", internal[0]["message"])
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_a_json_report_parses_for_extreme_dimension_inputs(self):
+        cases = [
+            self.mutated(
+                "good-en.html",
+                ('<meta property="og:image:width" content="1200">',
+                 '<meta property="og:image:width" content="%s">' % ("9" * 400)),
+                ('<meta property="og:image:height" content="630">',
+                 '<meta property="og:image:height" content="%s">' % ("9" * 400))),
+            self.mutated(
+                "good-en.html",
+                ('width="1200" height="675"',
+                 'width="%s" height="675"' % ("9" * 400))),
+        ]
+        for text in cases:
+            with self.subTest():
+                code, report = self.run_main(text)
+                self.assertIn(code, (0, 1))
+                self.assertEqual(code, 0)
+                self.assertEqual(report["summary"]["error"], 0)
+
+    def test_c_seeded_fuzz_mutations_always_yield_parseable_json(self):
+        rng = random.Random(20261014)
+        sources = (fixture_text("good-en.html"), fixture_text("good-ko.html"))
+        specials = ("\u2028", "\u2029", "\u0085", "\r", "\r\n", "\x00",
+                    "9" * 400, "0" * 400 + "7", "<!--", "<meta charset=",
+                    'content="', "utf-8", "\uac00", "\u00e9", "&amp;", "&#0;")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fuzz.html"
+            for index in range(200):
+                text = rng.choice(sources)
+                for _ in range(rng.randint(1, 6)):
+                    if not text:
+                        break
+                    start = rng.randrange(len(text))
+                    operation = rng.randint(0, 2)
+                    if operation == 0:      # insert
+                        text = text[:start] + rng.choice(specials) + text[start:]
+                    else:
+                        stop = min(len(text), start + rng.randint(1, 40))
+                        if operation == 1:  # delete
+                            text = text[:start] + text[stop:]
+                        else:               # replace
+                            text = text[:start] + rng.choice(specials) + text[stop:]
+                path.write_text(text, encoding="utf-8")
+                buffer = io.StringIO()
+                with redirect_stdout(buffer):
+                    code = cp.main([str(path), "--json"])
+                with self.subTest(index=index):
+                    self.assertIn(code, (0, 1))
+                    report = json.loads(buffer.getvalue())
+                    self.assertEqual(
+                        set(report),
+                        {"file", "lang", "summary", "findings", "extracted"})
 
 
 class TestUnionCoverage(RuleCase):

@@ -480,6 +480,23 @@ def absolute_url_violations(node):
 class PageChecker:
     """Runs every rule in RULES over one parsed page."""
 
+    # Checks in run order, each paired with the catalog ID that owns its
+    # finding group; the owner ID attributes an internal error when a
+    # check itself fails on unexpected input.
+    CHECK_STEPS = (
+        ("check_head", "HEAD-01"),
+        ("check_open_graph", "OG-01"),
+        ("check_twitter", "TW-01"),
+        ("check_semantic", "SEM-01"),
+        ("check_headings", "H-01"),
+        ("check_jsonld", "LD-01"),
+        ("check_images", "IMG-01"),
+        ("check_links", "LINK-01"),
+        ("check_a11y", "A11Y-01"),
+        ("check_perf", "PERF-01"),
+        ("check_content", "CONT-01"),
+    )
+
     def __init__(self, text, file_label, lang_arg="auto", keyword=None,
                  allow_noindex=False):
         self.text = text
@@ -1327,6 +1344,28 @@ class PageChecker:
                               "link the statistic to its primary source with "
                               "<a>, <cite>, or <sup>")
 
+    def _internal_error_finding(self, owner_id, method_name, error):
+        """Degrade one unexpectedly failing check to an info finding so
+        the report still prints and the remaining checks still run; the
+        severity is info rather than the rule's own, so an internal error
+        never changes the exit contract by itself."""
+        message = "internal error: %s in %s" % (type(error).__name__,
+                                                method_name)
+        try:
+            detail = "%s: %s" % (type(error).__name__, error)
+            evidence = collapse_ws(detail)[:160] or "-"
+        except Exception:
+            evidence = "-"
+        self.findings.append({
+            "id": owner_id,
+            "severity": "info",
+            "line": 1,
+            "message": message,
+            "evidence": evidence,
+            "fix": "this check failed unexpectedly and was skipped; the "
+                   "remaining checks still ran - please report the page",
+        })
+
     def run(self):
         self.lang = self.resolve_lang()
         self.og = self.meta_by_property("og:")
@@ -1345,17 +1384,11 @@ class PageChecker:
         description_text = collapse_ws(descriptions[0].attrs.get("content", "")) \
             if descriptions else ""
 
-        self.check_head()
-        self.check_open_graph()
-        self.check_twitter()
-        self.check_semantic()
-        self.check_headings()
-        self.check_jsonld()
-        self.check_images()
-        self.check_links()
-        self.check_a11y()
-        self.check_perf()
-        self.check_content()
+        for method_name, owner_id in self.CHECK_STEPS:
+            try:
+                getattr(self, method_name)()
+            except Exception as error:
+                self._internal_error_finding(owner_id, method_name, error)
 
         errors = sum(1 for item in self.findings if item["severity"] == "error")
         warns = sum(1 for item in self.findings if item["severity"] == "warn")
