@@ -673,9 +673,12 @@ class TestTemplate(RuleCase):
 
 
 class TestHardenedParsing(RuleCase):
-    """Regressions for the five review-blocker classes (R1-R5): malformed
-    numeric strings, hostless absolute URLs, the complete charset byte
-    extent, impossible calendar dates, and source-order text extraction."""
+    """Regressions for the review-blocker classes (R1-R5) and their delta
+    re-review survivors: unusable numeric magnitudes (bounded at
+    MAX_DIMENSION, overflow-free ratio comparison), URL authority
+    validation (valid host and port; IPv4/IPv6/IDNA hosts accepted), the
+    complete charset byte extent, impossible calendar dates, and
+    source-order text extraction."""
 
     def run_json_cli(self, text):
         with tempfile.NamedTemporaryFile(
@@ -738,6 +741,71 @@ class TestHardenedParsing(RuleCase):
                      'width="%s" height="675"' % junk))
                 self.assert_rule("IMG-03", self.result_for(text))
 
+    def test_r1_huge_og_width_yields_parseable_json(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<meta property="og:image:width" content="1200">',
+             '<meta property="og:image:width" content="%s">' % ("9" * 400)))
+        process = self.run_json_cli(text)
+        self.assertNotIn("Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout)
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("OG-07"), "info")
+        self.assertNotIn("OG-04", severities)
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_r1_huge_og_dimensions_yield_parseable_json(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<meta property="og:image:width" content="1200">',
+             '<meta property="og:image:width" content="%s">' % ("9" * 400)),
+            ('<meta property="og:image:height" content="630">',
+             '<meta property="og:image:height" content="%s">' % ("9" * 400)))
+        process = self.run_json_cli(text)
+        self.assertNotIn("Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout)
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("OG-07"), "info")
+        self.assertNotIn("OG-04", severities)
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_r1_huge_img_width_yields_parseable_json(self):
+        text = self.mutated(
+            "good-en.html",
+            ('width="1200" height="675"',
+             'width="%s" height="675"' % ("9" * 400)))
+        process = self.run_json_cli(text)
+        self.assertNotIn("Traceback", process.stderr)
+        self.assertEqual(process.returncode, 0)
+        report = json.loads(process.stdout)
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("IMG-03"), "warn")
+        self.assertEqual(report["summary"]["error"], 0)
+
+    def test_r1_dimension_magnitude_bound_from_constant(self):
+        self.assertEqual(cp.MAX_DIMENSION, 100000)
+        self.assertEqual(cp.parse_dimension(str(cp.MAX_DIMENSION)),
+                         cp.MAX_DIMENSION)
+        self.assertIsNone(cp.parse_dimension(str(cp.MAX_DIMENSION + 1)))
+        self.assertIsNone(cp.parse_dimension("9" * 400))
+        self.assertEqual(cp.parse_dimension("0" * 402 + "1"), 1)
+        self.assertEqual(cp.parse_dimension("001200"), 1200)
+        self.assertEqual(cp.parse_dimension("0"), 0)
+
+    def test_r1_extreme_usable_dimensions_fire_og_04(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<meta property="og:image:width" content="1200">',
+             '<meta property="og:image:width" content="%d">' % cp.MAX_DIMENSION),
+            ('<meta property="og:image:height" content="630">',
+             '<meta property="og:image:height" content="1000">'))
+        self.assert_rule("OG-04", self.result_for(text))
+
     def test_r2_hostless_canonical_fires_link_01(self):
         text = self.mutated(
             "good-en.html",
@@ -776,6 +844,71 @@ class TestHardenedParsing(RuleCase):
                     'hreflang="ko-KR" href="%s"' % broken_href)
                 self.assert_rule("LINK-02", self.result_for(broken))
 
+    def test_r2_invalid_host_characters_fire_link_01_and_og_06(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
+             '<link rel="canonical" href="https://exa mple.com/">'),
+            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
+             '<meta property="og:url" content="https://exa mple.com/">'))
+        result = self.result_for(text)
+        self.assert_rule("LINK-01", result)
+        self.assert_rule("OG-06", result)
+
+    def test_r2_invalid_host_ld_image_fires_ld_13(self):
+        text = self.mutated(
+            "good-en.html",
+            ('"image": "https://example.com/images/seo-basics.png",',
+             '"image": "https://exa mple.com/images/seo-basics.png",'))
+        self.assert_rule("LD-13", self.result_for(text))
+
+    def test_r2_out_of_range_port_fires_link_01(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
+             '<link rel="canonical" href="https://example.com:99999/">'),
+            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
+             '<meta property="og:url" content="https://example.com:99999/">'))
+        result = self.result_for(text)
+        self.assert_rule("LINK-01", result)
+        self.assert_rule("OG-06", result)
+
+    def test_r2_valid_ipv6_and_internationalized_hosts_stay_clean(self):
+        for url in ("https://[2001:db8::1]:443/path", "https://예시.한국/경로"):
+            with self.subTest(url=url):
+                text = self.mutated(
+                    "good-en.html",
+                    ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
+                     '<link rel="canonical" href="%s">' % url),
+                    ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
+                     '<meta property="og:url" content="%s">' % url))
+                result = self.result_for(text)
+                self.assertNotIn(
+                    "LINK-01",
+                    {finding["id"] for finding in result["findings"]})
+                self.assertNotIn(
+                    "OG-06",
+                    {finding["id"] for finding in result["findings"]})
+                bad = [finding for finding in result["findings"]
+                       if finding["severity"] in ("error", "warn")]
+                self.assertEqual(bad, [])
+
+    def test_r2_url_authority_validator_matrix(self):
+        good = ("https://example.com/", "http://example.com:8080/path",
+                "https://[2001:db8::1]:443/path", "http://127.0.0.1:8000/x",
+                "https://예시.한국/경로", "https://example.com./x")
+        bad = ("https://exa mple.com/", "https://example.com:99999/",
+               "https://example.com:0/", "https://example..com/",
+               "https://exa_mple.com/", "https://",
+               "https://user:pass@/path", "/relative/path",
+               "ftp://example.com/", "not a url")
+        for url in good:
+            with self.subTest(url=url):
+                self.assertTrue(cp.is_absolute_http_url(url), url)
+        for url in bad:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+
     def shifted_charset_page(self, tag_start_byte):
         """good-en.html with an ASCII comment prepended so the charset
         start tag's "<" lands on the given UTF-8 byte offset."""
@@ -804,6 +937,37 @@ class TestHardenedParsing(RuleCase):
     def test_r3_charset_starting_before_limit_ending_after_fires(self):
         page = self.shifted_charset_page(cp.CHARSET_MAX_BYTES - 1)
         self.assert_rule("HEAD-01", self.result_for(page))
+
+    def test_r3_unicode_line_separator_before_charset_fires(self):
+        # html.parser does not treat U+2028 as a line break, so a
+        # splitlines()-based line map measures the wrong tag's extent and
+        # this page wrongly passed. The charset tag spans UTF-8 bytes
+        # 1020 up to 1042 (exclusive) here, beyond the limit.
+        text = "<!--\u2028" + "x" * 967 + "-->\n" + fixture_text("good-en.html")
+        result = self.result_for(text)
+        self.assert_rule("HEAD-01", result)
+        evidence = [finding["evidence"] for finding in result["findings"]
+                    if finding["id"] == "HEAD-01"]
+        self.assertTrue(any("1042" in item for item in evidence),
+                        "expected the full declaration extent, got %r" % evidence)
+
+    def test_r3_crlf_line_endings_keep_page_clean(self):
+        text = fixture_text("good-en.html").replace("\n", "\r\n")
+        result = self.result_for(text)
+        bad = [finding for finding in result["findings"]
+               if finding["severity"] in ("error", "warn")]
+        self.assertEqual(bad, [])
+
+    def test_r3_lone_cr_before_charset_fires(self):
+        # The parser breaks lines at "\n" only, never at a lone "\r";
+        # the charset declaration ends at byte 1040, beyond the limit.
+        text = "<!--\r" + "x" * 967 + "-->\n" + fixture_text("good-en.html")
+        result = self.result_for(text)
+        self.assert_rule("HEAD-01", result)
+        evidence = [finding["evidence"] for finding in result["findings"]
+                    if finding["id"] == "HEAD-01"]
+        self.assertTrue(any("1040" in item for item in evidence),
+                        "expected the full declaration extent, got %r" % evidence)
 
     def test_r4_sem_06_impossible_calendar_date_fires(self):
         text = self.mutated(

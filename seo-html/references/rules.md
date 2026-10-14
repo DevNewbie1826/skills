@@ -26,7 +26,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | OG-03 | W | S | og:image present without og:image:alt | OGP | verified: https://ogp.me/ |
 | OG-04 | W | S | declared og:image:width/height under 150x150 or aspect ratio over 3:1 | Naver | verified: https://searchadvisor.naver.com/guide/markup-content |
 | OG-05 | I | S | og:site_name, og:locale missing, or og:locale not matching lang (ko_KR / en_*) | SUS head-tags | unverified: reference repo only |
-| OG-06 | W | S | og:url differs from canonical | SUS head-tags; CS | unverified: reference repo only |
+| OG-06 | W | S | og:url differs from canonical, or og:url is not an absolute http(s) URL with a valid host and port | SUS head-tags; CS | unverified: reference repo only |
 | OG-07 | I | S | og:image:width/height missing or below 1200x630 | SUS head-tags | unverified: 1200x630 is not on ogp.me or Naver docs |
 | TW-01 | W | S | twitter:card missing or not one of summary, summary_large_image, app, player | SUS head-tags | unverified: developer.x.com cards markup page renders by script; fetch returned no rule text |
 | TW-02 | I | S | twitter:title/description/image missing (OG fallback noted) | SUS head-tags | unverified: developer.x.com cards markup page renders by script; fetch returned no rule text |
@@ -58,7 +58,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | IMG-03 | W | S | `<img>` without width and height | CS | unverified: layout-shift best practice; reference repo only |
 | IMG-04 | I | S | first `<img>` in main has loading="lazy" | CS | unverified: reference repo only |
 | LINK-01 | E | S | exactly one canonical, absolute http(s) | SUS head-tags; Google; Naver | verified: https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls and https://searchadvisor.naver.com/guide/markup-structure |
-| LINK-02 | W | S | hreflang set present but missing self (canonical) or invalid code; I if no x-default | SUS head-tags | verified: https://developers.google.com/search/docs/specialty/international/localized-versions |
+| LINK-02 | W | S | hreflang set present but missing self (canonical) or invalid code; hreflang hrefs must be absolute http(s) URLs with a valid host and port; I if no x-default | SUS head-tags | verified: https://developers.google.com/search/docs/specialty/international/localized-versions |
 | LINK-03 | W | S | non-descriptive anchor text (click here, here, read more, more, 여기, 클릭, 여기를 클릭, 더보기, 자세히) | CS | unverified: Google link best practice; the word list is this skill's choice |
 | LINK-04 | I | S | `<a>` with empty or `#` href | CS | unverified: reference repo only |
 | A11Y-01 | W | S | form control without label[for], wrapping label, aria-label, or aria-labelledby | CS | unverified: accessibility best practice; reference repo only |

@@ -23,6 +23,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import re
 import sys
@@ -42,6 +43,7 @@ ALT_MAX = 125
 OG_IMAGE_MIN = (150, 150)
 OG_IMAGE_MAX_RATIO = 3.0
 OG_IMAGE_RECOMMENDED = (1200, 630)
+MAX_DIMENSION = 100000
 CHARSET_MAX_BYTES = 1024
 HANGUL_RATIO = 0.3
 
@@ -130,6 +132,7 @@ BAD_ANCHOR_TEXTS = ("click here", "here", "read more", "more", "여기", "클릭
 WS_RE = re.compile(r"\s+")
 VIEWPORT_RE = re.compile(r"width\s*=\s*device-width", re.IGNORECASE)
 ASCII_INT_RE = re.compile(r"^[0-9]+$")
+HOST_LABEL_RE = re.compile(r"[A-Za-z0-9-]+")
 HREFLANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z][A-Za-z0-9]{1,7})*$")
 ISO_8601_RE = re.compile(
     r"^(\d{4})-(\d{2})-(\d{2})"
@@ -185,28 +188,71 @@ def is_hangul_letter(ch):
 
 def parse_dimension(value):
     """Parse a declared pixel dimension (og:image:width/height, img
-    width/height). Only plain ASCII digit strings are usable; anything
-    else ("", "12px", "-5", "1e3", digit lookalikes such as the
-    superscript two) is unusable and counts as not declared."""
+    width/height). Only plain ASCII digit strings up to MAX_DIMENSION
+    pixels are usable; anything else ("", "12px", "-5", "1e3", digit
+    lookalikes such as the superscript two, or a magnitude above
+    MAX_DIMENSION) is unusable and counts as not declared. Digit strings
+    are compared by length after stripping leading zeros, so arbitrarily
+    long values never reach a numeric conversion."""
     if not isinstance(value, str):
         return None
     text = value.strip()
     if not ASCII_INT_RE.match(text):
         return None
-    return int(text)
+    digits = text.lstrip("0") or "0"
+    if len(digits) > len(str(MAX_DIMENSION)):
+        return None
+    number = int(digits)
+    return number if number <= MAX_DIMENSION else None
+
+
+def is_valid_host(host):
+    """True when host is a usable http(s) destination host: an IPv4/IPv6
+    literal accepted by ipaddress, or a dotted host whose labels are 1-63
+    characters of letters, digits, and hyphens with no empty labels (no
+    whitespace or other out-of-label characters). Internationalized hosts
+    are validated on their IDNA-encoded ASCII form; one optional trailing
+    root dot is allowed."""
+    if not host:
+        return False
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        pass
+    if not host.isascii():
+        try:
+            host = host.encode("idna").decode("ascii")
+        except (UnicodeError, ValueError):
+            return False
+    if host.endswith("."):
+        host = host[:-1]
+    if not host:
+        return False
+    for label in host.split("."):
+        if not 1 <= len(label) <= 63 or not HOST_LABEL_RE.fullmatch(label):
+            return False
+    return True
 
 
 def is_absolute_http_url(value):
-    """True when value is an absolute http(s) URL: an http/https scheme and
-    a non-empty host. A bare scheme such as "https://" is not a URL."""
+    """True when value is an absolute http(s) URL with a usable authority:
+    an http/https scheme, a present and syntactically valid host (see
+    is_valid_host), and a port that parses and lies within 1-65535 when
+    present. A bare scheme such as "https://" is not a URL."""
     if not isinstance(value, str):
         return False
     try:
         parts = urlsplit(value.strip())
         host = parts.hostname
+        port = parts.port
     except ValueError:
         return False
-    return parts.scheme in ("http", "https") and bool(host)
+    if parts.scheme not in ("http", "https"):
+        return False
+    if port is not None and not 1 <= port <= 65535:
+        return False
+    return is_valid_host(host)
 
 
 def is_valid_iso8601(value):
@@ -450,9 +496,13 @@ class PageChecker:
         self.extracted_title = ""
         self.extracted_h1 = ""
         self._jsonld_types = []
+        # html.parser counts only "\n" as a line separator (updatepos),
+        # so line starts are computed the same way here; str.splitlines()
+        # would also break at \r, \u2028 and friends and desynchronize
+        # char_offset() from the parser's reported positions.
         starts = [0]
-        for line in text.splitlines(keepends=True):
-            starts.append(starts[-1] + len(line))
+        for match in re.finditer(r"\n", text):
+            starts.append(match.end())
         self.line_starts = starts
 
     def emit(self, rule_id, line, message, evidence, fix, severity=None):
@@ -706,7 +756,9 @@ class PageChecker:
                               % (width, height, OG_IMAGE_MIN[0], OG_IMAGE_MIN[1]),
                               "og:image:width=%d og:image:height=%d" % (width, height),
                               "provide a larger result thumbnail image")
-                elif max(width, height) / max(1, min(width, height)) > OG_IMAGE_MAX_RATIO:
+                # Multiplication instead of float division keeps the
+                # ratio comparison overflow-free for any usable values.
+                elif max(width, height) > max(1, min(width, height)) * OG_IMAGE_MAX_RATIO:
                     self.emit("OG-04", 1,
                               "og:image aspect ratio %d:%d exceeds %s:1"
                               % (width, height, OG_IMAGE_MAX_RATIO),
