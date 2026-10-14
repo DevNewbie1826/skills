@@ -1570,6 +1570,157 @@ class TestAuthorityValidation(RuleCase):
                 self.assertEqual(strict.returncode, 1)
 
 
+# FU-6: numeric character references to the code points CPython's
+# html.unescape deletes (the C0 controls U+0001-0008, U+000B, U+000E-001F
+# and U+007F, plus the noncharacter code points in the same delete set)
+# must survive decoding with the code point itself, as HTML5 specifies:
+# a canonical "https://exa&#1;mple.com/" reaches URL validation with
+# U+0001 and is rejected instead of silently folding to
+# "https://example.com/". The Article image arrives as JSON inside
+# <script> - raw text the parser never character-reference-decodes - so
+# that reference stays literal and the attribute cases below cover
+# attribute decoding. Each entry is (reference form, decoded URL).
+DELTA6_CHARREF_URLS = (
+    ("https://exa&#1;mple.com/", "https://exa\x01mple.com/"),
+    ("https://exa&#x0001;mple.com/", "https://exa\x01mple.com/"),
+    ("https://exa&#1;mple.com:&#x7F;/", "https://exa\x01mple.com:\x7f/"),
+    ("https://u&#x7F;ser@example.com/", "https://u\x7fser@example.com/"),
+)
+
+
+class TestCharrefReferences(RuleCase):
+    """Character-reference decoding through the whole checker: the
+    deleted-set code points reach URL validation intact (LINK-01 error
+    + OG-06 warn), attributes decode to the code point, text decoding
+    is unchanged for normal entities, and raw-text script content
+    keeps the literal reference."""
+
+    canonical_anchor = ('<link rel="canonical" '
+                        'href="https://example.com/guide/seo-basics">')
+    og_url_anchor = ('<meta property="og:url" '
+                     'content="https://example.com/guide/seo-basics">')
+
+    def charref_page_with_urls(self, canonical, og_url):
+        return self.mutated(
+            "good-en.html",
+            (self.canonical_anchor,
+             '<link rel="canonical" href="%s">' % canonical),
+            (self.og_url_anchor,
+             '<meta property="og:url" content="%s">' % og_url))
+
+    def test_charref_urls_rejected_canonical_and_og(self):
+        for url, decoded in DELTA6_CHARREF_URLS:
+            with self.subTest(url=url):
+                result = self.result_for(
+                    self.charref_page_with_urls(url, url))
+                self.assert_rule("LINK-01", result)
+                self.assert_rule("OG-06", result)
+                self.assertEqual(result["extracted"]["canonical"], decoded)
+
+    def test_charref_canonical_cli_exit_1_link_01_og_06(self):
+        page = self.charref_page_with_urls("https://exa&#1;mple.com/",
+                                           "https://exa&#1;mple.com/")
+        path = write_temp_page(page)
+        try:
+            process = run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LINK-01"), "error")
+        self.assertEqual(severities.get("OG-06"), "warn")
+        self.assertEqual(report["extracted"]["canonical"],
+                         "https://exa\x01mple.com/")
+        self.assertEqual(report["extracted"]["og"]["og:url"],
+                         "https://exa\x01mple.com/")
+
+    def test_charref_control_codepoint_in_og_image_attribute(self):
+        text = self.mutated(
+            "good-en.html",
+            ('<meta property="og:image" '
+             'content="https://example.com/images/seo-basics.png">',
+             '<meta property="og:image" '
+             'content="https://exa&#1;mple.com/images/x.png">'))
+        result = self.result_for(text)
+        self.assertEqual(result["extracted"]["og"]["og:image"],
+                         "https://exa\x01mple.com/images/x.png")
+
+    def test_charref_text_decoding_normal_entities_and_kept_u0001(self):
+        result = self.result_for(self.mutated(
+            "good-en.html",
+            ("<title>%s</title>" % GOOD_EN_TITLE,
+             "<title>A &amp; B &lt; C &#233; &eacute; D &#1;</title>")))
+        self.assertEqual(result["extracted"]["title"],
+                         "A & B < C \u00e9 \u00e9 D \x01")
+
+    def test_raw_text_script_keeps_reference_literal(self):
+        # Script bodies are raw text under HTML5 and the parser never
+        # unescapes them, so the reference inside the Article image JSON
+        # stays the literal characters and LD-13 rejects that host
+        # exactly as before this fix.
+        text = self.mutated(
+            "good-en.html",
+            ('"image": "https://example.com/images/seo-basics.png",',
+             '"image": "https://exa&#1;mple.com/images/x.png",'))
+        result = self.result_for(text)
+        self.assert_rule("LD-13", result)
+        violations = [finding for finding in result["findings"]
+                      if finding["id"] == "LD-13"]
+        self.assertTrue(any("&#1;" in finding["message"]
+                            for finding in violations))
+
+
+class TestHtml5CharacterReferenceDecoder(RuleCase):
+    """The decoder itself: references CPython deletes keep their code
+    point (decimal, upper- and lower-case hex, missing semicolon, and
+    the noncharacters beyond the C0 controls); every other mapping is
+    delegated unchanged to html.unescape - the Windows-1252 table for
+    U+0080-009F, U+FFFD for NUL, surrogates and out-of-range values,
+    kept controls such as TAB and LF, named references, and text with
+    no references at all."""
+
+    def test_decoder_keeps_deleted_code_points(self):
+        for codepoint in (0x01, 0x08, 0x0B, 0x0E, 0x1F, 0x7F,
+                          0xFDD0, 0xFFFE, 0x10FFFF):
+            with self.subTest(codepoint=codepoint):
+                self.assertEqual(cp._decode_charrefs("&#%d;" % codepoint),
+                                 chr(codepoint))
+                self.assertEqual(cp._decode_charrefs("&#x%x;" % codepoint),
+                                 chr(codepoint))
+                self.assertEqual(cp._decode_charrefs("&#X%X;" % codepoint),
+                                 chr(codepoint))
+
+    def test_decoder_keeps_deleted_code_point_without_semicolon(self):
+        self.assertEqual(cp._decode_charrefs("exa&#1mple.com/"),
+                         "exa\x01mple.com/")
+        self.assertEqual(cp._decode_charrefs("exa&#x7f.com/"), "exa\x7f.com/")
+
+    def test_decoder_delegates_every_unchanged_mapping(self):
+        cases = (
+            ("plain text", "plain text"),
+            ("a&amp;b", "a&b"),
+            ("&lt;&gt;&quot;", "<>\""),
+            ("&#233;&eacute;", "\u00e9\u00e9"),
+            ("&#9;&#10;&#12;&#13;", "\t\n\x0c\r"),
+            ("&#65;&#x42;", "AB"),
+            ("&#0;", "\ufffd"),
+            ("&#xD800;", "\ufffd"),
+            ("&#x110000;", "\ufffd"),
+            ("&#" + "9" * 40 + ";", "\ufffd"),
+            ("&#x80;", "\u20ac"),
+            ("&#x81;", "\x81"),
+            ("&#x9f;", "\u0178"),
+            ("&notit;", "\xacit;"),
+            ("a&b &#1234; x", "a&b \u04d2 x"),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text):
+                self.assertEqual(cp._decode_charrefs(text), expected)
+
+
 class TestSafeReportOutput(RuleCase):
     """Delta re-review round 2, required change 1: printing the report
     (JSON and text mode, and the stderr file-echo messages) never raises

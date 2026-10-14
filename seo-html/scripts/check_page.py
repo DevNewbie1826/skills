@@ -23,6 +23,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import html.parser
 import ipaddress
 import json
 import re
@@ -31,6 +32,61 @@ import unicodedata
 from datetime import date, time
 from html.parser import HTMLParser
 from urllib.parse import urlsplit
+
+# CPython's html.unescape() deletes numeric character references whose
+# code point is in html._invalid_codepoints and is not already replaced
+# through its Windows-1252 table html._invalid_charrefs (both tables
+# verified identical on CPython 3.9.6 and 3.11.15): the C0 controls
+# U+0001-0008, U+000B, U+000E-001F and U+007F, plus the noncharacters
+# U+FDD0-FDEF and every U-xFFFE/U-xFFFF pair. HTML5 instead keeps those
+# code points (as a parse error), so a canonical
+# href="https://exa&#1;mple.com/" must reach URL validation with U+0001
+# intact instead of silently folding to https://example.com/.
+# HTMLParser unescapes attribute values (parse_starttag) and, with
+# convert_charrefs=True (TreeBuilder below), text data (goahead) through
+# its module-level ``unescape`` name, so rebinding html.parser.unescape
+# routes BOTH paths through the HTML5-keeping decoder below while
+# script and style content (raw text the parser never unescapes) keeps
+# its literal text and every other mapping stays exactly
+# html.unescape's: named references, NUL, surrogates and out-of-range
+# values to U+FFFD, and U+0080-009F through the Windows-1252 table.
+_NUMERIC_CHARREF = re.compile(r"&(#[0-9]+;?|#[xX][0-9a-fA-F]+;?)")
+_CPYTHON_UNESCAPE = html.unescape
+
+
+def _decode_charrefs(text):
+    """html.unescape() with one HTML5 correction: a numeric character
+    reference to a code point CPython deletes yields the code point
+    itself; everything else is delegated unchanged."""
+    if "&" not in text:
+        return text
+    parts = []
+    pos = 0
+    kept = False
+    for match in _NUMERIC_CHARREF.finditer(text):
+        # Deleted means "decodes to nothing" under the running
+        # interpreter's own unescape - exactly CPython's delete set
+        # (html._invalid_codepoints minus the U+0080-009F entries its
+        # Windows-1252 table replaces first), detected behaviorally so
+        # the keep-set can never drift from CPython's mapping.
+        if _CPYTHON_UNESCAPE(match.group(0)) != "":
+            continue
+        ref = match.group(1)
+        if ref[1] in "xX":
+            codepoint = int(ref[2:].rstrip(";"), 16)
+        else:
+            codepoint = int(ref[1:].rstrip(";"))
+        kept = True
+        parts.append(_CPYTHON_UNESCAPE(text[pos:match.start()]))
+        parts.append(chr(codepoint))
+        pos = match.end()
+    if not kept:
+        return _CPYTHON_UNESCAPE(text)
+    parts.append(_CPYTHON_UNESCAPE(text[pos:]))
+    return "".join(parts)
+
+
+setattr(html.parser, "unescape", _decode_charrefs)
 
 # Thresholds (module constants; tests import them).
 
