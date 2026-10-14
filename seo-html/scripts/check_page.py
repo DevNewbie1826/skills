@@ -139,6 +139,12 @@ HOST_LABEL_RE = re.compile(r"[A-Za-z0-9-]+")
 # ipaddress.IPv6Address accepts any non-empty scope text, so bracket
 # contents are charset-checked before the ipaddress parse.
 IPV6_LITERAL_RE = re.compile(r"^[0-9A-Fa-f:.]+$")
+# RFC 3986 section 3.2.1 userinfo: *( unreserved / pct-encoded /
+# sub-delims / ":" ), where unreserved is ALPHA / DIGIT / "-" / "." /
+# "_" / "~" and the sub-delims are "!$&'()*+,;=". A "%" is only valid
+# starting a well-formed "% HEXDIG HEXDIG" escape, and a raw "@" never
+# appears (the authority is split at the last "@" before this check).
+USERINFO_RE = re.compile(r"(?:[A-Za-z0-9\-._~!$&'()*+,;=:]|%[0-9A-Fa-f]{2})*")
 HREFLANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z][A-Za-z0-9]{1,7})*$")
 ISO_8601_RE = re.compile(
     r"^(\d{4})-(\d{2})-(\d{2})"
@@ -270,7 +276,11 @@ def is_valid_authority(netloc):
     """True when the complete raw authority is usable. urlsplit's
     .hostname and .port accessors discard the bracket, userinfo, and
     original port text, so the netloc is validated as-is here: optional
-    userinfo up to the last "@"; then either a bracketed IP literal,
+    userinfo - everything before the last "@", matched whole against
+    the RFC 3986 userinfo grammar of USERINFO_RE (empty, "user:pass",
+    percent-escaped delimiters, and the sub-delims are all valid; a raw
+    "@", "|", backslash, space, or broken "%" escape is not) - then
+    either a bracketed IP literal,
     which must be exactly "[" + a valid IPv6 address written only in
     RFC 3986 IPv6address characters (hex digits, ":", and "."; a zone
     identifier such as "%25eth0" is not URI syntax since RFC 9844
@@ -279,9 +289,11 @@ def is_valid_authority(netloc):
     nothing or ":" + port."""
     if not netloc:
         return False
-    _, _, hostinfo = netloc.rpartition("@")
+    userinfo, at_sign, hostinfo = netloc.rpartition("@")
     if not hostinfo:
         return False
+    if at_sign and not USERINFO_RE.fullmatch(userinfo):
+        return False            # userinfo outside RFC 3986 section 3.2.1
     if hostinfo.startswith("["):
         literal, bracket, tail = hostinfo.partition("]")
         if not bracket:
@@ -307,15 +319,23 @@ def is_valid_authority(netloc):
 
 
 def is_absolute_http_url(value):
-    """True when value is an absolute http(s) URL with a usable authority:
-    an http/https scheme plus a complete, syntactically valid authority
-    in the raw netloc (see is_valid_authority; brackets, userinfo, and
-    port text are checked intact). A bare scheme such as "https://" is
-    not a URL."""
+    """True when value is an absolute http(s) URL with a usable
+    authority, validated exactly once on the raw text: after stripping
+    only leading/trailing whitespace, any C0 control (U+0000-U+001F),
+    DEL, or space anywhere in the URL is rejected before parsing -
+    none of them is valid in an RFC 3986 URI, and urlsplit silently
+    deletes internal TAB/LF/CR before the netloc is even seen. The
+    netloc urlsplit then returns is therefore the authority exactly as
+    written, and is_valid_authority checks it intact (brackets,
+    userinfo, and port text included). A bare scheme such as
+    "https://" is not a URL."""
     if not isinstance(value, str):
         return False
+    text = value.strip()
+    if any(ord(ch) < 0x21 or ord(ch) == 0x7F for ch in text):
+        return False
     try:
-        parts = urlsplit(value.strip())
+        parts = urlsplit(text)
     except ValueError:
         return False
     if parts.scheme not in ("http", "https"):

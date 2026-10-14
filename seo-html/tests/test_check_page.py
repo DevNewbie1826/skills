@@ -167,6 +167,42 @@ DELTA3_PADDED_BAD_AUTHORITIES = (
     "https://example.com:" + "0" * 5000 + "65536/",
 )
 
+# Delta re-review round 4, required change 1: RFC 3986 section 3.2.1
+# userinfo = *( unreserved / pct-encoded / sub-delims / ":" ). The text
+# before the last "@" is validated whole before it is split away, so
+# raw space, "|", "\", a second "@", and malformed percent escapes
+# never reach the host checks. Empty userinfo, "user:pass", encoded
+# delimiters (%40, %3A), the sub-delims, and a bracketed IPv6 host
+# behind userinfo all stay valid.
+DELTA4_BAD_USERINFO_URLS = (
+    "https://bad space@example.com/",
+    "https://bad|user@example.com/",
+    "https://bad\\user@example.com/",
+    "https://user@@example.com/",
+    "https://user%@example.com/",
+    "https://user%2@example.com/",
+    "https://user%GG@example.com/",
+)
+DELTA4_GOOD_USERINFO_URLS = (
+    "https://@example.com/path",
+    "https://user:pass@example.com:65535/path",
+    "https://user%40name:p%3Ass@example.com/path",
+    "https://a!$&'()*+,;=:_~.-012@example.com/path",
+    "https://user:pass@[2001:db8::1]:443/path",
+)
+# Delta re-review round 4, required change 2: a C0 control (U+0000 to
+# U+001F), DEL, or a space is never valid anywhere in an RFC 3986 URI,
+# and urlsplit silently deletes internal TAB/LF/CR before the netloc
+# reaches the authority checks, so the raw URL is rejected before any
+# parsing - inside the host, the port, or the bracketed IPv6 literal.
+DELTA4_BAD_CONTROL_URLS = (
+    "https://exa\tmple.com/",
+    "https://example.com:4\t43/",
+    "https://example.com:4\n43/",
+    "https://example.com:4\r43/",
+    "https://[::\t1]/",
+)
+
 
 def run_checker_cli(args, env_extra=None):
     """Run the real CLI as a subprocess and capture raw bytes, so tests
@@ -1366,6 +1402,172 @@ class TestAuthorityValidation(RuleCase):
                  for finding in report["findings"]}
         self.assertNotIn(("LINK-01", "error"), pairs)
         self.assertNotIn(("OG-06", "warn"), pairs)
+
+    def placement_pages(self, url):
+        """The eight review placements for one URL: matching canonical +
+        og:url (LINK-01 error + OG-06 warn), a complete hreflang set whose
+        ko-KR href carries the URL (LINK-02 warn), and the Article image as
+        string / list / {"@id"} / [{"@id"}] / {"url"} / [{"url"}]
+        (LD-13 warn). JSON-LD values go through json.dumps so control
+        characters and backslashes stay valid JSON that decodes back to
+        the exact URL under test."""
+        image_anchor = '"image": "https://example.com/images/seo-basics.png",'
+        image_value = json.dumps(url)
+        shapes = (
+            ("image string", image_value),
+            ("image list", "[%s]" % image_value),
+            ('image {"@id"}', '{"@id": %s}' % image_value),
+            ('image [{"@id"}]', '[{"@id": %s}]' % image_value),
+            ('image {"url"}', '{"url": %s}' % image_value),
+            ('image [{"url"}]', '[{"url": %s}]' % image_value),
+        )
+        yield ("canonical+og:url", self.page_with_urls(url),
+               (("LINK-01", "error"), ("OG-06", "warn")))
+        yield ("hreflang ko-KR href", self.hreflang_page_with_ko_href(url),
+               (("LINK-02", "warn"),))
+        for label, shape in shapes:
+            yield (label, self.mutated("good-en.html",
+                                       (image_anchor, '"image": %s,' % shape)),
+                   (("LD-13", "warn"),))
+
+    def assert_placements_reject(self, urls, cli=False):
+        """Every URL must be rejected in every placement, in-process and
+        through the real CLI subprocess: the placement's finding appears
+        with its catalog severity, stderr carries no traceback, and the
+        exit code follows the finding (1 for the canonical error, 0 for
+        the warn-only placements)."""
+        for url in urls:
+            for label, page, expected in self.placement_pages(url):
+                with self.subTest(url=url, placement=label, cli=cli):
+                    if not cli:
+                        pairs = self.pairs_of(self.result_for(page))
+                    else:
+                        path = write_temp_page(page)
+                        try:
+                            process = run_checker_cli([path, "--json"])
+                        finally:
+                            Path(path).unlink()
+                        self.assertNotIn(b"Traceback", process.stderr)
+                        report = json.loads(process.stdout.decode("utf-8"))
+                        pairs = {(finding["id"], finding["severity"])
+                                 for finding in report["findings"]}
+                        expected_exit = 1 \
+                            if ("LINK-01", "error") in expected else 0
+                        self.assertEqual(process.returncode, expected_exit)
+                    for rule, severity in expected:
+                        self.assertIn(
+                            (rule, severity), pairs,
+                            "expected %s/%s for %r; findings: %r"
+                            % (rule, severity, url, sorted(pairs)))
+
+    def test_shared_validator_rejects_malformed_userinfo(self):
+        for url in DELTA4_BAD_USERINFO_URLS:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+
+    def test_shared_validator_accepts_valid_userinfo(self):
+        for url in DELTA4_GOOD_USERINFO_URLS:
+            with self.subTest(url=url):
+                self.assertTrue(cp.is_absolute_http_url(url), url)
+
+    def test_userinfo_rejected_in_all_placements(self):
+        self.assert_placements_reject(DELTA4_BAD_USERINFO_URLS)
+
+    def test_userinfo_rejected_in_all_placements_cli(self):
+        self.assert_placements_reject(DELTA4_BAD_USERINFO_URLS, cli=True)
+
+    def test_userinfo_positive_controls_stay_clean_in_all_placements(self):
+        for url in DELTA4_GOOD_USERINFO_URLS:
+            for label, page, _expected in self.placement_pages(url):
+                with self.subTest(url=url, placement=label):
+                    result = self.result_for(page)
+                    bad = [finding for finding in result["findings"]
+                           if finding["severity"] in ("error", "warn")]
+                    self.assertEqual(bad, [])
+
+    def test_userinfo_positive_controls_cli_stay_clean(self):
+        for url in DELTA4_GOOD_USERINFO_URLS:
+            with self.subTest(url=url):
+                path = write_temp_page(self.page_with_urls(url))
+                try:
+                    process = run_checker_cli([path, "--json"])
+                finally:
+                    Path(path).unlink()
+                self.assertEqual(process.returncode, 0)
+                self.assertNotIn(b"Traceback", process.stderr)
+                report = json.loads(process.stdout.decode("utf-8"))
+                pairs = {(finding["id"], finding["severity"])
+                         for finding in report["findings"]}
+                self.assertNotIn(("LINK-01", "error"), pairs)
+                self.assertNotIn(("OG-06", "warn"), pairs)
+
+    def test_shared_validator_rejects_internal_control_characters(self):
+        for url in DELTA4_BAD_CONTROL_URLS:
+            with self.subTest(url=url):
+                self.assertFalse(cp.is_absolute_http_url(url), url)
+        self.assertFalse(cp.is_absolute_http_url(
+            "https://example.com/x\x00y"))
+        self.assertFalse(cp.is_absolute_http_url(
+            "https://example.com/x\x7fy"))
+        self.assertFalse(cp.is_absolute_http_url(
+            "https://example.com/x y"))
+
+    def test_control_rejection_strips_only_outer_whitespace(self):
+        # Leading/trailing whitespace around the whole URL is still
+        # trimmed before the raw-text rejection; only characters that
+        # survive the trim are rejected.
+        self.assertTrue(cp.is_absolute_http_url(
+            "  https://example.com/path  "))
+        self.assertTrue(cp.is_absolute_http_url(
+            "\t\nhttps://example.com/path\r "))
+
+    def test_control_characters_rejected_in_all_placements(self):
+        self.assert_placements_reject(DELTA4_BAD_CONTROL_URLS)
+
+    def test_control_characters_rejected_in_all_placements_cli(self):
+        self.assert_placements_reject(DELTA4_BAD_CONTROL_URLS, cli=True)
+
+    def test_control_characters_cli_findings_and_strict_exits(self):
+        # Exact findings and the exit contract through the real CLI: a
+        # control character in the canonical is an error (exit 1 with
+        # LINK-01 error + OG-06 warn); in warn-only placements the page
+        # exits 0 and --strict turns the warn into exit 1.
+        path = write_temp_page(self.page_with_urls(DELTA4_BAD_CONTROL_URLS[0]))
+        try:
+            process = run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+        self.assertEqual(process.returncode, 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        report = json.loads(process.stdout.decode("utf-8"))
+        severities = {finding["id"]: finding["severity"]
+                      for finding in report["findings"]}
+        self.assertEqual(severities.get("LINK-01"), "error")
+        self.assertEqual(severities.get("OG-06"), "warn")
+
+        warn_pages = (
+            ("LD-13", self.mutated(
+                "good-en.html",
+                ('"image": "https://example.com/images/seo-basics.png",',
+                 '"image": %s,' % json.dumps(DELTA4_BAD_CONTROL_URLS[1])))),
+            ("LINK-02", self.hreflang_page_with_ko_href(
+                DELTA4_BAD_CONTROL_URLS[4])),
+        )
+        for rule, page in warn_pages:
+            with self.subTest(rule=rule):
+                path = write_temp_page(page)
+                try:
+                    normal = run_checker_cli([path, "--json"])
+                    strict = run_checker_cli([path, "--json", "--strict"])
+                finally:
+                    Path(path).unlink()
+                self.assertEqual(normal.returncode, 0)
+                self.assertNotIn(b"Traceback", normal.stderr)
+                report = json.loads(normal.stdout.decode("utf-8"))
+                pairs = {(finding["id"], finding["severity"])
+                         for finding in report["findings"]}
+                self.assertIn((rule, "warn"), pairs)
+                self.assertEqual(strict.returncode, 1)
 
 
 class TestSafeReportOutput(RuleCase):
