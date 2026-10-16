@@ -33,7 +33,7 @@ For each guard row the node owns, prove its test can fail, inside the same node:
 2. Run the guard's test once and capture the failing output.
 3. Restore the file, run the test once more, and capture the passing output.
 
-The evidence set is the injection diff, the failing output, and the passing output after restore. The capture must show a non-zero executed test count with the test named; a run that executed nothing proves nothing. A test that stays green under its injection guards nothing. Run inject, test, and restore as one command, so nothing ends mid-injection.
+The evidence set is the injection diff, the failing output, and the passing output after restore. A test that stays green under its injection guards nothing. Run inject, test, and restore as one command, so nothing ends mid-injection.
 
 ### Commits
 

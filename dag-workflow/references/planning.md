@@ -28,7 +28,7 @@ Write one plan file in the evidence dir (`SKILL.md`, Follow-up record) and recor
 - Gaps: per IS row, the current state, the user impact, and the cause; or "no gap" with the evidence the property already holds.
 - User-side QA scenarios: at least one per IS row, run on the real surface, each naming the exact command and one binary pass condition, with the happy case, the failure case, and the evidence path. A scenario that runs a command is a re-runnable script kept with its evidence.
 - The IS-row to QA-scenario pairing: which scenario proves which row, so no row is unproven and no scenario is unowned. Step 4 carries this pairing into the goal.
-- A risk list: one row per behavior the change touches, either `guard: <regression a user would hit> -> <node>` for behaviors that get a test, or `no-test: <reason>` where the reason is exactly one of: the change is prose, a prompt, or docs (read-through QA, never wording tests); or the behavior can't be tested in this repository, so QA scenario `<id>` covers it.
+- A risk list: one row per behavior the change touches, either `guard: <regression a user would hit> -> <node>` for behaviors that get a test, or `no-test: <reason>` for prose or behavior this repository cannot test, naming the QA scenario that covers it.
 - The two pinned rules, stated once here and never relaxed: every command pins the task worktree, and commits are serialized.
 
 ## Step 3: Plan review
