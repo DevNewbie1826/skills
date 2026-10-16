@@ -1,5 +1,5 @@
 ---
-description: Goal Mode via the dag-workflow skill (Discover→Plan→Execute→Verify→Review)
+description: Goal Mode via dag-workflow (Discover→Plan→Execute→Verify→Review→PR→Merge)
 ---
 
 /goal task: $ARGUMENTS

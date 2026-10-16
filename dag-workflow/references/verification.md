@@ -1,81 +1,47 @@
-Read this when stage 2 defines its batches (batch verification checks) and when stage 3 (verification and final review) runs; SKILL.md, Stages and required reads, lists it.
+Read this when steps 6-13 of the flow start; SKILL.md, The 13 steps, lists it.
 
-# dag-workflow: verification and final review
+# dag-workflow: verification, review, and merge
 
-This file covers the checks each batch verification node runs in stage 2, and all of stage 3: combined verification, the one final review, REVISE rounds, and the final report. The flow ends with the report. It never opens a PR and never merges.
+Covers steps 6-13 of the flow (see SKILL.md, The 13 steps).
 
-## Batch verification checks
+## Step 6: Pre-PR verification
 
-Each batch verification node (`references/execution.md`, Batch verification node) runs these on top of rerunning every node's VERIFY, and its verdict file names every finding:
+A failure that touches no IS or COMPANION row and fails the same way on the base commit (both runs captured) goes to the follow-up file (`SKILL.md`, Follow-up record) and the final report; every other failure, and any check that could not run, is fixed and rerun before the PR.
 
-- **Defect classes.** Answer the question of each class the plan chose whose Checked at column in `references/planning.md`, Defect classes, says Batch verification, against the batch's output.
-- **Mutation check.** When the batch changes testable runtime behavior, pick the three to five highest-risk changed behaviors, or all of them when fewer than three changed. For each, break the production code with one small edit in a throwaway copy of the worktree, run the tests that should guard it, and record killed (a test failed) or survived (none did). A survivor is a finding for the node that owns that behavior. Behaviors under a valid `no-test` row, including every change in a prose-only batch, get no mutation; the verdict says so and why. This is a bounded sample, not a full mutation-testing run.
+Run the two branches in one `parallel()` call of two `agent(agent='task', ...)` nodes. Both nodes' prompts follow SKILL.md, Delegation prompts. Both branches must pass before the PR (gate order: SKILL.md, Non-negotiable rules).
 
-## Combined verification
+- Branch (a), one `task` node: run the repository test suite, then the mutation check. Pick the 3-5 highest-risk changed behaviors (all of them if fewer changed). For each, break the production code with one small edit in a throwaway copy of the worktree, run the tests that should guard it, and record killed or survived. A mutation is killed only when its guard test passes unmutated and fails under the mutation; a run that fails for any other reason is not a kill. A survivor means a regression would pass unnoticed: strengthen that behavior's guard test until the mutation is killed, or record a no-test reason in the plan's risk list. Branch (a) passes when every failure is fixed or sent to the follow-up file under the rule above, and every mutation is killed or resolved this way. Behaviors under a valid no-test row get no mutation.
+- Branch (b), one `task` node: run every QA scenario's happy case and failure case on the real surface. Record per scenario the command, the observable, PASS or FAIL, the output capture, and the cleanup receipt for anything the scenario started. A failing scenario follows the rule above.
 
-After every implementation node has a PASS verdict, run the task's QA scenarios through their real surfaces, plus the repository's tests for the changed behavior. Tests alone don't prove user-visible behavior; each scenario needs its own artifact. Record the command, the observable, PASS or FAIL, and cleanup receipts for anything the QA started.
+## Step 7: Code review round
 
-- Assert the identity and marker of each record, not only its count. Totals can hold steady while records change or vanish.
-- Every artifact a verdict, conformance row, or report cites must exist at the cited path and show the observable itself, uncropped.
-- A comparator or harness is evidence only when it fails closed. Run it once on a corrupted or missing input as a control and capture that failure beside the passing run. The control goes through the same comparison; one that would still pass with the comparison replaced by a constant isn't a control.
+Run one `reviewer` once per round, before the PR. Its prompt follows SKILL.md, Delegation prompts, and requires the reviewer to load and apply `remove-ai-slops` and `programming` and to state in its report whether that check ran. It reports findings by severity CRITICAL, HIGH, MEDIUM, LOW. Fix the CRITICAL and HIGH findings once, through `task` nodes, then continue; the round gets no second pass. MEDIUM and LOW are notes for the report. In a REVISE round the reviewer sees only the delta diff since the last reviewed commit.
 
-Then check the plan's risk list:
+## Step 8: Open the PR
 
-- Every `guard` row: its test exists and passes, and its injection evidence shows the diff, the failing output, and the passing output after restore, with the diff producing the regression the guard names.
-- Every `no-test` row: the reason is one of the allowed ones, any QA scenario it names passed, and each claim it makes was checked against its cited source, recorded with file and line.
+One PR to the repository's main branch. The body states the behavior delivered, the tests and QA run with their capture paths, and the real limits. Claims stay within what the captures hold; never retype a number or SHA that a capture already holds. In a REVISE round, update the PR body.
 
-A missing guard test, a missing capture, an injection that doesn't produce the guard's regression or stayed green, a scenario that skipped a step it claims, or a `no-test` reason outside the list is invalid evidence. A touched behavior missing from the risk list is in scope when it shows an IS or COMPANION row not delivered, a regression this change introduced, or when it passes companion guards (a) to (c) (`SKILL.md`, The purpose boundary): add the COMPANION row and fix it in the same worktree. Otherwise it goes to the follow-up record (`SKILL.md`, Follow-up record).
+## Step 9: Final review
 
-A failing scenario is in scope by definition: fix it in the same worktree through a correction batch (`references/execution.md`, Recovery).
+One fresh `reviewer`, never one that worked on the task, after the PR exists. It reports every code defect of the PR in one verdict, never stopping at the first defect, and ends APPROVED or REVISE. Its prompt follows SKILL.md, Delegation prompts.
 
-Then build the **conformance table**, one row per IS row:
+## Step 10: Evidence problems
 
-| IS row | GAP closed, or `no gap` + evidence | todo | QA evidence path + PASS/FAIL | guard row or `none` |
-| --- | --- | --- | --- | --- |
+The evidence rule is in SKILL.md, Delegation prompts. Apply it from there without restating it.
 
-A row with missing or failed evidence is a mismatch: fix it, then refill the table. Move on only when every row matches. If an IS row itself proves wrong (wrong party, rows that contradict), fix only that row in the plan and record why; never restart the run for it.
+## Step 11: APPROVED or REVISE
 
-## Evidence reuse per target
+- APPROVED: the lead merges the PR.
+- REVISE, code problems only: go back to step 1 (`references/planning.md`, Step 1: Discovery) for the cited problems: re-run discovery with the variant sweep; update the plan (step 2: a COMPANION row for each in-scope variant, a risk row for each fix; `references/planning.md`, Step 2: The plan file); run the fixes as a correction run under `references/execution.md`, Step 5: Run the plan, in the SAME worktree and SAME PR with more commits; then run steps 6, 7 (delta diff), 8 (update the PR body), and 9 again. Steps 3 and 4 are not repeated: the plan review is one round and the goal already exists.
 
-Evidence is valid for a target (a scenario, test, or review claim) until something it depends on changes. Before reusing it:
+## Step 12: Post-merge verification
 
-1. Check what changed since capture: the files it exercised, its dependencies, and its environment. At minimum, treat as affected the tests of every touched file and of the files that import it, and the scenarios that exercise them.
-2. If none of those changed, reuse it. Keep its provenance (when, where, which commit) and write down why it's still valid.
-3. If any changed, or you can't tell, rerun that target.
+After the merge, one `task` node runs every QA scenario, plus the repository test suite, typecheck, and build where the repository has them, on the merged result. Its prompt follows SKILL.md, Delegation prompts. A failure follows the Step 6 rule; a fix goes through steps 5-11 again from the merged base, never as a direct patch to main.
 
-Never overwrite or delete a captured artifact. Write each rerun to a new file with its attempt number as a suffix. The one exception is a verdict file the gate reads at its fixed path (`references/execution.md`, Batch verification node), which carries no suffix.
+## Step 13: Cleanup and final report
 
-Don't throw out all evidence because one file changed, and don't rerun the whole matrix after every patch. The one full pass happens right before the final report (Finish and final report).
+- Clean up the task: remove the worktree and the branch, stop owned processes, and record a cleanup receipt for each.
+- Complete the goal once the merged result passes step 12.
+- Final report: results, evidence locations, limits, and every out-of-scope finding with its follow-up record path (`SKILL.md`, Follow-up record), or "none".
 
-## Final review
-
-After combined verification passes, run ONE `agent(agent='reviewer', ...)` call: a fresh reviewer, never one that worked on this task. Its prompt follows `SKILL.md`, Delegation prompts, and passes the full diff against the base SHA, the goal and success criteria, the plan's risk list, the conformance table, the plan's Plan review record (`references/planning.md`, Plan review), and the QA artifacts.
-
-The reviewer checks that every plan-review blocker fix is really in place, and answers each class in `references/planning.md`, Defect classes, whose Checked at column says Final review (D9: docs, the report, and UI text match the actual behavior). It ends with `APPROVED` or `REVISE`. Each REVISE item must show goal failure, a regression this change introduced, or invalid evidence, including risk-list evidence that fails Combined verification. An item about a companion that passes guards (a) to (c) counts as goal failure. Anything else is a follow-up note, not a required change.
-
-This review is mandatory, and nothing replaces it.
-
-## REVISE
-
-1. Build a correction batch in the same worktree from the required changes only. Record each one's cause class in the plan, as for any work failure (`references/execution.md`, Recovery).
-2. Fix each required change as the defect class it represents, not just the instance it cites: find that class's other inputs and interleavings and fix them in the same batch. Independent fixes run in parallel in one `parallel()` call.
-3. Run one verification node over the correction batch (`references/execution.md`, Batch verification node).
-4. Rerun the QA the fixes affect; use Evidence reuse per target for the rest.
-5. End with a delta re-review by a NEW `reviewer`, never the one that returned REVISE. Pass the delta diff, the required changes it cited, and fresh evidence for the affected targets, including, for each interleaving or input the previous verdict named, a capture showing its test fails with the fix reverted and passes with it.
-
-Never paste an old approval onto changed code, and never run a fresh whole-project review per round. Repeat until `APPROVED`. There's no round limit; each round stays scoped to its delta.
-
-## Finish and final report
-
-Right before the report, run the full verification set once on the final tree: every QA scenario, plus the repository's test suite, typecheck, and build where it has them. Until now the reuse rule decided what reran; this pass is the one exception. Refill the conformance table from it. A failing target here is in scope: fix it through a correction batch and a delta re-review.
-
-Then deliver the report:
-
-- **Results:** what was delivered, the branch, the worktree path, and the commits (`<sha> <subject>`, each confirmed with `git cat-file -t`).
-- **Evidence:** the QA scenarios and tests run, with artifact paths.
-- **Conformance:** the refilled conformance table and the COMPANION items delivered.
-- **Limits:** what wasn't proven, or what the host couldn't do.
-- **Removed tests:** each existing test removed, why, and the evidence that replaces it, or "none".
-- **Separate findings:** each out-of-scope finding with the companion guard (a) to (d) it fails and the follow-up file path (`SKILL.md`, Follow-up record), or "none".
-
-The flow stops here. Leave the branch and worktree for the user: no push to a shared branch, no PR, no merge unless the user asks for it separately.
+Stop conditions and the report shape: see SKILL.md, Finish.
