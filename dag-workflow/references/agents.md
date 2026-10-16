@@ -1,11 +1,11 @@
 <agents>
-Read this when choosing which omp agent runs a dag-workflow node; SKILL.md, Stages and required reads, lists it for stage 1.
+Read this when choosing which omp agent runs a dag-workflow node; SKILL.md, The 13 steps, lists it for steps 1-4.
 
 ## Built-in agents
 
 Pick via `agent="..."` in the `agent()` call.
 
-This table lists EVAL agent types for `agent()` calls. `SKILL.md`, Agents per stage, specifies which type RUNS each node — `task` for implementation nodes, `reviewer` for finder/verifier nodes.
+This table lists EVAL agent types for `agent()` calls. `SKILL.md`, Agents per step, specifies which type runs each node: `task` for implementation and verification nodes, `reviewer` for review and finder/verifier nodes.
 
 | agent | when to use |
 |---|---|
@@ -17,20 +17,26 @@ This table lists EVAL agent types for `agent()` calls. `SKILL.md`, Agents per st
 
 `designer` runs only when the host's task tool lists a `designer` agent (omp 18.3.4 built-ins do not; user agent files may add one); never dispatch to an agent the host does not list.
 
-`librarian` is not offered: external library/API research is done by the lead with its own web/doc tools, or by one `task` node per external question.
+## Agents by step
 
-## Agents by stage
+This table mirrors `SKILL.md`, Agents per step, which is the binding list; anything it does not name is not spawned:
 
-This table mirrors `SKILL.md`, Agents per stage, which is the binding list — anything it does not name is not spawned:
-
-| stage | agent |
+| step | agent |
 |---|---|
-| Discovery | one `scout` per open question per wave, in parallel |
-| Plan review | exactly one `reviewer` |
-| Execution | one `task` per implementation node, `sonic` for strictly mechanical nodes; no council on this route — each node's quality checks run inside its batch's single verification node, no extra reviewer calls per node |
-| Batch verification | one `reviewer` verification node per parallel batch (it also runs each node's quality checks), plus a `security-reviewer` for a batch that touches security-sensitive code |
-| Review/sweep route | per lens, one finder `reviewer` (plus a `security-reviewer` for a security lens), one batch verifier per 15 or fewer findings, one synthesis `reviewer` per round; in FULL mode or batch-local escalation, 2 additional batch verifiers per batch containing HIGH/CRITICAL findings (3 votes per HIGH/CRITICAL finding — never per-finding councils) |
-| Final review and each delta re-review | a NEW `reviewer` |
+| 1 Discovery | one `scout` per open question per wave, in one `parallel()`; external facts from the lead's own tools or one `task` |
+| 2 The plan file | the lead; no agent |
+| 3 Plan review | one `reviewer` |
+| 4 The goal | the lead; no agent |
+| 5 Run the plan | one `task` per implementation node, `sonic` for strictly mechanical nodes; no verification, review, or synthesis node inside the run |
+| 6 Pre-PR verification | two `task` nodes in one `parallel()`: (a) repository suite + mutation check, (b) QA scenarios on the real surface |
+| 7 Code review round | one `reviewer`, loading `remove-ai-slops` and `programming`; `task` nodes for its CRITICAL and HIGH fixes |
+| 8 Open the PR | the lead |
+| 9 Final review | one fresh `reviewer`, never one that worked on the task |
+| 10 Evidence problems | no agent; correction memos per SKILL.md, Delegation prompts |
+| 11 APPROVED or REVISE | the lead merges; on REVISE the flow returns to step 1 (steps 2, 5-9 again) |
+| 12 Post-merge verification | one `task` node |
+| 13 Cleanup and final report | the lead |
+| Review/sweep route | per lens, one finder `reviewer` (plus a `security-reviewer` for a security lens), one batch verifier per 15 or fewer findings, one synthesis `reviewer` per round; in FULL mode or batch-local escalation, 2 additional batch verifiers per batch containing HIGH/CRITICAL findings (3 votes per HIGH/CRITICAL finding, never per-finding councils) |
 
 ## Finder / verifier role assignment
 
@@ -40,7 +46,7 @@ When a workflow decomposes into finder and verifier slices, assign `agent` by ro
 |---|---|---|
 | finder (findings-producing) | `reviewer` | code review, adversarial checks that surface findings |
 | verifier | `reviewer` | verifying prior findings, re-checking claimed fixes |
-| scope discovery | `scout` | Discovery (stage 1) only: file lists, call-site mapping — never generates findings |
+| scope discovery | `scout` | Discovery (step 1) only: file lists, call-site mapping — never generates findings |
 | security lens | `security-reviewer` | security analysis exclusively, when a security angle is in scope |
 
 Rules:
