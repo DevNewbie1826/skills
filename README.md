@@ -25,7 +25,7 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | `git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
 | `lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
 | `seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
-| `dag-workflow/` | OMP-native: a task too big for one pass — decompose into a validated dependency DAG and run it through a staged, bounded flow: one plan review, verified batches of subagents in a worktree, one final review |
+| `dag-workflow/` | OMP-native: discover, review one plan, execute in a worktree with eval subagents owning each change and proof, verify before the PR, one code-review round, open a PR, one final review, merge, verify after merge, and clean up |
 
 ## Install
 
