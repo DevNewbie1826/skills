@@ -2,7 +2,7 @@
 This task involves multi-step reasoning. Think carefully through the problem before responding.
 
 Drive this task through the flow in SKILL.md, where delegation is the default and each step runs only the agents SKILL.md, Agents per step, names. Author the orchestration in the `eval` tool. Bound fan-out by that step structure: a step adds no agent its section does not name.
-Read this when a dag-workflow step needs the eval helpers (`agent()`, `parallel()`, `pipeline()`, `completion()`, `budget`, `write()`), the finder/verifier schemas, or the review/sweep contracts; SKILL.md, The 13 steps, says which step reads it.
+Read this when a dag-workflow step needs the eval helpers (`agent()`, `parallel()`, `pipeline()`, `completion()`, `budget`, `write()`), the finder/verifier schemas, or the review/sweep contracts; SKILL.md, The stage map, says which stage reads it.
 
 <when>
 Worth it when the task benefits from decomposition + parallel coverage, or from independent/adversarial cross-checking before you commit. For trivial work, stay inline (see SKILL.md, When to run the flow) — don't spin up agents. Scout inline FIRST (list the files, scope the diff, find the call sites) to discover the work-list, then fan out over it — you don't need to know the shape before the *task*, only before the *fan-out*. Scope discovery is bounded by `references/planning.md`, Step 1: Discovery: one `scout` per open question per wave; stop when every open question is answered and two consecutive waves add nothing new. Common shapes, each a well-scoped `eval` call you can chain across turns:
@@ -28,6 +28,59 @@ Everything runs INLINE and synchronously inside the eval call — no background 
 
 Because a subagent is unreachable after `agent()` returns, its final text must carry everything the orchestrator will read — nothing arrives afterward. Enforce that at the prompt level with a **return-once instruction** baked into every subagent prompt: "Return your result ONCE via the schema return value. Do not re-read files, re-check, or send coordination messages after returning — your result is final when agent() returns it." This stops a finished agent from voluntarily re-reading files or reverifying after the round ends — the stale-agent pattern that otherwise keeps re-reading and sends stale post-return noise (a finding re-sent after the round closed is stale by definition, and the orchestrator has no way to reach the agent to stop it). Pair that with a **broadcast dedup rule**: "If your result is returned via schema, do not also broadcast it on the coordination channel — the orchestrator reads the schema return, not the coordination channel." The schema return value is the single delivery channel for results; the coordination channel exists for live coordination only, and the same finding delivered both ways is duplicate noise the orchestrator must filter.
 </helpers>
+
+<delegation-prompts>
+
+## Dispatch frame
+
+Use this frame for **eval `agent()` nodes**, **task-tool children**, and **workflow-tool runs**. The lead owns orchestration: a workflow-tool run is a lead-dispatched dependency graph with a brief and a separately framed prompt for each node; a child does not spawn agents or call `agent()`, `parallel()`, the task tool, or the workflow tool. Use only roles the host lists and the current step permits. For independent eval nodes use `parallel()`; use a workflow-tool run when dependencies determine ordering. Workers receive only their prompt and named packet, not the conversation.
+
+Before the frame include, in order:
+
+1. **Purpose:** the original outcome.
+2. **Scope:** the assignment's permitted work and its worktree pin.
+3. **Contract:** paste the plan's applicable `IS`, `COMPANION`, `INVARIANT`, and `LIMIT` rows verbatim; before a plan exists say so.
+4. **Blockers:** an undelivered `IS` or `COMPANION`, or a listed invariant proved violated by its failing test or its `no-test` QA scenario. Evidence wording is a correction memo. Plan review additionally checks whether the plan would fail the request, introduce a regression, or rely on a false proof.
+5. **Separate findings:** report out-of-boundary findings as follow-ups; do not fix them.
+6. **Companion definition:** one hop from an `IS` row, no new owner decision, same task and PR, and recorded as `COMPANION: <item> <- <IS row> : <why expected>`.
+
+Then fill every field in this order:
+
+```text
+TASK: <one imperative naming the work>
+DELIVERABLE: <files, report, and evidence>
+SCOPE: <exact allowed reads and writes; name what is out of scope>
+VERIFY: <literal command or surface action and one binary observable>
+STOP WHEN: <one observable completion condition>
+TIMEBOX: <minutes; at expiry deliver partial work and name every unexamined item>
+FORBIDDEN: <shared and role-specific invariants>
+REPORT: <exact fields, evidence paths, and final line>
+```
+
+Make each dispatch self-contained, positive, and undecorated. Pin each command to the named worktree; give the complete head, tree, evidence directory outside the worktree, and owned receipt path when applicable. Supply the shared `local://` packet under **Shared context handoff**, or its documented fallback. State exact commands, paths, dependencies and binary observables; do not say "as discussed." A timebox is not approval: unexamined work is unverified. A missing prerequisite is `BLOCKED: <input>`, never invented evidence.
+
+Every `FORBIDDEN` names edits outside scope; amend, rebase, force-push and bypassing hooks; deleting, skipping or focusing tests; unplanned dependencies; writing another lane's receipt or a lead-owned plan, register, finding or transition record; and asking the requester questions. Only the lead fans out. Add the return-once and no-duplicate-broadcast instructions from `<helpers>` to every child. Redact secrets before writing captures or prompts; pass arguments as argv or quote every interpolated value, never execute a captured string. Each started process, process group, browser context, port and scratch directory gets a teardown receipt and a check that it is gone.
+
+Every reviewer prompt also carries the reviewer rule verbatim from `SKILL.md`, Delegation prompts. For design or research, interpret a product defect as a defect in the delivered artifact; do not expand the finite contract. Reviewers read a pinned snapshot in a read-only review worktree and never fix their findings. Use a fresh reviewer for each re-review.
+
+### Role-specific additions
+
+| Node kind | Required assignment and evidence | Additional TIMEBOX / FORBIDDEN |
+| --- | --- | --- |
+| Implementation or correction | Own one disjoint change and its proof; for each guard capture injection diff, failing output, restored passing output. A correction reproduces each assigned finding at its original head, fixes the cause, probes sibling variants, and captures the new-head pass. | On expiry list unproved guards and findings; no half-proven commit, concurrent shared-file write, or rewriting the finding register. |
+| Commit | Stage only the specified verified files, follow observed repository style, and report the commit identity and changed-file list. Serialize commit slots. | At expiry report uncommitted files; no unrelated staging or second commit. Nothing commits after freeze. |
+| Collection | Lead dispatches source slices and dependent extraction/reduction nodes; each source is read or named `UNREAD` with a reason, and extracted claims retain source anchors. | On expiry name unread slices and pending nodes; no invented source, hidden omission, nested dispatch, or shared-register write. |
+| Sweep / QA | Record a row for every assigned class or scenario: literal command or `no command`, binary observable, verdict and artifact; QA runs the shipped surface and includes teardown. | On expiry list every unexamined row; no product edits, dry-run as proof, or unproved result as PASS. |
+| Review / verifier | Supply pinned diff, contract, head, receipts and findings; report every in-scope finding, one line per axis, and counterexamples. Follow `<structure>` for finding schemas and ID joins. | On expiry return partial findings and name every unexamined area; no approval for incomplete coverage, edits, or self-review. |
+| Workflow-tool run | Specify the complete DAG, per-node frames, dependencies, disjoint writers, output artifacts and lead-owned state. Dispatch only after prerequisites exist; the lead inspects each result. | On expiry list pending nodes and artifacts; no nested graph from a child and no claiming a missing node passed. |
+
+For the implementation review path, preserve the order `triage -> fix -> freeze -> pr_open -> round`. A required `code-review` receipt must cover the exact frozen head before `round` dispatch. Other receipts remain reusable only while their tree and applicable scope/environment still match; each receipt has one writer. A final verdict covers the complete reviewed head only: a moved head voids it and requires review of the new head, never a carried approval. Do not commit after freeze.
+
+Two consecutive `REVISE` rounds on the same component and defect class trigger one architect premise review, if the host lists that category (otherwise use its highest-capability listed equivalent). A third-or-later repeat forces a recorded approach switch before the next round: `premise`, `family`, `strategy`, `split` (program mode only), or `rediscover`; use an unused applicable kind before repeating one. A cap is a switch, not an exit. Review continues until an applicable approval or a reported external limit.
+
+`/wf` entry already arms the flow and its goal: keep it, never re-arm, reset, or create a second goal. If criteria change, steer the existing goal through the host's supported mechanism; do not create another. Batch genuine owner decisions; a newly arising decision parks only its affected lane while independent work continues.
+
+</delegation-prompts>
 
 <structure>
 For independent per-item chains (review → verify, fetch → extract → score), wrap the WHOLE chain in one function and run it with `parallel()` — then each item flows through its own steps without waiting for the others. (The examples here reference schemas + fixtures defined by the **shared prelude** in the finder→verifier contract below — every example is runnable *after that prelude*.)
@@ -434,6 +487,86 @@ Five cases: (1) **persisted canonical acceptance** — `sec:5` is in the registr
 
 Scale to the ask: "find any bugs" → a few finders, single-vote verification. "thoroughly audit / be comprehensive" → larger finder pool, FULL mode (HIGH/CRITICAL: 2 additional per-batch verifiers, 3 votes per finding), a synthesis stage.
 </patterns>
+
+<defect-checklist>
+
+## Defect classes and review axes
+
+Use the same class identifier in the finding, checklist and review axis. The dictionary below is the review/sweep vocabulary; a class change must be reflected in the plan, finding and receipt contracts together. For mixed work use the union of the selected concrete types. Unknown classes are notes with their axis, not invented enum values.
+
+### Checklist sweep
+
+For code work the lead assigns a checklist sweep over the exact changed-file scope. A host-listed quick task or eval task node records one row per applicable class: `class | command | observable | verdict | artifact`; use `no command` for a reading. A `FAIL` is a claim the lead reproduces at the relevant head before filing a blocking finding; `WARN` is nonblocking, `INVALID` is unproved, and `SKIP` cannot satisfy a required lane. The receipt records `kind`, `type`, `unit`, `program_id`, `lane`, `stage`, full `head`, `tree`, `scope`, `started_at`, `ended_at`, `status`, `rows`, `artifacts`, and `cleanup`; each row carries `id`, `command`, `observable`, `verdict`, and `artifact`.
+
+For each guard row, remove the guard in a throwaway copy, run its declared suite, and require failure; the unmutated guard must pass. Record the mutation, output and cleanup. A survivor needs reproduction before it blocks; a capped or incomplete check reports uncovered rows as unverified, not PASS. Never mutate the worktree a reviewer is reading. This checklist is distinct from the finder/verifier review/sweep route in `<structure>` and `<patterns>`.
+
+| Class | Meaning | Checklist focus |
+| --- | --- | --- |
+| `S` | state, lifetime, cancellation, ownership | Run the changed entry point, signal it, and check the entire process group exits within budget; read other state transitions. |
+| `C` | input, IO and error boundaries | Test declared input boundaries: empty, invalid UTF-8, a 4096-byte block and a split read where applicable; check exit contract and retained error causes. |
+| `D` | reconstructed in place of original | Read provenance and whether the original authoritative object is used. |
+| `O` | missing real shipping path | Run the shipped entry point in QA and read the composition. |
+| `T` | test passes when behavior is wrong | Apply the guard mutation described above. |
+| `W` | write and ownership boundary | Read who owns each write and transition. |
+| `SEC` | secret in output or artifacts | Put a canary in each declared error path's environment and inspect stdout, stderr and all written logs; redact captures. |
+| `DOC` | code and docs disagree | Compare documented flags to help output and review whether prose matches behavior. |
+| `CFG` | configuration accepted or rejected incorrectly | Run declared accept and reject cases for each changed key. |
+| `PANIC` | crash on a contract input | Check for crash markers across contract inputs and generated variants. |
+| `REGRESS` | prior fix regressed | Re-run prior findings' `repro_cmd` at the current head and check that guards are nonvacuous. |
+
+Read the `remove-ai-slops` categories over the exact diff as a report-only review, not as a substitute for this checklist. Preserve a row for each applicable class even when the check is a reading.
+
+### Design classes
+
+The 74 `visual-qa` item IDs are grouped below. Capture every planned surface, state, width and theme; Pass A owns G-J and Pass B owns A-F.
+
+| IDs | Group | Owner |
+| --- | --- | --- |
+| `A1`-`A13` | layout and alignment, including the `Layout:` contract | capture + Pass B |
+| `B1`-`B8` | hierarchy and brief conformance | capture + Pass B |
+| `C1`-`C8` | text and copy | capture + Pass B |
+| `D1`-`D4` | touch and pointer targets | capture + Pass B |
+| `E1`-`E7` | contrast, colour and themes | capture + Pass B |
+| `F1`-`F9` | consistency and brand | capture + Pass B |
+| `G1`-`G7` | motion and feedback | capture + Pass A |
+| `H1`-`H11` | states | capture + Pass A |
+| `I1`-`I5` | keyboard and accessibility | capture + Pass A |
+| `J1`-`J2` | platform specifics | capture + Pass A |
+
+The five additional item IDs are `A13`, `B8`, `E7`, `F8`, and `F9`. The nine draft-guard classes are `edge-stripe`, `pseudo-bar`, `inset-shadow-stripe`, `gradient-stripe`, `accent-outline`, `promo-copy`, `emoji-icon`, `decorative-badge`, and `vanity-stat`. Run the pack's `frontend` draft-guard checker on declared targets when available: exit 0 means clean, 1 findings, 2 usage or unreadable target; stdout is a JSON findings array. If unavailable, record the lane unverified rather than inventing a result. An unknown checker rule keeps its row and note without a class. An uncovered capture cell is a note, not a class. Record `taste` separately, never blocking; carry it along only with a defect on the same surface.
+
+### Research and audit classes
+
+| Research class | Meaning |
+| --- | --- |
+| `untraceable_number` | number has no source |
+| `value_mismatch` | number differs from its source |
+| `quote_not_verbatim` | quotation differs from its source |
+| `unbound_sentence` | no claim binds the sentence |
+| `meaning_drift_confirmed`, `meaning_drift_warn` | source meaning changed in retelling |
+| `fidelity_unresolved` | artifact and claims disagree |
+| `subject_changed`, `scope_widened`, `hedge_dropped`, `certainty_added`, `causality_added`, `direction_flipped`, `population_changed`, `evidence_grade_raised`, `other` | drift kinds |
+| `claim_unresolved`, `claim_refuted` | claim gate states |
+
+Research checks are `fact-verify`, `claim-gate`, `skeptic`, `execution-verify`, and `delivery-gate`; each records evidence. An unresolved claim at delivery blocks. If a required capability is unavailable, record it unverified, not passed.
+
+Audit classes are the audited corpus's own open set of IDs matching `^[a-z][a-z0-9._-]*$`. Run its `lint`, a reproducible random `spot` sample, and `register-schema`: every rule-by-surface cell is judged and the register parses. Documentation and configuration checks may serve when those are the corpus's own rules.
+
+### Review axes
+
+The final reviewer writes `clean` or a located counterexample on every applicable axis. A missing line is incomplete review, not clean.
+
+| Type | Axes |
+| --- | --- |
+| code | error propagation; resource cleanup; concurrency and ordering; boundary and empty input; IS, COMPANION and INVARIANT delivery; prior-fix regression; secrets in output; docs versus code; config accept/reject; test strength; each code class above |
+| design | each checklist section and named lens rule; capture freshness; before/after pair per changed surface; `taste` separate from `defect` |
+| research | each gate code and claim status; drift kinds; unresolved delivery claims |
+| audit | each corpus rule; rule-by-surface coverage; spot accuracy; register schema |
+| mixed | union of the primary and secondary axes |
+
+Treat learned patterns as triage priors, never as substitutes for reproduction: exercise canaries on error paths, generate boundary variants for declared input, and measure process groups. A dropped error cause is a warning unless the plan makes the chain a strict contract; missing documented flags are notes unless user-facing contracts. Declare config accept/reject cases. Report mutation coverage gaps as warnings and reproduce survivors before blocking.
+
+</defect-checklist>
 
 <execution>
 - Decompose the surface first; capture it in `todo` when it spans phases.
