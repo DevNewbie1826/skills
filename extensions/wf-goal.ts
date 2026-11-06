@@ -12,7 +12,9 @@ const SKILL_MD = join(packRoot, "dag-workflow", "SKILL.md");
 const FLOW = `Run this task using the dag-workflow skill.
 
 First, read the skill router and follow its contract:
-${SKILL_MD}`;
+${SKILL_MD}
+
+Run its stage order in one pass: collect, define, plan, plan review, decide, goal, build per unit, verify lanes, round, merge, post-merge, cleanup.`;
 
 export default function wfGoalExtension(pi: ExtensionAPI) {
   pi.setLabel("Workflowz flow (/wf)");
