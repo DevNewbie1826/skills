@@ -92,7 +92,7 @@ Nodes, reviewers, and you share one worktree. Three rules keep one from corrupti
 
 Use the tier and facts fixed in planning. Never lower the tier; raise it when newly discovered facts require it. S permits plan review to start alongside build, with a blocker amending the run, and at most one mutation per guard row; M runs stages serially by default with the full verification wave; L adds an adversarial lane even without a high-risk row and QA covers state and lifetime transitions. Below L, the adversarial lane is required for a high-risk plan row. These are execution differences, not permission to reduce review depth or skip a required lane.
 
-Keep `todo` current as the live checklist. At each transition changing a count, and at least every 30 minutes while a unit runs, use the handoff to report a `PROGRESS:` line with whole-request units done/total, defect gaps fixed/total when tracked, PRs merged and open, the current wave, review round, switch count, and what is waiting. Use `n/a` for a missing register. Suppress repeats with no change; keep ordinary step-transition handoffs without duplicating an unchanged progress line.
+Keep `todo` current as the live checklist. At each transition changing a count, and at least every 30 minutes while a unit runs, use the handoff to report a `PROGRESS:` line with whole-request units done/total, defect gaps fixed/total when tracked, PRs merged and open, the current wave, review round, switch count, and what is waiting. Use `n/a` for a missing register. Suppress repeats with no change; keep ordinary stage-transition handoffs without duplicating an unchanged progress line.
 
 ### Restart after a death or a compaction
 
