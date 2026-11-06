@@ -23,8 +23,6 @@ When a review sends work back (the REVISE correction path, `references/verificat
 
 Before planning, define the affected users, their current and intended use, the ideal properties and their reasons, and each difference from today, its cause, impact, affected party and evidence. Apply `SKILL.md`, The purpose boundary: request properties and qualifying companions are in scope; record other findings as follow-ups. A property already satisfied still records "no gap" with evidence. If a gap register exists, identify its entries as `G<n>` and pair every IS row with the register entry it closes.
 
-Write one plan file in the evidence dir outside the task worktree, and record that path in the plan. When a request has independently verifiable units, write and explicitly select one plan per unit. The plan, `todo`, and evidence dir hold progress; hand the named plan to the host workflow tool or to `eval` `agent()`/`parallel()` nodes, not to a second planning pass. A node owns a disjoint write scope and its proof. The goal carries the IS-to-QA pairing.
-
 ## Stages 4-5: The plan file and its checks
 
 Write one plan file in the evidence dir outside the task worktree, and record that path in the plan. When a request has independently verifiable units, write and explicitly select one plan per unit. The plan, `todo`, and evidence dir hold progress; hand the named plan to the host workflow tool or to `eval` `agent()`/`parallel()` nodes, not to a second planning pass. A node owns a disjoint write scope and its proof. The goal carries the IS-to-QA pairing.
@@ -137,16 +135,6 @@ Structural checks do not prove wiring, authoritative ownership, actual node exis
 The default is one `architect` category review of the checked plan. The reviewer reads the request, boundary, gaps, graph, required device sentences, proof choices, and semantic checks; answers `OKAY` or lists blockers with a fix for each. Record fixes in the plan's review record and continue to the decision batch and goal without an approval question or a re-review of that round. Evidence wording, numerical and formatting problems are correction memos; a blocker is a failure to satisfy the request, an introduced regression, or a proof that shows the code does not do what is claimed.
 
 Only when the requester's own message explicitly asks for the separate planning workflow, run that workflow with its approval gate and add one one-shot `plan-reviewer` subagent review alongside the one `architect` review. This branch has both reviews, no third round, and no follow-up message to the one-shot reviewer. Its fixes are checked by final review. A skill instruction alone cannot activate that branch or make the agent available. If the host does not offer the needed review role, the session performs and records the review instead; never dispatch an unavailable agent.
-
-Write one plan file in the evidence dir (`SKILL.md`, Follow-up record) and record that path in the plan. The plan holds:
-
-- IS rows: one per property the delivered request must have, each with its success criterion and the affected party it serves.
-- COMPANION rows: `COMPANION: <item> <- <request IS row> : <why expected>`, each passing the guards of `SKILL.md`, The purpose boundary.
-- Gaps: per IS row, the current state, the user impact, and the cause; or "no gap" with the evidence the property already holds.
-- User-side QA scenarios: at least one per IS row, run on the real surface, each naming the exact command and one binary pass condition, with the happy case, the failure case, and the evidence path. A scenario that runs a command is a re-runnable script kept with its evidence.
-- The IS-row to QA-scenario pairing: which scenario proves which row, so no row is unproven and no scenario is unowned. Step 4 carries this pairing into the goal.
-- A risk list: one row per behavior the change touches, either `guard: <regression a user would hit> -> <node>` for behaviors that get a test, or `no-test: <reason>` for prose or behavior this repository cannot test, naming the QA scenario that covers it.
-- The two pinned rules, stated once here and never relaxed: every command pins the task worktree, and commits are serialized.
 
 ## Stage 8: The goal
 

@@ -65,7 +65,7 @@ The plan's IS and COMPANION rows are the request, INVARIANT rows what must keep 
 ## Non-negotiable rules
 
 1. One goal for the run, armed by `/wf` at entry; never a second. Its objective carries the register pairing; each unit's plan holds its own IS-to-QA rows, and `todo` holds progress.
-2. Gate order: never open the PR before the verify lanes pass and the code-review round has run; never run the round without the freeze; never merge before the round returns APPROVED.
+2. Gate order: never open the PR before the verify lanes pass and the code-review lane has run; never run the round without the freeze; never merge before the round returns APPROVED.
 3. Nothing commits after the freeze: a memo goes to the evidence dir, never the branch.
 4. Every run file has one writer. A receipt is valid while its tree matches; a verdict only while its round's head equals the frozen head and the observed head.
 5. Record only what you've checked. A commit counts once `git cat-file -t <sha>` prints `commit`.

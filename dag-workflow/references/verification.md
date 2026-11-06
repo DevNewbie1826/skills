@@ -136,7 +136,7 @@ throwaway copy, and leave no mutant directory behind.
 ### The five design-only checklist ids
 
 The design class set accepts the visual-QA checklist item ids (`A1`-`J2`, 74 items across ten families),
-the nine draft-guard and accent-stripe rule ids, and `taste`. The pack's visual-qa skill routes the two
+the nine draft-guard rule ids, and `taste`. The pack's visual-qa skill routes the two
 review passes and owns their charters, but it does not print the checklist body, so this flow names the ids
 and states each of the five below in one line. Those five are the ones a reader cannot recover from the pack
 without a second document, and they belong to the design lanes, where the captures are read against them:
@@ -240,7 +240,7 @@ A blocking finding needs a reproduction command on `head_found`. Before the next
 
 Run fixes as one dependency-ordered correction run of the host workflow tool or eval `agent()`/`parallel()` nodes under `references/execution.md`, Stage 9: Run the plan. Fix records name `round` and `head`: round 0 is pre-PR triage/fix, later rounds name the REVISE being corrected. Apply the reuse rule and rerun stale lanes. Keep `fix` in todo with `skip: <reason>` when it truly does not apply.
 
-The required order is **triage -> fix -> freeze -> pr_open -> round**. Steps 7-9 enforce that sequence on first review and every correction cycle. Code review and final review are distinct and are never dispatched in the same wave.
+The required order is **triage -> fix -> freeze -> pr_open -> round**. Stages 11-15 enforce that sequence on first review and every correction cycle. Code review and final review are distinct and are never dispatched in the same wave.
 
 ## Stages 13-14: Freeze and open the PR
 

@@ -25,7 +25,7 @@ This table mirrors `SKILL.md`, The stage map, which is binding; anything these t
 | 3 before | the lead; a read-only `quick` node may drive the captures |
 | 4 plan | the lead; reads the skills below before writing; no agent |
 | 5 plan_lint | the lead or a `quick` node checks the planning grammar, including valid blocked rows |
-| 6 plan_review | one `architect` category review through the task tool; read-only; OKAY or one fix per blocker; never re-reviewed |
+| 6 plan_review | one `architect` category review through the task tool; in the plan-gate branch (the requester explicitly asked for the planning workflow in their words) add one one-shot read-only `plan-reviewer` dispatch; read-only; OKAY or one fix per blocker; never re-reviewed |
 | 7 decide | the lead; one decision batch; no agent |
 | 8 goal | the lead; the host goal tool; no agent |
 | 9 build | one `task` per implementation node, `sonic` for strictly mechanical edits, one serialized `task` commit node loading `git-master`; each node owns its change and proof; no separate verification, review, or synthesis node in the run |
