@@ -132,9 +132,9 @@ Structural checks do not prove wiring, authoritative ownership, actual node exis
 
 ## Stage 6: Plan review
 
-The default is one `architect` category review of the checked plan. The reviewer reads the request, boundary, gaps, graph, required device sentences, proof choices, and semantic checks; answers `OKAY` or lists blockers with a fix for each. Record fixes in the plan's review record and continue to the decision batch and goal without an approval question or a re-review of that round. Evidence wording, numerical and formatting problems are correction memos; a blocker is a failure to satisfy the request, an introduced regression, or a proof that shows the code does not do what is claimed.
+The default is one fresh `reviewer` plan review of the checked plan. The reviewer reads the request, boundary, gaps, graph, required device sentences, proof choices, and semantic checks; answers `OKAY` or lists blockers with a fix for each. Record fixes in the plan's review record and continue to the decision batch and goal without an approval question or a re-review of that round. Evidence wording, numerical and formatting problems are correction memos; a blocker is a failure to satisfy the request, an introduced regression, or a proof that shows the code does not do what is claimed.
 
-Only when the requester's own message explicitly asks for the separate planning workflow, run that workflow with its approval gate and add one one-shot `plan-reviewer` subagent review alongside the one `architect` review. This branch has both reviews, no third round, and no follow-up message to the one-shot reviewer. Its fixes are checked by final review. A skill instruction alone cannot activate that branch or make the agent available. If the host does not offer the needed review role, the session performs and records the review instead; never dispatch an unavailable agent.
+Only when the requester's own message explicitly asks for the separate planning workflow, run that workflow with its approval gate and add a second fresh `reviewer` with the plan-gate lens alongside the first review. This branch has both reviews, no third round, and no follow-up message to that reviewer. Its fixes are checked by final review.
 
 ## Stage 8: The goal
 

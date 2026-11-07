@@ -33,7 +33,7 @@ Because a subagent is unreachable after `agent()` returns, its final text must c
 
 ## Dispatch frame
 
-Use this frame for **eval `agent()` nodes**, **task-tool children**, and **workflow-tool runs**. The lead owns orchestration: a workflow-tool run is a lead-dispatched dependency graph with a brief and a separately framed prompt for each node; a child does not spawn agents or call `agent()`, `parallel()`, the task tool, or the workflow tool. Use only roles the host lists and the current stage permits. For independent eval nodes use `parallel()`; use a workflow-tool run when dependencies determine ordering. Workers receive only their prompt and named packet, not the conversation.
+Use this frame for **eval `agent()` nodes**, **task-tool children**, and **workflow-tool runs**. The lead owns orchestration: a workflow-tool run is a lead-dispatched dependency graph with a brief and a separately framed prompt for each node; a child does not spawn agents or call `agent()`, `parallel()`, the task tool, or the workflow tool. Use only the agents the stage row names. For independent eval nodes use `parallel()`; use a workflow-tool run when dependencies determine ordering. Workers receive only their prompt and named packet, not the conversation.
 
 Before the frame include, in order:
 
@@ -76,7 +76,7 @@ Every reviewer prompt also carries the reviewer rule verbatim from `SKILL.md`, D
 
 For the implementation review path, preserve the order `triage -> fix -> freeze -> pr_open -> round`. A required `code-review` receipt must cover the exact frozen head before `round` dispatch. Other receipts remain reusable only while their tree and applicable scope/environment still match; each receipt has one writer. A final verdict covers the complete reviewed head only: a moved head voids it and requires review of the new head, never a carried approval. Do not commit after freeze.
 
-Two consecutive `REVISE` rounds on the same component or the same defect class trigger one architect premise review, if the host lists that category (otherwise use its highest-capability listed equivalent). A third-or-later repeat forces a recorded approach switch before the next round: `premise`, `family`, `strategy`, `split` (program mode only), or `rediscover`; use an unused applicable kind before repeating one. A cap is a switch, not an exit. Review continues until an applicable approval or a reported external limit.
+Two consecutive `REVISE` rounds on the same component or the same defect class trigger one fresh `reviewer` premise review. A third-or-later repeat forces a recorded approach switch before the next round: `premise`, `family`, `strategy`, `split` (program mode only), or `rediscover`; use an unused applicable kind before repeating one. A cap is a switch, not an exit. Review continues until an applicable approval or a reported external limit.
 
 `/wf` entry already arms the flow and its goal: keep it, never re-arm, reset, or create a second goal. If criteria change, steer the existing goal through the host's supported mechanism; do not create another. Batch genuine owner decisions; a newly arising decision parks only its affected lane while independent work continues.
 
@@ -496,7 +496,7 @@ Use the same class identifier in the finding, checklist and review axis. The dic
 
 ### Checklist sweep
 
-For code work the lead assigns a checklist sweep over the exact changed-file scope. A host-listed quick task or eval task node records one row per applicable class: `class | command | observable | verdict | artifact`; use `no command` for a reading. A `FAIL` is a claim the lead reproduces at the relevant head before filing a blocking finding; `WARN` is nonblocking, `INVALID` is unproved, and `SKIP` cannot satisfy a required lane. The receipt records `kind`, `type`, `unit`, `program_id`, `lane`, `stage`, full `head`, `tree`, `scope`, `started_at`, `ended_at`, `status`, `rows`, `artifacts`, and `cleanup`; each row carries `id`, `command`, `observable`, `verdict`, and `artifact`.
+For code work the lead assigns a checklist sweep over the exact changed-file scope. A `reviewer` sweep node records one row per applicable class: `class | command | observable | verdict | artifact`; use `no command` for a reading. A `FAIL` is a claim the lead reproduces at the relevant head before filing a blocking finding; `WARN` is nonblocking, `INVALID` is unproved, and `SKIP` cannot satisfy a required lane. The receipt records `kind`, `type`, `unit`, `program_id`, `lane`, `stage`, full `head`, `tree`, `scope`, `started_at`, `ended_at`, `status`, `rows`, `artifacts`, and `cleanup`; each row carries `id`, `command`, `observable`, `verdict`, and `artifact`.
 
 For each guard row, remove the guard in a throwaway copy, run its declared suite, and require failure; the unmutated guard must pass. Record the mutation, output and cleanup. A survivor needs reproduction before it blocks; a capped or incomplete check reports uncovered rows as unverified, not PASS. Never mutate the worktree a reviewer is reading. This checklist is distinct from the finder/verifier review/sweep route in `<structure>` and `<patterns>`.
 
