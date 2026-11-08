@@ -8,7 +8,7 @@ omp has two dispatch surfaces. Both select a bundled agent by exact name in the 
 | surface | call | names this flow uses |
 |---|---|---|
 | task tool | the task tool, selecting the agent by exact name in its `agent` field: one call, or a batch `{context, tasks:[...]}` with a per-item `agent` | `task`, `sonic`, `scout`, `reviewer`, `security-reviewer` |
-| eval agent | `agent(prompt, agent="<name>")` in eval | `task`, `sonic`, `scout`, `reviewer`, `security-reviewer` |
+| eval agent | `agent(prompt, { agent: "<name>" })` returns a handle at once; values come from `wait()` on the handles, and `workpool("<name>", { name })` shards many same-shaped string items | `task`, `sonic`, `scout`, `reviewer`, `security-reviewer` |
 
 omp 18.18.0 bundles exactly `task`, `sonic`, `scout`, `reviewer`, `security-reviewer`, and `seance`; this flow uses the first five and leaves `seance` unused. Model strength comes from the agent's model role: `scout` and `sonic` run the fast role (@smol), `reviewer` the thinking role (@slow), `task` the session model (@task), `security-reviewer` the session model. A specific model is pinned per agent with the omp setting `task.agentModelOverrides`, or per call with `model` when the setting `task.perCallModel` allows it (default off). A "`task` node" below means a node run by the `task` agent, and "spawn" means a dispatch through the task tool or eval `agent()`.
 
@@ -19,7 +19,7 @@ This table mirrors `SKILL.md`, The stage map, which is binding; anything these t
 | stage | agent |
 |---|---|
 | 0 intake | the lead; sets the tier and the `todo` list; no agent |
-| 1 collect | one dependency-ordered workflow-tool run: a `scout` for scope and for outside-source reading (it has `web_search`), `sonic` for mechanical harvest slices, `task` for extract and reduce and for questions that must run the product; the lead assembles the collect report |
+| 1 collect | the context graph (references/graphs.md): a `scout` for scope and for outside-source reading (it has `web_search`), `sonic` for mechanical harvest slices, `task` for extract and reduce and for questions that must run the product; the lead assembles the collect report |
 | 2 define | the lead, seeded by the collect report; an optional report-only `reviewer` pass with `remove-ai-slops` may feed it and edits nothing |
 | 3 before | the lead; an optional `sonic` capture node that writes only to the evidence dir |
 | 4 plan | the lead; reads the skills below before writing; no agent |
@@ -27,12 +27,12 @@ This table mirrors `SKILL.md`, The stage map, which is binding; anything these t
 | 6 plan_review | one fresh `reviewer` plan review through the task tool; in the plan-gate branch (the requester explicitly asked for the planning workflow in their words) add a second fresh `reviewer` with the plan-gate lens (fresh = a new spawn); read-only; OKAY or one fix per blocker; never re-reviewed |
 | 7 decide | the lead; one decision batch; no agent |
 | 8 goal | the lead; the host goal tool; no agent |
-| 9 build | one `task` per implementation node, `sonic` for strictly mechanical edits, one serialized `task` commit node loading `git-master`; each node owns its change and proof; no separate verification, review, or synthesis node in the run |
-| 10 verify_lane | for code, one task-tool batch per head: `task` for `tests` (suite plus one mutation per guard row), `reviewer` for `sweep`, `task` for `qa`, `reviewer` for `code-review` loading `remove-ai-slops` and `programming`, and `reviewer` for `adversarial` at tier L or on a HIGH-RISK row, pinned to a model family other than the author's; other work types use their required lanes: mechanical checkers and captures (`draft-guard`, `capture`, `lint`) run `sonic`; QA and execution checks (`qa`, `execution-verify`) run `task`; every judging lane (`vqa` passes, `fact-verify`, `claim-gate`, `skeptic`, `delivery-gate`, `spot`, `register-schema`) runs `reviewer` |
+| 9 build | the build graph: one `task` node per smallest independent change, each node owning its confirming device; `sonic` for strictly mechanical edits; one serialized `task` commit node loading `git-master` |
+| 10 verify_lane | the verify graph: one node per lane, test run, QA scenario, guard mutation and confirming device, with the same agents as before — for code, `task` for `tests` (suite plus one mutation per guard row), `reviewer` for `sweep`, `task` for `qa`, `reviewer` for `code-review` loading `remove-ai-slops` and `programming`, and `reviewer` for `adversarial` at tier L or on a HIGH-RISK row, pinned to a model family other than the author's; other work types use their required lanes: mechanical checkers and captures (`draft-guard`, `capture`, `lint`) run `sonic`; QA and execution checks (`qa`, `execution-verify`) run `task`; every judging lane (`vqa` passes, `fact-verify`, `claim-gate`, `skeptic`, `delivery-gate`, `spot`, `register-schema`) runs `reviewer` |
 | 11 triage | the lead; no agent |
-| 12 fix | one `task` per fix node, one component per node, plus the serialized `task` commit node loading `git-master`; only stale lanes re-run; a `family` switch pins the fix node's model |
+| 12 fix | a build graph per round: one `task` node per fix, one component per node, each node owning its fix-confirming device, plus the serialized `task` commit node loading `git-master`; only stale lanes re-run; a `family` switch pins the fix node's model |
 | 13 freeze | the lead; no agent |
-| 14 pr_open | the lead; the host `monitor` watches the PR; no agent |
+| 14 pr_open | the lead; a background `gh pr checks <pr> --watch` job watches the PR; no agent |
 | 15 round | one fresh `reviewer` review through the task tool every round: round 1 full, round 2 and later delta and prior findings; pinned to the strongest configured model and, where required, a model family other than the author's; when the work type requires `code-review`, refuse dispatch without a valid receipt at the frozen head |
 | 16 merge | the lead; no agent |
 | 17 post_merge | `task`: a smoke pass when the merged tree equals the frozen tree, the full pass otherwise |
@@ -58,7 +58,7 @@ For research, use the applicable pack skills and the flow's research verificatio
 
 ## Never
 
-- The lead is the only fan-out point: a subagent never spawns a subagent and never calls `agent()`, `parallel()`, or the task tool; `task` declares `spawns: "*"` and `reviewer` may spawn `scout`, so this rule is held by the prompt, or set `task.maxRecursionDepth: 1`.
+- The lead is the only fan-out point: a child never calls `agent()`, `workpool()`, or the task tool and never spawns a subagent; `task` declares `spawns: "*"` and `reviewer` may spawn `scout`, so this rule is held by the prompt, or set `task.maxRecursionDepth: 1`.
 - `scout` is scope-only: it maps files and call sites and produces no findings.
 - `security-reviewer` is the security lens only, never a general finder or verifier.
 - `sonic` runs mechanical work; it never carries a review or a blocking verdict.

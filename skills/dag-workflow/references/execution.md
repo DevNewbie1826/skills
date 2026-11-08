@@ -1,39 +1,135 @@
-Read this when stage 9 (the build run) of the dag-workflow flow starts; SKILL.md, The stage map, lists it.
+Read this when stage 9 (the build graph) or a stage 12 fix graph of the dag-workflow flow starts; SKILL.md, The stage map, lists it.
 
-# dag-workflow: execution
+# dag-workflow: the build graph
 
-Covers stage 9 of the flow (see `SKILL.md`, The stage map).
+Covers stage 9 of the flow and the fix graphs of stage 12 (see `SKILL.md`, The stage map).
 
-## Stage 9: Run the plan
+## Stage 9: Build — the build graph
 
-Run the plan's nodes under these rules.
+Stage 9 runs the plan as a build graph: the defined work cut into the smallest nodes that can run independently, every node owning its change, its confirming device, and the captured output of that device. A multi-unit request runs one such graph per unit, because each unit owns its worktree, branch, and PR; units launch together whenever their dependencies are settled. Everything the plan can foresee is defined before the first launch, and a node the plan did not foresee is recorded as a revision, never added silently. The lead records each launch and each attempt in the graph state; the discipline itself is owned by `references/graphs.md`, One graph per phase.
+
+A node is a complete assignment: it makes the edit, runs the device that confirms the edit, and writes the device output to the absolute path its DELIVERABLE names. A node that fixes a defect also owns a fix device, a check that fails on the code before the fix and passes after it, and it keeps both captures. A node that returns without the outputs it named is a failed attempt, not a partial success.
+
+The build graph contains no verification, review, or synthesis node. Verification is the next stage's own graph, and a green result for a sibling node or another unit is never this node's proof.
 
 ### Decisions, captures, and readiness
 
-Before build, gather the requester-owned decisions into one batch. Record the question, options, recommended default and one-line rationale for each in the plan or evidence dir, and ask the batch once. Do not ask again for authorized stages. If a new owner decision emerges mid-run, park only the lane that needs it, record what it awaits, and continue independent lanes.
+Before the build, gather the requester-owned decisions into one batch. Record the question, the options, the recommended default, and a one-line rationale for each in the plan or the evidence dir, and ask the batch once. Do not ask again for authorized stages. If a new owner decision emerges mid-run, park only the node that needs it, record what it awaits, and keep independent nodes running.
 
-Before the first edit anywhere in the request, capture one before artifact for every defect row and every row that edits existing UI. Link each capture to its row and record the tree on which it was taken in the evidence dir outside the worktree. The capture is historical evidence: never mark it stale merely because the tree changes. If there is no applicable row, keep the before step in `todo` with a skip reason.
+Before the first edit anywhere in the request, capture one before artifact for every defect row and every row that edits existing UI. Link each capture to its row and record the tree it was taken on in the evidence dir outside the worktree. A before capture is historical evidence: never mark it stale because the tree moved. When no row applies, leave the before step in `todo` with a skip reason.
 
-### Worktree and nodes
+Readiness is a fact about a node, not a time on a schedule. A node is ready when every dependency is settled and every handoff file it consumes exists and passes the check its brief names. An edge only orders; it proves neither that the file exists nor that its content is right. The handoff shape is owned by `references/graphs.md`, Handoff files. The launch pattern that follows readiness is owned by `references/graphs.md`, Running a graph on omp.
 
-Decide the unit split in the plan, never during a build. A unit is an independently verifiable part of the request with its own IS rows and a disjoint write scope. Give each unit its own branch and worktree off main, kept through that unit's merge; a correction run for that unit reuses its worktree and PR. A one-unit request stays one PR; otherwise deliver one PR per unit. Each PR body has `## Before` and `## After` sections showing that unit's change. Keep commits within the unit and serialize commits that share a worktree's index.
+### Cutting the build graph
 
-```
-git worktree add -b <branch> <path> main
-```
+The unit split is decided at plan, never during a build. A unit is an independently verifiable part of the request with its own IS rows and a disjoint write scope. A one-unit request stays one PR; otherwise deliver one PR per unit, and write `## Before` and `## After` sections in each PR body showing that unit's change.
 
-- Every command in every node prompt pins that worktree: `cd <worktree> && ...` or `git -C <worktree> ...`, never a default cwd (pinned rule, `references/planning.md`, Stages 4-5: The plan file and its checks).
-- Parallel nodes have a disjoint write scope: no two nodes running together write the same file. Dispatch a node after another only for a real dependency: it reads or writes a file the upstream node writes, or a rule orders them, such as serialized commits.
-- Dispatch all independent units and lanes up to host capacity, subject to real dependencies and disjoint write scopes. Units whose scopes overlap wait for a later wave; after an earlier wave merges, rebase the later unit and rejudge its evidence before reuse. Use the host workflow tool when dependency ordering is the point, or existing `agent()`/`parallel()` nodes.
-- Every lane proves its own assigned work and captures its own evidence; a green result for another lane or unit is not its proof. This extends the existing rule that an editing node owns its change and its proof; it does not add a verification, review or synthesis node inside the build run.
+Stage 8 created each unit's branch and worktree off main, and owns the command that made them: `references/planning.md`, Stage 8: The goal and the worktree. Keep each worktree through that unit's merge, and let a correction run reuse its worktree and PR.
+
+Cut the defined work into the smallest pieces that can run independently. Start from the plan's units and Todos rows, split each unit into nodes, then ask of every node whether it still splits; split again whenever two halves can each carry a deliverable and their write scopes stay apart. Stop at stable interface seams, and merge two nodes rather than let them share a file.
+
+- Every command in every node prompt pins that worktree: `cd <worktree> && ...` or `git -C <worktree> ...`, never a default cwd. The pinned rule is `references/planning.md`, Stages 4-5: The plan file and its checks.
+- Concurrent nodes have a disjoint write scope: no two nodes running at the same time write the same file. Dispatch a node after another only for a real dependency: it reads or writes a file the upstream node writes, or a rule orders them, such as a serialized commit.
+- Launch every ready node and every independent unit in the same wave, as wide as omp's limits allow. `async.maxJobs` (100 by default) counts every `agent()` handle. A node whose scope overlaps a running node waits for a later wave; after an earlier wave merges, rebase the later unit and rejudge its evidence before reuse.
+- A node owns its change AND its confirming device, and the device is the one its work type names. A `code` node runs its guard tests plus its QA scenario, with the injection check when it owns a guard row. A `design` node ends with the draft-guard checker at exit 0 on its own output, plus the post-edit capture for every surface it touched. A `research` node ends when every high-risk claim it touches has a status and a gate record. An `audit` node has no build step at all, because its lanes prove the register rather than a change. A `mixed` node does the primary type's shape plus the secondary type's verification for the surfaces the secondary type adds. The node captures what its device printed; a green result for another node or unit is not its proof. Test rules: `SKILL.md`, Rules.
 - For a refactor, when the repository keeps tests for the area, the first build node writes a characterization test that passes against unchanged code before moving the structure. For a patch, retain the existing injection check.
-- One node owns a change and its proof, and the proof is the one its work type names: a `design` node ends with the draft-guard checker at exit 0 on its own output; a `research` node ends when every high-risk claim it touches has a status and a gate record; an `audit` node has no build step at all, because its lanes prove the register rather than a change.
-- Cut at stable interface seams; merge two nodes rather than share a file.
-- Route each node by agent type: `agent(agent='task', ...)` by default, `agent(agent='sonic', ...)` only for strictly mechanical edits (`SKILL.md`, Agents per stage).
-- One node owns a change AND its proof: the node that makes the edit runs the VERIFY that proves it and captures the evidence. Test rules: `SKILL.md`, Rules.
-- Node fields: TASK, DELIVERABLE, SCOPE, VERIFY, STOP WHEN. Every node prompt follows `SKILL.md`, Delegation prompts, and carries these fields. SCOPE names this node's disjoint write scope and the worktree pin. VERIFY is the command that proves the change, including the injection check when the node owns a guard row. STOP WHEN is those artifacts written and no background command the node started still running.
-- A batch is the nodes whose dependencies are satisfied, dispatched together in one `parallel()` call of `agent()` thunks (`references/orchestration.md`, `<structure>`). Read each output and its artifacts. A node that returned without the artifacts it names is a call error (Recovery).
-- No verification, review, or synthesis node inside the run. Verification is stage 10.
+- Route each node by agent: `task` by default, `sonic` only for strictly mechanical edits, as in `agent(prompt, { agent: "sonic", label })`. The routing table is `SKILL.md`, Agents per stage.
+- Node fields: TASK, DELIVERABLE, SCOPE, VERIFY, STOP WHEN. Every node prompt follows the prompt shape in `SKILL.md`, Delegation prompts, and carries all five fields. DELIVERABLE names the changed files and the absolute path of every capture. SCOPE names the node's disjoint write scope and the worktree pin. VERIFY is the command that proves the change, including the injection check when the node owns a guard row and the fix device when the node fixes a defect. STOP WHEN is those artifacts written and no background command the node started still running.
+- Keep commits within their unit. One serialized commit node per worktree loads the `git-master` skill and is the only node that runs `git commit` there; editing nodes never commit, so commits that share a worktree's index cannot interleave. A commit counts only after `git -C <worktree> cat-file -t <sha>` prints `commit`.
+- Launch per `references/graphs.md`, Running a graph on omp. A wave is a set of `agent()` calls that return handles at once, then one `wait()` over those handles. For a wave of same-shaped mechanical edits, `workpool()` takes one string item per edit and delivers its aggregate once when it drains, while the kernel stays free.
+- After a wave settles, read every node's output and every artifact it named. A node that returned without its named outputs is a failed attempt; record it and follow the attempt and revision rules at `references/graphs.md`, Failure, attempts, and revisions before re-dispatching it.
+- No verification, review, or synthesis node inside the build graph. Verification is stage 10.
+
+A wave in an eval cell:
+
+```js
+// One build wave: launch the nodes whose dependencies are settled, then collect.
+(async () => {
+  const worktree = "/abs/path/to/unit-worktree";
+  const evidenceDir = "/abs/path/to/evidence/unit-a";
+
+  const brief = (task, deliverable, scope, verify) =>
+    [
+      `TASK: ${task}`,
+      `DELIVERABLE: ${deliverable}`,
+      `SCOPE: ${scope}; worktree pin: cd ${worktree} && ...`,
+      `VERIFY: ${verify}`,
+      "STOP WHEN: the deliverable's files exist and no background command this node started is still running.",
+    ].join("\n");
+
+  const wave = [
+    {
+      id: "n1",
+      agent: "task",
+      text: brief(
+        "Split the parser out of the CLI",
+        `${worktree}/src/parser.ts plus ${evidenceDir}/n1-device.txt`,
+        "src/parser.ts, src/cli.ts",
+        `cd ${worktree} && bun test src/parser.test.ts`,
+      ),
+    },
+    {
+      id: "n2",
+      agent: "task",
+      text: brief(
+        "Document the parser boundary",
+        `${worktree}/docs/parser.md plus ${evidenceDir}/n2-device.txt`,
+        "docs/parser.md",
+        `cd ${worktree} && bun run check:docs`,
+      ),
+    },
+  ];
+
+  phase("build wave 1");
+  const launched = [];
+  for (const node of wave) {
+    // Awaiting here resolves only the handle, so the whole wave still runs at once.
+    const handle = await agent(node.text, { agent: node.agent, label: node.id });
+    launched.push(handle);
+    log(`${node.id} launched as ${handle.handle}`);
+  }
+
+  const results = await wait(launched, { timeout: 3600, raiseErrors: false });
+  for (let i = 0; i < results.length; i += 1) {
+    const value = results[i];
+    if (value instanceof Error) {
+      log(`${wave[i].id} failed attempt: ${value.message}`);
+      continue;
+    }
+    let captured = "";
+    try {
+      captured = await read(`${evidenceDir}/${wave[i].id}-device.txt`);
+    } catch {
+      log(`${wave[i].id} returned without its device capture; record a failed attempt`);
+      continue;
+    }
+    log(`${wave[i].id} settled with ${captured.length} captured bytes`);
+  }
+})();
+```
+
+A wave of the same-shaped mechanical edits uses a pool instead of one `agent()` per node:
+
+```js
+// Same-shaped edits: one string item per edit, one named pool for this wave.
+(async () => {
+  const worktree = "/abs/path/to/unit-worktree";
+  const paths = ["docs/a.md", "docs/b.md", "docs/c.md"];
+  const pool = await workpool("sonic", { name: "docs-wording-wave" });
+  for (const path of paths) {
+    await pool.push(
+      [
+        `TASK: Apply the approved wording change to ${path}.`,
+        `DELIVERABLE: ${path} edited, with the checker output captured at the evidence dir.`,
+        `SCOPE: ${path} only; worktree pin: cd ${worktree} && ...`,
+        `VERIFY: cd ${worktree} && bun run check:docs ${path}`,
+        "STOP WHEN: the edit is written, the checker output is captured, and this item is answered with yield({ key, data }).",
+      ].join("\n"),
+    );
+  }
+  log(`docs-wording-wave queued ${paths.length} items; its aggregate arrives once when the pool drains`);
+})();
+```
 
 ### Work-type node shapes
 
@@ -62,7 +158,7 @@ The evidence set is the injection diff, the failing output, and the passing outp
 
 ### Commits
 
-Commit after each verified unit, in the repository's commit style, staging only its own unit's files. Parallel nodes share one git index, so commits are serialized: give committing to one node, or order the committing nodes so they do not run in the same batch. Record a commit only after `git -C <worktree> cat-file -t <sha>` prints `commit`.
+Commit after each verified unit, in the repository's commit style, staging only its own unit's files. Nodes in the same wave share one git index, so commits are serialized: give committing to one node, or order the committing nodes so they do not run in the same wave. Record a commit only after `git -C <worktree> cat-file -t <sha>` prints `commit`.
 
 ### Evidence ownership, reuse, and freeze
 
@@ -78,11 +174,11 @@ Nodes, reviewers, and you share one worktree. Three rules keep one from corrupti
 
 1. **One foreground command per injection.** An injection driver injects, runs the test, restores the file from a backup, and checks that the restored file's hash matches the backup, all in one foreground shell command, never split across separate tool calls or left in a background session. A turn that ends early then can't leave code injected.
 2. **No injection where a reviewer reads.** Never inject into the worktree while a reviewer may read it. Run injections before the reader starts, or in a private copy of the worktree.
-3. **Siblings see each other's edits.** Parallel nodes see each other's mid-edit state. A whole-tree check (a build, `go vet ./...`) that fails in a file outside the node's write scope may have caught a sibling mid-edit: check whether a sibling was writing that file, and rerun after it settles before calling the failure a defect.
+3. **Siblings see each other's edits.** Nodes in the same wave see each other's mid-edit state. A whole-tree check (a build, `go vet ./...`) that fails in a file outside the node's write scope may have caught a sibling mid-edit: check whether a sibling was writing that file, and rerun after it settles before calling the failure a defect.
 
 ### Recovery
 
-`agent()` cannot be resumed after it returns, so a re-run is a fresh `agent()` call. Before re-dispatching a failed node, restore its files to their pre-dispatch state, because a fresh `agent()` works in the shared worktree.
+A settled node's child can be messaged with `handle.send` while it is resident. Once it is no longer resident, a re-run is a fresh `agent()` call with the same prompt. A node has two attempts total (`references/graphs.md`, Failure, attempts, and revisions). Before re-dispatching a failed node, restore its files to their pre-dispatch state, because a fresh `agent()` works in the shared worktree.
 
 **Call errors** are failures of the host or the call, not the work: `agent()` raised, the output was empty or didn't match the schema, a tool or provider error, a crash, a timeout, or a node that ended without its named artifacts. Re-run that node as a fresh `agent()` call with the same prompt. Leave the plan alone.
 
@@ -96,13 +192,15 @@ Keep `todo` current as the live checklist. At each transition changing a count, 
 
 ### Restart after a death or a compaction
 
-The rules are in `references/verification.md`, Restart after a death or a compaction. This subsection carries
+The rules are in `references/verification.md`, Stages 18-19: Checkpoint, cleanup, and final report. This subsection carries
 only the mechanics, so the two never state the same rule twice.
 
 - The first command of a restarted run is the rebind: read the plan's evidence dir, `git worktree list`, and
   `git branch --show-current`, then confirm all three match what the plan records.
 - Before dispatching, read the plan file, the todo list, and the evidence dir. Never carry a next action out
   of the previous turn's conversation.
+- Read the build graph's snapshot and event log and reconcile live handles before relaunching any node; see
+  `references/graphs.md`, Picking a graph back up.
 - Read the live external state with a command, not from memory: `git ls-remote` for a push, the PR's own state
   for a PR or a merge, the deploy target's own status for a deploy.
 - A restarted run re-dispatches with the same node prompt. Do not rewrite the prompt to match what the
