@@ -61,6 +61,40 @@ try {
 
 If a browser is already running with a CDP endpoint, replace launch with `chromium.connectOverCDP(endpoint)` and select the intended context and page. If the installed Playwright version, browser channel, or runner cannot perform this sequence, use the CDP or equivalent-driver fallback instead.
 
+## Capture matrix loop
+
+One loop produces the matrix [Capture evidence](capture-evidence.md) requires: phone with true mobile emulation and desktop, light and dark, top and scrolled-to-end, plus a reduced-motion variant for motion frames. Playwright shape (adapt to your driver); `urls` and `outDir` belong to this QA run:
+
+```js
+import { chromium, devices } from "playwright"
+
+const browser = await chromium.launch({ headless: true })
+try {
+  for (const [route, url] of Object.entries(urls)) {
+    for (const [device, options] of [
+      ["phone", devices["iPhone 14"]],                               // 390 wide, DPR 3, mobile, touch
+      ["desktop-1440", { viewport: { width: 1440, height: 900 } }],
+    ]) {
+      for (const colorScheme of ["light", "dark"]) {
+        const context = await browser.newContext({ ...options, colorScheme, reducedMotion: "no-preference" })
+        const page = await context.newPage()
+        await page.goto(url, { waitUntil: "load" }) // then wait for the page's own ready state, never a sleep
+        await page.screenshot({ path: `${outDir}/${route}-${device}-${colorScheme}-top.png` })
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+        await page.screenshot({ path: `${outDir}/${route}-${device}-${colorScheme}-end.png` })
+        await context.close()
+      }
+    }
+  }
+  // Motion frames: drive the state (hover, press, open), capture rest, about 100 ms, and settled;
+  // repeat in a context created with reducedMotion: "reduce" for the reduced-motion pass.
+} finally {
+  await browser.close()
+}
+```
+
+Add a 1920 desktop column for page layouts. A 390-wide capture at desktop scale factor with classic scrollbars is not a phone capture, and a PNG is never resized to force a pass.
+
 ## Browser teardown
 
 When browser work is complete, close every browser, tab, or driver you opened for it. The one-shot headless CLI (Option 2) exits on its own, and the Playwright example above already closes an in-process launch in its `finally` block — those need no extra step. The remaining paths do:
