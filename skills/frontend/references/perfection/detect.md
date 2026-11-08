@@ -2,7 +2,7 @@
 
 Read this when a built page needs a render-based quality check: contrast against the painted background, computed type scale, overflow at width, heading outline, images with a missing or placeholder source, or page script errors.
 
-`scripts/detect/` is a TypeScript library with a thin CLI. It renders a page in a real browser engine and lints what was actually drawn, not what the source says. It runs after the source-level draft lint (`scripts/perfection/check-draft-guard.ts`) and before `visual-qa`. The draft lint reads files; this one needs pixels, so it catches what source can't show: a table header at 4.2:1 on a dark surface, an h1 followed by an h3, a card that overflows at 390 px, an image whose source attribute is missing or a placeholder. Network-level failures (an image URL that returns an error status) are outside what a snapshot can see; check those with a link checker.
+`scripts/detect/` is a TypeScript library with a thin CLI. It renders a page in a real browser engine and lints what was actually drawn, not what the source says. One source-text rule reads the project's design tokens. It runs after the source-level draft lint (`scripts/perfection/check-draft-guard.ts`) and before `visual-qa`. The draft lint reads files; this one needs pixels, so it catches what source can't show: a table header at 4.2:1 on a dark surface, an h1 followed by an h3, a card that overflows at 390 px, an image whose source attribute is missing or a placeholder. Network-level failures (an image URL that returns an error status) are outside what a snapshot can see; check those with a link checker.
 
 ## Run it
 
@@ -10,10 +10,11 @@ From code, import `index.ts`. Importing has no side effects:
 
 ```ts
 const detect = await import(`${SKILL_DIR}/scripts/detect/index.ts`)
+const tokens = detect.loadTokens("src/tokens.css")
 const findings = await detect.detectPage({ kind: "url", url: "http://localhost:5173/settings" }, {
   viewports: [{ width: 1440, height: 900 }, { width: 390, height: 844 }],
   reflow: true,
-  config: { allowFonts: ["Inter"], designTokens: { radii: [8, 12] } },
+  config: { allowFonts: ["Inter"], ...(tokens.ok ? detect.mergeTokenColors({}, tokens.colors) : {}) },
 })
 ```
 
@@ -21,15 +22,16 @@ const findings = await detect.detectPage({ kind: "url", url: "http://localhost:5
 - `reflow: true` adds 320, 375, 768, 1024, and 1440 widths, with a content stress pass at 320.
 - `detectFiles(paths, options)` renders each HTML file. `lintSnapshot` and `lintSources` are the pure rule engines for a snapshot or source set you already hold.
 - `renderer`: pass your own to reuse a browser you already drive. The default is a Bun web view backed by system WebKit or an installed Chrome/Chromium.
+- `loadTokens(path)` reads a project tokens file: CSS custom properties from any stylesheet, or color strings at any depth in a JSON tokens tree. With no path it returns `{ ok: true, colors: [] }`, which keeps the token rule silent. `mergeTokenColors(config, colors)` folds the loaded colors into `config.designTokens.colors` without duplicating equivalent values.
 
 From a shell:
 
 ```bash
-bun $SKILL_DIR/scripts/detect/cli.ts [--json] [--reflow] [--config detect.json] <file-or-dir-or-url>...
+bun $SKILL_DIR/scripts/detect/cli.ts [--json] [--reflow] [--config detect.json] [--tokens tokens.css] <file-or-dir-or-url>...
 bun $SKILL_DIR/scripts/detect/cli.ts --help
 ```
 
-Exit 0: no error or warning findings. Exit 1: at least one. Exit 2: usage error, a page that failed to render, or no browser runtime.
+Exit 0: no error or warning findings. Exit 1: at least one. Exit 2: usage error, a page that failed to render, an unreadable or malformed tokens file, or no browser runtime.
 
 ## Config
 
@@ -38,13 +40,16 @@ Exit 0: no error or warning findings. Exit 1: at least one. Exit 2: usage error,
 | Key | Meaning |
 |---|---|
 | `rules` | `{ "<rule-id>": "error" \| "warning" \| "advisory" \| "off" }` per rule |
-| `allowFonts`, `allowEasings`, `designTokens` | Parsed and validated for forward compatibility, but no rule in this port reads them (their consumers are taste rules this pack covers statically) |
+| `designTokens` | `{ colors: ["#1a5cff"], fonts: [], radii: [], fontSizes: [] }`. Token rules read `colors`; without `designTokens.colors` they stay silent. `--tokens <file>` loads them from a project file instead |
+| `allowFonts`, `allowEasings` | Parsed and validated for forward compatibility, but no rule in this port reads them (their consumers are taste rules this pack covers statically) |
 
-Rule ids: `low-contrast`, `gray-on-color`, `tiny-text`, `undersized-ui-text`, `line-length`, `tight-leading`, `flat-type-hierarchy`, `oversized-h1`, `text-overflow`, `viewport-reflow`, `first-viewport-column-overflow`, `cramped-padding`, `nested-cards`, `heading-rhythm`, `unbalanced-heading`, `body-text-viewport-edge`, `content-hidden-at-rest`, `text-occlusion`, `clipped-overflow-container`, `skipped-heading`, `broken-image`, `script-error`, `repeated-container-text`. Placeholder text contrast is checked by `low-contrast` itself (its placeholder path), not a separate id.
+Rule ids: `low-contrast`, `gray-on-color`, `tiny-text`, `undersized-ui-text`, `line-length`, `tight-leading`, `flat-type-hierarchy`, `oversized-h1`, `text-overflow`, `viewport-reflow`, `first-viewport-column-overflow`, `cramped-padding`, `nested-cards`, `heading-rhythm`, `unbalanced-heading`, `body-text-viewport-edge`, `content-hidden-at-rest`, `text-occlusion`, `clipped-overflow-container`, `skipped-heading`, `broken-image`, `script-error`, `repeated-container-text`, `hard-coded-color`. Placeholder text contrast is checked by `low-contrast` itself (its placeholder path), not a separate id.
+
+`hard-coded-color` is the one source-text rule. It reports a color literal that repeats a color the project's design tokens already name, so a project with tokens gets told where a token belongs. Token declarations, `var()` references and CSS comments are not reported.
 
 ## Waivers
 
-Put `data-detect-ignore="<rule-id> <rule-id>"` on the element or an ancestor. A waiver is only valid when `DESIGN.md` records the reason.
+Put `data-detect-ignore="<rule-id> <rule-id>"` on the element or an ancestor. A waiver is only valid when `DESIGN.md` records the reason. Source findings carry a file, line and column instead of a selector, so waive those by fixing the literal or switching the rule off in config.
 
 ## Reading the result
 
@@ -58,4 +63,4 @@ HTML always needs the renderer; there's no source-only fallback for pages. When 
 
 ## Not ported
 
-The upstream detector also ships source-text and decoration slop rules. This pack covers those statically through `references/deslop/scripts/scan.mjs` and `scripts/perfection/check-draft-guard.ts`, so only the rendered-quality rules above are ported.
+The upstream detector also ships further source-text and decoration slop rules. This pack covers those statically through `references/deslop/scripts/scan.mjs` and `scripts/perfection/check-draft-guard.ts`, or not at all, so beyond `hard-coded-color` only the rendered-quality rules above are ported. Additional token rules are a later wave; the loader and the rule group are the extension point.
