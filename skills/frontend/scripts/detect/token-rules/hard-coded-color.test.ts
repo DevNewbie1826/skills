@@ -153,6 +153,7 @@ describe("hard-coded-color", () => {
 	test("#given a functional color interrupted by a comment #then the color still matches", () => {
 		expect(lines(css(".a { color: rgb(26 /* note */ 92 255); }"))).toEqual([1])
 		expect(lines(css(".a { color: rgb(26/* note */ 92/* note */255); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgb(26 /* a\nb */ 92 255); }"))).toEqual([1])
 	})
 
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {

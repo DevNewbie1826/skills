@@ -258,7 +258,7 @@ function endOfCustomProperty(text: string, from: number, end: number, lineCommen
 function maskedValue(text: string, start: number, end: number, lineComments: boolean): string {
 	const chars = text.slice(start, end).split("")
 	const blank = (from: number, to: number): void => {
-		for (let k = Math.max(0, from); k < Math.min(chars.length, to); k++) if (chars[k] !== "\n") chars[k] = " "
+		for (let k = Math.max(0, from); k < Math.min(chars.length, to); k++) chars[k] = " "
 	}
 	let i = 0
 	while (i < chars.length) {
