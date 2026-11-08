@@ -10,6 +10,8 @@ Flags an em dash (U+2014) in `.ts`, `.tsx`, `.mts`, or `.cts` copy outside comme
 
 In `.tsx` files, quoted text that sits between tags is JSX copy, not a string literal: a quote there does not hide the rest of the file, whether the text sits inside an element or directly inside a fragment. Attribute strings, expression containers, and plain `.ts` code keep their normal string handling.
 
+A `//` inside JSX text starts prose, not a line comment, so a long dash after a protocol-relative URL is still copy. `//docs.example.test`, `//localhost:3000`, and `//[::1]:8080?q=1` are judged the same as any other JSX text. Outside JSX text a `//` is a comment as usual, and a dash there is not flagged.
+
 A long dash reads as typographic decoration in CLI output, log lines, and error messages. A period, comma, colon, or parentheses carries the same meaning without the flourish.
 
 Message: `em dash in copy: use a period, comma, colon, or parentheses instead`
@@ -27,6 +29,8 @@ console.log("build failed. Retry with --force")
 Flags a bare suppression directive in a comment. The directive matcher accepts generic `<word>-disable`, `<word>-enable`, `<word>-ignore`, and `<word>-suppress` forms, so it stays tool-neutral without naming any tool. A directive whose convention carries no reason text is still flagged: append the reason as a trailing phrase naming the constraint. The reason must sit on the directive's own line; a reason written on a later line of a block comment does not count.
 
 A suppression is a claim that a rule does not apply here. Without a written reason the next reader cannot tell a deliberate exception from a stale workaround.
+
+A `//` inside JSX text is prose, so `//docs.example.test/linttool-disable` sitting in an element is not a suppression directive. A real trailing comment after that element still is, and still needs its reason.
 
 Message: `suppression directive without a reason: say why it does not apply`
 
