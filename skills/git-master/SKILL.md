@@ -1,6 +1,6 @@
 ---
 name: git-master
-description: "MUST USE whenever a task needs a commit, a git-history investigation, or working-tree/diff inspection. Covers atomic commits, staging, commit-message style, rebase, squash, fixup/autosquash, blame, bisect, reflog, git log -S/-G, branch/diff/status inspection, and questions like who wrote this or when was this added. Also covers WORKTREE mode: provision an isolated worktree on explicit request, with ignore handling and merge/PR/cleanup lifecycle. Do not use for ordinary code edits unless the user asks for git work."
+description: "MUST USE for ANY git operation: a commit, a git-history investigation, or working-tree/diff inspection. Load it before running git yourself, and assign it by name to any delegated node that commits. Covers atomic commits, staging, commit-message style, rebase, squash, fixup/autosquash, blame, bisect, reflog, git log -S/-G, branch/diff/status inspection, PR-body evidence attachments, and questions like 'who wrote this', 'when was X added', 'find the commit that'. Also covers WORKTREE mode: provision an isolated worktree on explicit request, with ignore handling and merge/PR/cleanup lifecycle. Do not use for ordinary code edits unless the user asks for git work."
 ---
 
 # Git Master
@@ -18,7 +18,7 @@ Classify the request first:
 - `WORKTREE`: provision an isolated worktree for work the user explicitly asked to do in a worktree.
 WORKTREE is a setup overlay: when paired with `COMMIT` or `REBASE`, provision the worktree first and run the other mode inside it. STATUS stays read-only and never triggers provisioning.
 
-Do not commit, rebase, push, force-push, reset, stash-pop, or delete anything unless the user explicitly asked for that operation. If the request is only investigative, report findings and stop.
+Do not commit, rebase, push, force-push, reset, stash-pop, or delete anything unless the user explicitly asked for that operation. When a workflow the user started mandates one of them (a goal loop that commits each verified unit, a plan executor that lands its branches), that workflow's instruction is the ask. If the request is only investigative, report findings and stop.
 
 ## Ground Truth
 
@@ -40,7 +40,7 @@ Missing upstream or missing `main`/`master` is normal. Fall back to the best ava
 
 ## PR Body Evidence Attachments
 
-When a PR body needs screenshots or terminal PNGs, use the host's authenticated attachment flow if available; otherwise skip attachments and say so. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Do not log browser cookies, CSRF tokens, form fields, or upload headers.
+When a PR body needs screenshots or terminal PNGs, use the host's authenticated attachment flow if available; otherwise skip attachments and say so. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Do not log browser cookies, CSRF tokens, form fields, or upload headers. The step-by-step flow is in [PR evidence attachments](references/pr-evidence.md); read it only when a PR body needs images.
 
 ## Commit Mode
 
