@@ -9,7 +9,7 @@ Write the failing test first, watch it fail for the right reason, implement the 
 Answer all four; a missing answer means do not add the test yet.
 
 1. **What observable behavior, invariant, or contract does it protect?** Name it in the test name.
-2. **What credible regression makes it fail?** If no plausible edit to the production code turns it red, it is a [junk test](junk-classes.md), not a test.
+2. **What credible regression makes it fail?** If no plausible edit to the production code turns it red, it is a junk test, not a test (the `remove-ai-slops` skill lists the junk classes).
 3. **Why does existing coverage not already catch that failure?** Each contract has one primary owner test at the strongest boundary; extend a table row or shared fixture instead of adding a near-duplicate.
 4. **Does it need a production seam no production caller needs** (an export, flag, getter, reset hook)? If so, test at the real boundary instead.
 

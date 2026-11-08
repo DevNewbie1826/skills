@@ -13,7 +13,9 @@ A test earns its place by failing. After writing it, break the production owner 
    - the mutant is equivalent (a try/catch, fallback, or normalization maps it back to the same outcome) — retarget the mutation at the observable claim;
    - a second rule already produces the same outcome — make the input exercise only the rule under test and assert the recorded reason;
    - the mutated code is dead — delete the code, not the test's teeth.
-4. **Restore byte for byte.** Never commit a mutation. If your tooling has a mutation runner, use it; otherwise use a scratch branch or stash and verify a clean diff afterwards.
+4. **Restore byte for byte, and record a checksum of the owner before the mutation to confirm it matches after.** Never commit a mutation. If your tooling has a mutation runner, use it; otherwise use a scratch branch or stash and verify a clean diff afterwards.
+
+When one test asserts several behaviors, prove each with its own mutation; one shared red result proves only the behavior that mutation breaks. To judge whether an existing test should be kept, fixed, consolidated, or deleted, use the `remove-ai-slops` skill's junk tests reference.
 
 ## Vacuous assertion shapes
 
