@@ -1,6 +1,8 @@
 # Testing
 
 > Read this when designing or reviewing Go unit, integration, end-to-end, property, snapshot, or goroutine-leak tests.
+>
+> Before adding a test, answer the authoring gate in [`../testing/README.md`](../testing/README.md).
 
 TDD shape, table-driven tests, `require` vs `assert`, snapshot tests, property-based tests, integration tests with testcontainers, goroutine-leak detection. General test discipline — Given/When/Then, fakes before mocks, determinism — lives in the `tdd` skill; this document gives only the Go-specific recipes.
 

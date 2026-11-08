@@ -1,6 +1,6 @@
 ---
 name: programming
-description: "MUST USE for work on Python, Rust, TypeScript, or Go source files and project manifests. Triggers: write or edit code; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI; Rust public API design or macros."
+description: "MUST USE for work on Python, Rust, TypeScript, JavaScript, or Go source files and project manifests, and whenever a test or spec file is written, reshaped, reviewed, or deleted. Triggers: write or edit code; add, change, or delete a test; test authoring gate; junk tests; new project; Go HTTP service (gin lane); Bubble Tea TUI; CJK IME; Connect-Go RPC; sqlc or pgx; branded IDs; exhaustive matching; unsafe Rust; Miri; oversized file; refactoring; logging, log levels, structured logging, or observability; arena, allocator, bumpalo, const fn, const generics, compile-time programming, zero-allocation APIs, bitfields, repr, scope guards, errdefer-style cleanup, Zig-like patterns, zero-copy parsing, packed data, or FFI; Rust public API design or macros."
 ---
 
 # Programming
@@ -24,8 +24,9 @@ Before writing or editing code, identify the language and read its entry point. 
 |---|---|---|
 | `.py`, `.pyi`, Python | [Python lane](references/python/README.md) | The linked Python topic reference |
 | `.rs`, `Cargo.toml`, Rust | [Rust lane](references/rust/README.md) | [Rust soundness lane](references/rust-ub/README.md) for `unsafe`, raw pointers, `MaybeUninit`, FFI, manual `Send`/`Sync`, or lock-free primitives |
-| `.ts`, `.tsx`, `.mts`, `.cts`, TypeScript | [TypeScript lane](references/typescript/README.md) | The linked TypeScript topic reference |
+| `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, TypeScript or JavaScript | [TypeScript lane](references/typescript/README.md) | The linked TypeScript topic reference |
 | `.go`, `go.mod`, `go.sum`, `.golangci.yml`, or Go-adjacent `.proto` | [Go lane](references/go/README.md) | The linked Go topic reference |
+| Any test file (`*.test.*`, `*.spec.*`, `*_test.go`, `test_*.py`, `tests/`, `__tests__/`) or a change that adds, reshapes, or deletes a test | The language row above | [Testing](references/testing/README.md) (authoring gate) and [Junk classes](references/testing/junk-classes.md) |
 
 ## Cross-cutting routes
 
@@ -33,7 +34,9 @@ Before writing or editing code, identify the language and read its entry point. 
 |---|---|
 | Before the first edit: assumptions, task scope, or done criteria | [Shared programming philosophy § Pre-edit discipline](references/philosophy.md) |
 | Design, review, LOC limits, or portable verification | [Shared programming philosophy](references/philosophy.md) |
-| Test-driven development, test shape, fakes or mocks, or test quality | the `tdd` skill (Test-Driven Delivery) |
+| Test-driven development, test shape, fakes or mocks | the `tdd` skill (Test-Driven Delivery) |
+| Whether a test should exist, proving a test can fail, or pruning junk tests | [Testing](references/testing/README.md) and [Junk classes](references/testing/junk-classes.md) |
+| Bundled checkers, scaffolders, and the test-junk and mutation scripts | [Bundled script dependencies](scripts/DEPS.md) |
 | Adding or changing logs, logger setup, or boundary error handling | [Logging](references/logging.md) |
 | A file exceeds 200 pure LOC, a function has more than three parameters, verification is redundant, or names are negative-form | [Code smells](references/code-smells.md) |
 | Upgrading a dependency, bumping a version, or resolving a lockfile conflict | [Shared programming philosophy](references/philosophy.md) |
