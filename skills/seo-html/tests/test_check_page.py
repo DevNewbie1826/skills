@@ -12,6 +12,7 @@ import io
 import json
 import os
 import random
+import re
 import subprocess
 import sys
 import tempfile
@@ -1258,54 +1259,76 @@ class TestJsonldDepthLimit(RuleCase):
 
 
 class TestLdDepthDocstring(unittest.TestCase):
-    """The cost contract of ld_depth_exceeds is stated in its docstring:
-    the early exit one level past the limit bounds how deep the walk goes,
-    so O(limit) holds for nesting depth alone, while the nodes actually
-    visited cost O(n) in total, which for a wide input is O(n). A
-    docstring is the only shipped surface for that claim, so the check
-    reads it as text, requires the true bound, and rejects both the
-    earlier misleading O(limit) wording and any reworded claim of constant
-    or input-size-independent cost."""
+    """Golden pin for the cost contract in ld_depth_exceeds.__doc__.
 
-    CONSTANT_COST_CLAIMS = (
-        "O(1)",
-        "constant work",
-        "constant cost",
-        "constant time",
-        "independent of input size",
-        "independent of the input size",
-        "not O(n)",
-    )
+    The docstring is the only shipped surface for that contract, so the
+    check reads it as text and binds every cost bound to the subject it
+    is allowed to describe. Counting required tokens anywhere in the
+    docstring is not enough: "a wide input costs O(limit)" keeps every
+    token while asserting the false bound, and "O(limit) bounds the total
+    work" and "total work is bounded by a constant" do the same. Clauses
+    are therefore checked one by one against the subject they name.
+    """
+
+    REQUIRED = ("wide input", "O(n)", "nesting depth", "O(limit)",
+                "exact only for nesting depth")
+    DEPTH_WORDS = ("depth", "deep", "descends")
+    COST_SUBJECTS = ("wide input", "total work", "every node",
+                     "containers and values")
 
     def docstring_text(self):
         docstring = cp.ld_depth_exceeds.__doc__ or ""
         return " ".join(docstring.split())
 
-    def test_docstring_states_linear_wide_input_cost(self):
+    def sentences(self, text):
+        # Cost claims are per sentence: "Total work is bounded by a
+        # constant." appended on its own must be judged alone.
+        return [part.strip() for part in re.split(r"[.;]", text) if part.strip()]
+
+    def depth_scopes(self, text):
+        # An O(limit) mention is judged within its own conjunct, so a
+        # correct sentence may pair "a wide input costs O(n)" with
+        # "O(limit) says only how deep the walk goes" using "and".
+        parts = re.split(r"[.;]|,?\s+and\s+|,\s+so\s+", text)
+        return [part.strip() for part in parts if part.strip()]
+
+    def test_docstring_states_the_required_bounds(self):
         text = self.docstring_text()
-        self.assertIn("O(n)", text)
-        self.assertIn("wide input", text)
-        self.assertIn("nesting depth", text)
-        self.assertIn("O(limit)", text)
+        for anchor in self.REQUIRED:
+            with self.subTest(anchor=anchor):
+                self.assertIn(anchor, text)
 
     def test_docstring_drops_the_unqualified_constant_cost_claim(self):
         text = self.docstring_text()
         self.assertNotIn("costs at most O(limit) work", text)
         self.assertNotIn("no matter how deep it nests", text)
-
-    def test_docstring_claims_no_constant_or_size_independent_cost(self):
-        text = self.docstring_text()
-        for claim in self.CONSTANT_COST_CLAIMS:
-            with self.subTest(claim=claim):
-                self.assertNotIn(claim, text)
+        self.assertNotIn("constant", text)
+        self.assertNotIn("O(1)", text)
         self.assertNotRegex(text, r"\bnot\s+O\(n\)")
 
-    def test_docstring_claims_are_each_backed_by_the_other(self):
-        # Reject a reworded false claim that simply mentions O(n) somewhere
-        # else in the same sentence, e.g. "Total work is O(1), not O(n)".
-        text = self.docstring_text()
-        self.assertNotRegex(text, r"O\(n\)[^.]*\bnot\b")
-        self.assertNotRegex(text, r"\bnot\b[^.]*O\(n\)")
+    def test_every_limit_bound_is_qualified_as_depth_only(self):
+        for clause in self.depth_scopes(self.docstring_text()):
+            if "O(limit)" not in clause:
+                continue
+            with self.subTest(clause=clause):
+                self.assertTrue(
+                    any(word in clause for word in self.DEPTH_WORDS),
+                    "O(limit) must be tied to depth, got: %r" % clause)
+                for forbidden in self.COST_SUBJECTS:
+                    self.assertNotIn(
+                        forbidden, clause,
+                        "O(limit) applied to %r in %r" % (forbidden, clause))
+
+    def test_every_cost_clause_names_the_linear_bound(self):
+        for clause in self.sentences(self.docstring_text()):
+            if not any(word in clause for word in self.COST_SUBJECTS):
+                continue
+            if "O(limit)" in clause:
+                continue  # rejected by the depth-only test above
+            with self.subTest(clause=clause):
+                self.assertIn(
+                    "O(n)", clause,
+                    "cost clause must state the linear bound: %r" % clause)
 
 
 class TestAuthorityValidation(RuleCase):
