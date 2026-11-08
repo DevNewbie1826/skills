@@ -66,13 +66,13 @@ If a browser is already running with a CDP endpoint, replace launch with `chromi
 One loop produces the matrix [Capture evidence](capture-evidence.md) requires: phone with true mobile emulation and desktop, light and dark, top and scrolled-to-end, plus a reduced-motion variant for motion frames. Playwright shape (adapt to your driver); `urls` and `outDir` belong to this QA run:
 
 ```js
-import { chromium, devices } from "playwright"
+import { chromium } from "playwright"
 
 const browser = await chromium.launch({ headless: true })
 try {
   for (const [route, url] of Object.entries(urls)) {
     for (const [device, options] of [
-      ["phone", devices["iPhone 14"]],                               // 390 wide, DPR 3, mobile, touch
+      ["phone", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }],
       ["desktop-1440", { viewport: { width: 1440, height: 900 } }],
     ]) {
       for (const colorScheme of ["light", "dark"]) {

@@ -102,7 +102,7 @@ await page.evaluate(() => [...document.querySelectorAll("*")]
 - H6 Sheets and modals: one at a time; always a visible way out (Cancel or Back beside Done); a grabber on resizable sheets; unsaved changes are confirmed before dismissal.
 - H7 Long operations are cancellable when safe; a cancel with consequences warns first.
 - H8 Permission and consent requests appear in context, not at launch unless core; a pre-prompt screen has one button that opens the system prompt and no exit that dodges it; the purpose text says what the data is for.
-- H9 Sign-in is deferred until needed and its benefit stated; the auth method is named ("Sign in with GitHub", not "Sign in"); no license text in onboarding; password fields are masked and never pre-filled.
+- H9 Sign-in is deferred until needed and its benefit stated; the auth method is named ("Sign in with <provider>", not "Sign in"); no license text in onboarding; password fields are masked and never pre-filled.
 - H10 Search, when present: one search location, scope visible in the placeholder or a scope bar, recents or suggestions offered.
 - H11 Settings, when present: labels say what ON does; system-wide settings are not duplicated; (mac) the settings window title names the visible pane.
 

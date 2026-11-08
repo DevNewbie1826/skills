@@ -44,6 +44,6 @@ EVIDENCE REVIEWED: <artifacts inspected>
 
 ## Completion loop
 
-Both checks count against the same round budget as [Independent review passes](independent-review.md#completion-gate-and-review-budget) and must approve the same current revision and complete fresh evidence set. If either requests changes, fix the product gap, re-capture all affected items, and re-run both checks at most twice; a third mismatch stops the task with the fidelity gap reported. Do not declare fidelity complete from a visual-only pass, a code-only pass, an old approval, or a high similarity score.
+Both checks count against the same round budget as [Independent review passes](independent-review.md#completion-gate-and-review-budget) and must approve the same current revision and complete fresh evidence set. If either requests changes, fix the product gap, re-capture all affected items, and re-run both checks within that budget; when it is spent with a gap open, stop and report the fidelity gap. Do not declare fidelity complete from a visual-only pass, a code-only pass, an old approval, or a high similarity score.
 
 When delegated reviewers are unavailable, perform the pixel/content and code-level checks as separate fresh-eyes review contexts with their own evidence traces. State that limitation plainly in the final report.
