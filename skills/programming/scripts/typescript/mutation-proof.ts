@@ -12,7 +12,7 @@
  *
  * Verdicts per test: red (exit != 0, the test caught the mutation) or green (exit 0, it did not).
  * The owner is restored on success, on a thrown error, and on SIGINT/SIGTERM.
- * Exit codes: 0 ran and restored, 1 the find text is empty or did not match exactly once or the
+ * Exit codes: 0 ran and restored, 1 the find text is empty, identical to the replacement, or did not match exactly once or the
  * restore hash differed (the file was still restored), 2 usage, 130/143 interrupted and restored.
  * Read references/testing/junk-classes.md "Proof rule" for how to read a candidate/keeper pair.
  */
@@ -46,7 +46,7 @@ export type MutationResult = {
 
 export class MutationError extends Error {
   constructor(
-    readonly kind: "FIND_EMPTY" | "FIND_NOT_UNIQUE" | "RESTORE_MISMATCH",
+    readonly kind: "FIND_EMPTY" | "NO_CHANGE" | "FIND_NOT_UNIQUE" | "RESTORE_MISMATCH",
     message: string,
   ) {
     super(message)
@@ -80,6 +80,7 @@ export async function runMutation(options: {
   readonly tests: readonly MutationTest[]
 }): Promise<MutationResult> {
   if (options.find.length === 0) throw new MutationError("FIND_EMPTY", `${options.file}: find text is empty`)
+  if (options.find === options.replace) throw new MutationError("NO_CHANGE", `${options.file}: find and replace are identical, nothing would be mutated`)
   const full = resolve(options.cwd, options.file)
   const original = readFileSync(full)
   const text = original.toString("utf8")
@@ -138,12 +139,8 @@ function usage(): number {
   return 2
 }
 
-async function main(argv: readonly string[]): Promise<number> {
-  if (argv.includes("--help") || argv.includes("-h")) {
-    console.log(USAGE)
-    return 0
-  }
-  const { values } = parseArgs({
+function parseCli(argv: readonly string[]) {
+  return parseArgs({
     args: [...argv],
     options: {
       file: { type: "string" },
@@ -154,7 +151,20 @@ async function main(argv: readonly string[]): Promise<number> {
       json: { type: "boolean", default: false },
     },
     strict: true,
-  })
+  }).values
+}
+
+async function main(argv: readonly string[]): Promise<number> {
+  if (argv.includes("--help") || argv.includes("-h")) {
+    console.log(USAGE)
+    return 0
+  }
+  let values: ReturnType<typeof parseCli>
+  try {
+    values = parseCli(argv)
+  } catch {
+    return usage()
+  }
   if (values.file === undefined || values.find === undefined || values.replace === undefined || values.test === undefined) {
     return usage()
   }
