@@ -1281,16 +1281,25 @@ class TestLdDepthDocstring(unittest.TestCase):
         return " ".join(docstring.split())
 
     def sentences(self, text):
-        # Cost claims are per sentence: "Total work is bounded by a
-        # constant." appended on its own must be judged alone.
-        return [part.strip() for part in re.split(r"[.;]", text) if part.strip()]
+        # A cost claim is judged inside the sentence that makes it, and a
+        # colon or dash is a claim boundary just as a full stop is, so an
+        # appended false clause cannot hide behind punctuation.
+        parts = re.split(r"[.;:]|\s+[-—]\s+", text)
+        return [part.strip() for part in parts if part.strip()]
 
     def depth_scopes(self, text):
         # An O(limit) mention is judged within its own conjunct, so a
         # correct sentence may pair "a wide input costs O(n)" with
         # "O(limit) says only how deep the walk goes" using "and".
-        parts = re.split(r"[.;]|,?\s+and\s+|,\s+so\s+", text)
+        parts = re.split(r"[.;:]|,?\s+and\s+|,\s+so\s+|\s+[-—]\s+", text)
         return [part.strip() for part in parts if part.strip()]
+
+    def names_cost_subject(self, clause):
+        return any(word in clause.lower() for word in self.COST_SUBJECTS)
+
+    def negated(self, clause):
+        return re.search(r"\b(not|never|no|none|isn't|doesn't|cannot)\b",
+                         clause.lower()) is not None
 
     def test_docstring_states_the_required_bounds(self):
         text = self.docstring_text()
@@ -1312,20 +1321,23 @@ class TestLdDepthDocstring(unittest.TestCase):
                 continue
             with self.subTest(clause=clause):
                 self.assertTrue(
-                    any(word in clause for word in self.DEPTH_WORDS),
+                    any(word in clause.lower() for word in self.DEPTH_WORDS),
                     "O(limit) must be tied to depth, got: %r" % clause)
                 for forbidden in self.COST_SUBJECTS:
                     self.assertNotIn(
-                        forbidden, clause,
+                        forbidden, clause.lower(),
                         "O(limit) applied to %r in %r" % (forbidden, clause))
 
     def test_every_cost_clause_names_the_linear_bound(self):
         for clause in self.sentences(self.docstring_text()):
-            if not any(word in clause for word in self.COST_SUBJECTS):
+            if not self.names_cost_subject(clause):
                 continue
             if "O(limit)" in clause:
                 continue  # rejected by the depth-only test above
             with self.subTest(clause=clause):
+                self.assertFalse(
+                    self.negated(clause),
+                    "cost clause must assert the bound, not deny one: %r" % clause)
                 self.assertIn(
                     "O(n)", clause,
                     "cost clause must state the linear bound: %r" % clause)
