@@ -1,20 +1,15 @@
----
-name: lore-query
-description: "Read this when you need to query Lore trailers from git history."
----
+Read this when you need to query Lore trailers from git history.
 
 # Lore Query
 
-Read this when you need to query decision context from git history.
+Run the commands with your runtime's shell tool, from inside the repository.
 
 ## Usage forms
-
-Run via your runtime's shell tool.
 
 | Ask for | Do this |
 |---|---|
 | A specific trailer type | Query that trailer name |
-| A file or directory scope | Add the path to the git log command |
+| A file or directory scope | Add the path after `--` in the git log command |
 | A summary of recent Lore context | Use the summary-mode command |
 
 The user may say the trailer name in Korean, English, or the full trailer key. Map the shortcut to the trailer before querying.
@@ -35,19 +30,21 @@ The user may say the trailer name in Korean, English, or the full trailer key. M
 
 ## Queries
 
-Specific trailer:
+Specific trailer (`--grep` pre-selects candidates, `%(trailers:key=...)` prints only that trailer and joins folded lines, and the `awk` filter drops commits whose trailer block came out empty):
 
 ```bash
-git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%b" -- [PATH]
+git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%(trailers:key=TRAILER_NAME,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
 ```
 
-Summary mode:
+Summary mode (every commit that carries at least one Lore trailer, with all its trailers):
 
 ```bash
-git log -n 20 --format="%h %s%n%b"
+git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:key=Constraint,key=Rejected,key=Confidence,key=Scope-risk,key=Reversibility,key=Directive,key=Tested,key=Not-tested,key=Related,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
 ```
 
 Replace `TRAILER_NAME` with the mapped trailer key. Omit `-- [PATH]` when no path scope is needed.
+`--grep` also matches a trailer-looking line inside the body, but `%(trailers)` reads only the final paragraph; such a commit prints a heading with no trailer lines, and the `awk` filter removes it. Without the filter, report only commits that show a trailer line.
+Summary mode prints only the nine Lore keys, so unrelated trailers such as `Signed-off-by:` never appear and cannot hide a body-only lookalike.
 
 ## Output format
 

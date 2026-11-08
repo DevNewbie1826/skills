@@ -1,11 +1,6 @@
----
-name: lore-setup
-description: "Read this when you want to configure Lore commit formatting in a project or global instruction file."
----
+Read this when you want all future commit messages in a scope to follow the Lore protocol.
 
 # Lore Setup
-
-Read this when you want all future commit messages in a scope to follow the Lore protocol.
 
 ## Setup flow
 
