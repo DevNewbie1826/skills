@@ -112,6 +112,19 @@ If you must keep using `strings`, lower the threshold: `strings -n 1 -t x ./targ
 Write the triage summary to the journal:
 
 ```markdown
+### Sanitizer build for a crashing C/C++ binary
+
+If the binary can be rebuilt from C/C++ sources, reproduce the crash with sanitizers before inferring the fault from stripped machine code. AddressSanitizer catches out-of-bounds accesses and use-after-free; UndefinedBehaviorSanitizer reports undefined operations.
+
+```bash
+CFLAGS='-g -O1 -fsanitize=address,undefined' \
+CXXFLAGS='-g -O1 -fsanitize=address,undefined' \
+make clean all
+./target
+```
+
+The report names the invalid access and its allocation or free stack, often making the root cause clear before dynamic analysis. A binary that cannot be rebuilt continues with the tracing and debugger workflow below.
+
 ## Binary triage
 - Type: <ELF 64-bit, dynamically linked, stripped>
 - Arch: <x86_64 | arm64 | ...>
@@ -337,6 +350,21 @@ networksetup -setsecurewebproxy "$SERVICE" 127.0.0.1 8888
 | `dlopen("libfoo.so.42")` | Dynamic plugin loading; check plugin path |
 
 ---
+
+### Data watchpoints — catch the corruption, not just the crash
+
+When a value is already wrong by the time execution reaches the crash, watch the memory address for writes and stop at the instruction that corrupts it. Use the address of the field or buffer identified from the static or dynamic hypothesis; [tools/pwndbg.md](../tools/pwndbg.md) has the richer pwndbg workflow.
+
+```text
+# lldb: watch writes to an address (replace with a valid expression/address)
+(lldb) watchpoint set expression -- <addr>
+
+# gdb: stop on writes, or on reads when a read is the first observable symptom
+(gdb) watch *(<type> *)<addr>
+(gdb) rwatch *(<type> *)<addr>
+```
+
+Continue from the object's allocation or initialization, then inspect the backtrace and writer when it triggers. Hardware watchpoint slots are limited; remove broad watchpoints before adding more.
 
 ## [3] Static analysis with Ghidra
 

@@ -100,6 +100,24 @@ bun test --inspect-brk                        # debug test runner
 
 **Critical**: Bun uses WebKit Inspector Protocol, not V8. A V8-only inspector cannot connect directly. Use Bun's inspector page or another compatible inspector client if available.
 
+### Scripted V8 inspector / CDP attach
+
+The inspector port also serves machine-readable HTTP discovery endpoints. `/json` lists inspectable targets, each with its `webSocketDebuggerUrl`; `/json/version` only reports the browser and protocol version. Connect that URL with the Chrome DevTools Protocol (CDP) rather than scraping `node inspect` text. `chrome-remote-interface` is the canonical scriptable npm client; when browser automation is already in play, use its CDP session instead. These V8/CDP examples do not apply to Bun's WebKit inspector protocol.
+
+```bash
+curl -s http://127.0.0.1:9229/json     # each target carries webSocketDebuggerUrl
+```
+
+```js
+const CDP = require('chrome-remote-interface');
+const [target] = await fetch('http://127.0.0.1:9229/json').then(r => r.json());
+const client = await CDP({ target: target.webSocketDebuggerUrl });
+await client.Runtime.enable();
+await client.Debugger.pause();
+```
+
+For a persistent, bounded driver over a DAP-speaking adapter, see [tools/dap.md](../tools/dap.md).
+
 ### Deno (native V8, Chrome DevTools / VS Code compatible)
 
 ```bash

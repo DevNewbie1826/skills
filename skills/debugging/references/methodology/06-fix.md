@@ -53,6 +53,14 @@ The "mechanism" field is the acid test. If you can't write the causal chain from
 
 Red, green, refactor. For the general cycle and when it does not apply, see the `tdd` skill; here the non-negotiable part is that the test fails on the reproduction and passes only with the fix.
 
+### 0. Look for the owner test first
+
+Before writing a reproduction test, find the test that already owns this contract at the strongest boundary and run it on the pre-fix code:
+
+- **It already fails for this bug.** It is the red proof. Record its failure and skip step 1.
+- **It passes but covers the path.** Extend it with the failing case (a table row, a fixture case) instead of adding a parallel test.
+- **No owner exists.** Write the new reproduction test in step 1, applying the repository's test-authoring rules.
+
 ### 1. Red — failing-first test
 
 Write a test that fails *specifically because of this bug*. Requirements:
