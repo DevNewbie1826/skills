@@ -64,6 +64,7 @@ A test that fails when internals change but observable behavior stays the same i
 - For asynchronous behavior, subscribe to the exact event or state transition before triggering the action, then await it with a bounded timeout.
 - Inject clocks, randomness, and external seams where their values affect behavior.
 - Start each test from a known fixture and clean up all files, environment variables, transactions, goroutines, tasks, and processes it owns.
+- Two tests that pass alone and fail together are a fixture leak: fix the leak, never the order, and never skip a test or isolate it in a separate process to hide it. Namespace suite-global resources (temp roots, listen ports, container names) per run so concurrent runs cannot interfere; a different test failing each run is the signature of that leak.
 - Ensure override and fallback fixtures differ; a test cannot prove precedence when both values are identical.
 
 ## Test structure
@@ -73,6 +74,8 @@ A test that fails when internals change but observable behavior stays the same i
 | Unit | Pure behavior, edges, boundaries, error paths | Fast and local; exercise meaningful input classes |
 | Integration | A real adapter against a real downstream or faithful sandbox | Verify the wire, schema, query, or process boundary rather than an implementation imitation |
 | End-to-end | A user-visible narrative through the real surface | Drive the binary, route, CLI, TUI, or equivalent and assert observable outcomes |
+
+Budgets are targets, not hard limits: unit tests run in milliseconds and the whole unit suite in seconds; integration tests in about a second each; end-to-end scenarios are few, one per user-visible outcome, and include at least one error path. When a suite crosses its budget, profile and split it. A user-visible outcome never driven through its real surface is unverified.
 
 Use all applicable layers. An end-to-end scenario does not replace edge-focused units; units do not prove that the real boundary is wired correctly.
 
