@@ -18,6 +18,8 @@ const configFrom = (name: string) => {
 const css = (text: string): SourceFile => ({ path: "inline.css", text })
 const lines = (file: SourceFile, tokens: readonly string[] = ["#1a5cff", "#14161a"]): readonly number[] =>
 	hardCodedColor.check({ file, config: mergeTokenColors({}, tokens) }).map((hit) => hit.line)
+const cliFindingMessage = (text: string, tokens: readonly string[]): readonly string[] =>
+	hardCodedColor.check({ file: css(text), config: mergeTokenColors({}, tokens) }).map((hit) => hit.message)
 
 describe("hard-coded-color", () => {
 	test("#given no design tokens #then literals are silent", () => {
@@ -98,6 +100,41 @@ describe("hard-coded-color", () => {
 	test("#given a url() with a hex-looking fragment #then the fragment is not reported", () => {
 		expect(lines(css(".a { background-image: url(sprite.svg#1a5cff); }"))).toEqual([])
 		expect(lines(css(".a { background: url(sprite.svg#1a5cff) #1a5cff; }"))).toEqual([1])
+	})
+
+	test("#given thousands of hits in one large stylesheet #then location lookup stays linear", () => {
+		const block = ".card { border: 1px solid #1a5cff; color: var(--ink, #1a5cff); /* note */ }\n"
+		const file = css(block.repeat(20000))
+		const started = performance.now()
+		const hits = hardCodedColor.check({ file, config: mergeTokenColors({}, ["#1a5cff"]) })
+		const elapsed = performance.now() - started
+		expect(hits.length).toBe(20000)
+		expect(elapsed).toBeLessThan(5000)
+		expect(hits.at(-1)?.line).toBe(20000)
+		expect(hits.at(-1)?.snippet).toBe(".card { border: 1px solid #1a5cff; color: var(--ink, #1a5cff); /* note */ }")
+	})
+
+	test("#given a nested pseudo-selector #then the nested rule reports and the following declaration is still found", () => {
+		const tokens = ["#1a5cff", "#14161a", "#abc"]
+		expect(lines(css(".a { &:hover { color: #1a5cff; } color: #14161a; }"), tokens)).toEqual([1, 1])
+		expect(lines(css(".a { &:hover #abc { color: #1a5cff; } }"), tokens)).toEqual([1])
+		expect(cliFindingMessage(".a { &:hover #abc { color: #14161a; } }", tokens).join(" ")).not.toContain("#abc")
+	})
+
+	test("#given a custom property whose value is a block #then the block is skipped and the next declaration reports", () => {
+		expect(lines(css(":root { --bundle: { color: #1a5cff; background: #14161a; }; color: #1a5cff; }"))).toEqual([1])
+	})
+
+	test("#given an escaped parenthesis in url() #then the fragment is not reported", () => {
+		expect(lines(css(".a { background-image: url(sprite\\)x.svg#1a5cff); }"))).toEqual([])
+	})
+
+	test("#given a scss or less line comment #then the declaration after it is still found", () => {
+		const file = (path: string, text: string) => ({ path, text })
+		const tokens = mergeTokenColors({}, ["#1a5cff", "#14161a"])
+		expect(hardCodedColor.check({ file: file("x.scss", ".a { // color: #1a5cff\n color: #14161a; }"), config: tokens }).map((hit) => hit.line)).toEqual([2])
+		expect(hardCodedColor.check({ file: file("x.less", ".a { // color: #1a5cff\n color: #14161a; }"), config: tokens }).map((hit) => hit.line)).toEqual([2])
+		expect(hardCodedColor.check({ file: file("x.css", ".a { // color: #1a5cff\n color: #14161a; }"), config: tokens }).length).toBeGreaterThan(0)
 	})
 
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {
