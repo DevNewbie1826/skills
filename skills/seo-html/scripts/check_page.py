@@ -139,6 +139,7 @@ OG_IMAGE_MIN = (150, 150)
 OG_IMAGE_MAX_RATIO = 3.0
 OG_IMAGE_RECOMMENDED = (1200, 630)
 MAX_DIMENSION = 100000
+MAX_JSONLD_DEPTH = 500
 CHARSET_MAX_BYTES = 1024
 HANGUL_RATIO = 0.3
 
@@ -621,6 +622,25 @@ def iter_ld_nodes(obj, top_level=True):
             stack.extend(reversed([(member, is_top) for member in value]))
         else:
             yield value, is_top
+
+
+def ld_depth_exceeds(value, limit):
+    """Report whether parsed ld+json data nests containers (objects or
+    arrays) deeper than `limit`; the root container is depth 1. Iterative
+    with an early exit one level past the limit, so a pathological
+    document costs at most O(limit) work no matter how deep it nests."""
+    stack = [(value, 1)]
+    while stack:
+        node, depth = stack.pop()
+        if isinstance(node, dict):
+            if depth > limit:
+                return True
+            stack.extend((item, depth + 1) for item in node.values())
+        elif isinstance(node, list):
+            if depth > limit:
+                return True
+            stack.extend((item, depth + 1) for item in node)
+    return False
 
 
 def iter_strings(value):
@@ -1147,6 +1167,23 @@ class PageChecker:
                           "ld+json block %d root is not an object or list" % index,
                           "root type: %s" % type(data).__name__,
                           "make the block root a JSON object (or a list of objects)")
+                continue
+            # The explicit depth limit keeps the too-deep verdict
+            # independent of the running interpreter: the JSON parser's
+            # own recursion ceiling differs between interpreter
+            # generations (a stock 3.11 refuses just under 1000 nesting
+            # levels, later ones go an order of magnitude deeper), so
+            # this limit is the supported contract. The RecursionError
+            # arm above stays as the safety net for unusually small
+            # configured recursion limits.
+            if ld_depth_exceeds(data, MAX_JSONLD_DEPTH):
+                self.emit("LD-01", script.line,
+                          "ld+json block %d does not parse: nesting is "
+                          "deeper than the supported maximum of %d levels"
+                          % (index, MAX_JSONLD_DEPTH),
+                          body[:80],
+                          "reduce the nesting depth of the block so it "
+                          "parses")
                 continue
             self._check_ld_nodes(data, script, index)
 
