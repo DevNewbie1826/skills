@@ -39,12 +39,12 @@ git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%(trailers:key=TRAI
 Summary mode (every commit that carries at least one Lore trailer, with all its trailers):
 
 ```bash
-git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:only,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
+git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:key=Constraint,key=Rejected,key=Confidence,key=Scope-risk,key=Reversibility,key=Directive,key=Tested,key=Not-tested,key=Related,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
 ```
 
 Replace `TRAILER_NAME` with the mapped trailer key. Omit `-- [PATH]` when no path scope is needed.
 `--grep` also matches a trailer-looking line inside the body, but `%(trailers)` reads only the final paragraph; such a commit prints a heading with no trailer lines, and the `awk` filter removes it. Without the filter, report only commits that show a trailer line.
-Summary mode also prints non-Lore trailers such as `Signed-off-by:`; drop them from the answer.
+Summary mode prints only the nine Lore keys, so unrelated trailers such as `Signed-off-by:` never appear and cannot hide a body-only lookalike.
 
 ## Output format
 
