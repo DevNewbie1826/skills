@@ -33,7 +33,7 @@ function handle(request) {
     case "configurationDone": response(request); break;
     case "launch":
       program = request.arguments?.program ?? program;
-      if (rejectLaunch) response(request, {}, false, "launch rejected");
+      if (rejectLaunch) { response(request, {}, false, "launch rejected"); event("terminated", {}); }
       else response(request);
       break;
     case "continue": response(request, { allThreadsContinued: true }); if (!noStop) event("stopped", { reason: "breakpoint", threadId: 1, allThreadsStopped: true }); break;
@@ -43,7 +43,7 @@ function handle(request) {
     case "stackTrace": response(request, { stackFrames: [{ id: 42, name: "main", source: { path: program }, line: 12, column: 3 }] }); break;
     case "scopes": response(request, { scopes: [{ name: "Locals", variablesReference: 7, expensive: false }] }); break;
     case "variables": response(request, { variables: Array.from({ length: 250 }, (_, i) => ({ name: `v${i + 1}`, value: request.arguments?.variablesReference === 8 ? `${String(i + 1)} ${"x".repeat(500)}` : String(i + 1), variablesReference: 0 })) }); break;
-    case "evaluate": response(request, { result: request.arguments?.expression === "big" ? "y".repeat(40000) : "42", type: "int", variablesReference: 0 }); break;
+    case "evaluate": response(request, { result: request.arguments?.expression === "big" ? "y".repeat(40000) : request.arguments?.expression === "wide" ? "\u00e9".repeat(20000) : "42", type: "int", variablesReference: 0 }); break;
     case "terminate": response(request); event("terminated", {}); break;
     default: response(request, {}, false, `unsupported ${request.command}`);
   }

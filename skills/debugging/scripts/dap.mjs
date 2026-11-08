@@ -170,7 +170,7 @@ async function launch(adapter, program, args) {
     const launchError = await launched;
     // lldb-dap reports launch success unreliably, so a failed launch response is fatal only
     // when no process or stop event proves the program actually started.
-    if (launchError && !sawProcess && !currentStop && !terminated) throw launchError;
+    if (launchError && !sawProcess && !currentStop) throw launchError;
     // Best-effort: some adapters stop at entry, others run to the first breakpoint.
     await waitForStop(false, 2000);
     line("READY: launch");
@@ -254,9 +254,12 @@ async function command(input) {
       if (!parts.length) return error("invalid-args");
       const r = await request("evaluate", { expression: parts.join(" "), frameId: topFrame?.id || 42 });
       const value = String(r.body?.result || "");
-      const kept = Buffer.from(value).subarray(0, MAX_OUTPUT_BYTES).toString();
-      line(`EVAL\t${kept}`);
-      const dropped = Buffer.byteLength(value) - Buffer.byteLength(kept);
+      const bytes = Buffer.from(value);
+      // The line is `EVAL\t<value>\n`, so reserve those bytes; never cut inside a UTF-8 sequence.
+      let cut = Math.min(bytes.length, MAX_OUTPUT_BYTES - Buffer.byteLength("EVAL\t\n"));
+      while (cut > 0 && cut < bytes.length && (bytes[cut] & 0xc0) === 0x80) cut--;
+      line(`EVAL\t${bytes.subarray(0, cut).toString()}`);
+      const dropped = bytes.length - cut;
       if (dropped > 0) line(`TRUNCATED: rows dropped=0 bytes dropped=${dropped}`);
     } else if (cmd === "threads") {
       const r = await request("threads"); boundedTable(["ID", "NAME"], (r.body?.threads || []).map(t => [String(t.id), t.name]));

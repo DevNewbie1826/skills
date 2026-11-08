@@ -111,3 +111,15 @@ test("eval output is capped like every other result", async () => {
   expect(Buffer.byteLength(s.output)).toBeLessThan(33 * 1024 + 200);
   s.command("quit");
 }, 60_000);
+
+test("eval cap never splits a multi-byte character and counts dropped bytes exactly", async () => {
+  const s = session();
+  await until(s, out => out.includes("READY: launch"));
+  s.command("eval wide"); await until(s, out => out.includes("TRUNCATED: rows dropped=0 bytes dropped="));
+  expect(s.output).not.toContain("\ufffd");
+  const kept = Buffer.byteLength((s.output.match(/^EVAL\t(.*)$/m) ?? ["", ""])[1]);
+  const dropped = Number((s.output.match(/bytes dropped=(\d+)/) ?? ["", "-1"])[1]);
+  expect(kept + dropped).toBe(40000);
+  expect(kept + Buffer.byteLength("EVAL\t\n")).toBeLessThanOrEqual(32 * 1024);
+  s.command("quit");
+}, 60_000);
