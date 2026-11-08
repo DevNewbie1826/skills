@@ -1,8 +1,8 @@
 # Rendered-page quality lint
 
-Read this when a built page needs a render-based quality check: contrast against the painted background, computed type scale, overflow at width, heading outline, broken images, or page script errors.
+Read this when a built page needs a render-based quality check: contrast against the painted background, computed type scale, overflow at width, heading outline, images with a missing or placeholder source, or page script errors.
 
-`scripts/detect/` is a TypeScript library with a thin CLI. It renders a page in a real browser engine and lints what was actually drawn, not what the source says. It runs after the source-level draft lint (`scripts/perfection/check-draft-guard.ts`) and before `visual-qa`. The draft lint reads files; this one needs pixels, so it catches what source can't show: a table header at 4.2:1 on a dark surface, an h1 followed by an h3, a card that overflows at 390 px, an image that 404s.
+`scripts/detect/` is a TypeScript library with a thin CLI. It renders a page in a real browser engine and lints what was actually drawn, not what the source says. It runs after the source-level draft lint (`scripts/perfection/check-draft-guard.ts`) and before `visual-qa`. The draft lint reads files; this one needs pixels, so it catches what source can't show: a table header at 4.2:1 on a dark surface, an h1 followed by an h3, a card that overflows at 390 px, an image whose source attribute is missing or a placeholder. Network-level failures (an image URL that returns an error status) are outside what a snapshot can see; check those with a link checker.
 
 ## Run it
 

@@ -75,7 +75,10 @@ export function collectPageSnapshot(props: readonly string[], maxElements: numbe
 		}
 		return [...moving].sort()
 	}
-	const all = Array.from(document.querySelectorAll("body, body *"))
+	// "html" is included (a small, deliberate divergence from upstream) so painted backgrounds set on
+	// the root element reach the contrast rules; without it they fall back to white and dark themes
+	// report readable pale text as a contrast failure.
+	const all = Array.from(document.querySelectorAll("html, body, body *"))
 		.filter((el) => !["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "META", "LINK"].includes(el.tagName))
 		.slice(0, maxElements)
 	const indexOf = new Map<Element, number>()
