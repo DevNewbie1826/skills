@@ -627,8 +627,14 @@ def iter_ld_nodes(obj, top_level=True):
 def ld_depth_exceeds(value, limit):
     """Report whether parsed ld+json data nests containers (objects or
     arrays) deeper than `limit`; the root container is depth 1. Iterative
-    with an early exit one level past the limit, so a pathological
-    document costs at most O(limit) work no matter how deep it nests."""
+    with an early exit one level past the limit, so the walk never descends
+    past that level: for nesting depth alone the cost is O(limit).
+
+    That bound is exact only for nesting depth. Every container and value
+    that sits within the limit is still visited once, so a wide input costs
+    O(n) in the containers and values it holds. Total work is O(n), and
+    O(limit) describes only how deep the walk goes, not a constant cost for
+    every document."""
     stack = [(value, 1)]
     while stack:
         node, depth = stack.pop()

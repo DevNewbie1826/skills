@@ -1257,6 +1257,31 @@ class TestJsonldDepthLimit(RuleCase):
         self.assertEqual(report["summary"]["error"], 1)
 
 
+class TestLdDepthDocstring(unittest.TestCase):
+    """The cost contract of ld_depth_exceeds is stated in its docstring:
+    the early exit one level past the limit bounds how deep the walk goes,
+    so O(limit) holds for nesting depth alone, while a wide input costs
+    O(n) in the containers and values actually visited. A docstring is
+    the only shipped surface for that claim, so the check reads it as
+    text and rejects the earlier, misleading O(limit) wording."""
+
+    def docstring_text(self):
+        docstring = cp.ld_depth_exceeds.__doc__ or ""
+        return " ".join(docstring.split())
+
+    def test_docstring_states_linear_wide_input_cost(self):
+        text = self.docstring_text()
+        self.assertIn("O(n)", text)
+        self.assertIn("wide input", text)
+        self.assertIn("nesting depth", text)
+        self.assertIn("O(limit)", text)
+
+    def test_docstring_drops_the_unqualified_constant_cost_claim(self):
+        text = self.docstring_text()
+        self.assertNotIn("costs at most O(limit) work", text)
+        self.assertNotIn("no matter how deep it nests", text)
+
+
 class TestAuthorityValidation(RuleCase):
     """Delta re-review round 2, required change 2: the shared URL
     validator checks the complete raw authority - brackets, userinfo,
