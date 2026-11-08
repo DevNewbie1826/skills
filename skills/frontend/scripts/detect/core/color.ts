@@ -72,6 +72,18 @@ function predefinedToRgb(space: string, c: Vec3): Vec3 | null {
 	return null
 }
 
+/** A hue angle in degrees. CSS allows deg, grad, rad and turn, so a bare parseFloat would read `0.5turn` as 0.5deg. */
+function angleDegrees(token: string): number {
+	const m = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(deg|grad|rad|turn)?$/i.exec(token.trim())
+	if (!m) return Number.NaN
+	const value = Number.parseFloat(m[1] ?? "0")
+	const unit = (m[2] ?? "deg").toLowerCase()
+	if (unit === "rad") return (value * 180) / Math.PI
+	if (unit === "grad") return value * 0.9
+	if (unit === "turn") return value * 360
+	return value
+}
+
 /** Parses the color forms getComputedStyle returns (rgb/rgba, color(srgb | srgb-linear | display-p3), lab/lch, oklab/oklch) plus hex and `transparent`; other spaces return null. Out-of-gamut values are clamped to sRGB. */
 export function parseColor(input: string): Rgba | null {
 	const s = input.trim().toLowerCase()
@@ -92,13 +104,13 @@ export function parseColor(input: string): Rgba | null {
 	}
 	if (fn === "lab" || fn === "lch") {
 		const l = channel(parts[0] ?? "0", 100)
-		const [q1, q2] = [Number.parseFloat(parts[1] ?? "0"), Number.parseFloat(parts[2] ?? "0")]
+		const [q1, q2] = [Number.parseFloat(parts[1] ?? "0"), fn === "lch" ? angleDegrees(parts[2] ?? "0") : Number.parseFloat(parts[2] ?? "0")]
 		const [la, lb] = fn === "lch" ? [q1 * Math.cos((q2 * Math.PI) / 180), q1 * Math.sin((q2 * Math.PI) / 180)] : [q1, q2]
 		const [r, g, b] = labToRgb(l, la, lb)
 		return { r, g, b, a }
 	}
 	const l = channel(parts[0] ?? "0", 1)
-	const [p1, p2] = [Number.parseFloat(parts[1] ?? "0"), Number.parseFloat(parts[2] ?? "0")]
+	const [p1, p2] = [Number.parseFloat(parts[1] ?? "0"), fn === "oklch" ? angleDegrees(parts[2] ?? "0") : Number.parseFloat(parts[2] ?? "0")]
 	const [oa, ob] = fn === "oklch" ? [p1 * Math.cos((p2 * Math.PI) / 180), p1 * Math.sin((p2 * Math.PI) / 180)] : [p1, p2]
 	const [r, g, b] = oklabToRgb(l, oa, ob)
 	return { r, g, b, a }

@@ -13,15 +13,39 @@ export type LoadedTokens =
 function literalsIn(text: string): readonly string[] {
 	const colors: string[] = []
 	for (const match of text.matchAll(COLOR_LITERAL)) {
-		if (parseColor(match[0])) colors.push(match[0])
+		const color = parseColor(match[0])
+		// A parse that leaves a non-finite channel is not a color; the parser still returns an object, so
+		// trusting its truthiness would turn mangled text into a token.
+		if (color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b) && Number.isFinite(color.a)) colors.push(match[0])
 	}
 	return colors
+}
+
+/** A custom-property value with quoted strings replaced by a sentinel that no color parser accepts, so
+ * `--label: "#1a5cff"` and `rgb(26 92 "#1a5cff")` declare no color token. Blanking with a space would let the
+ * surrounding function parse as a valid color, inventing a token from an invalid declaration. */
+function withoutStrings(text: string): string {
+	let out = ""
+	let i = 0
+	while (i < text.length) {
+		const c = text[i] ?? ""
+		if (c !== "\"" && c !== "'") {
+			out += c
+			i++
+			continue
+		}
+		let j = i + 1
+		while (j < text.length && text[j] !== c) j += text[j] === "\\" ? 2 : 1
+		out += "\u0001"
+		i = j + 1
+	}
+	return out
 }
 
 function cssTokenColors(text: string): readonly string[] {
 	const colors: string[] = []
 	for (const declaration of text.replace(COMMENT, "").matchAll(CUSTOM_PROPERTY)) {
-		colors.push(...literalsIn(declaration[1] ?? ""))
+		colors.push(...literalsIn(withoutStrings(declaration[1] ?? "")))
 	}
 	return colors
 }
@@ -29,7 +53,8 @@ function cssTokenColors(text: string): readonly string[] {
 function jsonTokenColors(value: unknown, colors: string[]): void {
 	if (typeof value === "string") {
 		const text = value.trim()
-		if (parseColor(text)) colors.push(text)
+		const color = parseColor(text)
+		if (color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b) && Number.isFinite(color.a)) colors.push(text)
 		return
 	}
 	if (Array.isArray(value)) {

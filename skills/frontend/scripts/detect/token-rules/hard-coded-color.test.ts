@@ -212,6 +212,42 @@ describe("hard-coded-color", () => {
 		expect(lines(css(".a { color:\n #14161a; }"))).toEqual([2])
 	})
 
+	test("#given a functional color with the wrong component count #then nothing is invented from it", () => {
+		expect(lines(css(".a { color: rgb(26 92 255 1 99); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92); }"))).toEqual([])
+		expect(lines(css(".a { color: lch(50% 20); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255 / 1 / 2); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgb(26 92 255 / 1); }"))).toEqual([1])
+	})
+
+	test("#given an alpha one 8-bit step away from the token #then the colors stay distinct", () => {
+		expect(lines(css(".a { color: #1a5cfffe; }"))).toEqual([])
+		expect(lines(css(".a { color: #1a5cffff; }"))).toEqual([1])
+		expect(lines(css(".a { color: #1a5cff80; }"))).toEqual([])
+	})
+
+	test("#given a hue written in another angle unit than the token #then it still matches", () => {
+		expect(lines(css(".a { color: lch(50% 20 0.5turn); }"))).toEqual([])
+		expect(lines(css(".a { color: oklch(50% 0.1 0.5turn); }"))).toEqual([])
+		const turnToken = ["lch(50% 20 180deg)"]
+		expect(lines(css(".a { color: lch(50% 20 0.5turn); }"), turnToken)).toEqual([1])
+		expect(lines(css(".a { color: lch(50% 20 200grad); }"), turnToken)).toEqual([1])
+		expect(lines(css(".a { color: lch(50% 20 3.14159265rad); }"), turnToken)).toEqual([1])
+		expect(lines(css(".a { color: lch(50% 20 180deg); }"), turnToken)).toEqual([1])
+	})
+
+	test("#given a comma-separated rgba color #then the alpha slot is not mistaken for a surplus channel", () => {
+		expect(lines(css(".a { color: rgb(26, 92, 255); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgba(26, 92, 255, 1); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgba(26, 92, 255, 0.5); }"), ["rgba(26, 92, 255, 0.5)"])).toEqual([1])
+	})
+
+	test("#given four space-separated channels without a slash #then the color is not invented", () => {
+		expect(lines(css(".a { color: rgb(26 92 255 1); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255); }"))).toEqual([1])
+	})
+
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {
 		expect(ALL_RULES.some((rule) => rule.meta.id === "hard-coded-color")).toBe(true)
 		const findings = lintSources([source("with-tokens/component.css")], { config: configFrom("tokens.css") })
