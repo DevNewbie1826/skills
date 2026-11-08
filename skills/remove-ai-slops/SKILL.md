@@ -1,6 +1,6 @@
 ---
 name: remove-ai-slops
-description: "Remove AI-generated code slop from branch changes or an explicit file list while preserving behavior. Use when asked to remove slop, clean AI code, deslop, clean up generated code, strip slop, or review generated-code cleanup. Start by locking behavior with regression tests, then use the category and workflow references."
+description: "Remove AI-generated code slop from branch changes or an explicit file list while preserving behavior, including junk tests (prose pins, source greps, copied inventories, mock echoes), each proven by its class rule before a cut. Use when asked to remove slop, clean AI code, deslop, clean up generated code, strip slop, prune junk tests, or review generated-code cleanup. Start by locking behavior with regression tests, then use the category and workflow references."
 ---
 
 # Remove AI Slops
@@ -26,7 +26,7 @@ Before removing or simplifying source code, establish a green regression-test ba
 4. Run the deletion ladder: delete, reuse existing code, use platform or dependency support, then simplify only what must remain.
 5. Make a per-file plan that names categories, order, risk, and any intentional debt.
 6. Evaluate every category in the prescribed safest-to-riskiest order.
-7. Process independent files in bounded batches: when delegation is available, one worker per file in batches of at most five — never one worker per category, per finding, or per review question; otherwise work file by file.
+7. Process independent files in bounded batches: when delegation is available, one `task` worker per file in batches of at most five — never one worker per category, per finding, or per review question; otherwise work file by file. Workers mark junk tests but never cut them; the lead proves and cuts them serially.
 8. Run all applicable quality gates, perform critical review, and repair only failures caused by the cleanup.
 9. Report scope, behavior lock, plan, category results, gates, risks, and final status.
 
@@ -35,6 +35,8 @@ Before removing or simplifying source code, establish a green regression-test ba
 - Preserve public APIs, type information, exception behavior, and intentional boundary validation.
 - Apply a performance change only when semantic equivalence is obvious; otherwise skip it.
 - Do not add abstractions or dependencies merely to make a cleanup look tidier.
+- Mark a deliberately kept bounded simplification with a `debt:` comment naming its ceiling and upgrade trigger, and list it in the report.
+- A test that is red on the unchanged base is a product bug to report, never a deletion; if it covers an in-scope file's behavior, leave that file untouched until the baseline is green.
 - State every skipped gate as `N/A` with its reason; never claim a pass without running and reading it.
 - If a modular split is required, present the responsibility-based split plan before making the split.
 
@@ -43,10 +45,12 @@ Before removing or simplifying source code, establish a green regression-test ba
 | Need | Read |
 | --- | --- |
 | Decide whether code is slop; apply KEEP, REFACTOR, and proof rules; handle a large module | [Slop categories](references/slop-categories.md) |
+| Judge an existing test as junk, mark it R/F/C/D, prove a test cut, or decide what test a changed file still needs | [Junk tests](references/test-junk.md) |
 | Scope the work, lock tests first, plan and batch cleanup, run gates, recover failures, or format the report | [Workflow and quality gates](references/workflow.md) |
 
 ## Fast routing
 
 - Start with [Workflow and quality gates](references/workflow.md) for every cleanup.
 - Read [Slop categories](references/slop-categories.md) before planning or delegating a category pass.
+- When the scope contains test files, read [Junk tests](references/test-junk.md) before marking or cutting any test; a test is cut only with the proof its class names.
 - For a prose-only change, do not create wording-pinning tests; review machine-consumed values through their real parser or validator when one exists.
