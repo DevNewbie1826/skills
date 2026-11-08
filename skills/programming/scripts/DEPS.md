@@ -42,6 +42,12 @@ This file declares the non-standard-library packages imported by bundled scripts
 
 **Install:** `python3 -m pip install typer rich` or `uv add typer rich`.
 
+## `scripts/typescript/check-copy-rules.ts`
+
+**Third-party packages:** none. It uses Node built-ins only.
+
+**Run:** `bun scripts/typescript/check-copy-rules.ts [--json] <file-or-dir>...`
+
 ## `scripts/typescript/check-no-excuse-rules.ts`
 
 **Third-party packages:** `typescript`.
