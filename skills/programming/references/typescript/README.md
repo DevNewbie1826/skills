@@ -181,6 +181,17 @@ Violations caught by `../../scripts/typescript/check-no-excuse-rules.ts`. Run af
 
 Biome enforces additional rules (noExplicitAny, noNonNullAssertion, noDefaultExport, useImportType). The script catches what Biome cannot.
 
+### Copy and suppression audit
+
+Violations caught by `../../scripts/typescript/check-copy-rules.ts`. Run after editing copy or a suppression comment.
+
+| Rule ID | Catches | Opt-out |
+|---|---|---|
+| `no-em-dash-copy` | em dash (U+2014) in copy text outside comments | None: rewrite the sentence |
+| `require-suppression-reason` | bare `<word>-disable`/`-enable`/`-ignore`/`-suppress` directive | Add the reason after the directive |
+
+Run: `bun ../../scripts/typescript/check-copy-rules.ts .`
+
 ## In tests
 
 Tests are strict too, with these exceptions (configure in `biome.jsonc` overrides):

@@ -94,6 +94,7 @@ Read [TypeScript lane](references/typescript/README.md) first, then select the r
 | Typed errors, results, cancellation, and timeouts | [TypeScript error handling](references/typescript/error-handling.md) |
 | New project or package setup | [TypeScript bootstrap](references/typescript/bootstrap.md) |
 | HTTP service implementation | [TypeScript HTTP service](references/typescript/backend-hono.md) |
+| Copy text with long dashes, or suppression comments without reasons | [Copy and suppression rules](references/typescript/copy-rules.md) |
 
 ## Go lane
 
