@@ -135,7 +135,7 @@ export function buildBootstrap(root: string): string {
   }
 
   const sections: string[] = [
-    `This session has a skill pack installed. When a skill below is plausibly relevant to the task, load its SKILL.md with the read tool BEFORE starting the work, follow it, and say in one sentence which skill you loaded. Err toward loading: a needless read costs one tool call, but skipping a relevant skill means doing the task without its methodology. Load none only when no skill plausibly applies. The absolute path pattern is ${root}/<name>/SKILL.md.`,
+    `This session has a skill pack installed. When a skill below is plausibly relevant to the task, load its SKILL.md with the read tool BEFORE starting the work, follow it, and say in one sentence which skill you loaded. Err toward loading: a needless read costs one tool call, but skipping a relevant skill means doing the task without its methodology. Load none only when no skill plausibly applies. The absolute path pattern is ${root}/skills/<name>/SKILL.md.`,
   ];
 
   if (bulletLines.length > 0) {
@@ -159,11 +159,11 @@ export function buildBootstrap(root: string): string {
 }
 
 export default function createSkillsPackExtension(pi: ExtensionAPI) {
-  pi.on("resources_discover", async () => ({ skillPaths: [packRoot] }));
+  pi.on("resources_discover", async () => ({ skillPaths: [join(packRoot, "skills")] }));
 
-  // Register pack-internal agents (dag-workflow/agents/) via symlinks to ~/.omp/agent/agents/
+  // Register pack-internal agents (skills/dag-workflow/agents/) via symlinks to ~/.omp/agent/agents/
   pi.on("session_start", async () => {
-    const agentsDir = join(packRoot, "dag-workflow", "agents");
+    const agentsDir = join(packRoot, "skills", "dag-workflow", "agents");
     if (!existsSync(agentsDir)) return;
     const targetDir = join(homedir(), ".omp", "agent", "agents");
     mkdirSync(targetDir, { recursive: true });

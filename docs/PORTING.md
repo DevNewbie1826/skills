@@ -1,6 +1,6 @@
 # PORTING CONTRACT — OMP skill pack (ported skills neutralized)
 
-This directory is an **OMP skill pack** (used in Oh My Pi). It holds two kinds of skills:
+This repository is an **OMP skill pack** (used in Oh My Pi). It holds two kinds of skills:
 **ported** skills brought from other agents, and **OMP-native** skills written for OMP.
 
 **Ported** skills MUST be neutralized per the rules below to strip origin-agent branding
@@ -17,7 +17,7 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
 (OMP-native skills are exempt — see Rule 8):
 - Agent products/runtimes: senpi, omo (incl. `.omo/`), sisyphus, codex, opencode,
   claude code, aider, windsurf, amp, droid, openclaw, codegraph, cursor-the-IDE
-  (the Layer-B brand file `frontend/references/design/cursor.md` is allowlisted CONTENT),
+  (the Layer-B brand file `skills/frontend/references/design/cursor.md` is allowlisted CONTENT),
   and omo-specific skill names: ulw-loop, ultrawork, ulw-plan, ulw-research, start-work,
   review-work, hyperplan, prometheus, boulder.
 - Agent-runtime API names: subagent_type, fork_context, wait_agent, followup_task,

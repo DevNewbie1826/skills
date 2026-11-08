@@ -136,16 +136,16 @@ check_entrypoint_smoke() {
     require_command bun
     require_command npm
 
-    smoke_help "Lighthouse audit" python3 frontend/scripts/perfection/lighthouse-audit.py --help
-    smoke_help "UI/UX database search" python3 frontend/references/ui-ux-db/scripts/search.py --help
-    smoke_help "Python project scaffolder" python3 programming/scripts/python/new-project.py --help
-    smoke_help "Go project scaffolder" uv run --with typer --with rich programming/scripts/go/new-project.py --help
-    smoke_help "Rust project scaffolder" uv run --with typer --with rich programming/scripts/rust/new-project.py --help
-    smoke_help "Python script generator" python3 programming/scripts/python/new-script.py --help
-    smoke_help "Python no-excuse checker" python3 programming/scripts/python/check-no-excuse-rules.py --help
-    smoke_help "SEO HTML checker" python3 seo-html/scripts/check_page.py --help
+    smoke_help "Lighthouse audit" python3 skills/frontend/scripts/perfection/lighthouse-audit.py --help
+    smoke_help "UI/UX database search" python3 skills/frontend/references/ui-ux-db/scripts/search.py --help
+    smoke_help "Python project scaffolder" python3 skills/programming/scripts/python/new-project.py --help
+    smoke_help "Go project scaffolder" uv run --with typer --with rich skills/programming/scripts/go/new-project.py --help
+    smoke_help "Rust project scaffolder" uv run --with typer --with rich skills/programming/scripts/rust/new-project.py --help
+    smoke_help "Python script generator" python3 skills/programming/scripts/python/new-script.py --help
+    smoke_help "Python no-excuse checker" python3 skills/programming/scripts/python/check-no-excuse-rules.py --help
+    smoke_help "SEO HTML checker" python3 skills/seo-html/scripts/check_page.py --help
 
-    for script in programming/scripts/{go,rust}/check-no-excuse-rules.{sh,py}; do
+    for script in skills/programming/scripts/{go,rust}/check-no-excuse-rules.{sh,py}; do
         [[ -f "$script" ]] || continue
         checker_count=$((checker_count + 1))
         case "$script" in
@@ -169,7 +169,7 @@ check_entrypoint_smoke() {
         node_path="$node_path:$NODE_PATH"
     fi
 
-    for script in programming/scripts/typescript/*.ts; do
+    for script in skills/programming/scripts/typescript/*.ts; do
         [[ -f "$script" ]] || continue
         typescript_count=$((typescript_count + 1))
         case "$(basename "$script")" in
@@ -191,14 +191,14 @@ check_entrypoint_smoke() {
 
     smoke_usage_error "visual-qa image-diff" \
         '^visual-qa error: usage: image-diff <reference\.png> <actual\.png>$' \
-        bun visual-qa/scripts/cli.ts image-diff
+        bun skills/visual-qa/scripts/cli.ts image-diff
     smoke_usage_error "visual-qa tui-check" \
         '^visual-qa error: usage: tui-check <capture\.txt> \[--cols N\]$' \
-        bun visual-qa/scripts/cli.ts tui-check
+        bun skills/visual-qa/scripts/cli.ts tui-check
 }
 
 check_ui_ux_db_matrix() {
-    local ruleset_dir="frontend/references/ui-ux-db/scripts"
+    local ruleset_dir="skills/frontend/references/ui-ux-db/scripts"
     local config
     local kind
     local name
@@ -281,12 +281,12 @@ write_png(sys.argv[2], (255, 0, 0, 255))
 write_png(sys.argv[3], (0, 0, 255, 255))
 PY
 
-    if ! bun visual-qa/scripts/cli.ts image-diff "$image_dir/reference.png" "$image_dir/identical.png" >"$identical_output" 2>&1; then
+    if ! bun skills/visual-qa/scripts/cli.ts image-diff "$image_dir/reference.png" "$image_dir/identical.png" >"$identical_output" 2>&1; then
         printf 'visual-qa identical-image diff failed:\n' >&2
         cat "$identical_output" >&2
         return 1
     fi
-    if ! bun visual-qa/scripts/cli.ts image-diff "$image_dir/reference.png" "$image_dir/different.png" >"$different_output" 2>&1; then
+    if ! bun skills/visual-qa/scripts/cli.ts image-diff "$image_dir/reference.png" "$image_dir/different.png" >"$different_output" 2>&1; then
         printf 'visual-qa different-image diff failed:\n' >&2
         cat "$different_output" >&2
         return 1
@@ -341,7 +341,7 @@ check_skill_line_cap() {
 
 check_seo_html_fixtures() {
     require_command python3
-    python3 -m unittest discover -s seo-html/tests -v
+    python3 -m unittest discover -s skills/seo-html/tests -v
 }
 
 if (( fast )); then

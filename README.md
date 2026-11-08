@@ -3,12 +3,12 @@
 An **OMP (Oh My Pi) skill pack**. It holds two kinds of skills:
 
 - **Ported skills** (frontend, programming, tdd, debugging, visual-qa, remove-ai-slops,
-  git-master, lore, seo-html) — content neutralized per `PORTING.md` (skill prose makes no
+  git-master, lore, seo-html) — content neutralized per `docs/PORTING.md` (skill prose makes no
   framework/model/agent/language presuppositions). Each `SKILL.md` is a thin router;
   detail lives in `references/`.
 - **OMP-native skills** (`dag-workflow`) — written for OMP, may use OMP
   mechanisms (`eval`/`task`/`workflow tool`/`local://`/goal mode/`monitor`); exempt from the neutrality rules
-  that govern ported skills (see `PORTING.md` Rule 8).
+  that govern ported skills (see `docs/PORTING.md` Rule 8).
 
 Progressive disclosure throughout: detail is loaded only when routed to.
 
@@ -16,16 +16,16 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 
 | Skill | Use when |
 |---|---|
-| `frontend/` | Any web UI/UX/visual work: building, redesigning, styling, animation, performance, accessibility, design research |
-| `programming/` | Writing or editing Python, Rust, TypeScript, or Go code: strict types, modern toolchains, parse-don't-validate, typed errors |
-| `tdd/` | Test-driven development in any language: red/green/refactor, test quality, fakes before mocks, determinism |
-| `debugging/` | Real runtime debugging in any language or binary: crashes, silent failures, hangs, leaks, reverse engineering |
-| `visual-qa/` | Verifying a built UI/page/TUI visually: screenshots, pixel diffs, responsive and CJK checks |
-| `remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
-| `git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
-| `lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
-| `seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
-| `dag-workflow/` | OMP-native: one authorized task from collection to definition, one reviewed plan, a goal-bound worktree build with eval subagent nodes owning each change and proof, verification lanes, one review round to APPROVED, merge, post-merge verification, and cleanup |
+| `skills/frontend/` | Any web UI/UX/visual work: building, redesigning, styling, animation, performance, accessibility, design research |
+| `skills/programming/` | Writing or editing Python, Rust, TypeScript, or Go code: strict types, modern toolchains, parse-don't-validate, typed errors |
+| `skills/tdd/` | Test-driven development in any language: red/green/refactor, test quality, fakes before mocks, determinism |
+| `skills/debugging/` | Real runtime debugging in any language or binary: crashes, silent failures, hangs, leaks, reverse engineering |
+| `skills/visual-qa/` | Verifying a built UI/page/TUI visually: screenshots, pixel diffs, responsive and CJK checks |
+| `skills/remove-ai-slops/` | Cleaning AI-generated code smells from a diff or file list, with regression tests locked first |
+| `skills/git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
+| `skills/lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
+| `skills/seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
+| `skills/dag-workflow/` | OMP-native: one authorized task from collection to definition, one reviewed plan, a goal-bound worktree build with eval subagent nodes owning each change and proof, verification lanes, one review round to APPROVED, merge, post-merge verification, and cleanup |
 
 
 ### dag-workflow flow
@@ -53,7 +53,7 @@ omp install https://github.com/DevNewbie1826/skills.git
 
 ## Verifying the pack
 
-`PORTING.md` states the contract: this is an OMP pack — **ported** skills are neutralized
+`docs/PORTING.md` states the contract: this is an OMP pack — **ported** skills are neutralized
 (framework/model/agent/language-neutral), **OMP-native** skills are exempt (Rule 8).
 `tools/check-skills.py` (python3 stdlib only) enforces the machine-checkable subset for
 ported skills, and now also checks the OMP-native `dag-workflow` (its `omp-native: true`
@@ -67,7 +67,16 @@ python3 tools/check-skills.py --json     # machine-readable
 Content-driven allowlist exceptions (e.g. brand design references) live in
 `tools/allowlist/` with a reason per entry.
 
-## Layout note
+## Layout
+
+```text
+skills/        one folder per skill: <name>/SKILL.md plus references/, scripts/, tests/
+extensions/    omp extensions: skills-pack.ts (skill index), wf-goal.ts (/wf)
+commands/      slash-command templates (wf.md)
+tools/         pack gate: check-skills.py, verify.sh, allowlist/, install-hooks.sh, tests
+docs/          PORTING.md (the porting contract)
+package.json   omp pack manifest (pi.skills -> ./skills)
+```
 
 `.omo/` and `.senpi/` at this root are runtime session/state directories created by
 the authoring environment — they are NOT part of the skill pack and are not installed
