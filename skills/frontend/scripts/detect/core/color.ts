@@ -77,7 +77,7 @@ export function parseColor(input: string): Rgba | null {
 	const s = input.trim().toLowerCase()
 	if (s === "transparent") return TRANSPARENT
 	if (s.startsWith("#")) return parseHex(s)
-	const m = /^(rgba?|color|oklab|oklch|lab|lch)\((.*)\)$/.exec(s)
+	const m = /^(rgba?|color|oklab|oklch|lab|lch)\(([\s\S]*)\)$/.exec(s)
 	if (!m) return null
 	const [, fn, body = ""] = m
 	const [main = "", alphaPart] = body.split("/")

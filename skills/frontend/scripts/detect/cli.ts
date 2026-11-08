@@ -1,17 +1,18 @@
 #!/usr/bin/env bun
 // Thin CLI over the detect SDK (index.ts). Usage:
-//   bun cli.ts [--json] [--reflow] [--config <file.json>] <file-or-dir-or-url>...
+//   bun cli.ts [--json] [--reflow] [--config <file.json>] [--tokens <file>] <file-or-dir-or-url>...
 // Exit 0 no error or warning findings, 1 findings that fail the gate, 2 usage or render failure.
 import { readFileSync } from "node:fs"
 import { collectFiles } from "../perfection"
-import { type DetectConfig, detectFiles, detectPage, type Finding, formatFindingsText, hasFailures, parseConfig, RenderError, sortFindings } from "./index"
+import { type DetectConfig, detectFiles, detectPage, type Finding, formatFindingsText, hasFailures, loadTokens, mergeTokenColors, parseConfig, RenderError, sortFindings } from "./index"
 
-const USAGE = "usage: cli.ts [--json] [--reflow] [--config <file.json>] [--help] <file-or-dir-or-url>..."
+const USAGE = "usage: cli.ts [--json] [--reflow] [--config <file.json>] [--tokens <file>] [--help] <file-or-dir-or-url>..."
 const HELP = [
 	USAGE,
 	"  --json                 print findings as JSON",
 	"  --reflow               also render the reflow viewport matrix",
 	"  --config <file.json>   read rule severities and tokens from a config file",
+	"  --tokens <file>        read design tokens from a CSS custom-property or JSON tokens file",
 	"  --help                 print this help and exit",
 ].join("\n")
 
@@ -33,6 +34,7 @@ function parseArgs(argv: readonly string[]): Args | "help" | string {
 	let json = false
 	let reflow = false
 	let config: DetectConfig = {}
+	const tokenColors: string[] = []
 	const targets: string[] = []
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i] ?? ""
@@ -45,8 +47,16 @@ function parseArgs(argv: readonly string[]): Args | "help" | string {
 			const parsed = readConfig(path)
 			if (typeof parsed === "string") return `${path}: ${parsed}`
 			config = parsed
+		} else if (a === "--tokens") {
+			const path = argv[++i]
+			if (!path) return "--tokens needs a file"
+			const loaded = loadTokens(path)
+			if (!loaded.ok) return `${path}: ${loaded.error}`
+			tokenColors.push(...loaded.colors)
 		} else targets.push(a)
 	}
+	// Merged after the loop so the flag order between --config and --tokens cannot drop either one.
+	config = mergeTokenColors(config, tokenColors)
 	return targets.length === 0 ? "no targets" : { json, reflow, config, targets }
 }
 

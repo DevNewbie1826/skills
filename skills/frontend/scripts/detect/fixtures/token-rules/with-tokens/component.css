@@ -1,0 +1,29 @@
+.card {
+	border: 1px solid #1a5cff;
+	color: #14161a;
+}
+
+.hero {
+	background: #1a5cff;
+}
+
+.brand-fallback {
+	background: var(--color-brand, rgb(26 92 255));
+	border-color: var(--color-ink, rgb(20, 22, 26));
+}
+
+.off-token {
+	outline-color: #ff00aa;
+}
+
+.commented {
+	/* #1a5cff */
+}
+
+.uppercase {
+	color: RGB(26 92 255);
+}
+
+.quoted {
+	content: "#1a5cff";
+}

@@ -17,6 +17,8 @@ export type { PageContext, PageHit, PageRule, Rule, SourceContext, SourceHit, So
 /** @public */
 export { ALL_RULES } from "./rules"
 /** @public */
+export { type LoadedTokens, loadTokens, mergeTokenColors, TOKEN_RULES } from "./token-rules"
+/** @public */
 export { collectPageSnapshot } from "./snapshot"
 /** @public */
 export { STYLE_PROPS } from "./snapshot"
