@@ -183,6 +183,12 @@ describe("hard-coded-color", () => {
 		expect(lines(css(".a { color: myrgb(26 92 255); }"))).toEqual([])
 	})
 
+	test("#given an angle unit outside the hue slot #then the color is not invented", () => {
+		expect(lines(css(".a { color: oklch(50% 0.1turn 30); }"), ["oklch(50% 0.1 30)"])).toEqual([])
+		expect(lines(css(".a { color: lch(50% 20deg 30); }"), ["lch(50% 20 30)"])).toEqual([])
+		expect(lines(css(".a { color: oklch(50% 0.1 30 / 0.5turn); }"), ["oklch(50% 0.1 30 / 0.5turn)"])).toEqual([])
+	})
+
 	test("#given a hue carrying an angle unit #then the color is still reported", () => {
 		expect(lines(css(".a { color: lch(50% 20 30deg); }"), ["lch(50% 20 30deg)"])).toEqual([1])
 		expect(lines(css(".a { color: oklch(50% 0.1 30deg); }"), ["oklch(50% 0.1 30deg)"])).toEqual([1])

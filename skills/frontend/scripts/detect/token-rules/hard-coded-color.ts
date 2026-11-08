@@ -84,13 +84,18 @@ function sourceColor(text: string): Rgba | null {
 	if (parts.length === 0) return null
 	const head = fn === "color" ? 1 : 0
 	if (fn === "color" && !/^[a-z][a-z0-9-]*$/i.test(parts[0] ?? "")) return null
-	// hue is the last channel for the cylindrical spaces and sits before a `/` alpha or at the end.
+	// The hue is one fixed slot per function - first for hsl, third for lch/oklch - and an angle unit is valid
+	// nowhere else, so an angle in the chroma slot must not skip numeric validation.
+	const hueAt = fn === "hsl" || fn === "hsla" ? 0 : fn === "lch" || fn === "oklch" ? 2 : -1
 	const channels = parts.slice(head)
-	const hueAt = fn === "oklch" || fn === "lch" || fn === "hsl" || fn === "hsla" ? channels.findIndex((part, at) => at > 0 && part !== "/" && ANGLE_TOKEN.test(part)) : -1
-	for (const [at, part] of channels.entries()) {
-		if (part === "/" || at === hueAt) continue
-		if (!NUMBER_TOKEN.test(part)) return null
+	const alphaAt = channels.indexOf("/")
+	const body = alphaAt === -1 ? channels : channels.slice(0, alphaAt)
+	if (body.length === 0) return null
+	if (alphaAt !== -1 && alphaAt !== channels.length - 2) return null
+	for (const [at, part] of body.entries()) {
+		if (at === hueAt ? !NUMBER_TOKEN.test(part) && !ANGLE_TOKEN.test(part) : !NUMBER_TOKEN.test(part)) return null
 	}
+	if (alphaAt !== -1 && !NUMBER_TOKEN.test(channels[alphaAt + 1] ?? "")) return null
 	return parseColor(text)
 }
 const isSpace = (c: string): boolean => c === " " || c === "\t" || c === "\n" || c === "\r" || c === "\f"
