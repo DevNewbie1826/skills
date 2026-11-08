@@ -30,20 +30,20 @@ The user may say the trailer name in Korean, English, or the full trailer key. M
 
 ## Queries
 
-Specific trailer (`--grep` selects commits, `%(trailers:key=...)` prints only that trailer and joins folded lines):
+Specific trailer (`--grep` pre-selects candidates, `%(trailers:key=...)` prints only that trailer and joins folded lines, and the `awk` filter drops commits whose trailer block came out empty):
 
 ```bash
-git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%(trailers:key=TRAILER_NAME,unfold)" -- [PATH]
+git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%(trailers:key=TRAILER_NAME,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
 ```
 
 Summary mode (every commit that carries at least one Lore trailer, with all its trailers):
 
 ```bash
-git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:only,unfold)" -- [PATH]
+git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:only,unfold)" -- [PATH] | awk 'BEGIN{RS="";FS="\n";ORS="\n\n"} NF>1'
 ```
 
 Replace `TRAILER_NAME` with the mapped trailer key. Omit `-- [PATH]` when no path scope is needed.
-`%(trailers)` reads only the final paragraph, so a trailer-looking line inside the body is never printed.
+`--grep` also matches a trailer-looking line inside the body, but `%(trailers)` reads only the final paragraph; such a commit prints a heading with no trailer lines, and the `awk` filter removes it. Without the filter, report only commits that show a trailer line.
 Summary mode also prints non-Lore trailers such as `Signed-off-by:`; drop them from the answer.
 
 ## Output format
