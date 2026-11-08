@@ -35,7 +35,7 @@ Every execution-control answer prints a single snapshot line beginning with `STO
 
 | Command | Effect |
 |---|---|
-| `launch <adapter> <program> [args...]` | Spawn a stdio adapter (path to executable or `.mjs` adapter) and launch the program under it |
+| `launch <adapter> <program> [args...]` | `<adapter>` is one executable path with no arguments (or a `.mjs` adapter), spawned over stdio, or `host:port` of an adapter already listening on TCP; then launch the program under it. An adapter that needs arguments goes behind a one-line wrapper script |
 | `attach <host:port>` | Connect to a listening adapter over TCP and attach |
 | `break <file>:<line>` / `rmbreak <file>:<line>` | Set / remove a source breakpoint |
 | `continue` / `step` / `next` / `stepin` / `stepout` / `pause` | Execution control; each prints a `STOP:` snapshot when the debuggee next stops |
@@ -64,12 +64,12 @@ Every execution-control answer prints a single snapshot line beginning with `STO
 
 ## Adapter matrix
 
-Install the one matching your runtime; the client speaks to all of them the same way.
+Commands with arguments in the last column need a one-line wrapper script (or a TCP listener) to be passed to `launch`. Install the one matching your runtime; the client speaks to all of them the same way.
 
 | Runtime | Adapter | Install | Launch mode |
 |---|---|---|---|
-| Python | debugpy | `pip install debugpy` | `python -m debugpy.adapter` (stdio) |
-| Go | dlv | `go install github.com/go-delve/delve/cmd/dlv@latest` | `dlv dap` (stdio) |
+| Python | debugpy | `pip install debugpy` | wrapper script containing `exec python -m debugpy.adapter` (stdio) |
+| Go | dlv | `go install github.com/go-delve/delve/cmd/dlv@latest` | `dlv dap --listen=127.0.0.1:<port>` (TCP), then `launch 127.0.0.1:<port> <program>` |
 | C/C++/Swift/Rust/Zig | lldb-dap | ships with Xcode CLT / LLVM | `lldb-dap` (stdio) |
 | C/C++/Rust/Zig | codelldb | VS Code extension binary | stdio |
 | C/C++/Rust | gdb | `brew install gdb` / apt | via gdb's DAP mode where available |
@@ -88,8 +88,16 @@ If an adapter is missing, the install line is the fix. If it cannot be installed
 
 ## Worked example (Python)
 
+First create a wrapper, because the adapter argument cannot carry arguments (journal it, and remove it at cleanup):
+
+```bash
+printf '#!/bin/sh\nexec python -m debugpy.adapter\n' > /tmp/debugpy-adapter.sh && chmod +x /tmp/debugpy-adapter.sh
 ```
-launch /path/to/python -m debugpy.adapter myscript.py   # or a wrapper script path
+
+Then, in the REPL:
+
+```
+launch /tmp/debugpy-adapter.sh myscript.py
 break myscript.py:12
 continue
 STOP: stopped reason=breakpoint threadId=1 compute at myscript.py:12:1
@@ -102,4 +110,4 @@ terminate
 quit
 ```
 
-Cleanup is part of the session: `terminate` the debuggee, `quit` the REPL, and journal any wrapper scripts you created per the skill's cleanup phase.
+Cleanup is part of the session: `terminate` the debuggee, `quit` the REPL, and remove the wrapper script (`rm /tmp/debugpy-adapter.sh`) and anything else the journal lists.

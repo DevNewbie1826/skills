@@ -48,6 +48,7 @@ let nextSeq = 1;
 let initialized = false;
 let terminated = false;
 let currentStop = null;
+let sawProcess = false;
 let topFrame = null;
 const pending = new Map();
 const breakpoints = new Map();
@@ -96,6 +97,7 @@ function onMessage(message) {
     if (message.success === false) wait.reject(new Error("adapter-error")); else wait.resolve(message);
   } else if (message.type === "event") {
     if (message.event === "initialized") { initialized = true; emitEvent("initialized"); }
+    if (message.event === "process") sawProcess = true;
     if (message.event === "stopped") { currentStop = message.body || {}; emitEvent("stopped", currentStop); }
     if (message.event === "terminated" || message.event === "exited") { terminated = true; emitEvent("terminated"); }
   }
@@ -156,21 +158,20 @@ async function launch(adapter, program, args) {
   try {
     await startAdapter(adapter);
     await request("initialize", { clientID: "dap-client", adapterID: adapterIdFor(adapter), linesStartAt1: true, columnsStartAt1: true, pathFormat: "path" });
-    // Send launch BEFORE awaiting `initialized`: debugpy's adapter defers/flushes the
-    // initialized event until further client activity, so waiting for it first
-    // deadlocks the handshake. DAP allows launch any time after the initialize
-    // response; `initialized` is only required before configurationDone.
-    // stopOnEntry yields an initial stopped event with a real threadId, so the client
-    // can set breakpoints and inspect from a valid stopped state before continuing.
-    // `console: "internalConsole"` is REQUIRED by debugpy (without it the launch never
-    // spawns the debug server -> "Server is not available"); lldb-dap ignores it.
-    // lldb-dap reports the launch response success unreliably (false even when the
-    // process started and stopped); the process/stopped EVENTS are the real signal,
-    // so a non-success launch response is tolerated, not fatal.
-    await request("launch", { program, args, console: "internalConsole", justMyCode: false, stopOnEntry: true }).catch(() => null);
+    // DAP order: after the initialize response, send launch WITHOUT awaiting its response
+    // (many adapters answer launch only after configurationDone), then wait for the
+    // `initialized` event, send configurationDone, and only then settle the launch response.
+    // `console: "internalConsole"` is required by debugpy; lldb-dap ignores it.
+    // stopOnEntry yields an initial stop with a real threadId for adapters that honor it.
+    const launched = request("launch", { program, args, console: "internalConsole", justMyCode: false, stopOnEntry: true })
+      .then(() => null, e => e);
     await waitInitialized();
     await request("configurationDone").catch(() => null);
-    // Best-effort: lldb-dap stops at entry, other adapters run to the first breakpoint.
+    const launchError = await launched;
+    // lldb-dap reports launch success unreliably, so a failed launch response is fatal only
+    // when no process or stop event proves the program actually started.
+    if (launchError && !sawProcess && !currentStop && !terminated) throw launchError;
+    // Best-effort: some adapters stop at entry, others run to the first breakpoint.
     await waitForStop(false, 2000);
     line("READY: launch");
   } catch (e) { error(e.message === "timeout" ? "timeout" : e.message === "adapter-error" ? "adapter-error" : "adapter-failed"); }
@@ -236,7 +237,8 @@ async function command(input) {
       await request(dapCmd, { threadId });
       // Wait for the resulting stopped event (breakpoint hit / step completed) before
       // snapshotting; without this the stack is read while the debuggee is still running.
-      await waitForStop();
+      const stopped = await waitForStop();
+      if (!stopped && !terminated) return error("timeout");
       await snapshot();
     } else if (cmd === "stack") {
       const r = await request("stackTrace", { threadId: currentStop?.threadId || 1, levels: Number(parts[0]) || 100 });
@@ -251,7 +253,11 @@ async function command(input) {
     } else if (cmd === "eval") {
       if (!parts.length) return error("invalid-args");
       const r = await request("evaluate", { expression: parts.join(" "), frameId: topFrame?.id || 42 });
-      line(`EVAL\t${r.body?.result || ""}`);
+      const value = String(r.body?.result || "");
+      const kept = Buffer.from(value).subarray(0, MAX_OUTPUT_BYTES).toString();
+      line(`EVAL\t${kept}`);
+      const dropped = Buffer.byteLength(value) - Buffer.byteLength(kept);
+      if (dropped > 0) line(`TRUNCATED: rows dropped=0 bytes dropped=${dropped}`);
     } else if (cmd === "threads") {
       const r = await request("threads"); boundedTable(["ID", "NAME"], (r.body?.threads || []).map(t => [String(t.id), t.name]));
     } else if (cmd === "sessions") line("SESSION\tSTATE\n1\tactive");

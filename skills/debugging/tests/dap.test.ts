@@ -40,10 +40,12 @@ function session(...fixtureArgs: string[]) {
   // output could never appear (run 33065571760: byte-cap test burned its full
   // 15s wait while vars-7's ~5KB response stayed under 300ms and passed).
   const noAnswer = fixtureArgs.includes("--no-answer");
-  const child = spawn("bun", [client], { cwd: scripts, env: { ...process.env, DAP_TIMEOUT_MS: noAnswer ? "300" : "5000", ...(noAnswer ? { DAP_FIXTURE_NO_ANSWER: "1" } : {}) } });
+  const fastTimeout = noAnswer || fixtureArgs.includes("--no-stop") || fixtureArgs.includes("--reject-launch");
+  const child = spawn("bun", [client], { cwd: scripts, env: { ...process.env, DAP_TIMEOUT_MS: fastTimeout ? "300" : "5000", ...(noAnswer ? { DAP_FIXTURE_NO_ANSWER: "1" } : {}), ...(fixtureArgs.includes("--no-stop") ? { DAP_FIXTURE_NO_STOP: "1" } : {}), ...(fixtureArgs.includes("--reject-launch") ? { DAP_FIXTURE_REJECT_LAUNCH: "1" } : {}) } });
   let output = "";
   child.stdout.on("data", data => { output += data.toString(); });
   const api = { child, get output() { return output; }, command(line: string) { child.stdin.write(`${line}\n`); } };
+  // Fixture flags travel through the environment because the client spawns script adapters without arguments.
   api.command(`launch ${fixture} /tmp/program.py`);
   return api;
 }
@@ -84,4 +86,28 @@ test("unverified breakpoint and timeout are classified", async () => {
   const t = session("--no-answer");
   await until(t, out => out.includes("ERR: timeout"));
   s.command("quit"); t.command("quit");
+}, 60_000);
+
+test("a rejected launch reports an error and never READY", async () => {
+  const s = session("--reject-launch");
+  await until(s, out => out.includes("ERR: adapter-error"));
+  expect(s.output).not.toContain("READY: launch");
+  s.command("quit");
+}, 60_000);
+
+test("a missing stop event is a timeout, not a fabricated STOP", async () => {
+  const s = session("--no-stop");
+  await until(s, out => out.includes("READY: launch"));
+  const before = s.output;
+  s.command("continue"); await until(s, out => out.includes("ERR: timeout"));
+  expect(s.output.slice(before.length)).not.toContain("STOP:");
+  s.command("quit");
+}, 60_000);
+
+test("eval output is capped like every other result", async () => {
+  const s = session();
+  await until(s, out => out.includes("READY: launch"));
+  s.command("eval big"); await until(s, out => out.includes("TRUNCATED: rows dropped=0 bytes dropped="));
+  expect(Buffer.byteLength(s.output)).toBeLessThan(33 * 1024 + 200);
+  s.command("quit");
 }, 60_000);

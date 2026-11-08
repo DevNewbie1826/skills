@@ -148,17 +148,19 @@ Rust symbols are mangled. Use either:
 
 ## Sanitizers — memory and race bugs
 
-Nightly Rust exposes LLVM sanitizers through `-Z sanitizer`. Use them when a crash, data race, or leak is too timing- or state-dependent to explain from a backtrace; they replace guesswork with a report at the invalid operation. If the nightly toolchain or sanitizer is unavailable, say so and fall back to backtraces and `dbg!`.
+Nightly Rust exposes LLVM sanitizers through the compiler flag `-Zsanitizer`, passed with `RUSTFLAGS` (it is not a Cargo option) together with an explicit `--target`. Use them when a crash, data race, or leak is too timing- or state-dependent to explain from a backtrace; they replace guesswork with a report at the invalid operation. If the nightly toolchain or sanitizer is unavailable, say so and fall back to backtraces and `dbg!`.
 
 ```bash
-# AddressSanitizer: out-of-bounds accesses and use-after-free
-cargo +nightly run -Z sanitizer=address
+TARGET=$(rustc +nightly -vV | sed -n 's/^host: //p')
 
-# ThreadSanitizer: data races between threads
-cargo +nightly test -Z sanitizer=thread
+# AddressSanitizer: out-of-bounds accesses and use-after-free
+RUSTFLAGS='-Zsanitizer=address' cargo +nightly run --target "$TARGET"
+
+# ThreadSanitizer: data races between threads (rebuild std with -Zbuild-std for full coverage)
+RUSTFLAGS='-Zsanitizer=thread' cargo +nightly test -Zbuild-std --target "$TARGET"
 
 # LeakSanitizer: allocations still reachable at process exit
-cargo +nightly run -Z sanitizer=leak
+RUSTFLAGS='-Zsanitizer=leak' cargo +nightly run --target "$TARGET"
 ```
 
 Run the invocation that matches the suspected class, ideally before attaching a debugger to optimized or timing-sensitive code.
@@ -176,7 +178,7 @@ rr replay
 # (rr) reverse-step
 ```
 
-`rr` is Linux/x86-64 only; on Apple Silicon use `rust-lldb` or a sanitizer instead.
+`rr` runs on Linux only, on x86-64 and on some AArch64 CPUs (check the project's supported-hardware list); it does not run on macOS, so use `rust-lldb` or a sanitizer there.
 
 ---
 

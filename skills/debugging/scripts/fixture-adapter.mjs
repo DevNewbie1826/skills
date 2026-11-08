@@ -5,6 +5,8 @@ import { stdin, stdout, argv } from "node:process";
 let seq = 1;
 let program = "program.py"; // echoed back in stack frames; set from the launch request
 let buffer = Buffer.alloc(0);
+const rejectLaunch = argv.includes("--reject-launch") || process.env.DAP_FIXTURE_REJECT_LAUNCH === "1";
+const noStop = argv.includes("--no-stop") || process.env.DAP_FIXTURE_NO_STOP === "1";
 const noAnswer = argv.includes("--no-answer") || process.env.DAP_FIXTURE_NO_ANSWER === "1";
 
 function send(message) {
@@ -29,15 +31,19 @@ function handle(request) {
       break;
     }
     case "configurationDone": response(request); break;
-    case "launch": program = request.arguments?.program ?? program; response(request); break;
-    case "continue": response(request, { allThreadsContinued: true }); event("stopped", { reason: "breakpoint", threadId: 1, allThreadsStopped: true }); break;
+    case "launch":
+      program = request.arguments?.program ?? program;
+      if (rejectLaunch) response(request, {}, false, "launch rejected");
+      else response(request);
+      break;
+    case "continue": response(request, { allThreadsContinued: true }); if (!noStop) event("stopped", { reason: "breakpoint", threadId: 1, allThreadsStopped: true }); break;
     case "next": case "stepIn": case "stepOut": response(request); event("stopped", { reason: "step", threadId: 1 }); break;
     case "pause": response(request); event("stopped", { reason: "pause", threadId: 1 }); break;
     case "threads": response(request, { threads: [{ id: 1, name: "main" }] }); break;
     case "stackTrace": response(request, { stackFrames: [{ id: 42, name: "main", source: { path: program }, line: 12, column: 3 }] }); break;
     case "scopes": response(request, { scopes: [{ name: "Locals", variablesReference: 7, expensive: false }] }); break;
     case "variables": response(request, { variables: Array.from({ length: 250 }, (_, i) => ({ name: `v${i + 1}`, value: request.arguments?.variablesReference === 8 ? `${String(i + 1)} ${"x".repeat(500)}` : String(i + 1), variablesReference: 0 })) }); break;
-    case "evaluate": response(request, { result: "42", type: "int", variablesReference: 0 }); break;
+    case "evaluate": response(request, { result: request.arguments?.expression === "big" ? "y".repeat(40000) : "42", type: "int", variablesReference: 0 }); break;
     case "terminate": response(request); event("terminated", {}); break;
     default: response(request, {}, false, `unsupported ${request.command}`);
   }

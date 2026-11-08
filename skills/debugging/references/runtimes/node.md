@@ -102,16 +102,16 @@ bun test --inspect-brk                        # debug test runner
 
 ### Scripted V8 inspector / CDP attach
 
-The inspector port also serves machine-readable HTTP discovery endpoints. `/json` lists inspectable targets; `/json/version` includes the WebSocket debugger URL. Connect that URL with the Chrome DevTools Protocol (CDP) rather than scraping `node inspect` text. `chrome-remote-interface` is the canonical scriptable npm client; when browser automation is already in play, use its CDP session instead. These V8/CDP examples do not apply to Bun's WebKit inspector protocol.
+The inspector port also serves machine-readable HTTP discovery endpoints. `/json` lists inspectable targets, each with its `webSocketDebuggerUrl`; `/json/version` only reports the browser and protocol version. Connect that URL with the Chrome DevTools Protocol (CDP) rather than scraping `node inspect` text. `chrome-remote-interface` is the canonical scriptable npm client; when browser automation is already in play, use its CDP session instead. These V8/CDP examples do not apply to Bun's WebKit inspector protocol.
 
 ```bash
-curl -s http://127.0.0.1:9229/json/version
+curl -s http://127.0.0.1:9229/json     # each target carries webSocketDebuggerUrl
 ```
 
 ```js
 const CDP = require('chrome-remote-interface');
-const version = await fetch('http://127.0.0.1:9229/json/version').then(r => r.json());
-const client = await CDP({ target: version.webSocketDebuggerUrl });
+const [target] = await fetch('http://127.0.0.1:9229/json').then(r => r.json());
+const client = await CDP({ target: target.webSocketDebuggerUrl });
 await client.Runtime.enable();
 await client.Debugger.pause();
 ```

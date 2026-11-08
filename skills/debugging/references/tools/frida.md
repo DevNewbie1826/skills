@@ -68,13 +68,15 @@ When `frida-trace` isn't enough, you write a JS agent and load it with `frida` o
 ### Find a function
 
 ```js
-// By exported symbol name
-const openPtr = Module.getExportByName(null, "open");  // null = any module
-const sslWritePtr = Module.getExportByName("libssl.so", "SSL_write");
+// Frida 17+: module lookups go through Process; static Module.* helpers were removed.
+// By exported symbol name, in any module
+const openPtr = Module.getGlobalExportByName("open");
+const sslWritePtr = Process.getModuleByName("libssl.so").getExportByName("SSL_write");
 
 // By offset in a stripped binary (get the offset from Ghidra)
-const base = Module.getBaseAddress("target");
+const base = Process.getModuleByName("target").base;
 const funcPtr = base.add(0x1a3c);
+// On Frida 16 and older, use Module.getExportByName(null, "open") and Module.getBaseAddress("target").
 ```
 
 ### Intercept calls
@@ -171,10 +173,10 @@ Alternatives: filter by argument value, only log calls from a specific caller mo
 
 **Attach vs. spawn.** `frida -p <pid>` attaches to an already-running process. If you need to catch early initialization (constructors, `main` entry), spawn the process with `frida -f ./target`. Frida pauses it at startup. Resume with `%resume` in the REPL or by calling `device.resume(pid)` from Python.
 
-**Stripped binaries have no symbol names.** `Module.getExportByName` returns null for internal functions. You must find the function offset in Ghidra, then compute the address at runtime:
+**Stripped binaries have no symbol names.** An export lookup fails for internal functions. You must find the function offset in Ghidra, then compute the address at runtime:
 
 ```js
-const addr = Module.getBaseAddress("target").add(0x4a20);
+const addr = Process.getModuleByName("target").base.add(0x4a20);
 Interceptor.attach(addr, { /* ... */ });
 ```
 
