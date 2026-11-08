@@ -75,8 +75,29 @@ describe("hard-coded-color", () => {
 	})
 
 	test("#given a question mark before a hex run #then the question mark is not part of the match", () => {
-		const hits = hardCodedColor.check({ file: css("a{background:url(a?#1a5cff)}"), config: mergeTokenColors({}, ["#1a5cff"]) })
+		const hits = hardCodedColor.check({ file: css("a{background:#1a5cff?x}"), config: mergeTokenColors({}, ["#1a5cff"]) })
 		expect(hits.map((hit) => hit.message)).toEqual(["Hard-coded #1a5cff is a design-token color; use the token instead."])
+	})
+
+	test("#given a comment holding an unbalanced function or brace #then later declarations still report", () => {
+		expect(lines(css("/* var( */ .a { color: #1a5cff; }"))).toEqual([1])
+		expect(lines(css("/* { */ .a { color: #1a5cff; }"))).toEqual([1])
+		expect(lines(css(".a { /* { */ color: #1a5cff; }"))).toEqual([1])
+		expect(lines(css("/* ) */ .a { color: #1a5cff; }"))).toEqual([1])
+	})
+
+	test("#given a multi-line custom property #then the declaration is not reported but a real use is", () => {
+		expect(lines(css(":root {\n  --brand:\n    #1a5cff;\n}\n.a { color: #1a5cff; }"))).toEqual([5])
+	})
+
+	test("#given a comment inside a var() fallback #then the parentheses still balance", () => {
+		expect(lines(css(".a { color: var(--brand, /* ) */ #1a5cff); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255); }"))).toEqual([1])
+	})
+
+	test("#given a url() with a hex-looking fragment #then the fragment is not reported", () => {
+		expect(lines(css(".a { background-image: url(sprite.svg#1a5cff); }"))).toEqual([])
+		expect(lines(css(".a { background: url(sprite.svg#1a5cff) #1a5cff; }"))).toEqual([1])
 	})
 
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {

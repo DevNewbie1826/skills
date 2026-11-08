@@ -43,7 +43,8 @@ Exit 0: no error or warning findings. Exit 1: at least one. Exit 2: usage error,
 | Key | Meaning |
 |---|---|
 | `rules` | `{ "<rule-id>": "error" \| "warning" \| "advisory" \| "off" }` per rule |
-| `designTokens` | `{ colors: ["#1a5cff"], fonts: [], radii: [], fontSizes: [] }`. Token rules read `colors`; without `designTokens.colors` they stay silent. `--tokens <file>` loads them from a project file instead || `allowFonts`, `allowEasings` | Parsed and validated for forward compatibility, but no rule in this port reads them (their consumers are taste rules this pack covers statically) |
+| `designTokens` | `{ colors: ["#1a5cff"], fonts: [], radii: [], fontSizes: [] }`. Token rules read `colors`; without `designTokens.colors` they stay silent. `--tokens <file>` loads them from a project file instead |
+| `allowFonts`, `allowEasings` | Parsed and validated for forward compatibility, but no rule in this port reads them (their consumers are taste rules this pack covers statically) |
 
 Rule ids: `low-contrast`, `gray-on-color`, `tiny-text`, `undersized-ui-text`, `line-length`, `tight-leading`, `flat-type-hierarchy`, `oversized-h1`, `text-overflow`, `viewport-reflow`, `first-viewport-column-overflow`, `cramped-padding`, `nested-cards`, `heading-rhythm`, `unbalanced-heading`, `body-text-viewport-edge`, `content-hidden-at-rest`, `text-occlusion`, `clipped-overflow-container`, `skipped-heading`, `broken-image`, `script-error`, `repeated-container-text`, `hard-coded-color`. Placeholder text contrast is checked by `low-contrast` itself (its placeholder path), not a separate id.
 
