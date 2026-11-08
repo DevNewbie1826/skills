@@ -122,10 +122,11 @@ function skipTrivia(text: string, from: number, lineComments: boolean): number {
 	return i
 }
 
-/** First index in [from, end) holding a terminator at parenthesis depth 0, or `end`. */
+/** First index in [from, end) holding a terminator at nesting depth 0, or `end`. */
 function skipTo(text: string, from: number, end: number, terminators: string, lineComments: boolean): number {
 	let i = from
 	let parens = 0
+	let brackets = 0
 	while (i < end) {
 		const c = text[i] ?? ""
 		if (c === "\\") {
@@ -159,7 +160,17 @@ function skipTo(text: string, from: number, end: number, terminators: string, li
 			i++
 			continue
 		}
-		if (parens === 0 && terminators.includes(c)) return i
+		if (c === "[") {
+			brackets++
+			i++
+			continue
+		}
+		if (c === "]") {
+			if (brackets > 0) brackets--
+			i++
+			continue
+		}
+		if (parens === 0 && brackets === 0 && terminators.includes(c)) return i
 		i++
 	}
 	return end
@@ -212,6 +223,7 @@ function endOfCustomProperty(text: string, from: number, end: number, lineCommen
 	let i = from
 	let braces = 0
 	let parens = 0
+	let brackets = 0
 	while (i < end) {
 		const c = text[i] ?? ""
 		if (c === "\\") {
@@ -245,18 +257,28 @@ function endOfCustomProperty(text: string, from: number, end: number, lineCommen
 			i++
 			continue
 		}
+		if (c === "[") {
+			brackets++
+			i++
+			continue
+		}
+		if (c === "]") {
+			if (brackets > 0) brackets--
+			i++
+			continue
+		}
 		if (c === "{") {
 			braces++
 			i++
 			continue
 		}
 		if (c === "}") {
-			if (braces === 0 && parens === 0) return i
+			if (braces === 0 && parens === 0 && brackets === 0) return i
 			if (braces > 0) braces--
 			i++
 			continue
 		}
-		if (c === ";" && braces === 0 && parens === 0) return i + 1
+		if (c === ";" && braces === 0 && parens === 0 && brackets === 0) return i + 1
 		i++
 	}
 	return end

@@ -171,6 +171,17 @@ describe("hard-coded-color", () => {
 		expect(lines(css(":root { --b: foo(a; b); color: #14161a; }"))).toEqual([1])
 	})
 
+	test("#given a custom property value with brackets #then its semicolons do not end it", () => {
+		expect(lines(css(":root { --bundle: [a; b: #1a5cff]; color: #14161a; }"))).toEqual([1])
+		expect(lines(css(":root { --bundle: { a: b; } [a; b: #1a5cff]; color: #14161a; }"))).toEqual([1])
+		expect(lines(css(":root { --b: [[a; b: #1a5cff]]; color: #14161a; }"))).toEqual([1])
+	})
+
+	test("#given a bracketed selector prelude #then its brackets do not hide the declaration", () => {
+		expect(lines(css("[a; b: #1a5cff] { color: #14161a; }"))).toEqual([1])
+		expect(lines(css("[data-x=\"a;b\"] { color: #14161a; }"))).toEqual([1])
+	})
+
 	test("#given a color written across lines #then it is still reported", () => {
 		expect(lines(css(".a { color: rgb(\n 26 92 255\n); }"))).toEqual([1])
 		expect(lines(css(".a { color:\n #14161a; }"))).toEqual([2])
