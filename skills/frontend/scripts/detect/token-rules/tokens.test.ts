@@ -19,6 +19,11 @@ describe("loadTokens", () => {
 		expect(loadTokens(fixture("tokens.json"))).toEqual({ ok: true, colors: ["#1a5cff", "#14161a", "RGB(0 128 64)"] })
 	})
 
+	test("#given a CSS file with quoted and unquoted values #then only the unquoted color loads", () => {
+		const file = join(FIXTURE_DIR, "quoted-string.css")
+		expect(loadTokens(file)).toEqual({ ok: true, colors: ["#1a5cff"] })
+	})
+
 	test("#given a missing file #then the loader reports it instead of empty tokens", () => {
 		const loaded = loadTokens(fixture("absent.css"))
 		expect(loaded.ok).toBe(false)

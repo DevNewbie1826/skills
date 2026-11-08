@@ -18,10 +18,29 @@ function literalsIn(text: string): readonly string[] {
 	return colors
 }
 
+/** A custom-property value with quoted strings blanked, so `--label: "#1a5cff"` declares no color token. */
+function withoutStrings(text: string): string {
+	let out = ""
+	let i = 0
+	while (i < text.length) {
+		const c = text[i] ?? ""
+		if (c !== "\"" && c !== "'") {
+			out += c
+			i++
+			continue
+		}
+		let j = i + 1
+		while (j < text.length && text[j] !== c) j += text[j] === "\\" ? 2 : 1
+		out += " "
+		i = j + 1
+	}
+	return out
+}
+
 function cssTokenColors(text: string): readonly string[] {
 	const colors: string[] = []
 	for (const declaration of text.replace(COMMENT, "").matchAll(CUSTOM_PROPERTY)) {
-		colors.push(...literalsIn(declaration[1] ?? ""))
+		colors.push(...literalsIn(withoutStrings(declaration[1] ?? "")))
 	}
 	return colors
 }

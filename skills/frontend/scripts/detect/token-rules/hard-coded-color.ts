@@ -17,8 +17,10 @@ interface Span {
 	readonly end: number
 }
 
+/** An 8-bit alpha step is 1/255 (~0.0039), so a looser tolerance would equate two distinct representable opacities. */
+const ALPHA_TOLERANCE = 0.002
 const sameColor = (a: Rgba, b: Rgba): boolean =>
-	Math.abs(a.r - b.r) < 0.5 && Math.abs(a.g - b.g) < 0.5 && Math.abs(a.b - b.b) < 0.5 && Math.abs(a.a - b.a) < 0.005
+	Math.abs(a.r - b.r) < 0.5 && Math.abs(a.g - b.g) < 0.5 && Math.abs(a.b - b.b) < 0.5 && Math.abs(a.a - b.a) < ALPHA_TOLERANCE
 
 /** Offset of each line start, so locating many hits is one binary search each instead of a rescan per hit. */
 const lineStarts = (text: string): readonly number[] => {
@@ -90,12 +92,17 @@ function sourceColor(text: string): Rgba | null {
 	const channels = parts.slice(head)
 	const alphaAt = channels.indexOf("/")
 	const body = alphaAt === -1 ? channels : channels.slice(0, alphaAt)
-	if (body.length === 0) return null
-	if (alphaAt !== -1 && alphaAt !== channels.length - 2) return null
+	// Every color function takes exactly three components. Without this arity check the computed-value parser
+	// discards surplus channels, so `rgb(26 92 255 1 99)` would be compared as if it were a valid color.
+	if (body.length !== 3) return null
+	const commaAlpha = alphaAt === -1 && fn.startsWith("rgb") && channels.length === 4 ? channels[3] : undefined
+	if (alphaAt !== -1 && (alphaAt !== 3 || channels.length !== 5)) return null
+	if (alphaAt === -1 && channels.length !== body.length && commaAlpha === undefined) return null
 	for (const [at, part] of body.entries()) {
 		if (at === hueAt ? !NUMBER_TOKEN.test(part) && !ANGLE_TOKEN.test(part) : !NUMBER_TOKEN.test(part)) return null
 	}
-	if (alphaAt !== -1 && !NUMBER_TOKEN.test(channels[alphaAt + 1] ?? "")) return null
+	const alphaToken = alphaAt !== -1 ? channels[alphaAt + 1] : commaAlpha
+	if (alphaToken !== undefined && !NUMBER_TOKEN.test(alphaToken)) return null
 	return parseColor(text)
 }
 const isSpace = (c: string): boolean => c === " " || c === "\t" || c === "\n" || c === "\r" || c === "\f"
