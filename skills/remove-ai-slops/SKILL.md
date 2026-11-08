@@ -36,7 +36,7 @@ Before removing or simplifying source code, establish a green regression-test ba
 - Apply a performance change only when semantic equivalence is obvious; otherwise skip it.
 - Do not add abstractions or dependencies merely to make a cleanup look tidier.
 - Mark a deliberately kept bounded simplification with a `debt:` comment naming its ceiling and upgrade trigger, and list it in the report.
-- A test that is red on the unchanged base is a product bug to report, never a deletion.
+- A test that is red on the unchanged base is a product bug to report, never a deletion; if it covers an in-scope file's behavior, leave that file untouched until the baseline is green.
 - State every skipped gate as `N/A` with its reason; never claim a pass without running and reading it.
 - If a modular split is required, present the responsibility-based split plan before making the split.
 

@@ -43,12 +43,12 @@ Add a test only when both hold: the repository keeps tests for this kind of beha
 
 ## Retention bar (these stay `R` even when they match a class above)
 
-Keep a test that independently guards a public API, wire or protocol contract, config schema or default, migration, storage format, security boundary, platform behavior, byte equality between shipped artifacts, a generated or cross-language contract, a package or install payload, a release step, or an architecture invariant. Say which one in the ledger. Also keep:
+Keep a test that independently guards a public API, wire or protocol contract, config schema or default, migration, storage format, security boundary, platform behavior, byte equality between shipped artifacts, a generated or cross-language contract, a package or install payload, a release step, or an architecture invariant. Say which one in a ledger `R` row. Also keep:
 
 - **Platform suites**: anything that runs shipped code under its real runtime is a platform contract even when another runtime covers the same assertions.
 - **Issue regressions**: a test naming an issue number stays until another test is shown to fail on that exact regression.
 - **Machine-consumed text**: parsed fields, sentinel tokens, tool names, schema keys, a routing-bearing fragment of a parsed frontmatter description.
-- **Baseline-red tests**: a test that fails on the unchanged base is a product bug to report and fix at its owner, never a deletion; exclude it from every proof.
+- **Baseline-red tests**: a test that fails on the unchanged base is a product bug to report and fix at its owner, never a deletion; exclude it from every proof. If it covers an in-scope file's behavior, that file waits for a green baseline.
 
 Outside that list, a source-inspection test survives only as the cheapest independent guard of a user-facing key, byte, or path that an identifier-only refactor leaves green. Static or slow is never a reason to delete.
 
@@ -63,7 +63,7 @@ Break the production owner (flip a condition, drop a branch, return a constant, 
 | red | green | the candidate is the only proof: `R`, or `C` it into the keeper and re-run |
 | green | green | the mutation missed the behavior: confirm the edit landed, then pick another mutation |
 
-Run one mutation at a time, never while another worker edits the tree. Record the owner's checksum before the mutation and confirm it is byte-identical after restoring; never commit a mutation. A prose pin needs no mutation: the receipt is the assertion line plus the repository rule. A coverage diff proves lines still execute, not that anything still asserts on them; pair it with at least one mutation per theme.
+A verdict covers only the behavior the mutation breaks: when the candidate asserts several behaviors, prove each with its own mutation and keeper before cutting it, or `F`/`C` only the covered assertions. Run one mutation at a time, never while another worker edits the tree. Record the owner's checksum before the mutation and confirm it is byte-identical after restoring; never commit a mutation. A prose pin needs no mutation: the receipt is the assertion line plus the repository rule. A coverage diff proves lines still execute, not that anything still asserts on them; pair it with at least one mutation per theme.
 
 Proof kind per class: behavior classes (cannot fail, mock echo, source grep, duplicate contract, layer replay, implementation mirror, fabricated postcondition, input transcript) use the mutation above; prose pin uses the assertion line plus the repository rule; change certificate uses the revert that turns it red; seam keeper uses the no-production-caller check; copied inventory uses the generator or consumer that owns it; capability restatement uses the delivery test that owns the promise; near-duplicate cases use the single table that keeps every old assertion as a row.
 

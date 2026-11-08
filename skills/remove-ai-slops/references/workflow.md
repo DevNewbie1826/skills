@@ -27,7 +27,7 @@ For every in-scope source file:
 2. Find related tests using project conventions and search tools.
 3. If coverage is absent or weak, write the narrowest regression test that pins current observable behavior before editing the source. Favor outputs, side effects, errors, and boundary behavior over implementation details.
 4. A prose-only file is exempt from wording-pinning tests. Test a machine-consumed value only through its real parser, validator, or runtime seam; otherwise use review.
-5. Run the relevant tests, or the full suite when practical. A test that is red on the unchanged base is recorded as a product bug on a baseline-red list, excluded from every proof, and neither fixed in this pass nor deleted; everything else must be green before cleanup starts.
+5. Run the relevant tests, or the full suite when practical. A test that is red on the unchanged base is recorded as a product bug on a baseline-red list and is never deleted. If it covers behavior of an in-scope file, that file's baseline is not green: leave the file untouched and report the blocker. A red test unrelated to every in-scope file is only recorded and excluded from proofs. Everything covering in-scope behavior must be green before cleanup starts.
 6. Search every in-scope test file, including any written in step 3, for junk candidates as listed under Static candidates in [test-junk.md](test-junk.md). Hits become candidates for the tests ledger, never automatic cuts.
 
 Only a runner that cannot run at all stops the pass: record the failure and stop.
@@ -56,7 +56,7 @@ File: src/example-b
 
 When deliberately retaining a bounded simplification, document it in code with a `debt:` comment or the project's equivalent intentional-debt marker. Name the ceiling and the upgrade trigger, then include it in the final debt ledger.
 
-For each test file in scope, mark every declaration `R`, `F`, `C`, or `D` per [test-junk.md](test-junk.md) and keep one ledger row per `D`, `C`, or `F`. A known ceiling without a marker is indistinguishable from a defect.
+For each test file in scope, mark every declaration `R`, `F`, `C`, or `D` per [test-junk.md](test-junk.md) and keep one ledger row per `D`, `C`, or `F`, plus one `R` row for each test that matches a junk class but stays under the retention bar. A known ceiling without a marker is indistinguishable from a defect.
 
 ## Phase 4: Execute category passes with batch discipline
 
@@ -78,7 +78,7 @@ Every per-file pass must preserve behavior, public APIs, type information, error
 
 ## Phase 4b: Prove the test cuts, serially, then cut
 
-After the last batch finishes and no worker is running, the lead takes the collected ledger rows. For each row whose proof is a mutation, apply the named find and replace to the production owner, run the candidate and its keeper on the unmodified test tree, record both verdicts, and restore the owner byte for byte (checksum before and after) before the next row, as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded; a row whose proof does not hold becomes `R` and stays. Never run two mutations at once and never leave a mutation in the tree.
+After the last batch finishes and no worker is running, the lead takes the collected ledger rows. For each row whose proof is a mutation, apply the named find and replace to the production owner, run the candidate and its keeper on the unmodified test tree, record both verdicts, and restore the owner byte for byte (checksum before and after) before the next row, as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded and every behavior the candidate asserts is covered by a surviving keeper, not just the one mutated; a row whose proof does not hold becomes `R` and stays. Never run two mutations at once and never leave a mutation in the tree.
 
 ## Phase 5: Run quality gates and critical review
 
@@ -154,7 +154,7 @@ Per-File Results:
     - [category]: [before] -> [after]; why slop; why safe
     - Skipped (preserved): [issue and reason]
 
-Tests Ledger (one row per test marked D, C, or F; proofs run in Phase 4b):
+Tests Ledger (one row per test marked D, C, or F, and per R kept under the retention bar; proofs run in Phase 4b):
   | Test | Mark | Keeper / reason | Proof |
   |---|---|---|---|
   | path/to/test > name | D | source grep; named keeper owns the contract | mutation of the owner: candidate green, keeper red; owner restored checksum-equal |
