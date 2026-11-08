@@ -223,6 +223,12 @@ describe("#given JSX text that opens with a quote", () => {
     ])
   })
 
+  test("#when a nested expression holds a template with a dash #then it is flagged", () => {
+    expect(lintSource("unit.tsx", "export const el = (props) => (\n  <p title={props.label ?? `a — b`}>x</p>\n)\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+    ])
+  })
+
   test("#when a fragment holds text that opens with a quote #then later directives still scan", () => {
     expect(lintSource("unit.tsx", "export const L = ({user}) => (\n  <>{user.name}'s items</>\n)\n// @ts-ignore\n")).toEqual([
       expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
