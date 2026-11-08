@@ -1,20 +1,15 @@
----
-name: lore-query
-description: "Read this when you need to query Lore trailers from git history."
----
+Read this when you need to query Lore trailers from git history.
 
 # Lore Query
 
-Read this when you need to query decision context from git history.
+Run the commands with your runtime's shell tool, from inside the repository.
 
 ## Usage forms
-
-Run via your runtime's shell tool.
 
 | Ask for | Do this |
 |---|---|
 | A specific trailer type | Query that trailer name |
-| A file or directory scope | Add the path to the git log command |
+| A file or directory scope | Add the path after `--` in the git log command |
 | A summary of recent Lore context | Use the summary-mode command |
 
 The user may say the trailer name in Korean, English, or the full trailer key. Map the shortcut to the trailer before querying.
@@ -35,19 +30,21 @@ The user may say the trailer name in Korean, English, or the full trailer key. M
 
 ## Queries
 
-Specific trailer:
+Specific trailer (`--grep` selects commits, `%(trailers:key=...)` prints only that trailer and joins folded lines):
 
 ```bash
-git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%b" -- [PATH]
+git log -n 20 --all --grep="^TRAILER_NAME:" --format="%h %s%n%(trailers:key=TRAILER_NAME,unfold)" -- [PATH]
 ```
 
-Summary mode:
+Summary mode (every commit that carries at least one Lore trailer, with all its trailers):
 
 ```bash
-git log -n 20 --format="%h %s%n%b"
+git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Reversibility|Directive|Tested|Not-tested|Related):" --format="%h %s%n%(trailers:only,unfold)" -- [PATH]
 ```
 
 Replace `TRAILER_NAME` with the mapped trailer key. Omit `-- [PATH]` when no path scope is needed.
+`%(trailers)` reads only the final paragraph, so a trailer-looking line inside the body is never printed.
+Summary mode also prints non-Lore trailers such as `Signed-off-by:`; drop them from the answer.
 
 ## Output format
 

@@ -1,6 +1,10 @@
-Read this when writing or reviewing commit messages for non-trivial changes.
+Read this when writing or reviewing a commit message for a non-trivial change.
 
 # Lore Commits
+
+Lore trailers add decision context to a commit message. They sit after your repository's own
+subject and body style; they never replace it. Follow the repository's existing subject
+convention first (check `git log --oneline -20`), then append trailers.
 
 ## The format
 
@@ -21,6 +25,8 @@ Related: <commit hash or description of related commit>
 ```
 
 Trailers are optional, repeatable, and may be extended with custom keys when needed.
+They must form the last paragraph of the message, one `Key: value` per line, with no blank
+line between them. A line indented under a trailer continues that trailer's value.
 
 ## Trailer vocabulary
 
@@ -56,26 +62,17 @@ Tested: Single expired token refresh (unit)
 Not-tested: Auth service cold-start > 500ms behavior
 ```
 
-## Why trailers, not prose
-
-Prose is easy to write and hard to query. Git trailers keep decision context machine-readable with standard git tools:
-
-```bash
-git log --all --grep="^Constraint:" -- path/to/file.ts
-git log --all --grep="^Rejected:" -- path/to/file.ts
-git log --all --grep="^Directive:" -- path/to/file.ts
-git log --all --grep="^Not-tested:" -- path/to/file.ts
-```
-
-That turns history into a queryable decision database with zero extra infrastructure.
-
-## Agent workflow
+## Workflow
 
 1. Harvest context: what constrained the work, what was rejected, what remains fragile.
 2. Write the summary line around the decision, not the diff.
 3. Add a body only when the how needs explanation.
-4. Append trailers one per decision fact; keep only signal.
+4. Append trailers, one per decision fact; keep only signal. To add them without editing the
+   message by hand: `git commit --trailer "Confidence: high" --trailer "Rejected: alt | reason"`.
 5. Self-check: would a future modifier benefit from this context?
+6. Confirm the trailers parse: `git log -1 --format='%(trailers:only)'` must list each one.
+
+Reading trailers back is in `references/query.md`.
 
 ## Common mistakes
 
@@ -83,6 +80,7 @@ That turns history into a queryable decision database with zero extra infrastruc
 |---|---|
 | Writing trailers as prose paragraphs | Use `Key: value` on separate lines |
 | Putting trailers before the body | Put trailers after the body, separated by a blank line |
+| Blank line between trailers, or text after them | Keep them as one final paragraph, or git will not parse them |
 | Omitting the reason in `Rejected:` | Use `alternative | reason` |
 | Adding trailers to trivial commits | Reserve them for non-trivial decisions |
 | Duplicating diff content in trailers | Capture the why, not the what |
