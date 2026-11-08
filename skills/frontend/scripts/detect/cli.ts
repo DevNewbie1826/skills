@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // Thin CLI over the detect SDK (index.ts). Usage:
-//   bun cli.ts [--json] [--reflow] [--config <file.json>] <file-or-dir-or-url>...
+//   bun cli.ts [--json] [--reflow] [--config <file.json>] [--tokens <file>] <file-or-dir-or-url>...
 // Exit 0 no error or warning findings, 1 findings that fail the gate, 2 usage or render failure.
 import { readFileSync } from "node:fs"
 import { collectFiles } from "../perfection"
@@ -34,6 +34,7 @@ function parseArgs(argv: readonly string[]): Args | "help" | string {
 	let json = false
 	let reflow = false
 	let config: DetectConfig = {}
+	const tokenColors: string[] = []
 	const targets: string[] = []
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i] ?? ""
@@ -51,9 +52,11 @@ function parseArgs(argv: readonly string[]): Args | "help" | string {
 			if (!path) return "--tokens needs a file"
 			const loaded = loadTokens(path)
 			if (!loaded.ok) return `${path}: ${loaded.error}`
-			config = mergeTokenColors(config, loaded.colors)
+			tokenColors.push(...loaded.colors)
 		} else targets.push(a)
 	}
+	// Merged after the loop so the flag order between --config and --tokens cannot drop either one.
+	config = mergeTokenColors(config, tokenColors)
 	return targets.length === 0 ? "no targets" : { json, reflow, config, targets }
 }
 
