@@ -138,6 +138,7 @@ check_entrypoint_smoke() {
 
     smoke_help "Lighthouse audit" python3 skills/frontend/scripts/perfection/lighthouse-audit.py --help
     smoke_help "UI/UX database search" python3 skills/frontend/references/ui-ux-db/scripts/search.py --help
+    smoke_help "Frontend page detect" bun skills/frontend/scripts/detect/cli.ts --help
     smoke_help "Python project scaffolder" python3 skills/programming/scripts/python/new-project.py --help
     smoke_help "Go project scaffolder" uv run --with typer --with rich skills/programming/scripts/go/new-project.py --help
     smoke_help "Rust project scaffolder" uv run --with typer --with rich skills/programming/scripts/rust/new-project.py --help
