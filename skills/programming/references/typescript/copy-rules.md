@@ -8,7 +8,7 @@ Two checks keep user-facing copy readable and suppression comments honest. Both 
 
 Flags an em dash (U+2014) in `.ts`, `.tsx`, `.mts`, or `.cts` copy outside comments.
 
-In `.tsx` files, quoted text that sits between tags is JSX copy, not a string literal: a quote there does not hide the rest of the file. Attribute strings, expression containers, and plain `.ts` code keep their normal string handling.
+In `.tsx` files, quoted text that sits between tags is JSX copy, not a string literal: a quote there does not hide the rest of the file, whether the text sits inside an element or directly inside a fragment. Attribute strings, expression containers, and plain `.ts` code keep their normal string handling.
 
 A long dash reads as typographic decoration in CLI output, log lines, and error messages. A period, comma, colon, or parentheses carries the same meaning without the flourish.
 

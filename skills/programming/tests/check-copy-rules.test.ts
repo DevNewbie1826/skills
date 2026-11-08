@@ -11,6 +11,7 @@ const EXPECTED: Record<string, Array<[number, RuleId]>> = {
   "em-dash-string.ts": [[1, "no-em-dash-copy"], [2, "no-em-dash-copy"]],
   "em-dash-template.tsx": [[1, "no-em-dash-copy"], [4, "no-em-dash-copy"]],
   "jsx-text-quote.tsx": [[5, "no-em-dash-copy"], [10, "require-suppression-reason"]],
+  "jsx-fragment-quote.tsx": [[5, "no-em-dash-copy"], [10, "require-suppression-reason"]],
   "bare-ts-directives.ts": [
     [1, "require-suppression-reason"],
     [4, "require-suppression-reason"],
@@ -222,9 +223,18 @@ describe("#given JSX text that opens with a quote", () => {
     ])
   })
 
-  test("#when a nested expression holds a template with a dash #then it is flagged", () => {
-    expect(lintSource("unit.tsx", "export const el = (props) => (\n  <p title={props.label ?? `a — b`}>x</p>\n)\n")).toEqual([
+  test("#when a fragment holds text that opens with a quote #then later directives still scan", () => {
+    expect(lintSource("unit.tsx", "export const L = ({user}) => (\n  <>{user.name}'s items</>\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.tsx", "export const L = () => (\n  <>He said \"hi</>\n)\n// note — dash in comment\n")).toEqual([])
+  })
+
+  test("#when a fragment nests a quote-first element #then both levels close in order", () => {
+    expect(lintSource("unit.tsx", "export const L = ({n}) => (\n  <><span>'a — b</span><p>Ship — now</p></>\n)\n// @ts-ignore\n")).toEqual([
       expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
     ])
   })
 })
@@ -237,7 +247,8 @@ describe("#given the CLI", () => {
     expect(result.status).toBe(1)
     expect(result.stdout).toMatch(/em-dash-string\.ts:1 no-em-dash-copy/)
     expect(result.stdout).toMatch(/bare-tool-directives\.ts:4 require-suppression-reason/)
-    expect(result.stdout).toMatch(/check-copy-rules: 12 finding\(s\)/)
+    expect(result.stdout).toMatch(/jsx-fragment-quote\.tsx:10 require-suppression-reason/)
+    expect(result.stdout).toMatch(/check-copy-rules: 14 finding\(s\)/)
   })
 
   test("#when it scans the negative fixtures #then it exits 0 with no findings", () => {

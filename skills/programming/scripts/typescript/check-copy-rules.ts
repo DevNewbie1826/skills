@@ -60,7 +60,7 @@ type ScanState = "code" | "line" | "block" | "single" | "double" | "template" | 
 
 type BraceFrame = { readonly depth: number; readonly back: "template" | "jsxTag" | "jsxChildren" }
 
-type TagHeader = { readonly end: number; readonly selfClosing: boolean; readonly generic: boolean }
+type TagHeader = { readonly end: number; readonly selfClosing: boolean; readonly generic: boolean; readonly fragment: boolean }
 
 const EXPRESSION_CHARS = new Set(["(", "[", "{", "=", ",", ":", "?", "!", ";", "&", "|", ">"])
 const EXPRESSION_KEYWORD = /(?:^|[^A-Za-z0-9_$])(?:return|yield|case|else|do)$/
@@ -111,11 +111,12 @@ function tagHeader(text: string, at: number): TagHeader | undefined {
     }
     if (ch === ">") {
       const header = raw.trim()
+      if (header === "") return { end: j, selfClosing: false, generic: false, fragment: true }
       const name = /^([A-Za-z_$][\w$.:-]*)([\s\S]*)$/.exec(header)
       if (name === null) return undefined
       const rest = name[2] ?? ""
       if (rest !== "" && !/^[\s/]/.test(rest)) {
-        if (rest.startsWith(",")) return { end: j, selfClosing: false, generic: true }
+        if (rest.startsWith(",")) return { end: j, selfClosing: false, generic: true, fragment: false }
         return undefined
       }
       const typeParameters = /^[A-Za-z_$][\w$]*(?:\s+extends\s+[^=]+)?(?:\s*,\s*[A-Za-z_$][\w$]*)*$/.test(header)
@@ -123,6 +124,7 @@ function tagHeader(text: string, at: number): TagHeader | undefined {
         end: j,
         selfClosing: lastSignificant === "/",
         generic: masked.includes(",") || (typeParameters && /\bextends\b/.test(header)),
+        fragment: false,
       }
     }
     raw += ch
@@ -182,8 +184,13 @@ function scanSource(text: string, jsx: boolean): ScanResult {
       } else if (jsx && ch === "<" && /[A-Za-z>]/.test(next) && startsExpression(text, i)) {
         const header = tagHeader(text, i)
         if (header !== undefined && !header.generic) {
-          jsxStack.push("tag")
-          state = "jsxTag"
+          if (header.fragment) {
+            jsxStack.push("children")
+            state = "jsxChildren"
+          } else {
+            jsxStack.push("tag")
+            state = "jsxTag"
+          }
         }
       } else if (ch === "{") {
         braceDepth += 1
@@ -206,8 +213,13 @@ function scanSource(text: string, jsx: boolean): ScanResult {
         } else if (/[A-Za-z>]/.test(next)) {
           const header = tagHeader(text, i)
           if (header !== undefined) {
-            jsxStack.push("tag")
-            state = "jsxTag"
+            if (header.fragment) {
+              jsxStack.push("children")
+              state = "jsxChildren"
+            } else {
+              jsxStack.push("tag")
+              state = "jsxTag"
+            }
           }
         }
       } else if (ch === "{") {
