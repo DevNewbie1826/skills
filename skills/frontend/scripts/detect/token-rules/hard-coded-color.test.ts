@@ -137,6 +137,24 @@ describe("hard-coded-color", () => {
 		expect(hardCodedColor.check({ file: file("x.css", ".a { // color: #1a5cff\n color: #14161a; }"), config: tokens }).length).toBeGreaterThan(0)
 	})
 
+	test("#given a url() in a scss or less file #then its slashes are not a line comment", () => {
+		const tokens = mergeTokenColors({}, ["#1a5cff", "#14161a"])
+		const scss = hardCodedColor.check({ file: { path: "x.scss", text: ".a { background: url(https://assets.test/x.svg) #1a5cff; color: #14161a; }" }, config: tokens })
+		expect(scss.map((hit) => hit.line)).toEqual([1, 1])
+		const less = hardCodedColor.check({ file: { path: "x.less", text: ".a { background: url(//cdn.test/x.svg) #1a5cff; color: #14161a; }" }, config: tokens })
+		expect(less.map((hit) => hit.line)).toEqual([1, 1])
+	})
+
+	test("#given a custom property whose block value ends mid-rule #then the following text stays its value", () => {
+		expect(lines(css(":root { --bundle: { color: #1a5cff; } color: #14161a; }"))).toEqual([])
+		expect(lines(css(":root { --bundle: { color: #1a5cff; }; color: #14161a; }"))).toEqual([1])
+	})
+
+	test("#given a functional color interrupted by a comment #then the color still matches", () => {
+		expect(lines(css(".a { color: rgb(26 /* note */ 92 255); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgb(26/* note */ 92/* note */255); }"))).toEqual([1])
+	})
+
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {
 		expect(ALL_RULES.some((rule) => rule.meta.id === "hard-coded-color")).toBe(true)
 		const findings = lintSources([source("with-tokens/component.css")], { config: configFrom("tokens.css") })

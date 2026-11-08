@@ -3,6 +3,7 @@ import type { SourceHit, SourceRule } from "../rule"
 
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
 const MASKED_CALL = /^(?:var|url)\s*\(/i
+const URL_CALL = /^url\s*\(/i
 const STYLESHEET_EXTENSIONS = ["css", "scss", "less", "pcss", "postcss"]
 const LINE_COMMENT_EXTENSIONS = ["scss", "less"]
 
@@ -86,45 +87,17 @@ function closeCall(text: string, from: number, end: number, lineComments: boolea
 	return end
 }
 
-/** Index just past the `}` matching the `{` at `from`, or `end`. Used to skip a custom property whose value is a block. */
-function closeBrace(text: string, from: number, end: number, lineComments: boolean): number {
-	let i = from
-	let depth = 0
-	while (i < end) {
-		const c = text[i] ?? ""
-		if (c === "\\") {
-			i += 2
-			continue
-		}
-		if (atBlockComment(text, i)) {
-			i = Math.min(end, skipBlockComment(text, i))
-			continue
-		}
-		if (atLineComment(text, i, lineComments)) {
-			i = Math.min(end, skipLineComment(text, i))
-			continue
-		}
-		if (c === "\"" || c === "'") {
-			i = Math.min(end, skipString(text, i))
-			continue
-		}
-		if (c === "{") depth++
-		else if (c === "}") {
-			depth--
-			if (depth === 0) return i + 1
-		}
-		i++
-	}
-	return end
-}
-
-/** Index of `var(`/`url(` at `i`, or -1. A call is masked whole: its arguments may hold `;`, `{` or `//`. */
+/**
+ * Index just past a `var()`/`url()` call starting at `i`, or -1. `//` inside `url()` is never a line
+ * comment: a protocol-relative or scheme URL would otherwise swallow the rest of the file.
+ */
 function maskedCallEnd(text: string, i: number, end: number, lineComments: boolean): number {
 	if (i > 0 && isIdentifierChar(text[i - 1] ?? "")) return -1
 	if (!MASKED_CALL.test(text.slice(i, Math.min(end, i + 8)))) return -1
 	const open = text.indexOf("(", i)
 	if (open === -1 || open >= end) return -1
-	return closeCall(text, open, end, lineComments)
+	const inUrl = URL_CALL.test(text.slice(i, Math.min(end, i + 8)))
+	return closeCall(text, open, end, inUrl ? false : lineComments)
 }
 
 function skipTrivia(text: string, from: number, lineComments: boolean): number {
@@ -162,17 +135,17 @@ function skipTo(text: string, from: number, end: number, terminators: string, li
 			i = Math.min(end, skipBlockComment(text, i))
 			continue
 		}
+		const callEnd = maskedCallEnd(text, i, end, lineComments)
+		if (callEnd > i) {
+			i = callEnd
+			continue
+		}
 		if (atLineComment(text, i, lineComments)) {
 			i = Math.min(end, skipLineComment(text, i))
 			continue
 		}
 		if (c === "\"" || c === "'") {
 			i = Math.min(end, skipString(text, i))
-			continue
-		}
-		const callEnd = maskedCallEnd(text, i, end, lineComments)
-		if (callEnd > i) {
-			i = callEnd
 			continue
 		}
 		if (c === "(") {
@@ -229,49 +202,108 @@ function topLevelColon(text: string, from: number, to: number, lineComments: boo
 	return -1
 }
 
-/** Sub-ranges of a declaration value that may hold a reportable literal: no comments, strings, `var()` or `url()`. */
-function reportableSpans(text: string, start: number, end: number, lineComments: boolean): readonly Span[] {
-	const spans: Span[] = []
-	let chunk = start
-	let i = start
+/**
+ * Index at which a custom property that starts a block value ends: past the `;` that closes its
+ * declaration, or at the `}` closing the enclosing rule. Per CSS a custom property value runs to the next
+ * top-level `;`, so text after its block is still part of the value, not a declaration of its own.
+ */
+function endOfCustomProperty(text: string, from: number, end: number, lineComments: boolean): number {
+	let i = from
+	let braces = 0
 	while (i < end) {
 		const c = text[i] ?? ""
-		if (atBlockComment(text, i) || atLineComment(text, i, lineComments)) {
-			if (i > chunk) spans.push({ start: chunk, end: i })
-			i = Math.min(end, atBlockComment(text, i) ? skipBlockComment(text, i) : skipLineComment(text, i))
-			chunk = i
-			continue
-		}
 		if (c === "\\") {
 			i += 2
 			continue
 		}
-		if (c === "\"" || c === "'") {
-			if (i > chunk) spans.push({ start: chunk, end: i })
-			i = Math.min(end, skipString(text, i))
-			chunk = i
+		if (atBlockComment(text, i)) {
+			i = Math.min(end, skipBlockComment(text, i))
 			continue
 		}
 		const callEnd = maskedCallEnd(text, i, end, lineComments)
 		if (callEnd > i) {
-			if (i > chunk) spans.push({ start: chunk, end: i })
 			i = callEnd
-			chunk = i
+			continue
+		}
+		if (atLineComment(text, i, lineComments)) {
+			i = Math.min(end, skipLineComment(text, i))
+			continue
+		}
+		if (c === "\"" || c === "'") {
+			i = Math.min(end, skipString(text, i))
+			continue
+		}
+		if (c === "{") {
+			braces++
+			i++
+			continue
+		}
+		if (c === "}") {
+			if (braces === 0) return i
+			braces--
+			i++
+			continue
+		}
+		if (c === ";" && braces === 0) return i + 1
+		i++
+	}
+	return end
+}
+
+/**
+ * The value with every non-reportable region replaced by spaces of the same length: comments, strings,
+ * `var()`/`url()` calls, and escapes. Same-length replacement keeps offsets aligned with the source and
+ * lets a functional color stay whole across a comment, as in `rgb(26 /* note *\/ 92 255)`.
+ */
+function maskedValue(text: string, start: number, end: number, lineComments: boolean): string {
+	const chars = text.slice(start, end).split("")
+	const blank = (from: number, to: number): void => {
+		for (let k = Math.max(0, from); k < Math.min(chars.length, to); k++) if (chars[k] !== "\n") chars[k] = " "
+	}
+	let i = 0
+	while (i < chars.length) {
+		const abs = start + i
+		if (text[abs] === "\\") {
+			blank(i, i + 2)
+			i += 2
+			continue
+		}
+		if (atBlockComment(text, abs)) {
+			const stop = Math.min(end, skipBlockComment(text, abs))
+			blank(i, stop - start)
+			i = stop - start
+			continue
+		}
+		const callEnd = maskedCallEnd(text, abs, end, lineComments)
+		if (callEnd > abs) {
+			blank(i, callEnd - start)
+			i = callEnd - start
+			continue
+		}
+		if (atLineComment(text, abs, lineComments)) {
+			const stop = Math.min(end, skipLineComment(text, abs))
+			blank(i, stop - start)
+			i = stop - start
+			continue
+		}
+		if (text[abs] === "\"" || text[abs] === "'") {
+			const stop = Math.min(end, skipString(text, abs))
+			blank(i, stop - start)
+			i = stop - start
 			continue
 		}
 		i++
 	}
-	if (end > chunk) spans.push({ start: chunk, end })
-	return spans
+	return chars.join("")
 }
 
 /**
- * Declaration values of a stylesheet, in source order, excluding custom-property definitions. A statement
- * is a declaration only when it reaches `;` or `}` before any `{`; anything reaching `{` first is a nested
- * rule or block, so a prelude such as `&:hover` or `#abc` is never read as a property.
+ * Value ranges of declarations, in source order, excluding custom-property definitions. A statement is a
+ * declaration only when it reaches `;` or `}` before any `{`; reaching `{` first makes it a nested rule or
+ * block, so a selector prelude such as `&:hover` or `#abc` is never read as a property name or a value.
  */
-function declarationValueSpans(text: string, lineComments: boolean): readonly Span[] {
-	const spans: Span[] = []
+function declarationValueRanges(text: string, lineComments: boolean): readonly Span[] {
+	const ranges: Span[] = []
 	const n = text.length
 	let i = 0
 	let depth = 0
@@ -287,10 +319,9 @@ function declarationValueSpans(text: string, lineComments: boolean): readonly Sp
 		const terminator = stop < n ? (text[stop] ?? "") : ""
 		if (terminator === "{") {
 			const colon = topLevelColon(text, i, stop, lineComments)
-			if ((colon === -1 ? "" : text.slice(i, colon).trim()).startsWith("--")) {
-				i = closeBrace(text, stop, n, lineComments)
-				const after = skipTrivia(text, i, lineComments)
-				i = (text[after] ?? "") === ";" ? after + 1 : after
+			const name = colon === -1 ? "" : text.slice(i, colon).trim()
+			if (name.startsWith("--")) {
+				i = endOfCustomProperty(text, stop, n, lineComments)
 				continue
 			}
 			depth++
@@ -301,13 +332,13 @@ function declarationValueSpans(text: string, lineComments: boolean): readonly Sp
 		if (colon !== -1) {
 			const name = text.slice(i, colon).trim()
 			if (!name.startsWith("--") && !name.startsWith("@")) {
-				spans.push(...reportableSpans(text, skipTrivia(text, colon + 1, lineComments), stop, lineComments))
+				ranges.push({ start: skipTrivia(text, colon + 1, lineComments), end: stop })
 			}
 		}
 		i = stop
 		if (terminator === ";") i++
 	}
-	return spans
+	return ranges
 }
 
 export const hardCodedColor: SourceRule = {
@@ -326,9 +357,10 @@ export const hardCodedColor: SourceRule = {
 		const hits: SourceHit[] = []
 		const starts = lineStarts(file.text)
 		const lineComments = LINE_COMMENT_EXTENSIONS.includes(extensionOf(file.path))
-		for (const span of declarationValueSpans(file.text, lineComments)) {
-			for (const match of file.text.slice(span.start, span.end).matchAll(COLOR_LITERAL)) {
-				const offset = span.start + (match.index ?? 0)
+		for (const range of declarationValueRanges(file.text, lineComments)) {
+			const value = maskedValue(file.text, range.start, range.end, lineComments)
+			for (const match of value.matchAll(COLOR_LITERAL)) {
+				const offset = range.start + (match.index ?? 0)
 				const color = parseColor(match[0])
 				if (!color || !tokens.some((token) => sameColor(token, color))) continue
 				const at = locatedAt(starts, offset)
