@@ -24,7 +24,7 @@ ground -> brief -> build -> subtract -> verify. Name the references the request 
 | Any UI implementation, styling, redesign, mockup, or visual decision | [`design/README.md`](references/design/README.md). It owns the design-system gate and routes Layer B brand references and framework-matched tooling. |
 | Greenfield work | [`design/README.md#greenfield-workflow`](references/design/README.md#greenfield-workflow) before UI work; it owns research, `DESIGN.md`, and the Primitive Showcase Gate. |
 | Existing project that already has `DESIGN.md` or a component system | Read and follow it; update it only for a needed token, primitive, state, motion rule, accessibility constraint, accepted debt, or fidelity requirement |
-| Existing UI with neither `DESIGN.md` nor a component system | Ask whether to preserve the current look with local styling or first extract a design system ([`design/design-system-architecture.md`](references/design/design-system-architecture.md)); do not silently choose |
+| Existing UI with neither `DESIGN.md` nor a component system | For a new screen or flow: ask whether to preserve the current look with local styling or first extract a design system ([`design/design-system-architecture.md`](references/design/design-system-architecture.md)); do not silently choose. A small change (fix, new control, restyled component, copy or spacing change) with a styled sibling to copy needs no extraction and no question: see the small-change rule in [`design/README.md`](references/design/README.md) |
 | No `DESIGN.md`, or extracting a system from existing UI | [`design/design-system-architecture.md`](references/design/design-system-architecture.md) |
 | A concrete visual reference (screenshot, mockup, Figma export) as the contract, or generating/analyzing a visual direction before implementing it | [`design/image-to-code-skill.md`](references/design/image-to-code-skill.md); extract tokens, geometry, states, motion into `DESIGN.md`. For image-only concepts (no code): [`design/image-gen-concepts-web.md`](references/design/image-gen-concepts-web.md) or the mobile/brandkit variants. |
 | A live URL as the contract | [`design/clone-from-url.md`](references/design/clone-from-url.md) |
@@ -73,7 +73,7 @@ ground -> brief -> build -> subtract -> verify. Name the references the request 
 
 ## Shared axioms
 
-- **No design system, no UI work.** `DESIGN.md` exists before components; color, type, and spacing trace to tokens.
+- **No design system, no UI work.** `DESIGN.md` exists before components; color, type, and spacing trace to tokens. Exception: a small change copies the nearest styled sibling ([`design/README.md`](references/design/README.md), small-change rule).
 - **Concrete reference means contract.** Match its pixels, copy, component structure, and responsive intent unless the user approves a deviation.
 - **Do not weaken UX to buy a score.** Preserve meaningful motion, content, and interaction while fixing architecture and assets.
 - **No emoji icons.** Use accessible SVG icon sets.

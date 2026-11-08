@@ -19,7 +19,7 @@ Project and personal design records are separate: project/client requirements gu
 
 - **New project**: If the user gave no concrete visual reference, select one Layer A style skill and one Layer B brand/design-system reference first. Treat them as source material for tokens, layout, component anatomy, states, motion, and taste; customize for the user's product without freestyling past the selected references. Then create `DESIGN.md` before UI, with Section 5 primitives and states defined before implementation.
 - **Existing project without one, but with implicit patterns/components**: Extract the design system from existing code before continuing work.
-- **Existing project without one and without a reusable component layer**: Ask whether to preserve the current look with copy-nearby styling or extract a `DESIGN.md` plus reusable components first. Do not silently choose.
+- **Existing project without one and without a reusable component layer**: Ask whether to preserve the current look with copy-nearby styling or extract a `DESIGN.md` plus reusable components first. Do not silently choose. Exception: a small change (fix, new control, restyled component, copy or spacing change) that has a styled sibling to copy follows the small-change rule in [README.md](README.md) and needs neither extraction nor a question.
 - **Existing project with one**: Read it. Follow it. Update it only when a genuinely new pattern emerges.
 
 ## DESIGN.md Structure
