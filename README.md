@@ -7,8 +7,8 @@ An **OMP (Oh My Pi) skill pack**. It holds two kinds of skills:
   framework/model/agent/language presuppositions). Each `SKILL.md` is a thin router;
   detail lives in `references/`.
 - **OMP-native skills** (`dag-workflow`) — written for OMP, may use OMP
-  mechanisms (`eval`/`task`/`workflow tool`/`local://`/goal mode/`monitor`); exempt from the neutrality rules
-  that govern ported skills (see `docs/PORTING.md` Rule 8).
+  mechanisms (`eval`/`task`/`agent()`/`wait()`/`workpool()`/`local://`/goal mode);
+  exempt from the neutrality rules that govern ported skills (see `docs/PORTING.md` Rule 8).
 
 Progressive disclosure throughout: detail is loaded only when routed to.
 
