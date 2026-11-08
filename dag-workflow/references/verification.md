@@ -184,9 +184,9 @@ Dispatch independent lanes for one candidate head in one host task batch or one 
 | `audit` | `lint`, `spot`, `register-schema` |
 | `mixed` | The union of the primary and secondary work types' lanes |
 
-The tier, the mutation caps by tier, and the `adversarial` lane's conditions live in Work types and required lanes above; the tier is never lowered, and a heavier fact found mid-run raises it. The `tests` lane uses a `quick` task node for the repository suite and the hand-applied mutations its tier's cap allows. A mutation counts as killed only when the unmutated guard passes and that guard fails under the mutation. Apply mutations in a throwaway copy, away from any review reader, at most eight mutation processes at once, and leave no mutant directory behind. A survivor requires a stronger guard or a justified `no-test` row with its QA scenario; a different failure is not a kill. A valid `no-test` row receives QA rather than a mutation.
+The tier, the mutation caps by tier, and the `adversarial` lane's conditions live in Work types and required lanes above; the tier is never lowered, and a heavier fact found mid-run raises it. The `tests` lane uses a `task` node for the repository suite and the hand-applied mutations its tier's cap allows. A mutation counts as killed only when the unmutated guard passes and that guard fails under the mutation. Apply mutations in a throwaway copy, away from any review reader, at most eight mutation processes at once, and leave no mutant directory behind. A survivor requires a stronger guard or a justified `no-test` row with its QA scenario; a different failure is not a kill. A valid `no-test` row receives QA rather than a mutation.
 
-The QA executor runs the plan's happy and failure cases on the real surface, naming the artifact for each QA row. The code reviewer owns `code-review`; the code-review section defines its discipline. Use a `deep-high` task node for `adversarial`. The `sweep` lane records one row per applicable class of the defect-class checklist (`references/orchestration.md`, Defect classes and review axes): the literal command or `no command`, the one binary observable, the verdict, and the artifact. Keep the discovery variant sweep in stage 1 rather than adding a separate merge or synthesis node.
+The `qa` lane runs a `task` node that drives the plan's happy and failure cases on the real surface, naming the artifact for each QA row. The `code-review` lane uses a `reviewer`; the code-review section defines its discipline. The `adversarial` lane uses a `reviewer` at tier L or on a HIGH-RISK row, pinned with `task.agentModelOverrides.reviewer` to an exact model from a family other than the author's; when no other-family model is configured, the round record states same-family as a known limit. The `sweep` lane records one row per applicable class of the defect-class checklist (`references/orchestration.md`, Defect classes and review axes): the literal command or `no command`, the one binary observable, the verdict, and the artifact. Keep the discovery variant sweep in stage 1 rather than adding a separate merge or synthesis node.
 
 ### Evidence and reuse
 
@@ -228,7 +228,7 @@ The completeness register carries `id`, `area`, `surface`, `rule`, `current`, `i
 
 ## Stages 11-12: Code review, triage, and fix
 
-Every reviewer lane uses a locked read-only review worktree. Never inject mutations into a worktree a reviewer reads. Every re-review uses a new reviewer, never the previous child continued. The code-review prompt follows `SKILL.md`, Delegation prompts, loads `remove-ai-slops` and `programming`, and states whether those checks ran. It reports CRITICAL, HIGH, MEDIUM, and LOW, but only the finite-contract test of the verify section determines blocking.
+Every review lane runs a `reviewer` in a locked read-only review worktree; `reviewer` has `bash`, so the read-only rule is held by its prompt plus the locked worktree. Never inject mutations into a worktree a reviewer reads. Every re-review uses a new `reviewer`, never the previous child continued. The code-review prompt follows `SKILL.md`, Delegation prompts, loads `remove-ai-slops` and `programming`, and states whether those checks ran. It reports CRITICAL, HIGH, MEDIUM, and LOW, but only the finite-contract test of the verify section determines blocking.
 
 Collect the stage 10 lane reports, including `code-review` when required. The lead triages their findings, reproduces claimed failures on the stated head, and files only reproduced contract failures as blocking. A FAIL receipt alone is not proof. Notes and evidence correction memos do not require another review. If code fixes change the reviewed head, obtain a new code-review receipt at the resulting candidate head.
 
@@ -248,7 +248,7 @@ The required order is **triage -> fix -> freeze -> pr_open -> round**. Stages 11
 
 After triage and applicable fixes, record a freeze with full `head`, `tree`, and `pr` (or `null` before opening). Confirm that the worktree is clean and no commit is pending. Freeze binds both identities for the whole final round. Nothing commits after the freeze: evidence and correction memos go to the external evidence directory. A fix lands only after the verdict, then requires a fresh freeze and another round.
 
-The required code-review lane must cover this exact frozen head and matching tree. A receipt already produced at that unchanged head may satisfy it; otherwise run a fresh code reviewer there. The round gate refuses final review until this holds.
+The required code-review lane must cover this exact frozen head and matching tree. A receipt already produced at that unchanged head may satisfy it; otherwise run a fresh `reviewer` there. The round gate refuses final review until this holds.
 
 ### PR and monitor
 
@@ -276,7 +276,7 @@ A same-tree code-review receipt from another head, a sibling unit's receipt, a r
 
 ### Reviewer and verdict
 
-After the gate passes, dispatch one fresh `ultrabrain` final reviewer, never a worker on the task, in a locked read-only review worktree. Its prompt follows `SKILL.md`, Delegation prompts, and the evidence rule. Round 1 reads the full change; round 2 and later read the delta since the last reviewed commit plus prior findings. It reports all contract defects together rather than stopping at the first.
+After the gate passes, dispatch one fresh `reviewer` for the round, never a worker on the task, in a locked read-only review worktree. Its prompt follows `SKILL.md`, Delegation prompts, and the evidence rule. Pin `task.agentModelOverrides.reviewer` to the strongest configured model and, where a family other than the author's is required, to an exact model from another family; when no other-family pin is configured, the round record states same-family as a known limit instead of refusing to dispatch. Round 1 reads the full change; round 2 and later read the delta since the last reviewed commit plus prior findings. It reports all contract defects together rather than stopping at the first.
 
 Number each unit's rounds 1, 2, 3, and onward without gaps. Save the report as `<evidence dir>/receipts/final-r<n>-<head7>.md`. Its last nonempty line has exactly this form, substituting real values:
 
@@ -290,7 +290,7 @@ When the reviewer returns, check the observed head and verdict coverage again be
 
 ## The evidence rule
 
-Every code, final, architect, gate, and adversarial reviewer prompt carries this paragraph:
+Every code, final, plan and premise, gate, and adversarial reviewer prompt carries this paragraph:
 
 > Evidence problems are never a REVISE reason. Typos, number errors, and wording or format problems in evidence or reports do not cause REVISE. Write each one as a correction memo in your report; do not fix the evidence yourself and do not request a re-review for it. Only a problem in CODE can cause REVISE, and only inside the plan's finite contract: a listed invariant violated, shown by a failing test (or, for a behavior the plan marks no-test, by its failing QA scenario), or an IS or COMPANION row not delivered. Report every other finding as a note or a follow-up, never as a blocker; a known limit listed in the plan is not a finding. The plan review in `references/planning.md`, Stage 6: Plan review, judges the contract itself.
 
@@ -314,7 +314,7 @@ Run the fix under stage 9 in the same worktree, branch, and PR. Append commits t
 
 ### Escalation and switches
 
-Two consecutive REVISE rounds on the same component **or** the same defect class stop the patch loop and force one `architect` premise review of the assumption the failed fixes shared. Record that premise review as a switch for the REVISE round; it consumes a switch kind even when the round is not a repeat.
+Two consecutive REVISE rounds on the same component **or** the same defect class stop the patch loop and force one fresh `reviewer` premise review of the assumption the failed fixes shared. Record that premise review as a switch for the REVISE round; it consumes a switch kind even when the round is not a repeat.
 
 A third-or-later REVISE that repeats a previously cited blocking defect class requires an approach switch for that same round before the next round. There is no review-round ceiling. A cap forces a switch, never a blocked or terminal outcome, and never permission to stop.
 
@@ -328,8 +328,8 @@ At the next-round transition, compute and record `prior_repeat` once from that h
 
 | Kind | Required change |
 | --- | --- |
-| `premise` | Run the architect premise review if it has not run. |
-| `family` | Move the fix node to a model family different from the one that produced the failed fix, using host routing; use a `deep-high` fix node. |
+| `premise` | Run the `reviewer` premise review if it has not run. |
+| `family` | Move the fix node to a model family different from the one that produced the failed fix: use a `task` fix node with `task.perCallModel: on` and an exact `model` on the item. |
 | `strategy` | Write `SWITCH: <failed premise> -> <new approach>` in the plan and redesign the component rather than adding another patch. |
 | `split` | Program mode only: make the failing component its own unit and PR; keep its gap row open. |
 | `rediscover` | Rerun collection with the judging rules and sweep variants. |
@@ -365,7 +365,7 @@ the binding text; this is how it runs.
 6. **Re-run the prior reproductions at the new head.** Every prior blocking finding's reproduction command
    runs again. A row that does not reproduce any more passes; a row still failing sends the run back to the
    fix step with that row as the next component's target.
-7. **Review with a new reviewer.** The final review is always a new task, never the previous reviewer
+7. **Review with a new reviewer.** The final review always dispatches a fresh `reviewer`, never the previous reviewer
    continued. Its inputs are the delta diff since the last reviewed commit, the prior findings that must now
    fail to reproduce, and the gate table. A round that only re-reads the old report is not a review.
 8. **Read the verdict line.** `APPROVED` on the frozen head ends the loop and the lead merges. `REVISE`
@@ -373,7 +373,7 @@ the binding text; this is how it runs.
 
 ## Stage 17: Post-merge verification
 
-Compare the merged result's full tree with the verified frozen tree. When identical, the QA executor runs a smoke check and reuses the valid evidence. When different, run full QA and the repository suite, typecheck, and build where they exist on the merged result. For artifact work, use its artifact identity rather than inventing a git tree.
+Compare the merged result's full tree with the verified frozen tree. When identical, a `task` node runs a smoke check and reuses the valid evidence. When different, a `task` node runs the full pass: full QA and the repository suite, typecheck, and build where they exist on the merged result. For artifact work, use its artifact identity rather than inventing a git tree.
 
 Post-merge per type: `code` and `design` run every QA scenario plus the suite, typecheck, and build where
 they exist; `design` also runs what the tree comparison calls for; `research` re-checks that the artifact
@@ -389,7 +389,7 @@ Record `post_merge` with full `head`, `tree`, commands, outcomes, captures, and 
 
 The request is complete only when every defect row in the register is `fixed`, `accepted-limit` backed by a plan LIMIT row, or `out-of-scope`; every unit's PR has merged and has post-merge verification recorded; and the evidence record supports completion. Fixed defects have their before/after receipts and fixed head. Taste rows do not block closure.
 
-Use the host's goal/checkpoint equivalent to record completion, with a gate reviewer reading the evidence record. Complete the existing goal only after the merged result passes post-merge verification (stage 17). Remove the worktrees and branches, stop owned processes and monitors, and keep a teardown receipt for each; cleanup records include at least one receipt. Record the defect classes caught through the host's memory capability.
+Use the host's goal/checkpoint equivalent to record completion, with a `reviewer` reading the evidence record; the caller's prompt states its narrow scope (presence, criteria match, schema only), and the lead records the checkpoint. Complete the existing goal only after the merged result passes post-merge verification (stage 17). Remove the worktrees and branches, stop owned processes and monitors, and keep a teardown receipt for each; cleanup records include at least one receipt. Record the defect classes caught through the host's memory capability.
 
 Deliver the final report with results, evidence locations, limits, and every out-of-scope finding with its follow-up path, or "none". Finish only after the register, merged units, post-merge verification, completion checkpoint, cleanup receipts, and final report all hold. Stop conditions and the report shape: see `SKILL.md`, Finish.
 
