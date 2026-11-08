@@ -177,6 +177,19 @@ describe("hard-coded-color", () => {
 		expect(lines(css(":root { --b: [[a; b: #1a5cff]]; color: #14161a; }"))).toEqual([1])
 	})
 
+	test("#given a source color that is not valid CSS #then nothing is invented from it", () => {
+		expect(lines(css(".a { color: rgb(26\\x 92 255); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255garbage); }"))).toEqual([])
+		expect(lines(css(".a { color: myrgb(26 92 255); }"))).toEqual([])
+	})
+
+	test("#given an escaped function or custom-property name #then it is decoded before matching", () => {
+		expect(lines(css(":root { --brand: #14161a; } .a { color: v\\61 r(--brand, #1a5cff); }"))).toEqual([])
+		expect(lines(css(":root { \\2d -brand: #1a5cff; }"))).toEqual([])
+		expect(lines(css(":root { \\2d -brand: { a: #1a5cff; } }"))).toEqual([])
+		expect(lines(css(":root { --brand: #14161a; } .a { color: var(--brand, #1a5cff); }"))).toEqual([])
+	})
+
 	test("#given a bracketed selector prelude #then its brackets do not hide the declaration", () => {
 		expect(lines(css("[a; b: #1a5cff] { color: #14161a; }"))).toEqual([1])
 		expect(lines(css("[data-x=\"a;b\"] { color: #14161a; }"))).toEqual([1])

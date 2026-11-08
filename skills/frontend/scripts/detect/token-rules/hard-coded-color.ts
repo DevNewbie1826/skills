@@ -1,7 +1,9 @@
 import { extensionOf, parseColor, type Rgba } from "../core"
 import type { SourceHit, SourceRule } from "../rule"
 
-const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
+const COLOR_LITERAL = /(?<![A-Za-z0-9_-])#[0-9a-fA-F]{3,8}(?![A-Za-z0-9_-])|(?<![A-Za-z0-9_-])(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
+const HEX_LITERAL = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
+const NUMBER_TOKEN = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?%?$/i
 const MASKED_CALL = /^(?:var|url)\s*\(/i
 const POISON = "\u0001"
 const URL_CALL = /^url\s*\(/i
@@ -35,6 +37,56 @@ const locatedAt = (starts: readonly number[], offset: number): { readonly index:
 }
 
 const isIdentifierChar = (c: string): boolean => /[A-Za-z0-9_-]/.test(c)
+
+/** The character a CSS escape denotes, or a replacement when the escape is malformed or a hex escape runs past its terminator. */
+function decodeEscape(text: string, at: number): { readonly char: string; readonly next: number } {
+	const hex = /^[0-9a-f]{1,6}/i.exec(text.slice(at + 1, at + 7))
+	if (hex) {
+		const stop = at + 1 + hex[0].length
+		const after = text[stop] === " " || text[stop] === "\t" || text[stop] === "\n" ? stop + 1 : stop
+		const code = Number.parseInt(hex[0], 16)
+		return { char: code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : "\u0001", next: after }
+	}
+	if (at + 1 >= text.length) return { char: "\u0001", next: text.length }
+	return { char: text[at + 1] ?? "\u0001", next: at + 2 }
+}
+
+/** The identifier text with CSS escapes decoded, so `v\61 r` is recognised as `var` and `\2d -brand` as `--brand`. */
+function decoded(text: string, limit = 64): string {
+	let out = ""
+	let i = 0
+	while (i < text.length && out.length < limit) {
+		if (text[i] === "\\") {
+			const step = decodeEscape(text, i)
+			out += step.char
+			i = step.next
+			continue
+		}
+		out += text[i] ?? ""
+		i++
+	}
+	return out
+}
+
+/**
+ * A color literal that is valid CSS source syntax, or null. Computed-value parsing accepts numeric prefixes,
+ * so `255garbage` and `rgb(26\x 92 255)` would otherwise compare equal to a real color; source syntax must be
+ * checked token by token first. `color()` keeps its space identifier as the first argument.
+ */
+function sourceColor(text: string): Rgba | null {
+	if (HEX_LITERAL.test(text)) return parseColor(text)
+	const call = /^(rgba?|color|oklab|oklch|lab|lch)\(([^()]*)\)$/i.exec(text)
+	if (!call) return null
+	const fn = (call[1] ?? "").toLowerCase()
+	const parts = (call[2] ?? "").replaceAll("/", " / ").split(/[\s,]+/).filter(Boolean)
+	if (parts.length === 0) return null
+	const head = fn === "color" ? 1 : 0
+	if (fn === "color" && !/^[a-z][a-z0-9-]*$/i.test(parts[0] ?? "")) return null
+	for (const part of parts.slice(head)) {
+		if (part !== "/" && !NUMBER_TOKEN.test(part)) return null
+	}
+	return parseColor(text)
+}
 const isSpace = (c: string): boolean => c === " " || c === "\t" || c === "\n" || c === "\r" || c === "\f"
 const atBlockComment = (text: string, i: number): boolean => text[i] === "/" && text[i + 1] === "*"
 const atLineComment = (text: string, i: number, lineComments: boolean): boolean => lineComments && text[i] === "/" && text[i + 1] === "/"
@@ -94,11 +146,12 @@ function closeCall(text: string, from: number, end: number, lineComments: boolea
  */
 function maskedCallEnd(text: string, i: number, end: number, lineComments: boolean): number {
 	if (i > 0 && isIdentifierChar(text[i - 1] ?? "")) return -1
-	if (!MASKED_CALL.test(text.slice(i, Math.min(end, i + 8)))) return -1
-	const open = text.indexOf("(", i)
-	if (open === -1 || open >= end) return -1
-	const inUrl = URL_CALL.test(text.slice(i, Math.min(end, i + 8)))
-	return closeCall(text, open, end, inUrl ? false : lineComments)
+	const ahead = decoded(text.slice(i, Math.min(end, i + 16)))
+	if (!MASKED_CALL.test(ahead)) return -1
+	const paren = text.indexOf("(", i)
+	if (paren === -1 || paren >= end) return -1
+	const inUrl = URL_CALL.test(ahead)
+	return closeCall(text, paren, end, inUrl ? false : lineComments)
 }
 
 function skipTrivia(text: string, from: number, lineComments: boolean): number {
@@ -301,7 +354,7 @@ function maskedValue(text: string, start: number, end: number, lineComments: boo
 	while (i < chars.length) {
 		const abs = start + i
 		if (text[abs] === "\\") {
-			blank(i, i + 2, " ")
+			blank(i, i + 2, POISON)
 			i += 2
 			continue
 		}
@@ -356,7 +409,7 @@ function declarationValueRanges(text: string, lineComments: boolean): readonly S
 		const terminator = stop < n ? (text[stop] ?? "") : ""
 		if (terminator === "{") {
 			const colon = topLevelColon(text, i, stop, lineComments)
-			const name = colon === -1 ? "" : text.slice(i, colon).trim()
+			const name = colon === -1 ? "" : decoded(text.slice(i, colon).trim())
 			if (name.startsWith("--")) {
 				i = endOfCustomProperty(text, stop, n, lineComments)
 				continue
@@ -367,7 +420,7 @@ function declarationValueRanges(text: string, lineComments: boolean): readonly S
 		}
 		const colon = topLevelColon(text, i, stop, lineComments)
 		if (colon !== -1) {
-			const name = text.slice(i, colon).trim()
+			const name = decoded(text.slice(i, colon).trim())
 			if (!name.startsWith("--") && !name.startsWith("@")) {
 				ranges.push({ start: skipTrivia(text, colon + 1, lineComments), end: stop })
 			}
@@ -398,7 +451,7 @@ export const hardCodedColor: SourceRule = {
 			const value = maskedValue(file.text, range.start, range.end, lineComments)
 			for (const match of value.matchAll(COLOR_LITERAL)) {
 				const offset = range.start + (match.index ?? 0)
-				const color = parseColor(match[0])
+				const color = sourceColor(match[0])
 				if (!color || !tokens.some((token) => sameColor(token, color))) continue
 				const at = locatedAt(starts, offset)
 				const lineEnd = starts[at.index + 1]
