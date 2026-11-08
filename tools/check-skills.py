@@ -34,6 +34,7 @@ class Results(TypedDict):
     summary: dict[str, int]
     ok: bool
 
+SKILLS_DIR = "skills"  # every skill lives in <root>/skills/<name>/
 DEFAULT_SKILLS = ("frontend", "debugging", "remove-ai-slops", "visual-qa", "programming", "tdd", "git-master", "lore", "dag-workflow", "seo-html")
 TEXT_SUFFIXES = {".md", ".py", ".ts", ".mjs", ".json", ".csv", ".txt"}
 SCRIPT_SUFFIXES = {".py", ".ts", ".mjs"}
@@ -455,7 +456,7 @@ ROUTING_CUE_MESSAGE = "reference file needs a routing cue (frontmatter descripti
 ROUTING_PRIMARY_ROLE = re.compile(r"primary role:", re.IGNORECASE)
 # Blockquote markers are Markdown, not the cue. Existing references use `> Read this when`.
 ROUTING_READ_THIS_WHEN = re.compile(r"^(?:>\s*)*read this when\b", re.IGNORECASE)
-# Single-line description cue (PORTING.md Rule 4). Not a YAML parser.
+# Single-line description cue (docs/PORTING.md Rule 4). Not a YAML parser.
 _DESCRIPTION_LINE = re.compile(r"^description:[ 	]*(.*)$")
 _PLAIN_NULLS = {"null", "Null", "NULL", "~"}
 
@@ -514,7 +515,7 @@ def has_routing_cue(lines: list[str]) -> bool:
     )
 
 def check_routing_cues(root: Path, skill: Path, texts: dict[Path, str], results: Results) -> None:
-    # PORTING.md Rule 4. Structure, not neutrality: OMP-native skills are checked too.
+    # docs/PORTING.md Rule 4. Structure, not neutrality: OMP-native skills are checked too.
     references = skill / "references"
     for path, text in texts.items():
         if path.suffix.lower() != ".md" or not is_inside(path, references):
@@ -525,7 +526,7 @@ def check_routing_cues(root: Path, skill: Path, texts: dict[Path, str], results:
         add_failure(results, root, path, 1, "ROUTING-CUE", ROUTING_CUE_MESSAGE, lines[0] if lines else "")
 
 def is_omp_native(skill_text: str | None) -> bool:
-    # OMP-native skills (PORTING.md Rule 8) are exempt from the Tier-A/Tier-B neutrality
+    # OMP-native skills (docs/PORTING.md Rule 8) are exempt from the Tier-A/Tier-B neutrality
     # checks. They mark themselves with `omp-native: true` in SKILL.md frontmatter.
     if skill_text is None:
         return False
@@ -536,7 +537,7 @@ def is_omp_native(skill_text: str | None) -> bool:
     return field is not None and field[0].strip().lower() in ("true", "yes", "1")
 
 def check_skill(root: Path, skill_name: str, allowlists: list[AllowlistEntry], results: Results) -> None:
-    skill, skill_file = root / skill_name, root / skill_name / "SKILL.md"
+    skill, skill_file = root / SKILLS_DIR / skill_name, root / SKILLS_DIR / skill_name / "SKILL.md"
     if not skill.is_dir():
         add_failure(results, root, skill, 0, "STRUCTURE", "missing skill directory")
         return

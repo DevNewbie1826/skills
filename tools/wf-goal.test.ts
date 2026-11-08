@@ -76,7 +76,7 @@ for (const [input, expected] of cases) {
       console.log(`PASS ${JSON.stringify(input)} → no rewrite`);
     }
   } else {
-    const tailOk = actual !== null && actual.includes("dag-workflow/SKILL.md");
+    const tailOk = actual !== null && actual.includes("skills/dag-workflow/SKILL.md");
     const missing = actual === null ? KEYWORDS : KEYWORDS.filter((word) => !standalone(word).test(actual));
     if (missing.length > 0) {
       console.log(`FAIL ${JSON.stringify(input)} → keyword not standalone prose: ${missing.join(", ")}`);

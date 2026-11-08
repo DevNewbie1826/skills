@@ -12,7 +12,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 // effort when automatic thinking is on.
 // /uwf is removed (its only difference was ultrathink, now part of /wf).
 const packRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SKILL_MD = join(packRoot, "dag-workflow", "SKILL.md");
+const SKILL_MD = join(packRoot, "skills", "dag-workflow", "SKILL.md");
 
 const KEYWORDS = "ultrathink workflowz";
 

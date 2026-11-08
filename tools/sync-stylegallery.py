@@ -28,7 +28,7 @@ class Arguments(argparse.Namespace):
     def __init__(self) -> None:
         super().__init__()
         self.upstream: Path = Path(".")
-        self.dest: Path = Path("frontend/references/stylegallery")
+        self.dest: Path = Path("skills/frontend/references/stylegallery")
         self.check: bool = False
 
 
@@ -177,7 +177,7 @@ def drift(expected: Path, actual: Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     _ = parser.add_argument("--upstream", type=Path, required=True, help="upstream git checkout")
-    _ = parser.add_argument("--dest", type=Path, default=Path("frontend/references/stylegallery"),
+    _ = parser.add_argument("--dest", type=Path, default=Path("skills/frontend/references/stylegallery"),
                             help="destination (relative paths use the pack root)")
     _ = parser.add_argument("--check", action="store_true", help="report byte-level drift without writing destination")
     args = parser.parse_args(namespace=Arguments())
