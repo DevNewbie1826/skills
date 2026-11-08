@@ -6,6 +6,14 @@ omp-native: true
 
 # dag-workflow
 
+## Keyword notices are the base contract
+
+`workflowz`, `ultrathink`, and `orchestrate` each carry a notice that is the base contract for this flow: read the notice for the keyword in play from its link before the references below.
+- workflowz: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/workflow-notice.md
+- ultrathink: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/ultrathink-notice.md
+- orchestrate: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/orchestrate-notice.md
+The workflowz and orchestrate notices carry handlebars-style conditionals: follow only the branches that match the tools enabled in this session. If the notice is already in the conversation (typing the keyword or starting with `/wf` injects it), follow that and skip fetching; if a link cannot be fetched, continue with this skill's own references.
+
 Entry is `/wf <task>` (the pack rewrites it to `/goal task: <task>` plus an instruction to read this router) or the user naming this skill. Running the flow authorizes collection, definition, planning, implementation in worktrees, verification, opening PRs, review to APPROVED, merge, and cleanup, so phases already covered are never asked again. Genuine owner decisions (irreversible, destructive, spending money, or a contract-level limit to accept) are asked once, at decide, as one batch with a recommended default each; after that nothing is asked, and a decision that appears mid-run parks only its own lane.
 
 ## The three graphs
