@@ -69,6 +69,8 @@ During the audit loop, after Lighthouse scores pass, run a Design System Complia
 - **Spacing**: every margin/padding/gap value must be a multiple of the base unit (4px) and ideally use a declared token.
 - **Components**: any component used 2+ times must be documented in `DESIGN.md` Section 5. If it isn't, add it.
 - **Depth**: if `DESIGN.md` says "borders-only", there must be zero `box-shadow` declarations. If "tonal-shift", zero borders for surface separation.
+- **Draft guard**: run `bun $SKILL_DIR/scripts/perfection/check-draft-guard.ts <src dirs>`. Besides promotional filler copy, emoji icons, hype badges, and hard-coded vanity stats, it flags a coloured one-side border (including a gradient `border-image`), a coloured `::before`/`::after` bar, an inset `box-shadow` stripe, a hard-stop gradient band along one edge of any box, and a 2px-or-wider accent outline on a rounded card, in CSS, Tailwind, inline styles, and styled-components. Each finding is a violation; identity belongs to tonal surfaces, headings, glyphs, and spacing, state to ink-alpha washes and glyphs. Keyboard `focus-visible` rings, form-validation states, and neutral 1px hairlines stay allowed. Exit 1 means fix it, not argue with it.
+- **Craft floor and WCAG gate**: check the rendered page against [craft-floor.md](craft-floor.md) and state the table in [wcag-gate.md](wcag-gate.md); build rules live in [build-rules.md](build-rules.md).
 
 A page that scores Lighthouse 100 but uses 14 undeclared hex codes and 8 magic spacing values is **NOT DONE**. The design system is the architecture — Lighthouse measures the performance of that architecture.
 

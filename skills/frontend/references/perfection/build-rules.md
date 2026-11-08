@@ -1,0 +1,15 @@
+# Build rules: hit targets, hierarchy, states, keyboard, motion
+
+Read this when building or changing any interface in code, before the first edit and again before calling it done. These are the rules the rendered screen is checked against; `visual-qa` should find nothing new when they were followed.
+
+Take the design-system gate first ([../design/README.md](../design/README.md)): `DESIGN.md` (or, under its small-change rule, the nearest styled sibling) exists before components do, and every colour, size, and spacing value traces to a token in it. A new system is built in this order: colour roles in both themes, then type and spacing, then components that start from the project's own component kit (or a well-known accessible anatomy) restyled with the tokens, never invented shapes.
+
+- **Hit targets.** Touch layouts: at least 44x44 CSS px per interactive element, 8-12 px between neighbours. Pointer-only: at least 24x24 CSS px (WCAG 2.5.8), about 10 px beyond the glyph. Grow the hit area with padding or a pseudo-element, never the glyph; adjacent bar buttons share continuous hit areas.
+- **Hierarchy.** The brief's primary action is the one prominent control; the most important content sits top-leading in reading order; each screen's title says what it is; neither a destructive action nor Cancel is the Enter default.
+- **States.** A control ships with hover, pressed, focus-visible, and disabled states beside its default. It keeps one box in every state: label, icon, and spinner swap inside slots that exist in all states (a min-width sized to the longest label, a spinner overlaying the hidden label), so width, height, and padding never change when the state does. A data view ships empty (offering the next action), loading (a placeholder at once, a spinner only past about a second), error (cause beside the object), and offline.
+- **Keyboard.** Every action reachable in reading order with a visible focus ring that no sticky bar or overlay covers; Escape closes the topmost overlay; Enter triggers the non-destructive default; standard shortcuts keep their meaning; icon-only controls carry an accessible name and a tooltip.
+- **Motion.** Only for a cause (an interaction, a state change, an arrival), on `transform`, `opacity`, `filter`; interruptible, never gating input; movement becomes a cross-fade under `prefers-reduced-motion`. A hover that changes nothing, or motion on a non-interactive element, is slop: leave it out.
+- **Icons.** One SVG icon set; never an emoji.
+- **Browser surfaces and type floor.** Selection, caret, scrollbars, focus ring, link underline offset, and tabular numerals are themed in both themes, and heading steps, spacing ratios, and line length clear the floors in [craft-floor.md](craft-floor.md). Check computed values, not the source.
+- **Concrete reference means contract.** Match its pixels, copy, component structure, and responsive intent unless the user accepts a deviation.
+- **Never weaken UX to buy points.** No dropping animations, hiding content, or simplifying interactions for a Lighthouse score or a deadline.

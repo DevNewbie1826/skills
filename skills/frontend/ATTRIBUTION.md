@@ -112,6 +112,8 @@ SOFTWARE.
 
 `SKILL.md`, routing references, the performance audit helper, and the neutralized cross-reference layer are maintained with this skill. `aside.md`, `lazyweb.md`, and `clone-from-url.md` are project-local synthesis guides based on live-site research and runtime extraction patterns. They do not grant permission to copy third-party trademarks, assets, or proprietary copy.
 
+The newer references `grounding.md`, `brief-and-subtract.md`, `print-paged-media.md`, `interaction-skill.md`, `ambience-skill.md`, `component-catalogs.md`, `craft-floor.md`, `build-rules.md`, and `wcag-gate.md`, and the lint scripts under `scripts/perfection/` (`check-draft-guard.ts`, `check-accent-stripes.ts`, and their helpers and fixtures), are adapted from an Apache-2.0 licensed design-skill collection and a design-quality reference whose licence permits adaptation. They were rewritten for this pack: product, catalog, and agent-runtime names are removed, wording is neutral, and the scripts are behaviorally unchanged apart from renamed identifiers, a `--help` flag, and import layout. The Apache-2.0 text is in `LICENSE-Apache-2.0.txt`.
+
 ---
 
 ## StyleGallery layout, motion, design-engineering, game-UI, platform-guides, and design-terminology corpus
