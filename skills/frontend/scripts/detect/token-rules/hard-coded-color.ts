@@ -3,6 +3,7 @@ import type { SourceHit, SourceRule } from "../rule"
 
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
 const MASKED_CALL = /^(?:var|url)\s*\(/i
+const POISON = "\u0001"
 const URL_CALL = /^url\s*\(/i
 const STYLESHEET_EXTENSIONS = ["css", "scss", "less", "pcss", "postcss"]
 const LINE_COMMENT_EXTENSIONS = ["scss", "less"]
@@ -210,6 +211,7 @@ function topLevelColon(text: string, from: number, to: number, lineComments: boo
 function endOfCustomProperty(text: string, from: number, end: number, lineComments: boolean): number {
 	let i = from
 	let braces = 0
+	let parens = 0
 	while (i < end) {
 		const c = text[i] ?? ""
 		if (c === "\\") {
@@ -233,62 +235,75 @@ function endOfCustomProperty(text: string, from: number, end: number, lineCommen
 			i = Math.min(end, skipString(text, i))
 			continue
 		}
+		if (c === "(") {
+			parens++
+			i++
+			continue
+		}
+		if (c === ")") {
+			if (parens > 0) parens--
+			i++
+			continue
+		}
 		if (c === "{") {
 			braces++
 			i++
 			continue
 		}
 		if (c === "}") {
-			if (braces === 0) return i
-			braces--
+			if (braces === 0 && parens === 0) return i
+			if (braces > 0) braces--
 			i++
 			continue
 		}
-		if (c === ";" && braces === 0) return i + 1
+		if (c === ";" && braces === 0 && parens === 0) return i + 1
 		i++
 	}
 	return end
 }
 
 /**
- * The value with every non-reportable region replaced by spaces of the same length: comments, strings,
- * `var()`/`url()` calls, and escapes. Same-length replacement keeps offsets aligned with the source and
- * lets a functional color stay whole across a comment, as in `rgb(26 /* note *\/ 92 255)`.
+ * The value with every non-reportable region overwritten: comments and escapes become spaces, because they
+ * are whitespace to a CSS parser and a functional color stays whole around them; `var()`, `url()` and
+ * strings become `POISON`, a character that cannot parse as a number, so a color overlapping substituted
+ * content is unparseable instead of invented. Blanking those to spaces would turn `rgb(var(--r) 92 255)`
+ * into `rgb(92 255)` and report a color the declaration never had. Replacement is same-length, so offsets
+ * stay aligned with the source.
  */
 function maskedValue(text: string, start: number, end: number, lineComments: boolean): string {
 	const chars = text.slice(start, end).split("")
-	const blank = (from: number, to: number): void => {
-		for (let k = Math.max(0, from); k < Math.min(chars.length, to); k++) chars[k] = " "
+	const blank = (from: number, to: number, fill: string): void => {
+		for (let k = Math.max(0, from); k < Math.min(chars.length, to); k++) chars[k] = fill
 	}
 	let i = 0
 	while (i < chars.length) {
 		const abs = start + i
 		if (text[abs] === "\\") {
-			blank(i, i + 2)
+			blank(i, i + 2, " ")
 			i += 2
 			continue
 		}
 		if (atBlockComment(text, abs)) {
 			const stop = Math.min(end, skipBlockComment(text, abs))
-			blank(i, stop - start)
+			blank(i, stop - start, " ")
 			i = stop - start
 			continue
 		}
 		const callEnd = maskedCallEnd(text, abs, end, lineComments)
 		if (callEnd > abs) {
-			blank(i, callEnd - start)
+			blank(i, callEnd - start, POISON)
 			i = callEnd - start
 			continue
 		}
 		if (atLineComment(text, abs, lineComments)) {
 			const stop = Math.min(end, skipLineComment(text, abs))
-			blank(i, stop - start)
+			blank(i, stop - start, " ")
 			i = stop - start
 			continue
 		}
 		if (text[abs] === "\"" || text[abs] === "'") {
 			const stop = Math.min(end, skipString(text, abs))
-			blank(i, stop - start)
+			blank(i, stop - start, POISON)
 			i = stop - start
 			continue
 		}

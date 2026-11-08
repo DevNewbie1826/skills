@@ -156,6 +156,26 @@ describe("hard-coded-color", () => {
 		expect(lines(css(".a { color: rgb(26 /* a\nb */ 92 255); }"))).toEqual([1])
 	})
 
+	test("#given a var() inside a functional color #then no color is invented from what remains", () => {
+		expect(lines(css(":root { --r: 26; } .a { color: rgb(var(--r) 92 255); }"), ["#5cff00", "#1a5cff", "#14161a"])).toEqual([])
+		expect(lines(css(".a { color: rgb(26 var(--g) 255); }"), ["#1a5cff", "#1aff00"])).toEqual([])
+	})
+
+	test("#given a string inside a functional color #then no color is invented from what remains", () => {
+		expect(lines(css(".a { color: rgb(\"26\" 92 255); }"), ["#5cff00"])).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255 / \"1\"); }"), ["#1a5cff"])).toEqual([])
+	})
+
+	test("#given a custom property value with parentheses #then its semicolons do not end it", () => {
+		expect(lines(css(":root { --bundle: { a: b; } foo(a; b: #1a5cff); }"))).toEqual([])
+		expect(lines(css(":root { --b: foo(a; b); color: #14161a; }"))).toEqual([1])
+	})
+
+	test("#given a color written across lines #then it is still reported", () => {
+		expect(lines(css(".a { color: rgb(\n 26 92 255\n); }"))).toEqual([1])
+		expect(lines(css(".a { color:\n #14161a; }"))).toEqual([2])
+	})
+
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {
 		expect(ALL_RULES.some((rule) => rule.meta.id === "hard-coded-color")).toBe(true)
 		const findings = lintSources([source("with-tokens/component.css")], { config: configFrom("tokens.css") })
