@@ -1,9 +1,9 @@
 ---
 description: Goal Mode via dag-workflow (Collect→Define→Plan→Plan review→Decide→Goal→Build→Verify→Round→Merge→Post-merge→Cleanup)
 ---
-/goal task: $ARGUMENTS
+/goal ultrathink workflowz
 
-ultrathink workflowz
+task: $ARGUMENTS
 
 Arm the goal this command prefixes, then read the dag-workflow router (resolve it via the pack's absolute-path pattern) and follow its contract.
 

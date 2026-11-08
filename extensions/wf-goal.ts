@@ -2,19 +2,21 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-// /wf <task> → /goal task: <task> + FLOW below. FLOW carries the omp magic
-// keywords ultrathink and workflowz as plain prose on their own line, so omp
-// adds their hidden notices to the goal's first turn. omp matches only the exact
-// lowercase word standing alone, never inside code spans, fences or tags; the
-// notice applies to that turn only, workflowz needs the task and eval tools, and
-// ultrathink also raises reasoning effort when automatic thinking is on.
+// /wf <task> → /goal ultrathink workflowz, then task: <task> + FLOW below. The
+// omp magic keywords ultrathink and workflowz open the goal objective as plain
+// prose, so omp adds their hidden notices to the goal's first turn. omp matches
+// only the exact lowercase word standing alone, never inside code spans, fences
+// or tags, so the line goes before the task text: an unclosed fence or tag in
+// the task would mask anything after it. The notice applies to that turn only,
+// workflowz needs the task and eval tools, and ultrathink also raises reasoning
+// effort when automatic thinking is on.
 // /uwf is removed (its only difference was ultrathink, now part of /wf).
 const packRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILL_MD = join(packRoot, "dag-workflow", "SKILL.md");
 
-const FLOW = `Run this task using the dag-workflow skill.
+const KEYWORDS = "ultrathink workflowz";
 
-ultrathink workflowz
+const FLOW = `Run this task using the dag-workflow skill.
 
 First, read the skill router and follow its contract:
 ${SKILL_MD}
@@ -29,6 +31,6 @@ export default function wfGoalExtension(pi: ExtensionAPI) {
     if (!match) return;
     const task = match[1].trim();
     if (!task) return;
-    return { text: "/goal task: " + task + "\n\n" + FLOW };
+    return { text: "/goal " + KEYWORDS + "\n\ntask: " + task + "\n\n" + FLOW };
   });
 }

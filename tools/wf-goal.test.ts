@@ -20,8 +20,9 @@ if (import.meta.main) {
 
 const FLOW_HEAD = "Run this task using the dag-workflow skill.";
 // omp fires a magic keyword only for the exact lowercase word standing alone in
-// prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), on a line
-// that is not inside a code fence or tag.
+// prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), never
+// inside a code fence or tag. The keywords must open the objective, before the
+// task text: an unclosed fence or tag in the task masks everything after it.
 const KEYWORDS = ["ultrathink", "workflowz"];
 const standalone = (word: string) =>
   new RegExp(
@@ -30,7 +31,7 @@ const standalone = (word: string) =>
     "mu",
   );
 const goalHead = (task: string) =>
-  `/goal task: ${task}\n\n${FLOW_HEAD}`;
+  `/goal ${KEYWORDS.join(" ")}\n\ntask: ${task}\n\n${FLOW_HEAD}`;
 
 const cases: Array<[string, string | null]> = [
   ["/wf 골 테스트!", goalHead("골 테스트!", )],
@@ -41,6 +42,8 @@ const cases: Array<[string, string | null]> = [
   ["/wf 골 테스트!\n", goalHead("골 테스트!")],
   ["/wf 골 테스트!\n\n두 번째 줄", goalHead("골 테스트!\n\n두 번째 줄")],
   ["/wf     code", goalHead("code")],
+  ["/wf test task\n~~~", goalHead("test task\n~~~")],   // unclosed fence in the task
+  ["/wf fix <div> layout", goalHead("fix <div> layout")], // unclosed tag in the task
   // no-rewrite cases
   ["/wf", null],
   ["/wf\n", null],
