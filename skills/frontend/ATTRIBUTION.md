@@ -134,3 +134,12 @@ The `references/deslop/` ruleset (`taxonomy.md`, `detection.md`, `fixes.md`, and
 
 - Licensed under the Apache License, Version 2.0 (full text in `LICENSE-Apache-2.0.txt`).
 - Changes: integrated as a ruleset of the frontend skill rather than a standalone skill; `README.md` rewritten as a pack ruleset guide; `detection.md` adapted for the pack link checker (`$SKILL_DIR`-prefixed inline paths in two prose mentions, and the tell-11 font-size regex rewritten to the equivalent `[4-9]\.?[0-9]*rem`); `scan.mjs` and `rules.ru.mjs` vendored verbatim from upstream; `taxonomy.md` and `fixes.md` are upstream text plus one added routing line and a modification notice (no longer byte-identical); `README.md` and `detection.md` likewise carry a routing line and a modification notice.
+
+---
+
+## Rendered-page quality lint
+
+The rule logic under `scripts/detect/` is adapted from the detector of an upstream frontend tool, and its reflow check from an MIT-licensed style-gallery project. Both were adapted for this neutral pack: names are neutral, only the rendered-quality rules are ported, and the source-text and decoration rules are left to the pack's existing static lints.
+
+- Detector rules: Copyright 2025 Paul Bakaus, licensed under the Apache License, Version 2.0 (full text in `LICENSE-Apache-2.0.txt`).
+- Reflow check: adapted from an MIT-licensed style-gallery project.

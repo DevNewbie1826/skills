@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: "Use for frontend, web UI, UX, visual design, styling, layout, animation, mockups, performance, accessibility, or SEO work, and for any HTML/CSS/SVG artifact rendered to a PDF, print page, report, figure, diagram, or slide. Routes design references, a ground-brief-build-subtract-verify flow, a draft-guard lint, real-browser audits, UI/UX lookups, design operating guidance, and a visual/copy AI-slop taxonomy with a scanner for de-slop audits and pre-ship scans; includes optional framework-specific lanes such as React tooling. Also triggers on: kill AI slop, de-slop, remove the AI look, looks AI-generated, templated, print stylesheet, paged media."
+description: "Use for frontend, web UI, UX, visual design, styling, layout, animation, mockups, performance, accessibility, or SEO work, and for any HTML/CSS/SVG artifact rendered to a PDF, print page, report, figure, diagram, or slide. Routes design references, a ground-brief-build-subtract-verify flow, a draft-guard lint, a rendered-page quality lint, real-browser audits, UI/UX lookups, design operating guidance, and a visual/copy AI-slop taxonomy with a scanner for de-slop audits and pre-ship scans; includes optional framework-specific lanes such as React tooling. Also triggers on: kill AI slop, de-slop, remove the AI look, looks AI-generated, templated, print stylesheet, paged media."
 ---
 
 # Frontend
@@ -47,6 +47,7 @@ ground -> brief -> build -> subtract -> verify. Name the references the request 
 | Comparing design terms across named design systems | [`stylegallery/design-terminology/index.md`](references/stylegallery/design-terminology/index.md) |
 | Domain map of all StyleGallery areas | [`stylegallery/index.md`](references/stylegallery/index.md); synced revision and resync procedure: [`stylegallery/UPSTREAM.md`](references/stylegallery/UPSTREAM.md) |
 | Frontend code, performance, SEO, accessibility, or quality auditing | [`perfection/README.md`](references/perfection/README.md); build for production, then run the lighthouse audit (Commands below). Any code change also takes [`perfection/build-rules.md`](references/perfection/build-rules.md) and [`perfection/craft-floor.md`](references/perfection/craft-floor.md). |
+| Render-based page-quality check of a built page: contrast on painted backgrounds, type scale, overflow at width, heading outline, broken images, script errors | [`perfection/detect.md`](references/perfection/detect.md); run after the draft-guard lint and before `visual-qa` (Commands below). |
 | A new screen or flow, a redesign, or design-system creation or rework | [`design/grounding.md`](references/design/grounding.md), then the brief in [`design/brief-and-subtract.md`](references/design/brief-and-subtract.md) |
 | Any screen you build or change (small changes included) | [`design/brief-and-subtract.md`](references/design/brief-and-subtract.md): brief, draft guard, subtract, scoped fix passes |
 | Finishing a UI or design-system deliverable | [`perfection/wcag-gate.md`](references/perfection/wcag-gate.md): the PASS/FAIL table for the hand-off |
@@ -92,5 +93,6 @@ bun $SKILL_DIR/scripts/perfection/check-draft-guard.ts <changed files or dirs>  
 bun $SKILL_DIR/scripts/perfection/check-accent-stripes.ts <changed files or dirs>   # stripe and accent-outline rules only
 python3 $SKILL_DIR/scripts/perfection/lighthouse-audit.py https://localhost:3000   # perfection/README.md; run mobile + desktop presets
 python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<query>" --design-system -p "Project"   # guide/usage.md
+bun $SKILL_DIR/scripts/detect/cli.ts [--json] [--reflow] [--config detect.json] <file-or-dir-or-url>...   # rendered-page quality lint; references/perfection/detect.md
 node $SKILL_DIR/references/deslop/scripts/scan.mjs <root> [--json] [--only=01,06] [--exclude=legacy]   # deslop/README.md
 ```
