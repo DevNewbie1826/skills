@@ -70,6 +70,7 @@ Read the matching tool reference before use. If a named tool is unavailable, use
 | Situation | Reference |
 |---|---|
 | The failure is intermittent: fails sometimes, a different test each run, passes in isolation, or fails only in CI. | [03-flaky-triage.md](references/methodology/03-flaky-triage.md) - read before Phase 2. |
+| A UI bug must be reproduced in a real browser (layout, client state, console, network). | [browser-qa.md](references/browser-qa.md) - generic method: reproduction loop, console and network capture, screenshot discipline, flake handling. |
 | You cannot run the real operation but still need runtime evidence. | [partial-runtime-evidence.md](references/methodology/partial-runtime-evidence.md) |
 | You are about to declare an extraction, audit, or reverse-engineering artifact complete and need a skeptical pass. | [verification review pattern](references/methodology/partial-runtime-evidence.md#verification-review-pattern-for-non-debug-tasks) |
 
