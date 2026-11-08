@@ -61,6 +61,13 @@ describe("hard-coded-color", () => {
 		])
 	})
 
+	test("#given a hex-looking id that is also a token color #then the selector itself is never reported", () => {
+		const config = mergeTokenColors(configFrom("tokens.css"), ["#fade"])
+		const hits = hardCodedColor.check({ file: source("with-tokens/id-selector.css"), config })
+		expect(hits.map((hit) => hit.line)).toEqual([2, 7])
+		expect(hits.every((hit) => !hit.snippet.startsWith("#"))).toBe(true)
+	})
+
 	test("#given the rule switched off #then token literals are silent", () => {
 		const config = { ...configFrom("tokens.css"), rules: { "hard-coded-color": "off" as const } }
 		expect(lintSources([source("with-tokens/component.css")], { config })).toEqual([])

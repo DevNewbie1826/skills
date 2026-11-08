@@ -5,6 +5,8 @@ const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\(
 const COMMENT = /\/\*[\s\S]*?\*\//g
 /** Token declarations and var() references (including a fallback) are where literals belong, so both are masked. */
 const TOKEN_VALUE = /(?:["']?--[A-Za-z0-9_-]+["']?)\s*:\s*[^;{}]+|var\([^()]*\)/g
+/** Selector text is masked so a hex-looking id such as `#fade` is not read as a color literal. */
+const SELECTOR = /[^{};]*\{/g
 
 const EXTENSIONS = ["css", "scss", "less", "pcss", "postcss", "html", "htm", "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "vue", "svelte", "astro"]
 
@@ -26,7 +28,7 @@ export const hardCodedColor: SourceRule = {
 			return color ? [color] : []
 		})
 		if (tokens.length === 0) return []
-		const scanned = mask(mask(file.text, COMMENT), TOKEN_VALUE)
+		const scanned = mask(mask(mask(file.text, COMMENT), SELECTOR), TOKEN_VALUE)
 		const hits: SourceHit[] = []
 		for (const match of scanned.matchAll(COLOR_LITERAL)) {
 			if (match.index === undefined) continue
