@@ -55,6 +55,8 @@ RM = sampled sources (12 per catalog) that carry a `prefers-reduced-motion` path
 1. **Route.** Pick the section 1 row; read at most two catalogs. Check `package.json` and prefer the engine already installed. Never add a second motion engine for one effect.
 2. **Find.** Search the catalog index for the intent word:
 
+Placeholder: `<catalog-origin>` is the host of the open catalog you picked from the routing table. Find it with a web search for an open, copy-in pattern catalog that publishes raw source and matches the tone, check its licence first, and use the endpoints below only if it publishes them (many serve `llms.txt` and a registry index). If you cannot find one, skip this lane and say so in the Research Log.
+
    ```bash
    curl -s https://<catalog-origin>/llms.txt | grep -i approval
    curl -s https://<catalog-origin>/r/registry.json | jq -r '.items[].name' | grep -i tab

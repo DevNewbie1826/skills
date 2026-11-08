@@ -20,7 +20,7 @@ For each journey step, write what the product does at its best: what the user se
 
 ## 4. Gap ledger
 
-Capture the surface under work with `visual-qa` (every state at 390 and 1440 CSS px, both themes; for a new screen, capture the first draft after the brief is written, and let the ledger grow as the draft is checked). List every difference from the ideal state. Do not rank the small ones away.
+Capture the surface under work with `visual-qa` (every state at 375, 768, and 1280 CSS px, both themes; for a new screen, capture the first draft after the brief is written, and let the ledger grow as the draft is checked). List every difference from the ideal state. Do not rank the small ones away.
 
 Then read the rule sources in full and add every violation of each: the build rules and draft guard in [brief-and-subtract.md](brief-and-subtract.md) and [../perfection/build-rules.md](../perfection/build-rules.md) (include the `check-draft-guard.ts` output), the `visual-qa` checklist, every reference this request routed to, and the WCAG 2.2 AA items in [../perfection/wcag-gate.md](../perfection/wcag-gate.md). Capture a screenshot for each row and keep the ledger in a durable record (a file in the repository or the task's own tracking record) so no finding lives only in context. One row per gap:
 

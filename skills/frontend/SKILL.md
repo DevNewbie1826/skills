@@ -5,7 +5,7 @@ description: "Use for frontend, web UI, UX, visual design, styling, layout, anim
 
 # Frontend
 
-This file is a router, not a rulebook. Load the smallest set of references that covers the request, state which you loaded, then execute under their guidance. The bar is restraint with a visible hierarchy: one primary action, the important thing first, nothing on screen without a job. A quiet, correct screen that holds its hierarchy at 390 and 1440 CSS px in both themes is a finish; atmosphere, motion, and award-grade surface work are built when the brief asks (a named brand, "premium", a marketing page), never by default for an internal tool, dashboard, report, or figure. For implementation work, load design and perfection together.
+This file is a router, not a rulebook. Load the smallest set of references that covers the request, state which you loaded, then execute under their guidance. The bar is restraint with a visible hierarchy: one primary action, the important thing first, nothing on screen without a job. A quiet, correct screen that holds its hierarchy at 375, 768, and 1280 CSS px in both themes is a finish; atmosphere, motion, and award-grade surface work are built when the brief asks (a named brand, "premium", a marketing page), never by default for an internal tool, dashboard, report, or figure. For implementation work, load design and perfection together.
 
 ## Flow
 
@@ -89,6 +89,7 @@ Run from the skill directory (`$SKILL_DIR`); full flags live in each owning READ
 
 ```bash
 bun $SKILL_DIR/scripts/perfection/check-draft-guard.ts <changed files or dirs>   # exit 1 = a first-draft tell; design/brief-and-subtract.md
+bun $SKILL_DIR/scripts/perfection/check-accent-stripes.ts <changed files or dirs>   # stripe and accent-outline rules only
 python3 $SKILL_DIR/scripts/perfection/lighthouse-audit.py https://localhost:3000   # perfection/README.md; run mobile + desktop presets
 python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<query>" --design-system -p "Project"   # guide/usage.md
 node $SKILL_DIR/references/deslop/scripts/scan.mjs <root> [--json] [--only=01,06] [--exclude=legacy]   # deslop/README.md

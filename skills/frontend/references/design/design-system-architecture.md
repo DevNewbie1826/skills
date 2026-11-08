@@ -166,7 +166,6 @@ code; do not invent future components just to fill the section.
 | Emphasis | 400-600ms | cubic-bezier(0.16, 1, 0.3, 1) | Page transition, hero entry |
 | Scroll-driven | tied to scroll | linear | Parallax, progress, reveal |
 
-### Rules
 ### Feedback thresholds
 
 | Event | Feedback | Timing |

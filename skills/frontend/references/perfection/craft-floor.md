@@ -29,7 +29,7 @@ Exempt: a surface with no instance of the element (no inputs means no caret), an
 | Type scale steps (*floor*) | Each step of the heading ladder (display, h1, h2, h3) and the step from the smallest heading to body differ by at least 1.25x in size. Body-family roles (lead, body, small, caption, overline or label) may sit closer, but each also differs from its neighbour by weight, colour or case, never by size alone. | computed `font-size` of each role in use |
 | Space around a heading | The space above a section heading is at least 1.5x the space below it, so the heading belongs to the content it introduces. | computed margin/padding plus the parent gap |
 | Group separation | The gap between groups is at least 2x the gap inside a group. | computed `gap` / margins of siblings |
-| Body measure (*floor*) | Body text runs 65-75 characters per line on desktop; 45 is the lower bound on a phone. | rendered line length at 1440 and 390 |
+| Body measure (*floor*) | Body text runs 65-75 characters per line on desktop; 45 is the lower bound on a phone. | rendered line length at 1280 and 375 |
 | Display size | A display heading stays at or under 6rem unless the chosen route sets a larger display scale. | computed `font-size` |
 | Tracking | Letter spacing stays at or above -0.04em unless the chosen route sets tighter display tracking; -0.02em to -0.03em usually reads better on large type. Body text keeps 0. | computed `letter-spacing` / `font-size` |
 

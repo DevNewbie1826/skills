@@ -23,6 +23,8 @@ The contract, in order:
 
 ## 2. Consultation recipe (public endpoints, no auth, no browser)
 
+Placeholder: `<catalog-origin>` is the host of the open catalog you picked from the routing table. Find it with a web search for an open, copy-in pattern catalog that publishes raw source and matches the tone, check its licence first, and use the endpoints below only if it publishes them (many serve `llms.txt` and a registry index). If you cannot find one, skip this lane and say so in the Research Log.
+
 ```bash
 curl -s https://<catalog-origin>/llms.txt                         # catalog: every pattern + one-line feel
 curl -s https://<catalog-origin>/r                                # registry index (JSON): slugs, categories, endpoints
