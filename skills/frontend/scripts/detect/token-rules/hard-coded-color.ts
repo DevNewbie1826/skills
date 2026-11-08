@@ -91,13 +91,16 @@ function sourceColor(text: string): Rgba | null {
 	const hueAt = fn === "hsl" || fn === "hsla" ? 0 : fn === "lch" || fn === "oklch" ? 2 : -1
 	const channels = parts.slice(head)
 	const alphaAt = channels.indexOf("/")
-	const body = alphaAt === -1 ? channels : channels.slice(0, alphaAt)
+	// Legacy `rgb(26, 92, 255, 0.5)` puts the alpha in a fourth comma-separated slot, so the arity rule must
+	// account for it before requiring three components. Only commas can select that form: `rgb(26 92 255 1)`
+	// has four space-separated values and no slash, which is not valid CSS.
+	const commaSeparated = /,/.test(call[2] ?? "")
+	const commaAlpha = alphaAt === -1 && commaSeparated && fn.startsWith("rgb") && channels.length === 4 ? channels[3] : undefined
+	const body = alphaAt !== -1 ? channels.slice(0, alphaAt) : commaAlpha === undefined ? channels : channels.slice(0, 3)
 	// Every color function takes exactly three components. Without this arity check the computed-value parser
 	// discards surplus channels, so `rgb(26 92 255 1 99)` would be compared as if it were a valid color.
 	if (body.length !== 3) return null
-	const commaAlpha = alphaAt === -1 && fn.startsWith("rgb") && channels.length === 4 ? channels[3] : undefined
 	if (alphaAt !== -1 && (alphaAt !== 3 || channels.length !== 5)) return null
-	if (alphaAt === -1 && channels.length !== body.length && commaAlpha === undefined) return null
 	for (const [at, part] of body.entries()) {
 		if (at === hueAt ? !NUMBER_TOKEN.test(part) && !ANGLE_TOKEN.test(part) : !NUMBER_TOKEN.test(part)) return null
 	}

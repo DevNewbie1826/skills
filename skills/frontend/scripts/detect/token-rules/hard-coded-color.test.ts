@@ -237,6 +237,17 @@ describe("hard-coded-color", () => {
 		expect(lines(css(".a { color: lch(50% 20 180deg); }"), turnToken)).toEqual([1])
 	})
 
+	test("#given a comma-separated rgba color #then the alpha slot is not mistaken for a surplus channel", () => {
+		expect(lines(css(".a { color: rgb(26, 92, 255); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgba(26, 92, 255, 1); }"))).toEqual([1])
+		expect(lines(css(".a { color: rgba(26, 92, 255, 0.5); }"), ["rgba(26, 92, 255, 0.5)"])).toEqual([1])
+	})
+
+	test("#given four space-separated channels without a slash #then the color is not invented", () => {
+		expect(lines(css(".a { color: rgb(26 92 255 1); }"))).toEqual([])
+		expect(lines(css(".a { color: rgb(26 92 255); }"))).toEqual([1])
+	})
+
 	test("#given the built-in registry #then the rule runs on stylesheet sources with project tokens", () => {
 		expect(ALL_RULES.some((rule) => rule.meta.id === "hard-coded-color")).toBe(true)
 		const findings = lintSources([source("with-tokens/component.css")], { config: configFrom("tokens.css") })
