@@ -19,6 +19,16 @@ if (import.meta.main) {
   const handler = handlers[0];
 
 const FLOW_HEAD = "Run this task using the dag-workflow skill.";
+// omp fires a magic keyword only for the exact lowercase word standing alone in
+// prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), on a line
+// that is not inside a code fence or tag.
+const KEYWORDS = ["ultrathink", "workflowz"];
+const standalone = (word: string) =>
+  new RegExp(
+    "^[^`<>]*" + String.raw`(?<![\p{L}\p{N}_./\\-])(?<!::)` + word +
+      String.raw`(?![\p{L}\p{N}_/\\-])(?!\.[\p{L}\p{N}_-])(?!\()` + "[^`<>]*$",
+    "mu",
+  );
 const goalHead = (task: string) =>
   `/goal task: ${task}\n\n${FLOW_HEAD}`;
 
@@ -64,11 +74,15 @@ for (const [input, expected] of cases) {
     }
   } else {
     const tailOk = actual !== null && actual.includes("dag-workflow/SKILL.md");
-    if (actual === null || !actual.startsWith(expected) || !tailOk) {
+    const missing = actual === null ? KEYWORDS : KEYWORDS.filter((word) => !standalone(word).test(actual));
+    if (missing.length > 0) {
+      console.log(`FAIL ${JSON.stringify(input)} → keyword not standalone prose: ${missing.join(", ")}`);
+      failed++;
+    } else if (actual === null || !actual.startsWith(expected) || !tailOk) {
       console.log(`FAIL ${JSON.stringify(input)}\n  expected head: ${JSON.stringify(expected)}\n  actual head:   ${JSON.stringify(actual?.slice(0, expected.length + 4))}`);
       failed++;
     } else {
-      console.log(`PASS ${JSON.stringify(input)} → head OK, skill read OK`);
+      console.log(`PASS ${JSON.stringify(input)} → head OK, skill read OK, keywords OK`);
     }
   }
 }
