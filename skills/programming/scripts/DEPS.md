@@ -50,6 +50,18 @@ This file declares the non-standard-library packages imported by bundled scripts
 
 **Run:** invoke with Bun or another TypeScript runner that resolves the installed package.
 
+## `scripts/typescript/check-test-junk.ts`
+
+**Third-party packages:** none. It uses Node built-ins only (shared rules live in `scripts/typescript/check-test-junk-rules.ts`, a module with no entrypoint).
+
+**Run:** `bun scripts/typescript/check-test-junk.ts [--json] <file-or-dir>...`; use another TypeScript runner that resolves extensionless imports if Bun is unavailable.
+
+## `scripts/typescript/mutation-proof.ts`
+
+**Third-party packages:** none. It uses Node built-ins only and restores the mutated file byte for byte.
+
+**Run:** `bun scripts/typescript/mutation-proof.ts --file <owner> --find <text> --replace <text> --test '<label>=<command>'`.
+
 ## `scripts/typescript/new-project.ts`
 
 **Third-party packages:** none for the generator itself. The generated Bun template uses `hono`; the generated Node template also uses `@hono/node-server`, `tsx`, and `@types/node`.

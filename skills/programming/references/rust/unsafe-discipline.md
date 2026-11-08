@@ -196,10 +196,13 @@ What miri catches that the borrow checker cannot:
 The 2024 edition makes the unsafety of FFI items visible at the declaration:
 
 ```rust
-use core::ffi::c_char;
+use core::ffi::{c_char, c_int};
 
-// SAFETY: this signature matches <string.h> for every target we build.
+// SAFETY: these signatures match <string.h>/<unistd.h> for every target we build.
 unsafe extern "C" {
+    /// Total for every input and no preconditions: callable from safe code.
+    pub safe fn getpid() -> c_int;
+
     /// Caller must pass a valid NUL-terminated string.
     pub unsafe fn strlen(s: *const c_char) -> usize;
 }

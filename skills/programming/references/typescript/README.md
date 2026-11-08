@@ -93,10 +93,10 @@ try {
 }
 
 // GOOD — top-level boundary (only place catch-all is acceptable)
-async function main(): Promise<void> {  // no-excuse-ok: catch
+async function main(): Promise<void> {
   try {
     await run()
-  } catch (e) {
+  } catch (e) {  // no-excuse-ok: catch
     console.error("unhandled:", e)
     process.exit(1)
   }
@@ -189,10 +189,9 @@ Tests are strict too, with these exceptions (configure in `biome.jsonc` override
 |---|---|
 | Use `expect()` assertions | That's how testing works |
 | Use magic numbers | Test data |
-| Access private members via bracket notation | Testing internals |
 | Skip readonly on test fixtures | Mutable setup/teardown |
 
-Tests still follow the iron list — branded types, typed errors, exhaustive switch.
+Tests still follow the iron list — branded types, typed errors, exhaustive switch — and the authoring gate in [`../testing/README.md`](../testing/README.md). Private members are reached through the public boundary, never by bracket notation: a test on internals is an implementation mirror.
 
 ## Existing codebases
 
@@ -200,4 +199,4 @@ When editing an existing file that doesn't follow these rules: **write new code 
 
 ## Activation
 
-This skill activates whenever you are writing or modifying any `.ts` or `.tsx` file. Even one-off scripts get the strict treatment.
+This reference applies to `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, and `.cjs`. JavaScript uses the same lint, formatting, and copy rules; TypeScript-only syntax and compiler gates apply to TS or checked JS projects. Even one-off scripts get the strict treatment.

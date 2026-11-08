@@ -155,13 +155,13 @@ except httpx.HTTPStatusError as e:
 except httpx.ConnectError:
     raise ServiceUnavailableError(service="api") from None
 
-# GOOD — top-level boundary (only place broad catch is acceptable)
-def main() -> int:  # noqa: BROAD_EXCEPT_OK
+# GOOD — top-level boundary (CLI entry or HTTP handler: the only places a broad catch is acceptable)
+def main() -> int:
     try:
         return run()
-    except Exception:
+    except Exception:  # noqa: BROAD_EXCEPT_OK
         logger.exception("unhandled error")
-        return 1
+        raise
 ```
 
 ### Async
@@ -309,7 +309,7 @@ Tests are strict too, with these exceptions (already configured in `pyproject.to
 | Skip docstrings | Test names are the docs (`D` ignored) |
 | Have unused function args | Fixtures (`ARG` ignored) |
 
-Tests still follow the iron list — frozen dataclasses, typed errors, exhaustive match. If test fixtures need mutable state, use `# noqa: MUTABLE_OK` on the fixture class.
+Tests still follow the iron list — frozen dataclasses, typed errors, exhaustive match — and the authoring gate in [`../testing/README.md`](../testing/README.md). If test fixtures need mutable state, use `# noqa: MUTABLE_OK` on the fixture class.
 
 ## Existing codebases
 

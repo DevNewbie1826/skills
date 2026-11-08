@@ -20,7 +20,7 @@ These apply before the first edit, for any change to code, configuration, docume
 4. **Parse once at the boundary.** Convert untrusted HTTP, RPC, CLI, configuration, file, queue, and database inputs into typed values at ingress. Interior code consumes typed values and does not repeat validation.
 5. **Match closed variants exhaustively.** Use the language's exhaustive-match pattern and an explicit unreachable assertion where the compiler cannot prove completeness. Do not let a default conditional silently accept a new variant.
 6. **Trust established contracts.** Do not add null checks, broad catches, casts, or post-action verification for states that a type, framework, or operation already guarantees. Validate only at true system boundaries.
-7. **Prove behavior with focused tests.** A behavior change earns a test that fails for the intended reason, then the minimum implementation, then a green refactor. The full cycle — and when it does not apply — plus test shape, fakes and mocks, and determinism, live in the `tdd` skill (Test-Driven Delivery).
+7. **Prove behavior with focused tests.** A behavior change earns a test that fails for the intended reason, then the minimum implementation, then a green refactor. The full cycle — and when it does not apply — plus test shape, fakes and mocks, and determinism, live in the `tdd` skill (Test-Driven Delivery); the four-question authoring gate and the junk-test classes live in [Testing](testing/README.md) and [Junk classes](testing/junk-classes.md).
 
 ## Cross-language design rules
 
@@ -74,7 +74,7 @@ Run this review after every substantive code change.
 4. **Escape hatches:** did a cast, unchecked assertion, broad catch, suppression, or warning override hide a type or contract problem?
 5. **Defensive layers:** did a redundant null check, catch, or verification accumulate around a trusted contract?
 6. **Abstractions:** did a one-use helper or broad interface appear without a real second caller?
-7. **Tests:** would a focused test fail if this behavior regressed?
+7. **Tests:** does every test you added or reshaped pass the [authoring gate](testing/README.md), go red when its production owner is broken, and match no row of [Junk classes](testing/junk-classes.md)?
 8. **Parameters:** did a signature gain too many independent inputs or an untyped options bag?
 9. **Names:** are names positive and direct?
 10. **Logging:** if logs changed, are they consistent with the local practice and useful to their consumer?
@@ -94,6 +94,9 @@ bash scripts/rust/check-no-excuse-rules.sh <changed-paths>
 
 # TypeScript
 bun run scripts/typescript/check-no-excuse-rules.ts <changed-paths>
+
+# Any language: junk classes a regex can see in the test files you touched
+bun scripts/typescript/check-test-junk.ts <changed-test-paths>
 ```
 
 The Python checker requires Python 3.9 or newer and only the standard library. If `python3` is not the local command, use the platform's compatible Python launcher. The Rust and TypeScript checkers require their respective runtimes; if one is unavailable, run the project's native compiler and test command where possible, or state that the unavailable check was not run. Never report an unavailable validator as a pass.

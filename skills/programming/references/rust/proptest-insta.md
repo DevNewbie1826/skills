@@ -2,7 +2,7 @@
 
 > Read this when designing Rust property tests, snapshots, or deterministic test fixtures.
 
-Two test types every Rust project should have alongside unit tests. Proptest hunts for inputs your unit tests forgot to try. Insta locks down output shapes you do not want to silently change.
+Before adding any test, answer the authoring gate in [`../testing/README.md`](../testing/README.md). Two test types every Rust project should have alongside unit tests. Proptest hunts for inputs your unit tests forgot to try. Insta locks down output shapes you do not want to silently change.
 
 ## When to reach for each
 
