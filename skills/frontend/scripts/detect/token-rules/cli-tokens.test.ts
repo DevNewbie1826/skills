@@ -26,14 +26,16 @@ describe("cli token flags", () => {
 	test("#given --tokens with a CSS tokens file #then the rule reports the token literals", async () => {
 		const result = await run(["--json", "--tokens", tokens, component])
 		expect(result.code).toBe(1)
-		expect(JSON.parse(result.stdout).map((finding: { ruleId: string }) => finding.ruleId)).toEqual(["hard-coded-color", "hard-coded-color", "hard-coded-color"])
+		expect(JSON.parse(result.stdout).map((finding: { ruleId: string }) => finding.ruleId)).toEqual([
+			"hard-coded-color", "hard-coded-color", "hard-coded-color", "hard-coded-color",
+		])
 	})
 
 	test("#given --tokens before --config #then the config does not drop the loaded tokens", async () => {
 		const configPath = join(FIXTURE_DIR, "config.json")
 		const result = await run(["--json", "--tokens", tokens, component], configPath)
 		expect(result.code).toBe(1)
-		expect(JSON.parse(result.stdout).length).toBe(3)
+		expect(JSON.parse(result.stdout).length).toBe(4)
 	})
 
 	test("#given a missing tokens file #then the CLI exits 2 with a message naming it", async () => {

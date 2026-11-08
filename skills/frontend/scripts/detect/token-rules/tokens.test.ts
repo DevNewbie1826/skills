@@ -11,12 +11,12 @@ describe("loadTokens", () => {
 		expect(loadTokens()).toEqual({ ok: true, colors: [] })
 	})
 
-	test("#given a CSS custom-property file #then only declared colors load", () => {
-		expect(loadTokens(fixture("tokens.css"))).toEqual({ ok: true, colors: ["#1a5cff", "#14161a"] })
+	test("#given a CSS custom-property file #then only declared colors load, including uppercase function forms", () => {
+		expect(loadTokens(fixture("tokens.css"))).toEqual({ ok: true, colors: ["#1a5cff", "#14161a", "RGB(0 128 64)"] })
 	})
 
 	test("#given a JSON tokens tree #then colors load at any depth", () => {
-		expect(loadTokens(fixture("tokens.json"))).toEqual({ ok: true, colors: ["#1a5cff", "#14161a"] })
+		expect(loadTokens(fixture("tokens.json"))).toEqual({ ok: true, colors: ["#1a5cff", "#14161a", "RGB(0 128 64)"] })
 	})
 
 	test("#given a missing file #then the loader reports it instead of empty tokens", () => {
@@ -35,6 +35,12 @@ describe("mergeTokenColors", () => {
 		const config = { designTokens: { colors: ["#1A5CFF"], radii: [8] } }
 		expect(mergeTokenColors(config, ["#1a5cff", "#14161a"])).toEqual({
 			designTokens: { colors: ["#1A5CFF", "#14161a"], radii: [8] },
+		})
+	})
+
+	test("#given a functional color equivalent to a hex token #then it is not appended twice", () => {
+		expect(mergeTokenColors({ designTokens: { colors: ["#1a5cff"] } }, ["rgb(26 92 255)", "RGB(26, 92, 255)"])).toEqual({
+			designTokens: { colors: ["#1a5cff"] },
 		})
 	})
 

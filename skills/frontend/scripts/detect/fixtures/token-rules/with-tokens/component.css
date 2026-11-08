@@ -8,7 +8,8 @@
 }
 
 .brand-fallback {
-	background: var(--color-brand, #1a5cff);
+	background: var(--color-brand, rgb(26 92 255));
+	border-color: var(--color-ink, rgb(20, 22, 26));
 }
 
 .off-token {
@@ -17,4 +18,12 @@
 
 .commented {
 	/* #1a5cff */
+}
+
+.uppercase {
+	color: RGB(26 92 255);
+}
+
+.quoted {
+	content: "#1a5cff";
 }

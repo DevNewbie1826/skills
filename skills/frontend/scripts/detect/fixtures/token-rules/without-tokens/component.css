@@ -3,18 +3,6 @@
 	color: #14161a;
 }
 
-.hero {
-	background: #1a5cff;
-}
-
-.brand-fallback {
-	background: var(--color-brand, #1a5cff);
-}
-
 .off-token {
 	outline-color: #ff00aa;
-}
-
-.commented {
-	/* #1a5cff */
 }

@@ -6,3 +6,7 @@
 .hero {
 	border-color: #14161a;
 }
+
+.success {
+	color: rgb(0 128 64);
+}

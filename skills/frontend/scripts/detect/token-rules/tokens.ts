@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { parseColor } from "../core"
 import type { DetectConfig } from "../types"
 
-const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/g
+const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
 const COMMENT = /\/\*[\s\S]*?\*\//g
 const CUSTOM_PROPERTY = /--[A-Za-z0-9_-]+\s*:\s*([^;{}]+)/g
 
