@@ -16,25 +16,25 @@ Use a different available runner when Node is unavailable. Treat a missing runne
 
 ## Required check 1: pixel and content comparison
 
-Use a read-only reviewer to crop and zoom matching regions of both reference and actual captures. It must inspect them region by region, not at a glance:
+Dispatch a fresh read-only `reviewer` (task tool `agent: reviewer`, or eval `agent(prompt, agent="reviewer")`) with the reference and actual paths, the overview text, and the image-diff JSON in its prompt. It must crop and zoom matching regions of both reference and actual captures. It must inspect them region by region, not at a glance:
 
 - page bounds, header, navigation, hero, cards, grids, charts, media, and overlays;
 - geometry, spacing, alignment, type ramp, colors, borders, radii, shadows, and icon sizes;
 - rendered copy and DOM text against overview text and annotations; and
 - each changed state, viewport, and responsive extrapolation.
 
-The reviewer must consume `dimensionsMatch`, `diffRatio`, `similarityScore`, `alphaChannelIntact`, and every hotspot. Anything beyond unavoidable rasterization or rounding is a finding, with a capture region and concrete fix.
+The reviewer must consume `dimensionsMatch`, `diffRatio`, `similarityScore`, `alphaChannelIntact`, and every hotspot. Anything beyond unavoidable rasterization or rounding is a finding, with a capture region and concrete fix. Under a concrete reference there is no taste category: any deviation, spacing and radius included, is a `[defect]`. If the reference packet covers only one viewport, still capture the full matrix and record which captures are extrapolated from the design contract rather than pixel-compared.
 
 ## Required check 2: code-level design-system fidelity
 
-Use a separate read-only reviewer to inspect the source, relevant change set, reference artifacts, and evidence. It must determine whether:
+Dispatch a second, separate fresh `reviewer`, given the same read-only instruction, to inspect the source, relevant change set, reference artifacts, and evidence. It must determine whether:
 
 1. Live, reusable components and state variants render the UI rather than a pasted screenshot, raster image, or background image standing in for elements.
 2. Tokens or reusable primitives drive colors, spacing, typography, and component anatomy rather than scattered one-off values.
 3. The DOM or terminal layout hierarchy matches the target's layer and layout structure.
 4. The rendered design, content, and behavior match the reference.
 
-Require this response shape:
+The reviewer's brief states the goal, success criteria, changed files, full diff, the reference artifacts, and evidence paths, and tells it to be skeptical but fair: the author may have overstated success or faked the design, so it inspects the diff and artifacts before approving, and it recommends no fixes. Require this response shape:
 
 ```text
 RECOMMENDATION: APPROVE | REQUEST_CHANGES
@@ -44,6 +44,6 @@ EVIDENCE REVIEWED: <artifacts inspected>
 
 ## Completion loop
 
-Both checks must approve the same current revision and complete fresh evidence set. If either requests changes, fix the product gap, re-capture all affected items, and re-run both checks at most twice; a third mismatch stops the task with the fidelity gap reported. Do not declare fidelity complete from a visual-only pass, a code-only pass, an old approval, or a high similarity score.
+Both checks count against the same round budget as [Independent review passes](independent-review.md#completion-gate-and-review-budget) and must approve the same current revision and complete fresh evidence set. If either requests changes, fix the product gap, re-capture all affected items, and re-run both checks within that budget; when it is spent with a gap open, stop and report the fidelity gap. Do not declare fidelity complete from a visual-only pass, a code-only pass, an old approval, or a high similarity score.
 
 When delegated reviewers are unavailable, perform the pixel/content and code-level checks as separate fresh-eyes review contexts with their own evidence traces. State that limitation plainly in the final report.
