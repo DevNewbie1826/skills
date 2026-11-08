@@ -110,6 +110,53 @@ describe("#given the dash scanner", () => {
   })
 })
 
+describe("#given shapes found by the review round", () => {
+  test("#when a template interpolation sits at module top level #then later comments still scan", () => {
+    expect(lintSource("unit.ts", "const t = `a ${x} b`\nconst y = 1\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 3, rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.ts", "const t = `a ${x} b`\n// note — dash in comment\n")).toEqual([])
+  })
+
+  test("#when a dash sits in the tail after a top-level interpolation #then it is flagged", () => {
+    expect(lintSource("unit.ts", "const t = `a ${x} b — c`\n")).toEqual([
+      expect.objectContaining({ line: 1, rule: "no-em-dash-copy" }),
+    ])
+  })
+
+  test("#when an interpolation nests an object literal #then the template tail still scans", () => {
+    expect(lintSource("unit.ts", "const t = `v=${ {a:1}.a }`\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a rule id uses a slash path or a scoped name #then it is still not a reason", () => {
+    expect(lintSource("unit.ts", "// linttool-ignore lint/suspicious/noExplicitAny\n")).toEqual([
+      expect.objectContaining({ rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.ts", "// linttool-disable-next-line @scope/no-explicit-any\n")).toEqual([
+      expect.objectContaining({ rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.ts", "// @suppress {checkTypes}\n")).toEqual([
+      expect.objectContaining({ rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.ts", "// linttool-ignore lint/suspicious/noExplicitAny: generated file\n")).toEqual([])
+  })
+
+  test("#when JSX text holds an apostrophe #then the rest of the file still scans", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>Don't stop</p>\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>Don't stop</p>\n)\n// note — dash\n")).toEqual([])
+  })
+
+  test("#when JSX text holds a URL with a dash after it #then the dash is flagged", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>See https://example.test — docs</p>\n)\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+    ])
+  })
+})
+
 describe("#given the CLI", () => {
   const run = (...args: string[]) => spawnSync(process.execPath, [SCRIPT, ...args], { encoding: "utf8", timeout: 30_000 })
 

@@ -45,7 +45,7 @@ const EXCLUDED_DIRS = new Set([".git", ".next", ".nuxt", ".turbo", ".yarn", "cov
 const TS_DIRECTIVE = /@ts-(?:expect-error|ignore|nocheck)(?![\w-])/
 const GENERIC_DIRECTIVE = /(?:^|[^a-zA-Z0-9])[a-z][a-z0-9]*(?:-[a-z0-9]+)*-(?:disable|enable|ignore|suppress)(?:-(?:next-)?line)?(?=$|[\s(:])/
 const SUPPRESS_DIRECTIVE = /@suppress(?![\w-])/
-const RULE_TOKEN = /^[A-Za-z0-9_.*-]+/
+const RULE_TOKEN = /^[A-Za-z0-9_.*\/@-]+/
 const REASON_LETTER = /[a-z\u00c0-\u024f\u0370-\uffff]/
 
 type CommentLine = { readonly text: string; readonly line: number }
@@ -72,7 +72,8 @@ function scanSource(text: string): ScanResult {
     const next = i + 1 < text.length ? text[i + 1] : ""
     if (ch === "\n") line += 1
     if (state === "code") {
-      if (ch === "/" && next === "/") {
+      const prevCh = i > 0 ? text[i - 1] : ""
+      if (ch === "/" && next === "/" && prevCh !== ":") {
         state = "line"
         commentStartLine = line
         parts.length = 0
@@ -84,19 +85,17 @@ function scanSource(text: string): ScanResult {
         i += 1
       } else if (ch === EM_DASH) {
         dashLines.push(line)
-      } else if (ch === "'") {
-        state = "single"
-      } else if (ch === '"') {
-        state = "double"
+      } else if ((ch === "'" || ch === '"') && !/[A-Za-z0-9_$]/.test(prevCh)) {
+        state = ch === "'" ? "single" : "double"
       } else if (ch === "`") {
         state = "template"
       } else if (ch === "{") {
         braceDepth += 1
-      } else if (ch === "}" && braceDepth > 0) {
+      } else if (ch === "}") {
         if (templateStack.length > 0 && braceDepth === templateStack[templateStack.length - 1]) {
           templateStack.pop()
           state = "template"
-        } else {
+        } else if (braceDepth > 0) {
           braceDepth -= 1
         }
       }
@@ -167,6 +166,7 @@ function directiveRemainders(commentText: string): string[] {
 
 function carriesReason(remainder: string): boolean {
   let rest = remainder.replace(/^[ \t]*\([^()]*\)/, "")
+  rest = rest.replace(/^[ \t]*\{[^{}]*\}/, "")
   rest = rest.replace(/^[ \t]*:[ \t]*/, "")
   rest = rest.replace(/^[ \t]+/, "")
   const dashAt = rest.indexOf("--")
@@ -174,7 +174,7 @@ function carriesReason(remainder: string): boolean {
   const colonAt = rest.indexOf(":")
   if (colonAt >= 0) return REASON_LETTER.test(rest.slice(colonAt + 1))
   for (;;) {
-    const commaToken = /^([A-Za-z0-9_.*-]+)[ \t]*,[ \t]*/.exec(rest)
+    const commaToken = /^([A-Za-z0-9_.*\/@-]+)[ \t]*,[ \t]*/.exec(rest)
     if (commaToken === null) break
     rest = rest.slice(commaToken[0].length)
   }
@@ -225,7 +225,7 @@ function scan(paths: readonly string[]): Finding[] {
       if (isScanned(file)) findings.push(...lintSource(file, readFileSync(file, "utf8")))
     }
   }
-  return findings
+  return findings.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line))
 }
 
 function main(argv: readonly string[]): number {
