@@ -23,7 +23,7 @@ A test earns its place by failing. After writing it, break the production owner 
 | override fixture equal to its fallback | precedence is never exercised | every value the code must select or override differs from the fallback |
 | lower bound (`>= n`, `> 0`) over independently produced items | removing one item still satisfies the bound | pin the exact set |
 | count after deduplication where duplicates are byte-identical to a mandatory item | dropping all duplicates gives the same count | distinct payloads; assert retention and placement |
-| the argv, flags, URL, or request handed to a child component | an input transcript, not the child's outcome | drive the real component and assert the state it resolved, with a control case |
+| the argv, flags, URL, or request handed to a child component | an input transcript, not the child's outcome (unless the emitted command or payload is itself the contract under test, as in [writing good tests](writing-good-tests.md)) | drive the real component and assert the state it resolved, with a control case |
 | counter or filter keyed on a value the code path never produces | both sides count zero | count the operation itself |
 | a copy of the production component, props, or allowlist | the copy passes while the shipped one is broken | import or mount the real one |
 | timing assertion for an off-thread or performance claim | passes on the base at fixture size | prove performance on a realistic harness; keep the unit test to behavior |

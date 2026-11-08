@@ -11,7 +11,7 @@ A test that matches a class below is junk unless the retention bar keeps it. A t
 | `R` retain | guards a contract | the contract and the regression it catches |
 | `F` fix | real contract, weak assertion | the repaired assertion |
 | `C` consolidate | the assertion moves into a keeper (a table row, a stronger boundary test) | the keeper |
-| `D` delete | no contract, or another test owns it | the owner test that still fails on the regression, plus a proof receipt |
+| `D` delete | no contract, or another test owns it | the owner test that still fails on the regression (or why no contract exists), plus a proof receipt |
 
 ## Junk classes
 
@@ -29,7 +29,7 @@ A test that matches a class below is junk unless the retention bar keeps it. A t
 | Seam keeper | exists to keep a test-only export, flag, getter, or reset hook alive | no production caller: delete test and seam together |
 | Fabricated postcondition | the fixture supplies the state the owner should produce | mutate the writer: stays green |
 | Capability restatement | asserts a flag or capability is true instead of the delivery it promises | a delivery test owns it, or none exists (then `F`, not `D`) |
-| Input transcript | asserts the request handed to a child, not the state the child resolved | mutate the child's handling of the input: stays green |
+| Input transcript | asserts the request handed to a child, not the state the child resolved; not junk when the emitted command or payload is itself the contract (one command, right collaborator, right payload) | mutate the child's handling of the input: stays green |
 | Misnamed | the name promises a behavior its inputs never exercise | read the assertions; mark by what they check |
 | Near-duplicate cases | N tests differing only in input literals | `C` into one table; every old assertion stays a row |
 
@@ -54,4 +54,4 @@ Break the production owner and run the candidate and its named keeper on the unm
 | red | green | candidate is the only proof: `R`, or `C` it into the keeper and re-run |
 | green | green | the mutation missed the behavior: confirm the edit landed, then pick another mutation |
 
-Restore the owner byte for byte. A prose pin needs no mutation: the receipt is the assertion line plus the rule against pinning prose. Coverage diffs prove lines execute, not that anything asserts on them; pair one with at least one mutation per theme.
+One shared red mutation is not enough to delete or consolidate: run the keeper against every mutation the candidate guards (each branch, boundary, and side effect it asserts), and fold in any the keeper misses before removing the candidate. Restore the owner byte for byte. A prose pin needs no mutation: the receipt is the assertion line plus the rule against pinning prose. Coverage diffs prove lines execute, not that anything asserts on them; pair one with at least one mutation per theme.
