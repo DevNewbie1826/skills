@@ -4,7 +4,7 @@
 
 ## The rule
 
-NEVER pandas. Polars (with numpy) plus DuckDB. Pandas is 10-50x slower, has weaker types, and the modern Python data ecosystem has moved on.
+NEVER pandas. Polars (with numpy) plus DuckDB. Pandas is slower on large frames, has weaker types, and the modern Python data ecosystem has moved on.
 
 ## Quick decision tree
 
@@ -12,16 +12,16 @@ NEVER pandas. Polars (with numpy) plus DuckDB. Pandas is 10-50x slower, has weak
 |---|---|---|
 | `.csv` / `.parquet` / `.json` direct query | DuckDB | Zero memory load, SQL ergonomics |
 | `.duckdb` file | DuckDB | Native format |
-| Filter (any size) | Polars | 128x faster than DuckDB for filtering |
-| Sort | Polars | 12x faster |
-| Multi-table join | DuckDB | 3x faster, more join types |
-| Heavy GROUP BY aggregation | DuckDB | 4x faster on large datasets |
-| Window function | Polars | 3-5x faster |
-| Pivot / melt / string ops | Polars | 2x faster |
+| Filter (any size) | Polars | row-wise filtering, low setup cost |
+| Sort | Polars | in-memory sorting |
+| Multi-table join | DuckDB | more join types, out-of-core joins |
+| Heavy GROUP BY aggregation | DuckDB | large grouped aggregation |
+| Window function | Polars | window expressions |
+| Pivot / melt / string ops | Polars | reshape and string expressions |
 | Larger than RAM | Polars streaming or DuckDB out-of-core | Both handle OOM |
 | Mixed pipeline | Hybrid (zero-copy via Arrow) | Use each tool's strengths |
 
-For the deep version (per-operation benchmarks, OOM strategies, full execution templates), load the **`data-scientist`** skill - it lives in this same skill set and is the source of truth for performance numbers.
+Engine choice depends on data size and shape: when it matters, measure on the actual data before committing to one engine, and use a data-analysis capability of your runtime, if available, for out-of-memory strategies and execution templates.
 
 ## Standard imports
 
@@ -71,14 +71,14 @@ result = (
         pl.len().alias("count"),
         pl.sum("amount").alias("total"),
     ])
-    .collect(streaming=True)
+    .collect(engine="streaming")
 )
 ```
 
 ## Hybrid pipeline (most realistic shape)
 
 ```python
-# Phase 1: DuckDB for the join (3x faster)
+# Phase 1: DuckDB for the join
 joined = duckdb.sql("""
     SELECT o.*, c.region, p.category
     FROM 'orders.parquet' o
@@ -86,7 +86,7 @@ joined = duckdb.sql("""
     JOIN 'products.parquet'  p ON o.product_id  = p.id
 """).pl()
 
-# Phase 2: Polars for filtering and transformation (128x + 2x faster)
+# Phase 2: Polars for filtering and transformation 
 processed = (
     joined
     .filter(pl.col("amount") > 100)
@@ -95,7 +95,7 @@ processed = (
     ])
 )
 
-# Phase 3: DuckDB for final aggregation (4x faster) - register Polars frame by name
+# Phase 3: DuckDB for final aggregation - register Polars frame by name
 duckdb.register("processed", processed)
 final = duckdb.sql("""
     SELECT region, category, SUM(amount_with_tax) AS revenue
@@ -132,4 +132,3 @@ basedpyright understands `polars-stubs`, which ship with polars itself. No extra
 
 - Polars docs: <https://docs.pola.rs>
 - DuckDB Python API: <https://duckdb.org/docs/api/python/overview>
-- Cross-reference - this skill set's `data-scientist` skill (load it for the deep version)

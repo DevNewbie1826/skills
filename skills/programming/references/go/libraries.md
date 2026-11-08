@@ -209,7 +209,7 @@ import json "github.com/goccy/go-json"
 // drop-in replacement — same API
 ```
 
-Reach for `bytedance/sonic` (~5x faster, requires amd64/arm64) for production proxies with thousands of RPS of JSON traversal. CLIProxyAPI uses `tidwall/gjson` + `tidwall/sjson` for **partial-tree mutation without full unmarshal** — a different optimization, useful when you transform large payloads. See `backend-stack.md`.
+Reach for `bytedance/sonic` (~5x faster, requires amd64/arm64) for production proxies with thousands of RPS of JSON traversal. `tidwall/gjson` + `tidwall/sjson` offer **partial-tree mutation without full unmarshal** — a different optimization, useful when you transform large payloads. See `backend-stack.md`.
 
 ---
 
@@ -334,6 +334,4 @@ Before `go get`-ing anything new:
 - 2024 Go Developer Survey: https://go.dev/blog/survey2024-h1-results
 - Connect-Go docs: https://connectrpc.com/docs/go/getting-started
 - sqlc: https://docs.sqlc.dev
-- bubbletea v2 IME: https://github.com/code-yeongyu/bubbletea-wm (reference for `SetVirtualCursor(false)` pattern)
-- CLIProxyAPI (gin + SSE + WebSocket in production): https://github.com/router-for-me/CLIProxyAPI
 - slog blog: https://go.dev/blog/slog

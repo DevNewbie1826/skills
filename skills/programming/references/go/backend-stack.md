@@ -546,7 +546,7 @@ func (h *Handler) WebSocketEcho(c *gin.Context) {
 }
 ```
 
-For long-lived connections, use `conn.SetReadDeadline` + `SetPongHandler` for keepalive. CLIProxyAPI's `wsrelay` package is a reference implementation.
+For long-lived connections, use `conn.SetReadDeadline` + `SetPongHandler` for keepalive. Keep the relay in its own package so the keepalive policy has one owner.
 
 ---
 
@@ -635,7 +635,6 @@ See `testing.md` for full patterns (testcontainers integration, table-driven, go
 ## Sources
 
 - gin docs: https://gin-gonic.com/docs/
-- CLIProxyAPI (reference impl): https://github.com/router-for-me/CLIProxyAPI
 - pgx pool: https://pkg.go.dev/github.com/jackc/pgx/v5/pgxpool
 - SSE spec: https://html.spec.whatwg.org/multipage/server-sent-events.html
 - Go's `http.Server` graceful shutdown: https://pkg.go.dev/net/http#Server.Shutdown

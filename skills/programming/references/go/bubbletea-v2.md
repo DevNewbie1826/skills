@@ -4,8 +4,6 @@
 
 The TUI stack for 2026. Use **v2 RC**, not v1. If your users include Korean, Japanese, or Chinese speakers, v1 is broken — IME composition lands in the wrong cells. v2 fixes this. This document is the canonical setup.
 
-The reference implementation this document is distilled from: [`code-yeongyu/bubbletea-wm`](https://github.com/code-yeongyu/bubbletea-wm) — a floating window manager built specifically to nail down v2 + IME.
-
 ---
 
 ## Why v2 (not v1) — the IME story
@@ -356,7 +354,6 @@ func TestModel_typing_cjk_keeps_cursor_in_position(t *testing.T) {
 - bubbletea v2 RC: https://github.com/charmbracelet/bubbletea/tree/v2
 - bubbles v2: https://github.com/charmbracelet/bubbles/tree/v2
 - lipgloss v2: https://github.com/charmbracelet/lipgloss/tree/v2
-- bubbletea-wm (IME reference): https://github.com/code-yeongyu/bubbletea-wm
 - crush CLI (production IME impl): https://github.com/charmbracelet/crush
 - go-runewidth: https://github.com/mattn/go-runewidth
 - Unicode East Asian Width: https://www.unicode.org/reports/tr11/
