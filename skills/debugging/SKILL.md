@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: "MUST USE for real runtime debugging across any language or binary: crashes, silent failures, wrong responses, stuck processes, memory leaks, async misbehavior, unexplained timing, or reverse engineering. Runs a hypothesis-driven loop: form at least three hypotheses, investigate independent evidence paths, after two failed rounds use independent adversarial review passes from orthogonal angles (parallel subagents if your runtime supports delegation, otherwise fresh-eyes self-review passes), confirm root cause, lock it with a failing test, fix minimally, QA by using the system, and scrub artifacts. The HOW lives in `references/`. Triggers: 'debug this', 'why is X not working', 'hanging', 'attach a debugger', 'reverse engineer', 'pwndbg', 'gdb', 'lldb', 'node inspect', 'tsx debug', 'pdb', 'dlv', 'delve', 'rust-gdb', 'set a breakpoint', 'why is the response empty', 'trace this bug', 'reproduce and fix', 'silent failure', 'HTTP 200 but empty', 'inspect the binary', or 'playwright'."
+description: "MUST USE for real runtime debugging across any language or binary: crashes, silent failures, wrong responses, stuck processes, memory leaks, async misbehavior, unexplained timing, or reverse engineering. Runs a hypothesis-driven loop: form at least three hypotheses, investigate independent evidence paths, after two failed rounds use independent adversarial review passes from orthogonal angles (parallel subagents if your runtime supports delegation, otherwise fresh-eyes self-review passes), confirm root cause, lock it with a failing test, fix minimally, QA by using the system, and scrub artifacts. The HOW lives in `references/`. Triggers: 'debug this', 'why is X not working', 'hanging', 'attach a debugger', 'reverse engineer', 'pwndbg', 'gdb', 'lldb', 'node inspect', 'tsx debug', 'pdb', 'dlv', 'delve', 'rust-gdb', 'set a breakpoint', 'why is the response empty', 'trace this bug', 'reproduce and fix', 'silent failure', 'HTTP 200 but empty', 'inspect the binary', 'playwright', 'flaky test', 'fails only in CI', 'intermittent failure', 'frida', or 'debug adapter protocol'."
 ---
 
 # Debugging
@@ -43,6 +43,8 @@ Read the matching tool reference before use. If a named tool is unavailable, use
 | Browser-driving automation | A browser UI flow, viewport, or browser state may cause the bug. | [Playwright CLI](references/tools/playwright-cli.md), if available; otherwise another browser-driving capability or a manually driven real browser with captured evidence. Never substitute an HTTP client for browser behavior. |
 | Native decompilation | A binary lacks trustworthy source. | [Ghidra](references/tools/ghidra.md), if available; otherwise an installed decompiler or disassembler and an explicit limitation. |
 | Interactive native debugging | You need registers, stack, heap, or disassembly while a native binary runs. | [pwndbg](references/tools/pwndbg.md), if available; otherwise standard GDB or lldb with the equivalent inspection commands. |
+| Live process instrumentation | A running process without source or symbols must be hooked to see real arguments, return values, or call traces. | [Frida](references/tools/frida.md), if available; otherwise a debugger breakpoint with logging, `strace`/`ltrace`/`dtrace`, or an explicit limitation. |
+| Debugger that speaks the Debug Adapter Protocol | You would otherwise drive debugpy, `dlv dap`, lldb-dap, or js-debug through a terminal and scrape text. | [DAP client](references/tools/dap.md) (`scripts/dap.mjs`, Bun or Node); otherwise the debugger's own CLI with every query bounded. |
 | Scripted binary or network interaction | You need a reproducible crafted payload, fuzz harness, or binary repro. | [pwntools](references/tools/pwntools.md), if available; otherwise a deterministic script using available subprocess or socket facilities. |
 
 ---
@@ -67,6 +69,7 @@ Read the matching tool reference before use. If a named tool is unavailable, use
 
 | Situation | Reference |
 |---|---|
+| The failure is intermittent: fails sometimes, a different test each run, passes in isolation, or fails only in CI. | [03-flaky-triage.md](references/methodology/03-flaky-triage.md) - read before Phase 2. |
 | You cannot run the real operation but still need runtime evidence. | [partial-runtime-evidence.md](references/methodology/partial-runtime-evidence.md) |
 | You are about to declare an extraction, audit, or reverse-engineering artifact complete and need a skeptical pass. | [verification review pattern](references/methodology/partial-runtime-evidence.md#verification-review-pattern-for-non-debug-tasks) |
 

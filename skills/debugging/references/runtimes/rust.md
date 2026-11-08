@@ -146,6 +146,40 @@ Rust symbols are mangled. Use either:
 
 ---
 
+## Sanitizers — memory and race bugs
+
+Nightly Rust exposes LLVM sanitizers through `-Z sanitizer`. Use them when a crash, data race, or leak is too timing- or state-dependent to explain from a backtrace; they replace guesswork with a report at the invalid operation. If the nightly toolchain or sanitizer is unavailable, say so and fall back to backtraces and `dbg!`.
+
+```bash
+# AddressSanitizer: out-of-bounds accesses and use-after-free
+cargo +nightly run -Z sanitizer=address
+
+# ThreadSanitizer: data races between threads
+cargo +nightly test -Z sanitizer=thread
+
+# LeakSanitizer: allocations still reachable at process exit
+cargo +nightly run -Z sanitizer=leak
+```
+
+Run the invocation that matches the suspected class, ideally before attaching a debugger to optimized or timing-sensitive code.
+
+---
+
+## rr — time-travel debugging
+
+On supported Linux systems, record the failure once, replay it deterministically, and run backwards from the failure:
+
+```bash
+rr record ./target/debug/my_binary
+rr replay
+# (rr) reverse-continue
+# (rr) reverse-step
+```
+
+`rr` is Linux/x86-64 only; on Apple Silicon use `rust-lldb` or a sanitizer instead.
+
+---
+
 ## tokio-console — async task debugging
 
 For tokio-based async apps, use this when it is installed and tasks are stuck or leaking. If it is unavailable, add temporary `tracing` instrumentation and inspect task lifecycle logs instead.

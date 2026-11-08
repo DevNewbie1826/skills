@@ -47,6 +47,16 @@ dlv attach $(pgrep myserver)
 dlv debug --headless --listen=:2345 --api-version=2 ./cmd/server
 ```
 
+Delve exposes two distinct machine-readable interfaces; both give structured state, unlike scraping an interactive `(dlv)` session:
+
+```bash
+# Debug Adapter Protocol: editors and DAP-aware automation (see ../tools/dap.md)
+dlv dap --listen=127.0.0.1:2345
+
+# Delve's JSON-RPC API: clients built directly against Delve's API
+dlv debug --headless --listen=127.0.0.1:2345 --api-version=2 ./cmd/server
+```
+
 ### Building a debuggable binary
 
 The compiler inlines and optimizes aggressively in normal builds, which makes stepping confusing. For serious debugging:
