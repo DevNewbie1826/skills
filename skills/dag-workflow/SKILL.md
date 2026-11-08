@@ -1,12 +1,26 @@
 ---
 name: dag-workflow
-description: "Use for any nontrivial task that benefits from implementation delegation or independent verification, from a single focused change to a large migration: run a bounded staged flow (collect, define, one reviewed plan with confirmation devices, a goal-bound build with one PR per unit, per-head verify lanes, a frozen-head VERDICT round, merge, post-merge verification, and cleanup; requires the eval tool). Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, a one-step answer, or work that needs no verification machinery"
+description: "Use for any nontrivial task that benefits from implementation delegation or independent verification, from a single focused change to a large migration: run a bounded staged flow driven by three dependency graphs (a context graph that analyses context and history, a build graph of the smallest independently runnable pieces, a verify graph of tests, QA and confirming devices) through collect, define, one reviewed plan with confirmation devices, a goal-bound build with one PR per unit, per-head verify lanes, a frozen-head VERDICT round, merge, post-merge verification, and cleanup; requires the eval tool). Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, a one-step answer, or work that needs no verification machinery"
 omp-native: true
 ---
 
 # dag-workflow
 
 Entry is `/wf <task>` (the pack rewrites it to `/goal task: <task>` plus an instruction to read this router) or the user naming this skill. Running the flow authorizes collection, definition, planning, implementation in worktrees, verification, opening PRs, review to APPROVED, merge, and cleanup, so phases already covered are never asked again. Genuine owner decisions (irreversible, destructive, spending money, or a contract-level limit to accept) are asked once, at decide, as one batch with a recommended default each; after that nothing is asked, and a decision that appears mid-run parks only its own lane.
+
+## The three graphs
+
+The flow is one idea applied three times. Analyse the whole context and history of the work at maximum parallelism, then define, from evidence, the ideal state and every major decision point. From that definition create a fresh git worktree, set a concrete goal, and cut the defined work into the smallest pieces that can run independently, so they run at the same time. Implement, and put in, strictly, a device that confirms the implementation; fix what needs fixing, and put in, strictly, a device that confirms the fix. Verify all of it rigorously, in detail, leaving nothing out.
+
+Each of the three parts is a dependency graph run from `eval` on omp's `agent()` handles and `wait()` (with `workpool()` for many same-shaped items):
+
+| graph | stage | what its nodes do | what it hands on |
+|---|---|---|---|
+| context graph | 1 collect | read the code, history, memory, earlier evidence and outside sources, one question or slice per node, then check and reduce | `collect.md`, the input to define (stage 2) |
+| build graph | 9 build, 12 fix | one smallest independent change per node, each with its own confirming device; a fix node also owns the device that proves the fix | commits plus each node's device evidence |
+| verify graph | 10 verify_lane | every test run, QA scenario, mutation, review lane and confirming device as its own node, ending in a reducer | lane receipts the round (stage 15) requires |
+
+How any graph is defined, checked before launch, run, recovered and resumed: [references/graphs.md](references/graphs.md). Read it at stage 1, before the first graph.
 
 ## When to run the flow
 
@@ -21,20 +35,20 @@ Read each reference at its stage, not before, and report the reads in that stage
 | # | stage | what runs it | record |
 |---|---|---|---|
 | 0 | intake | the session: tier triage; `todo` carries the stage steps | the plan file, created here and never pre-created |
-| 1 | collect | one workflow-tool run (or one `parallel()` wave): `scout` for scope and for outside-source reading (it has web_search), `sonic` for mechanical harvest slices, `task` for extract and reduce and for questions that must run the product | `collect.md`; an unread source is named, never omitted |
+| 1 | collect | the context graph (references/graphs.md): `scout` for scope and for outside-source reading (it has web_search), `sonic` for mechanical harvest slices, `task` for extract, check and reduce and for questions that must run the product | `collect.md`; an unread source is named, never omitted |
 | 2 | define | the session, seeded by collect | `define.md` + the difference rows in `gaps.tsv` |
 | 3 | before | the session: one pre-edit capture per defect row and per row that edits existing UI | capture receipts, taken before the first edit |
 | 4 | plan | the session writes it in this pack's plan grammar | the plan (`references/planning.md`) |
 | 5 | plan_lint | the session checks the plan against the lint rules — no script, the rule list itself | a clean check, or every complaint fixed |
 | 6 | plan_review | one fresh `reviewer` plan review; a plan-gate branch adds a second fresh `reviewer` with the plan-gate lens | review record: OKAY, or blockers each with one fix |
 | 7 | decide | the session collects the one decision batch | decision records with a recommended default each |
-| 8 | goal | the host's goal tool: `/wf` already armed the run's one goal; its objective is the register's IS-to-QA pairing, and a unit never opens a second goal | the goal id |
-| 9 | build | one workflow-tool/eval run per unit; the commit node loads git-master | build records; one PR per unit |
-| 10 | verify_lane | one task-tool batch per head: for code, `task` for `tests` (suite plus one mutation per guard row), `reviewer` for `sweep`, `task` for `qa`, `reviewer` for `code-review` (loading `remove-ai-slops` and `programming`), `reviewer` for `adversarial` at tier L or on a HIGH-RISK row pinned to a model family other than the author's; other work types: mechanical checkers and captures (draft-guard, capture, lint) run `sonic`, QA and execution checks (qa, execution-verify) run `task`, and every judging lane (vqa passes, fact-verify, claim-gate, skeptic, delivery-gate, spot, register-schema) runs `reviewer` | the lane receipt per required lane |
+| 8 | goal | the host's goal tool: `/wf` already armed the run's one goal; its objective is the register's IS-to-QA pairing, and a unit never opens a second goal; each unit gets a fresh worktree off main here | the goal id, the worktree path |
+| 9 | build | the build graph, one per unit; the commit node loads git-master | build records; one PR per unit |
+| 10 | verify_lane | the verify graph, one per head: for code, `task` for `tests` (suite plus one mutation per guard row), `reviewer` for `sweep`, `task` for `qa`, `reviewer` for `code-review` (loading `remove-ai-slops` and `programming`), `reviewer` for `adversarial` at tier L or on a HIGH-RISK row pinned to a model family other than the author's; other work types: mechanical checkers and captures (draft-guard, capture, lint) run `sonic`, QA and execution checks (qa, execution-verify) run `task`, and every judging lane (vqa passes, fact-verify, claim-gate, skeptic, delivery-gate, spot, register-schema) runs `reviewer` | the lane receipt per required lane |
 | 11 | triage | the session | findings rows |
-| 12 | fix | a correction run per round; the reuse rule re-runs only stale lanes | fix + reuse records |
+| 12 | fix | a build graph per round, one node per fix with its fix-confirming device; the reuse rule re-runs only stale lanes | fix + reuse records |
 | 13 | freeze | the session records head and tree, and commits nothing after | freeze record: head, tree, pr |
-| 14 | pr_open | `gh pr create` with the generated body; the host's monitor watches the PR | the open PR |
+| 14 | pr_open | `gh pr create` with the generated body; a background `gh pr checks <pr> --watch` job watches it | the open PR |
 | 15 | round | the gate check, then one fresh `reviewer` every round (round 1 full, later rounds delta), pinned to the strongest configured model and, where required, a family other than the author's by setting `task.agentModelOverrides.reviewer` to an exact model from another family; when none is configured, the round record states same-family as a known limit rather than refusing to dispatch; the session reads the VERDICT line and confirms it names the frozen head | final review record + verdict |
 | 16 | merge | the session merges | merge record: sha, pr |
 | 17 | post_merge | `task`: smoke when the merged tree equals the frozen tree, the full pass otherwise | post-merge record |
@@ -85,7 +99,7 @@ Out-of-scope findings live in `<evidence dir>/follow-ups.md`. The evidence dir i
 
 ## Rules
 
-- **Tests and devices:** every IS row carries a confirmation device — existing tests, a guard mutation, or the no-test path with a QA scenario. A device that mostly tests mocks, encodes implementation details, depends on timing, or needs heavy infrastructure for a small fix is a bad device; prefer no new test over a bad one. Prose gets read-through QA, never wording tests.
+- **Tests and devices:** every IS row carries a confirmation device — existing tests, a guard mutation, or the no-test path with a QA scenario — and every fix carries its own device that fails on the code before the fix and passes after it; the build graph node that makes the change owns its device, and the verify graph re-runs it. A device that mostly tests mocks, encodes implementation details, depends on timing, or needs heavy infrastructure for a small fix is a bad device; prefer no new test over a bad one. Prose gets read-through QA, never wording tests.
 - **Evidence capture:** capture the command and its output; never retype a SHA or number a capture holds.
 - **Test discipline:** no sleeps; wait on the event or state change itself.
 

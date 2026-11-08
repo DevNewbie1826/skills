@@ -1,8 +1,6 @@
-Read this when stages 10-19 of the flow start; SKILL.md, The stage map, lists it.
+Read this when stages 10-19 (the verify graph, triage, fix, freeze, the PR, the round, merge, post-merge, checkpoint and cleanup) of the dag-workflow flow start; SKILL.md, The stage map, lists it.
 
-# dag-workflow: verification, review, and merge
-
-Covers stages 10-19 of the flow (see `SKILL.md`, The stage map).
+# dag-workflow: the verify graph, review, and merge
 
 ### Work types and required lanes
 
@@ -164,7 +162,20 @@ A capture matrix cell that no checklist id covers is a note, not a class. `taste
 register is complete, never block, and may only ride a defect fix on the same surface. A reviewer that
 treats taste as a defect is wrong; the finding is filed as a note.
 
-## Stage 10: Verify lanes
+## Stage 10: Verify — the verify graph
+
+This is Stage 10: verify_lane in `SKILL.md`, The stage map. It is also the verify graph of the flow's three graphs in `references/graphs.md`, The flow's three graphs. One node covers one required lane, one test run, one QA scenario, one guard mutation, or one confirming device. A node is chained to another only where it consumes that node's output, and every node whose inputs are all settled is ready in the same wave, launched with `agent()` and collected with `wait()`. A reducer node reads the settled lane reports and writes the lane receipts, so the stage ends only when every required lane and every device has a settled verdict at one candidate head. The pre-launch checks are `references/graphs.md`, Before launch: the graph checks. The wave mechanics are `references/graphs.md`, Running a graph on omp.
+
+```text
+verify graph for one code unit at one candidate head
+
+ready at once: tests-suite, mut-INV1, mut-INV2, qa-QA1, qa-QA2,
+               sweep, code-review, adversarial (tier L or a HIGH-RISK row),
+               device-IS1, device-IS2
+waits on consumed output: capture -> vqa-passA, vqa-passB
+                          base tree and head -> fix-device nodes
+reducer: reads the settled lane reports, writes the lane receipts
+```
 
 ### Finite contract
 
@@ -174,7 +185,7 @@ For a program, a unit is one worktree, branch, and PR; its PR contract is its ow
 
 ### Verification lanes
 
-Dispatch independent lanes for one candidate head in one host task batch or one eval `parallel()` batch of `agent()` nodes. Use dependencies for work that cannot run together. Every lane follows `SKILL.md`, Delegation prompts, and writes its own receipt outside the task worktree.
+Dispatch one node per required lane for one candidate head, as one wave of `agent()` nodes in one eval cell; a lane that consumes another lane's output waits on it, and every lane that consumes nothing from another is ready at once. Use dependencies for work that cannot run together. Every lane follows `SKILL.md`, Delegation prompts. Each lane writes its own lane report outside the task worktree.
 
 | Work type | Required lanes |
 | --- | --- |
@@ -184,13 +195,94 @@ Dispatch independent lanes for one candidate head in one host task batch or one 
 | `audit` | `lint`, `spot`, `register-schema` |
 | `mixed` | The union of the primary and secondary work types' lanes |
 
-The tier, the mutation caps by tier, and the `adversarial` lane's conditions live in Work types and required lanes above; the tier is never lowered, and a heavier fact found mid-run raises it. The `tests` lane uses a `task` node for the repository suite and the hand-applied mutations its tier's cap allows. A mutation counts as killed only when the unmutated guard passes and that guard fails under the mutation. Apply mutations in a throwaway copy, away from any review reader, at most eight mutation processes at once, and leave no mutant directory behind. A survivor requires a stronger guard or a justified `no-test` row with its QA scenario; a different failure is not a kill. A valid `no-test` row receives QA rather than a mutation.
+A required lane with internal units expands into nodes: `tests` is one node per test run and per guard mutation, `qa` is one node per QA scenario, and every confirming device is its own node.
 
-The `qa` lane runs a `task` node that drives the plan's happy and failure cases on the real surface, naming the artifact for each QA row. The `code-review` lane uses a `reviewer`; the code-review section defines its discipline. The `adversarial` lane uses a `reviewer` at tier L or on a HIGH-RISK row, pinned with `task.agentModelOverrides.reviewer` to an exact model from a family other than the author's; when no other-family model is configured, the round record states same-family as a known limit. The `sweep` lane records one row per applicable class of the defect-class checklist (`references/orchestration.md`, Defect classes and review axes): the literal command or `no command`, the one binary observable, the verdict, and the artifact. Keep the discovery variant sweep in stage 1 rather than adding a separate merge or synthesis node.
+```js
+phase("Verify");
+
+// Read these from the plan's front matter before dispatch; each is a string.
+const head = "<full 40-hex candidate head>";
+const tree = "<full tree identity>";
+const unit = "<unit id from the plan>";
+const type = "code";
+const evidenceDir = "<evidence dir recorded in the plan>";
+const startedAt = new Date().toISOString();
+
+const LANE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["lane", "status", "rows", "artifacts"],
+  properties: {
+    lane: { type: "string" },
+    status: { type: "string", enum: ["PASS", "FAIL", "WARN", "SKIP"] },
+    rows: { type: "array", items: { type: "object" } },
+    artifacts: { type: "array", items: { type: "string" } },
+  },
+};
+
+// One entry per required lane that consumes nothing from another lane.
+// A lane that consumes another lane's output is launched only after it settles.
+const lanes = [
+  { lane: "tests-suite", agent: "task", scope: "tests/**", prompt: "Run the repository suite at the candidate head and return the lane report." },
+  { lane: "qa-QA1", agent: "task", scope: "tests/qa/**", prompt: "Drive QA-1 on the shipped surface at the candidate head and return the lane report." },
+  { lane: "sweep", agent: "reviewer", scope: "src/**", prompt: "Record one row per applicable defect class at the candidate head and return the lane report." },
+  { lane: "code-review", agent: "reviewer", scope: "src/**", prompt: "Review the candidate head with remove-ai-slops and programming loaded and return the lane report." },
+];
+
+const handles = lanes.map((lane) =>
+  agent(lane.prompt, { agent: lane.agent, label: `verify:${lane.lane}`, schema: LANE_SCHEMA }),
+);
+const reports = await wait(handles, { timeout: 3600, raiseErrors: false });
+
+// The reducer: one receipt per settled lane report, in the receipt contract.
+for (const [index, report] of reports.entries()) {
+  const lane = lanes[index];
+  const failed = report instanceof Error;
+  const receipt = {
+    kind: "lane",
+    type,
+    unit,
+    program_id: null,
+    lane: lane.lane,
+    stage: "verify_lane",
+    head,
+    tree,
+    scope: lane.scope,
+    started_at: startedAt,
+    ended_at: new Date().toISOString(),
+    status: failed ? "INVALID" : report.status,
+    rows: failed ? [] : report.rows,
+    artifacts: failed ? [] : report.artifacts,
+    cleanup: "none",
+  };
+  const path = `${evidenceDir}/receipts/verify_lane-${lane.lane}-${head.slice(0, 7)}.json`;
+  await write(path, JSON.stringify(receipt, null, 2));
+}
+```
+
+A lane launched only after its input settles keeps its own handle and is waited on in its own wave; the reducer runs once, after the last wave, and writes the receipts from the settled reports.
+
+The tier is set in `SKILL.md`, Plans, units, and tiers. The lane sets and the `adversarial` lane's conditions are in `SKILL.md`, Work types. The tier is never lowered, and a heavier fact found mid-run raises it. The `tests` lane uses a `task` node for the repository suite and the hand-applied mutations its tier's cap allows. A mutation counts as killed only when the unmutated guard passes and that guard fails under the mutation. Apply mutations in a throwaway copy, away from any review reader, at most eight mutation processes at once, and leave no mutant directory behind. A survivor requires a stronger guard or a justified `no-test` row with its QA scenario; a different failure is not a kill. A valid `no-test` row receives QA rather than a mutation.
+
+The `qa` lane runs a `task` node that drives the plan's happy and failure cases on the real surface, naming the artifact for each QA row. The `code-review` lane uses a `reviewer` in a locked read-only review worktree, with `remove-ai-slops` and `programming` loaded; every re-review uses a new `reviewer`, never the previous child continued, and the triage of its findings is Stage 11: Triage, below. The `adversarial` lane uses a `reviewer` at tier L or on a HIGH-RISK row, pinned with `task.agentModelOverrides.reviewer` to an exact model from a family other than the author's; when no other-family model is configured, the round record states same-family as a known limit. The `sweep` lane records one row per applicable class of the defect-class checklist in `references/orchestration.md`, Defect classes and review axes. Each row carries the literal command or `no command`, the one binary observable, the verdict, and the artifact. Keep the discovery variant sweep in stage 1 rather than adding a separate merge or synthesis node.
+
+### Building and calibrating the devices
+
+Every DEVICE row in the plan is a node in this graph: each IS row's device, each gap-targeted device, and each fix device is its own node with an id, its inputs, its receipt path, and one binary verdict. A device node waits only on a node whose output it consumes, such as the build node that produces the artifact a QA scenario drives, or the two trees a fix device compares.
+
+A fix device is calibrated against two trees. It must fail on the base, the code before the fix, and pass on the head, and both runs are captured as its receipt: the receipt names the base and the head and records each run's literal command, observable, verdict, and artifact. A device that passes on the base proves nothing about the fix; it is a work failure, never a PASS, and it is rebuilt before the stage can close.
+
+An implementation device is calibrated by removal. It must fail when the implemented behavior is removed at the head, by the guard mutation of that behavior, and pass on the head. A device that still passes with the behavior removed proves nothing about the implementation and is the same work failure. A behavior the repository cannot test keeps the no-test path: the QA scenario is the device, and the QA failure case is the removal it drives.
+
+A work failure is recorded against the device node and returns that row to its owner; it is never a PASS and never closes the IS row it was meant to confirm.
+
+A device runs on the shipped surface where one exists: the built artifact, the real entry point, the running UI, or the delivered file, never a mock, a private helper, or a copy of the code. Where no shipped surface exists, the receipt names the substituted surface and why none exists.
+
+A device that mutates follows the tests lane's mutation mechanics: a throwaway copy per mutation, at most eight mutation processes at once, never in a worktree a reviewer reads, and no mutant directory left behind. A device FAIL is a claim triaged at stage 11 like any lane FAIL, and a device left unproved leaves its IS row unproved and the stage open.
 
 ### Evidence and reuse
 
-Use the evidence directory recorded in the plan, outside the task worktree (`SKILL.md`, Follow-up record). The lead alone updates the plan, todo, findings, register, and transition records; each lane writes only its own receipt. Each file has one writer.
+Use the evidence directory recorded in the plan, outside the task worktree; the record is `SKILL.md`, Follow-up record. The lead alone updates the plan, todo, findings, register, and transition records; each lane node writes only its own lane report, and the reducer writes the lane receipts. Each file has one writer.
 
 A receipt records `kind`, `type`, `unit`, `program_id` (or `null`), `lane`, `stage` for a lane receipt, full `head`, `tree`, nonempty path/glob `scope`, UTC `started_at` and `ended_at`, `status`, `rows`, `artifacts`, and `cleanup`. Mixed work also records `primary` and `secondary`. Each check row carries `id`, literal `command` (or `no command` for a read-through), one binary `observable`, `verdict`, `artifact` (path or `null`), and applicable `class` and `note`. Preserve applicable `gap`, `name`, `pass`, and `env_sha` fields.
 
@@ -222,15 +314,15 @@ Store receipts under `<evidence dir>/receipts/`. Anchors are the first seven hex
 | Claim gate | `claim-gate-<sha7>.json`, anchored to the research head |
 | Lint | `lint-<name>-<tree7>.json`; research uses `<head7>` |
 
-Use a stage name for `<stage>`, a kebab-case lane, and a `G<n>` gap ID. The filename anchor must agree with the receipt body; refuse mismatches. Markdown lane receipts use the same fields in YAML front matter, `rows: []`, and the report below. Before/after extensions are `.json`, `.md`, `.png`, `.jpg`, `.jpeg`, `.webp`, or `.txt`; visual-QA extensions are the same except `.txt`; claim-gate and lint receipts use `.json` only.
+Use a stage name for `<stage>`, a kebab-case lane, and a `G<n>` gap ID. A device node's receipt uses the lane family with a lowercase `device-<id>` lane. The filename anchor must agree with the receipt body; refuse mismatches. Markdown lane receipts use the same fields in YAML front matter, `rows: []`, and the report below. Before/after extensions are `.json`, `.md`, `.png`, `.jpg`, `.jpeg`, `.webp`, or `.txt`; visual-QA extensions are the same except `.txt`; claim-gate and lint receipts use `.json` only.
 
-The completeness register carries `id`, `area`, `surface`, `rule`, `current`, `ideal`, `before_artifact`, `severity`, `kind`, `class`, `type`, `unit`, `status`, `pr`, and `fixed_head`. Every before/after receipt names a register gap. Every defect gap has a pre-edit before receipt; when fixed it also has an after receipt and `fixed_head`. Capture before the first edit, including rows that change existing UI. A before artifact is required when a defect row leaves `open`. Taste rows stay visible but do not block. Use the cleanup section's register closure rule for whole-request completion.
+The completeness register carries `id`, `area`, `surface`, `rule`, `current`, `ideal`, `before_artifact`, `severity`, `kind`, `class`, `type`, `unit`, `status`, `pr`, and `fixed_head`. Every before/after receipt names a register gap. Every defect gap has a pre-edit before receipt; when fixed it also has an after receipt and `fixed_head`. Capture before the first edit, including rows that change existing UI. A before artifact is required when a defect row leaves `open`. Taste rows stay visible but do not block. The register closure rule for whole-request completion is in Stages 18-19: Checkpoint, cleanup, and final report, below.
 
-## Stages 11-12: Code review, triage, and fix
+## Stage 11: Triage
 
-Every review lane runs a `reviewer` in a locked read-only review worktree; `reviewer` has `bash`, so the read-only rule is held by its prompt plus the locked worktree. Never inject mutations into a worktree a reviewer reads. Every re-review uses a new `reviewer`, never the previous child continued. The code-review prompt follows `SKILL.md`, Delegation prompts, loads `remove-ai-slops` and `programming`, and states whether those checks ran. It reports CRITICAL, HIGH, MEDIUM, and LOW, but only the finite-contract test of the verify section determines blocking.
+Every review lane runs a `reviewer` in a locked read-only review worktree; `reviewer` has `bash`, so the read-only rule is held by its prompt plus the locked worktree. Never inject mutations into a worktree a reviewer reads. Every re-review uses a new `reviewer`, never the previous child continued. The code-review prompt follows `SKILL.md`, Delegation prompts, loads `remove-ai-slops` and `programming`, and states whether those checks ran. It reports CRITICAL, HIGH, MEDIUM, and LOW, but only the finite contract of the verify graph determines blocking.
 
-Collect the stage 10 lane reports, including `code-review` when required. The lead triages their findings, reproduces claimed failures on the stated head, and files only reproduced contract failures as blocking. A FAIL receipt alone is not proof. Notes and evidence correction memos do not require another review. If code fixes change the reviewed head, obtain a new code-review receipt at the resulting candidate head.
+Collect the Stage 10 lane reports, including `code-review` when required. The lead triages their findings, reproduces claimed failures on the stated head, and files only reproduced contract failures as blocking. A FAIL receipt alone is not proof. Notes and evidence correction memos do not require another review.
 
 ### Findings and dispatch table
 
@@ -238,7 +330,58 @@ Each finding records `id`, `round`, `source`, `class`, `severity`, `file_line`, 
 
 A blocking finding needs a reproduction command on `head_found`. Before the next final dispatch, rerun each prior blocker's reproduction on the new candidate head and record its result. If it still reproduces, mark `not-fixed` and refuse dispatch. If no reproduction exists, mark `no-command` and write one before the gate. Mark a resolved finding `fixed` with its `fixed_head`; a change of status never erases its earlier blocking class from round history.
 
-Run fixes as one dependency-ordered correction run of the host workflow tool or eval `agent()`/`parallel()` nodes under `references/execution.md`, Stage 9: Run the plan. Fix records name `round` and `head`: round 0 is pre-PR triage/fix, later rounds name the REVISE being corrected. Apply the reuse rule and rerun stale lanes. Keep `fix` in todo with `skip: <reason>` when it truly does not apply.
+The table is the dispatch input: each blocking finding becomes work for exactly one node in the fix graph, grouped by component.
+
+### The code-review receipt
+
+Triage also checks the code-review receipt, because a fix or a rebase silently moves the head it covered. When the work type requires `code-review`, the unit needs one structurally valid receipt with `kind: lane`, `stage: verify_lane`, `lane: code-review`, the exact full `head`, the matching `tree`, and status PASS or WARN. A receipt from another head, a sibling unit's receipt, a reuse decision, FAIL, or SKIP cannot satisfy it; a receipt already produced at the unchanged head may. If a fix changes the reviewed head, the fix round obtains a new code-review receipt at the resulting candidate head. Research and audit units, whose lane set has no `code-review`, are exempt from this check only.
+
+## Stage 12: Fix
+
+Every fix runs as a build graph for its round, never as a loose list of edits. Build that graph from the round's findings before dispatching anything: round 0 is pre-PR triage and fix, and a later round is the REVISE being corrected. Each node owns one finding component, its change, and its fix device; the lead records the node's finding ids, owned paths, device command, before and after output, and head in the fix record.
+
+### One node per finding component
+
+A component is the smallest set of findings one node can fix and prove together: one root cause, one module or file set, and one write scope. Group the round's blocking findings by component; a finding that shares a file with another goes into the same node rather than a second node that writes the same file. Nodes with disjoint write scopes and no ordering between them run in the same wave; an edge exists only where one node must land before another can run its device. Everything the round can foresee goes into the graph before launch - the node list, the edges, the owned paths, and each device - and a finding discovered mid-round waits for the next round rather than editing a graph already running.
+
+Each node prompt follows `SKILL.md`, Delegation prompts and carries the node fields (TASK, DELIVERABLE, SCOPE, VERIFY, STOP WHEN); SCOPE names the node's owned paths and the worktree pin, and VERIFY names the node's fix device. The graph checks are in `references/graphs.md`, Before launch: the graph checks. The two-attempt bound is in `references/graphs.md`, Failure, attempts, and revisions.
+
+The round's wave is one batch of `agent()` nodes. The lead exports `FIX_HEAD` with the frozen head first, then composes every prompt before the first dispatch and collects the handles in input order:
+
+```js
+const round = 1;
+const head = env("FIX_HEAD");
+const worktree = env("UNIT_WORKTREE");
+const nodes = [
+  { id: "fix-auth", findings: ["F3"], owns: "src/auth.ts", device: "bun test test/auth.guard.test.ts" },
+  { id: "fix-cache", findings: ["F5"], owns: "src/cache.ts", device: "bun test test/cache.guard.test.ts" },
+];
+const prompts = nodes.map((n) => [
+  `TASK: fix ${n.findings.join(", ")} in ${n.owns} on head ${head}, round ${round}.`,
+  `DELIVERABLE: the change plus the fix device ${n.device}, failing on the pre-fix head and passing on your head.`,
+  `SCOPE: only ${n.owns} under ${worktree}; pin every command to that worktree.`,
+  `VERIFY: run ${n.device} before the edit and capture the failure, then after the edit and capture the pass.`,
+  `STOP WHEN: the device has passed on your head and no command you started is still running.`,
+].join("\n"));
+const reports = await wait(nodes.map((n, i) => agent(prompts[i], { agent: "task", label: n.id })));
+for (let i = 0; i < nodes.length; i += 1) {
+  log(`${nodes[i].id}: ${String(reports[i]).slice(0, 160)}`);
+}
+```
+
+### The fix device
+
+A fix device fails on the code before the fix and passes on the head. It is the observable that shows the component's defect, not a restatement of the patch.
+
+The node owns its device. At dispatch the lead runs the device on the pre-fix head once and captures the failing output; a device that already passes there proves nothing about the fix and is replaced before the node runs. The node then applies its fix and runs the same device on its own head, capturing the passing output. A device that still fails means the finding is not fixed and the node stays open. The record holds the device command, both outputs, the head each ran on, and the finding ids it covers. A finding's `repro_cmd` is the natural starting point; when it only shows one symptom, widen it to the component's behavior.
+
+A node that returns without its before/after pair is a call error under `references/execution.md`, Stage 9: Build — the build graph. The tests lane at the next verify pass still judges the whole head; the fix device proves only its own component. A device that mostly tests mocks, encodes implementation details, or depends on timing is a bad device under `SKILL.md`, Rules.
+
+### Reuse and the next verify pass
+
+After the fixes land, judge every lane receipt from the previous head against the new tree: a matching tree stays valid, and a receipt whose recorded scope intersects the changed files or whose recorded surface or build identity changed is stale. Record each reuse decision as `receipt`, `VALID` or `STALE`, `reason`, and current `head`, and rerun stale lanes only. Pre-edit before captures stay historical and are exempt. The reuse rule in full is in `references/verification.md`, Stage 10: Verify — the verify graph.
+
+Keep `fix` in todo with `skip: <reason>` when it truly does not apply.
 
 The required order is **triage -> fix -> freeze -> pr_open -> round**. Stages 11-15 enforce that sequence on first review and every correction cycle. Code review and final review are distinct and are never dispatched in the same wave.
 
@@ -250,9 +393,9 @@ After triage and applicable fixes, record a freeze with full `head`, `tree`, and
 
 The required code-review lane must cover this exact frozen head and matching tree. A receipt already produced at that unchanged head may satisfy it; otherwise run a fresh `reviewer` there. The round gate refuses final review until this holds.
 
-### PR and monitor
+### PR and its watch
 
-Open one PR per unit to the repository's main branch. The body states the delivered behavior, test and QA captures, before/after evidence for the unit, and real limits. Derive numbers and identities from captures rather than retyping them. Record `pr_open` with the PR number and start the host's monitor on the PR. Use event delivery rather than a foreground polling loop. An unreadable check or unknown PR state is not ready.
+Open one PR per unit to the repository's main branch. The body states the delivered behavior, test and QA captures, before/after evidence for the unit, and real limits. Derive numbers and identities from captures rather than retyping them. Record `pr_open` with the PR number and start `gh pr checks <pr> --watch` as a background job on that PR. Do not watch it in a foreground polling loop; the job's completion is delivered to the session with the exit status and the final check table. Read that delivery rather than a partial poll: an unreadable check or unknown PR state is not ready.
 
 For a correction cycle, append commits to this same PR, freeze the new head, and update the existing body; record that the existing PR satisfies `pr_open`. Never open a second PR for that unit's fix commits.
 
@@ -296,21 +439,15 @@ Every code, final, plan and premise, gate, and adversarial reviewer prompt carri
 
 The lead handles correction memos in the external evidence directory and updates the PR body as needed. Nothing commits after freeze to repair a report or its formatting.
 
-## Stage 16: APPROVED or REVISE
-
-### APPROVED and merge
-
-APPROVED is the only end of review. The lead merges only while the approved verdict's head equals both the frozen head and observed head, the gates hold, and the PR is ready. Record the merge's `sha`, `merged_at`, `pr`, and reviewed `head`.
-
-No further round follows a recorded APPROVED for that unit. If its head drifts afterwards, refuse merge and restore the head the approval judged; an old approval never covers the moved head. Head movement during an unfinished round follows the round's re-review rule instead.
+## After the verdict: APPROVED or REVISE
 
 ### Correction path
 
-On REVISE, revisit stage 1 (discovery) for the cited problem: define it again and sweep its defect-class variants. Then update the plan (stages 4-5) and validate its grammar before checking lanes, findings, freeze, and switch obligations. Record the definition, plan, and validation against the completed REVISE round number. The plan review, the initial decision batch, and the existing goal are not repeated.
+On REVISE, revisit stage 1 (collect) for the cited problem: define it again and sweep its defect-class variants. Then update the plan (stages 4-5) and validate its grammar before checking lanes, findings, freeze, and switch obligations. Record the definition, plan, and validation against the completed REVISE round number. The plan review, the initial decision batch, and the existing goal are not repeated.
 
 For every in-scope variant, add a COMPANION row only if it is one hop from a request IS row, introduces no new owner decision, stays in this task and PR, and records `COMPANION: <item> <- <request IS row> : <why expected>`. Same-pattern sibling bugs passing those guards are fixed here. Record everything else in `<evidence dir>/follow-ups.md` and the final report without fixing it in this task.
 
-Run the fix under stage 9 in the same worktree, branch, and PR. Append commits to that PR. Then apply the reuse rule, rerun stale lanes, and run stages 10-15 with a fresh freeze and existing-PR body update. The code-review order gate still needs an exact-head receipt even when other same-tree evidence can be reused. After an approach switch, this same path is mandatory: fix run, reuse decisions, stale lanes, freeze, gate table, and a fresh final reviewer on the delta plus prior findings.
+Run the fix as a build graph at stage 12 in the same worktree, branch, and PR. Append commits to that PR. Then apply the reuse rule, rerun stale lanes, and run stages 10-15 with a fresh freeze and existing-PR body update. The code-review order gate still needs an exact-head receipt even when other same-tree evidence can be reused. After an approach switch, this same path is mandatory: fix run, reuse decisions, stale lanes, freeze, gate table, and a fresh final reviewer on the delta plus prior findings.
 
 ### Escalation and switches
 
@@ -354,7 +491,7 @@ the binding text; this is how it runs.
    sibling location, the same transition, the same input shape. File what the sweep finds as its own
    findings, and re-run the lane that owns the defect, because a fix that leaves a sibling broken returns
    as the same class.
-3. **Return to discovery and the plan for the cited problem only.** Update the plan's gap rows and the
+3. **Return to stage 1 (collect) and the plan for the cited problem only.** Update the plan's gap rows and the
    affected IS rows, adding a COMPANION row for each in-scope variant the sweep found and a risk row for each
    fix. The plan review and the goal are not repeated. The fix commits go to the same PR, never a second one.
 4. **Fix in one node per component.** Each node recreates the reported failure, captures it, fixes it,
@@ -370,6 +507,12 @@ the binding text; this is how it runs.
    fail to reproduce, and the gate table. A round that only re-reads the old report is not a review.
 8. **Read the verdict line.** `APPROVED` on the frozen head ends the loop and the lead merges. `REVISE`
    returns to step 1 of this path with the new findings.
+
+## Stage 16: Merge
+
+APPROVED is the only end of review. The lead merges only while the approved verdict's head equals both the frozen head and observed head, the gates hold, and the PR is ready. Record the merge's `sha`, `merged_at`, `pr`, and reviewed `head`.
+
+No further round follows a recorded APPROVED for that unit. If its head drifts afterwards, refuse merge and restore the head the approval judged; an old approval never covers the moved head. Head movement during an unfinished round follows the round's re-review rule instead.
 
 ## Stage 17: Post-merge verification
 
@@ -389,7 +532,7 @@ Record `post_merge` with full `head`, `tree`, commands, outcomes, captures, and 
 
 The request is complete only when every defect row in the register is `fixed`, `accepted-limit` backed by a plan LIMIT row, or `out-of-scope`; every unit's PR has merged and has post-merge verification recorded; and the evidence record supports completion. Fixed defects have their before/after receipts and fixed head. Taste rows do not block closure.
 
-Use the host's goal/checkpoint equivalent to record completion, with a `reviewer` reading the evidence record; the caller's prompt states its narrow scope (presence, criteria match, schema only), and the lead records the checkpoint. Complete the existing goal only after the merged result passes post-merge verification (stage 17). Remove the worktrees and branches, stop owned processes and monitors, and keep a teardown receipt for each; cleanup records include at least one receipt. Record the defect classes caught through the host's memory capability.
+Use the goal tool to record the completion checkpoint, with a `reviewer` reading the evidence record; the caller's prompt states its narrow scope (presence, criteria match, schema only), and the lead records the checkpoint. Complete the existing goal only after the merged result passes post-merge verification (stage 17). Remove the worktrees and branches, stop owned processes and background jobs, and keep a teardown receipt for each; cleanup records include at least one receipt. Record the defect classes caught in memory.
 
 Deliver the final report with results, evidence locations, limits, and every out-of-scope finding with its follow-up path, or "none". Finish only after the register, merged units, post-merge verification, completion checkpoint, cleanup receipts, and final report all hold. Stop conditions and the report shape: see `SKILL.md`, Finish.
 
@@ -429,3 +572,5 @@ scratch and never re-derive a decision the receipts already record.
 10. **Pause safely before a long wait.** Before a final-review dispatch, a CI wait, or an owner question,
     write a resume note with the intent, the current step, the valid receipts, and the one next action, and
     leave nothing uncommitted that the restart would lose.
+
+- The graph-level resume contract — reconcile live handles before relaunching, allow one replacement per node, and adopt a late result only at a matching head or tree — is in `references/graphs.md`, Picking a graph back up.

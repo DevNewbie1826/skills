@@ -1,31 +1,156 @@
-Read this when stages 1-8 (discovery, definition, the plan, its checks and review, and the goal) of the dag-workflow flow start; SKILL.md, The stage map, lists it.
+Read this when stages 1-8 (collect with the context graph, define, the plan, its checks and review, and the goal with its worktree) of the dag-workflow flow start; SKILL.md, The stage map, lists it.
 
-# dag-workflow: discovery, plan, and goal
+# dag-workflow: context graph, definition, plan, and goal
 
 Covers stages 1-8 of the flow (see `SKILL.md`, The stage map).
 
-## Stage 1: Discovery
+## Stage 1: Collect — the context graph
 
-Gather facts before deciding anything. Write the open questions down first, then run one `scout` per open question per wave, all in one `parallel()` call of `agent(agent='scout', ...)` thunks, alongside your own reads. A question leaves the next wave as soon as it is answered. Survey:
+Stage 1 is the context graph: the overall context and history of the work gathered at maximum parallelism, as nodes with edges, handoff files, per-node checks and one reducer. It produces the evidence stage 2 defines the ideal state from. Why each phase is one graph, and what a graph must satisfy, are owned by `references/graphs.md`, The flow's three graphs; this section owns stage 1's nodes, edges and closing check.
 
-- The code the request touches: layout, existing tests, the real surfaces users go through.
-- Git history of the paths you will touch: what changed there recently and why.
-- Memory: durable facts, past decisions, and regressions earlier runs caught.
-- Earlier session evidence for the same area.
+### Open questions first
 
-Facts from outside the repository (a library, an external API, current docs) come from your own web and doc tools, or from one `agent(agent='task', ...)` per external question, never from what you remember.
+Write the questions down before any node runs, to `<evidence>/collect/questions.md`: one line per question with a stable id, the question in a form one answer can settle, the node that owns it, and the citation that settles it (`file:line`, `sha`, a memory path, a session id, a url). A question that cannot name what would settle it is not ready; split it until it can. Start from:
 
-Stop when every open question is answered and two consecutive waves add nothing new. Let the survey range wide enough to name everyone the result touches, then apply the boundary before planning: see `SKILL.md`, The purpose boundary.
+- **The request's own ambiguities** — what must be true for the work to be done, and what the requester would call a failure.
+- **The code the request touches** — layout, the real surfaces users go through, existing tests, and the call sites that make them real.
+- **Git history of the touched paths** — what changed recently, when, and why.
+- **Memory** — durable facts, past decisions, and regressions earlier runs caught.
+- **Earlier session evidence** for the same area.
+- **Outside sources** — a library, an external API, current docs.
 
-When a review sends work back (the REVISE correction path, `references/verification.md`), re-run discovery for the cited problem and also sweep variants of the same defect class: list the axes along which that class varies, probe representative inputs at the real entry point, and group failures by root cause. The sweep lives inside this step; never spawn separate nodes for the sweep or for merging its results.
+A memory hit is a pointer to evidence, not an answer.
 
-## Stage 2: Definition
+### The graph
 
-Before planning, define the affected users, their current and intended use, the ideal properties and their reasons, and each difference from today, its cause, impact, affected party and evidence. Apply `SKILL.md`, The purpose boundary: request properties and qualifying companions are in scope; record other findings as follow-ups. A property already satisfied still records "no gap" with evidence. If a gap register exists, identify its entries as `G<n>` and pair every IS row with the register entry it closes.
+Every open question, and every slice of the request whose survey stands alone, is one node with a stable id. The default slices are the code, its history, memory and earlier sessions; the request adds the rest. The lead's own reads are nodes too, never work done beside the graph. Route by what the node does: `scout` for scope, file maps and outside-source reading (it has `web_search`); `sonic` for a mechanical harvest; `task` for extract, for a question that must run the product, and, when an outside question needs a heavier read than one page, for that one external question as its own node. Outside facts never come from memory.
+
+A slice node writes `<evidence>/collect/<id>.md`: its answers, the citation for each, and every source it could not open, by exact path. One `task` check node, `<id>-check`, depends on it and re-opens each cited line, sha and url, writing `<evidence>/collect/<id>.check.md` as `PASS` or as the exact citation and what it actually says; a check that cannot read its slice's file fails that node. One `task` reducer, `collect-reduce`, depends on every check node and writes `<evidence>/collect.md`: one section per question, the answer with its evidence, every conflict between slices, and every unread source named by exact path. An unread source is named in `collect.md`, never omitted.
+
+The edges do only one job, ordering: slice → its check, every check → the reducer. Data moves through the files, and a consumer treats a missing or malformed handoff as a failure of its producer, never as an empty answer.
+
+```js
+// agent(), wait() and write() are eval prelude helpers; references/graphs.md, Running a graph on omp owns the full runner.
+const dir = "/evidence/run-42/collect";
+
+// Questions exist before the first dispatch; one node per open question or slice.
+const nodes = [
+  { id: "q-code", agent: "scout", cite: "file:line", ask: "Which files, real entry surfaces and tests does the request touch?" },
+  { id: "q-history", agent: "scout", cite: "sha", ask: "What changed on each touched path recently, and why?" },
+  { id: "q-memory", agent: "task", cite: "memory path", ask: "Which durable facts, decisions and regressions name this area?" },
+  { id: "q-sessions", agent: "task", cite: "session id", ask: "What did earlier sessions record about this area?" },
+  { id: "q-ext", agent: "scout", cite: "url", ask: "What do the current docs say about each outside API the request depends on?" },
+];
+// An outside question too heavy for one page gets its own task node instead of joining q-ext.
+
+await write(`${dir}/questions.md`, nodes.map((n) => `${n.id} | ${n.agent} | ${n.cite} | ${n.ask}`).join("\n") + "\n");
+
+// One chain per slice: its check node starts the moment that slice settles, and nothing else waits.
+const chains = nodes.map(async (n) => {
+  await wait([agent(
+    `${n.ask}\nAnswer in ${dir}/${n.id}.md with file:line, sha, url, memory or session evidence, and name every source you could not read by exact path.`,
+    { agent: n.agent, label: n.id },
+  )]);
+  await wait([agent(
+    `Re-open every citation in ${dir}/${n.id}.md. Write PASS, or the exact citation and what it really says, to ${dir}/${n.id}.check.md.`,
+    { agent: "task", label: `${n.id}-check` },
+  )]);
+  return n.id;
+});
+await Promise.all(chains);
+
+// One reducer, ready only when every check node has settled.
+const reducer = agent(
+  `Read ${dir}/questions.md and every ${dir}/*.md, including the .check.md verdicts. Write ${dir}/../collect.md: one section per question, the answer and its evidence, every conflict between slices, and every unread source named by exact path.`,
+  { agent: "task", label: "collect-reduce" },
+);
+await wait([reducer]);
+```
+
+A question a slice opens but does not answer is a revision: the lead adds its node and check, records the change against the graph, and re-runs only the reducer, which is downstream of every check. The stage closes when every question in `questions.md` is answered and two consecutive waves add nothing new — a wave that answers nothing and opens nothing is recorded as empty, and two consecutive empty waves close it. The lead's close check then reads `collect.md` against `questions.md`: every question answered, every unread source named, every `<id>.check.md` `PASS`. A close-check failure reopens only the slice the named citation belongs to, and the lead records the stage on the strength of that check.
+
+### Before launch
+
+Define the whole graph before the first dispatch and hold it to `references/graphs.md`, Before launch: the graph checks. Those checks are: unique ids, every dependency exists, no cycle, no two concurrently runnable nodes writing the same file, and verification coverage for every node. Writes are disjoint by construction; the waves are as wide as the ready set allows, so every ready node starts before the graph waits, and nothing is capped at a fixed batch size. The bound is the session's background-job limit (`async.maxJobs`). The slices are heterogeneous, so each is its own node; a pool suits one shape repeated over many items, and `references/graphs.md`, Wide graphs: shards, reducers, bounded reports owns that shard form. At tier S the graph collapses to the one slice that matters and its check; the shape and the checks do not change.
+
+Let the survey range wide enough to name everyone the result touches, then apply the boundary before planning: see `SKILL.md`, The purpose boundary.
+
+### When a review sends work back
+
+The REVISE correction path (`references/verification.md`, After the verdict: APPROVED or REVISE) opens a new context graph for the cited defect class instead of returning to the old one: extra nodes list the axes along which that class varies, probe representative inputs at the real entry point for each axis, and group the failures by root cause. The same per-node check nodes re-open each probe's cited lines, and one reducer writes the sweep record beside `collect.md`. The sweep is nodes inside that graph, never separate dispatches outside it, and its reducer merges nothing a check node did not verify.
+
+## Stage 2: Define — the ideal state
+
+Stage 2 turns `collect.md` into the definition the rest of the run is measured against. It is written from `collect.md`'s evidence only: every user, use, property, difference and decision point below cites the section, capture or file-and-line in `collect.md` that carries it. A fact the definition needs but `collect.md` does not carry sends the run back to stage 1 for one more context-graph node; it is never filled from memory, from the request's wording alone, or from an assumption. Check the handoff before using it (graphs.md, Handoff files): a missing or malformed `collect.md` is a failure to report, not a gap to paper over.
+
+The output is the evidence-based ideal state: what the result must be for its users once nothing is constrained by today's code, and which major decisions settle it. It is the yardstick for every later choice, and stage 8 copies it into the goal. `define.md` is the run's definition snapshot: one writer, the session, and a revision is recorded with its reason, never edited silently.
+
+### Users and their use
+
+Name every party the evidence shows the result touches, then give each one its current and its intended use:
+
+- **Affected users** — every party `collect.md` shows the result touches: the person who asks for the work, the person who operates or reads the result, the maintainer who inherits it, and any other skill, command, service or downstream consumer that reads the surface. One entry per party, with the collect evidence that shows the touch.
+- **Current use** — what each party does today, through which real surface (command, file, page, API, receipt), and where it hurts. The evidence is the collect row, not an adjective.
+- **Intended use** — what each party must be able to do when the work is done, stated as an observable action with an observable result.
+
+A party the request implies but `collect.md` never shows is an open question back at stage 1, not a row invented here.
+
+### The ideal properties
+
+For each property, state what must hold, the party it serves, the reason it must hold (what breaks, for whom, if it does not), and the collect evidence that the property matters:
+
+```text
+- P<n>: <property that must hold> ; party: <affected party> ; reason: <what breaks without it> ; evidence: <collect.md section or capture path>
+```
+
+Properties describe the ideal end state, not today's behavior: "unchanged" and "works as now" are not properties. The set is complete when every intended use is served by at least one property and every property names a party and a reason. A property nobody needs is dropped; a need no property serves is a missing property.
+
+### Differences from today
+
+Each difference from today is one row in `gaps.tsv`, with its cause, impact, affected party and evidence:
+
+```text
+- G<n>: <the difference> ; party: <affected party> ; cause: <why it exists today> ; impact: <what the party hits> ; evidence: <collect.md section, capture path, or file:line> ; state: gap | no gap
+```
+
+- **A satisfied property is a row too.** It records `no gap` and the evidence that shows it is already satisfied: the command and its output, the capture, or the file and line. "No gap" without evidence is an unverified claim and cannot enter the register.
+- **Register ids.** New differences take the next free `G<n>`. When the run already carries a gap register (an audit register, or one handed in with the request), its entries keep their ids and are cited as they are; the definition never renumbers them. Every later IS row names the `G<n>` it closes.
+- **Boundary.** Request properties and qualifying companions are in scope; every other finding goes to the follow-up record, never into this register (SKILL.md, The purpose boundary; SKILL.md, Follow-up record). A companion enters only through the four guards.
+
+### Major decision points
+
+Name every major decision point the definition opens: the forks that change what gets built, how the work is split, or what counts as done. Settle each one from evidence here:
+
+```text
+- D<n>: <decision point> ; options: <the live options> ; settled by: <collect evidence> -> <the choice> ; affects: <G ids, properties> ; state: settled | owner decision
+```
+
+- **Settled here.** When collect's evidence decides it, record the evidence and the choice in the same row. A settled decision is not reopened at stage 7 and is not asked of the owner.
+- **Owner decision.** When the evidence cannot settle it because the choice is irreversible, destructive, spends money, or accepts a contract-level limit, mark the row `owner decision` and carry it to stage 7 decide with a recommended default and its reason. It is asked once, in the one decision batch, and never again.
+- **No silent forks.** A fork with no row is the defect this section exists to prevent: it resurfaces mid-build as an unowned choice. When a later stage finds one, revise define before that stage continues.
+
+### The ideal end state as the yardstick
+
+Write the end state once, as one paragraph: the users, the use they get, the properties that hold, and the decisions that are settled. That paragraph is the yardstick for every later choice. A plan row, a node split, a device, a lane, a fix, or a review finding is checked against it, and a choice that makes a property unreachable or reverses a settled decision is wrong even when it is locally convenient.
+
+- **Changing the definition is a revision.** Record the reason, re-derive the affected rows, re-check the plan, and re-run the stages the change invalidates. It is never edited silently mid-build.
+- **Copied into the goal.** Stage 8 creates the goal and the worktree, and the end-state paragraph is copied into the run's one goal, together with the IS-to-QA pairing, so the goal and this definition cannot drift and no second goal is created.
+
+### The IS pairing
+
+The pairing is declared here, not invented at plan time. Every delivered property becomes one `IS-<n>` row in the plan's contract; each IS row names at least one declared QA scenario; every QA scenario is named by at least one IS. When a gap register exists, each IS row also cites the declared `G<n>` it closes; without one, the IS rows stand alone and no gap target is claimed.
+
+The pairing is complete only when both directions hold. A register gap with no IS row is undelivered work; an IS row the request never asked for is out of the boundary unless it is a qualifying companion. A `no gap` row yields no IS row: it stays in the register and is re-checked at verify.
+
+### What stage 2 leaves behind
+
+- `define.md` in the evidence dir: the users and their current and intended use, the properties with reasons, the decision rows, the end-state paragraph, and the IS-to-`G<n>` pairing table.
+- `gaps.tsv` in the evidence dir: the difference rows, `no gap` rows included, one writer.
+- The plan is written from this definition; the next section owns its grammar and the checks it must pass.
 
 ## Stages 4-5: The plan file and its checks
 
-Write one plan file in the evidence dir outside the task worktree, and record that path in the plan. When a request has independently verifiable units, write and explicitly select one plan per unit. The plan, `todo`, and evidence dir hold progress; hand the named plan to the host workflow tool or to `eval` `agent()`/`parallel()` nodes, not to a second planning pass. A node owns a disjoint write scope and its proof. The goal carries the IS-to-QA pairing.
+Write one plan file in the evidence dir outside the task worktree, and record that path in the plan. When a request has independently verifiable units, write and explicitly select one plan per unit. The plan, `todo`, and evidence dir hold progress; hand the named plan to the build graph (`references/execution.md`, Stage 9: Build — the build graph), not to a second planning pass. A node owns a disjoint write scope and its proof. The goal carries the IS-to-QA pairing.
 
 ### Plan identity and checkbox sections
 
@@ -74,7 +199,7 @@ Design requires at least one SCREEN; research requires at least one AXIS and CLA
 - G1 DEVICE: <device body>
 ```
 
-All QA fields are nonempty and ordered as shown; `run` is last, so its command may contain semicolons, pipes, quotes or arrows. State happy and failure cases and capture paths. A scenario that runs a command is a re-runnable script kept with its evidence. Every IS has at least one DEVICE row; write gap-targeted devices in the same form. When a register exists, each IS cites its declared gap.
+All QA fields are nonempty and ordered as shown; `run` is last, so its command may contain semicolons, pipes, quotes or arrows. State happy and failure cases and capture paths. A scenario that runs a command is a re-runnable script kept with its evidence. Every IS has at least one DEVICE row; write gap-targeted devices in the same form. When a register exists, each IS cites its declared gap. Each fix row also names its fix device, which must fail on the code before the fix and pass on the head.
 
 Choose a device that directly confirms each delivered behavior. Prefer no new test to a bad test: a bad test mostly tests mocks, pins implementation details, depends on timing or unrelated global state, needs expensive infrastructure for a small fix, or would be deleted immediately after proving the fix. Use existing repository tests for behavior already tested; use a mutation for a guard; for behavior the repository cannot test use the type-specific confirmation below plus a `no-test` row naming the QA scenario that runs the same check.
 
@@ -136,6 +261,16 @@ The default is one fresh `reviewer` plan review of the checked plan. The reviewe
 
 Only when the requester's own message explicitly asks for the separate planning workflow, run that workflow with its approval gate and add a second fresh `reviewer` with the plan-gate lens alongside the first review. This branch has both reviews, no third round, and no follow-up message to that reviewer. Its fixes are checked by final review.
 
-## Stage 8: The goal
+## Stage 8: The goal and the worktree
 
 `/wf` already armed the run's one goal; keep it and never create a second. Its objective is the register's IS-to-QA pairing written as one paragraph; in a multi-unit request each unit's plan holds its own IS rows and their QA scenarios, and the single run goal covers the register. Without `/wf`, create that one goal with the host's goal tool. The plan files and the `todo` list hold progress.
+
+The objective also carries the ideal end state recorded in `define.md`, written as one sentence, and a concrete `WHEN-TO-STOP:` line naming the observable condition that ends the run. Write both into the objective itself, not into a side note: the goal is the run's durable objective, so an objective missing either one is incomplete and is repaired before the first build node starts. The stop line names the flow's finish, not a stage boundary: the register closed, every unit's PR merged with its post-merge record written, the checkpoint complete, the worktrees and branches removed with receipts, and the final report delivered.
+
+Each unit then gets a fresh worktree off main before build, so no unit starts on a tree that another unit or an earlier run has touched:
+
+```text
+git worktree add -b <branch> <path> main
+```
+
+Every later command pins that worktree with `cd <path> && ...` or `git -C <path> ...`; a node prompt that names a bare command or relies on a default cwd is refused at dispatch. A one-unit request still gets its own worktree and one PR. A correction run for a unit reuses that unit's worktree and PR, and the run's one goal already covers it. The worktree and branch live through that unit's merge, and cleanup removes them with receipts. Record the goal id and each unit's worktree path in the plan's evidence dir. Build rules continue in references/execution.md, Stage 9: Build — the build graph.
