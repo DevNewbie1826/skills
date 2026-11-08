@@ -4,6 +4,8 @@ import type { SourceHit, SourceRule } from "../rule"
 const COLOR_LITERAL = /(?<![A-Za-z0-9_-])#[0-9a-fA-F]{3,8}(?![A-Za-z0-9_-])|(?<![A-Za-z0-9_-])(?:rgba?|color|oklab|oklch|lab|lch)\([^()]*\)/gi
 const HEX_LITERAL = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 const NUMBER_TOKEN = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?%?$/i
+/** A hue may carry an angle unit; rejecting it would silently miss a valid oklch()/lch()/hsl() color. */
+const ANGLE_TOKEN = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?(?:deg|grad|rad|turn)$/i
 const MASKED_CALL = /^(?:var|url)\s*\(/i
 const POISON = "\u0001"
 const URL_CALL = /^url\s*\(/i
@@ -82,8 +84,12 @@ function sourceColor(text: string): Rgba | null {
 	if (parts.length === 0) return null
 	const head = fn === "color" ? 1 : 0
 	if (fn === "color" && !/^[a-z][a-z0-9-]*$/i.test(parts[0] ?? "")) return null
-	for (const part of parts.slice(head)) {
-		if (part !== "/" && !NUMBER_TOKEN.test(part)) return null
+	// hue is the last channel for the cylindrical spaces and sits before a `/` alpha or at the end.
+	const channels = parts.slice(head)
+	const hueAt = fn === "oklch" || fn === "lch" || fn === "hsl" || fn === "hsla" ? channels.findIndex((part, at) => at > 0 && part !== "/" && ANGLE_TOKEN.test(part)) : -1
+	for (const [at, part] of channels.entries()) {
+		if (part === "/" || at === hueAt) continue
+		if (!NUMBER_TOKEN.test(part)) return null
 	}
 	return parseColor(text)
 }

@@ -183,6 +183,12 @@ describe("hard-coded-color", () => {
 		expect(lines(css(".a { color: myrgb(26 92 255); }"))).toEqual([])
 	})
 
+	test("#given a hue carrying an angle unit #then the color is still reported", () => {
+		expect(lines(css(".a { color: lch(50% 20 30deg); }"), ["lch(50% 20 30deg)"])).toEqual([1])
+		expect(lines(css(".a { color: oklch(50% 0.1 30deg); }"), ["oklch(50% 0.1 30deg)"])).toEqual([1])
+		expect(lines(css(".a { color: oklch(0.5 0.1 0.5turn); }"), ["oklch(0.5 0.1 0.5turn)"])).toEqual([1])
+	})
+
 	test("#given an escaped function or custom-property name #then it is decoded before matching", () => {
 		expect(lines(css(":root { --brand: #14161a; } .a { color: v\\61 r(--brand, #1a5cff); }"))).toEqual([])
 		expect(lines(css(":root { \\2d -brand: #1a5cff; }"))).toEqual([])
