@@ -631,10 +631,10 @@ def ld_depth_exceeds(value, limit):
     past that level: for nesting depth alone the cost is O(limit).
 
     That bound is exact only for nesting depth. Every container and value
-    that sits within the limit is still visited once, so a wide input costs
-    O(n) in the containers and values it holds. Total work is O(n), and
-    O(limit) describes only how deep the walk goes, not a constant cost for
-    every document."""
+    the walk reaches is visited once, so total work is O(n) in the
+    containers and values visited; when nothing exceeds the limit that is
+    every node in the document, and a wide input costs O(n). O(limit)
+    describes only how deep the walk goes."""
     stack = [(value, 1)]
     while stack:
         node, depth = stack.pop()

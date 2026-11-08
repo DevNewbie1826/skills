@@ -1260,10 +1260,22 @@ class TestJsonldDepthLimit(RuleCase):
 class TestLdDepthDocstring(unittest.TestCase):
     """The cost contract of ld_depth_exceeds is stated in its docstring:
     the early exit one level past the limit bounds how deep the walk goes,
-    so O(limit) holds for nesting depth alone, while a wide input costs
-    O(n) in the containers and values actually visited. A docstring is
-    the only shipped surface for that claim, so the check reads it as
-    text and rejects the earlier, misleading O(limit) wording."""
+    so O(limit) holds for nesting depth alone, while the nodes actually
+    visited cost O(n) in total, which for a wide input is O(n). A
+    docstring is the only shipped surface for that claim, so the check
+    reads it as text, requires the true bound, and rejects both the
+    earlier misleading O(limit) wording and any reworded claim of constant
+    or input-size-independent cost."""
+
+    CONSTANT_COST_CLAIMS = (
+        "O(1)",
+        "constant work",
+        "constant cost",
+        "constant time",
+        "independent of input size",
+        "independent of the input size",
+        "not O(n)",
+    )
 
     def docstring_text(self):
         docstring = cp.ld_depth_exceeds.__doc__ or ""
@@ -1280,6 +1292,20 @@ class TestLdDepthDocstring(unittest.TestCase):
         text = self.docstring_text()
         self.assertNotIn("costs at most O(limit) work", text)
         self.assertNotIn("no matter how deep it nests", text)
+
+    def test_docstring_claims_no_constant_or_size_independent_cost(self):
+        text = self.docstring_text()
+        for claim in self.CONSTANT_COST_CLAIMS:
+            with self.subTest(claim=claim):
+                self.assertNotIn(claim, text)
+        self.assertNotRegex(text, r"\bnot\s+O\(n\)")
+
+    def test_docstring_claims_are_each_backed_by_the_other(self):
+        # Reject a reworded false claim that simply mentions O(n) somewhere
+        # else in the same sentence, e.g. "Total work is O(1), not O(n)".
+        text = self.docstring_text()
+        self.assertNotRegex(text, r"O\(n\)[^.]*\bnot\b")
+        self.assertNotRegex(text, r"\bnot\b[^.]*O\(n\)")
 
 
 class TestAuthorityValidation(RuleCase):
