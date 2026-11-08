@@ -1,13 +1,10 @@
 Read this when a PR body needs screenshots or terminal PNGs as evidence. It is the detail behind the "PR Body Evidence Attachments" section in [SKILL.md](../SKILL.md).
 
-The allowed hosting path is GitHub user attachments from the authenticated web attachment flow. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Never log browser cookies, CSRF tokens, form fields, or upload headers.
+Use only the code host's own authenticated attachment feature, so the image is hosted where the PR lives and readers can open it. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Never log session cookies, anti-forgery tokens, upload form fields, or upload headers.
 
-The flow needs an authenticated GitHub web session; an API token from the `gh` CLI alone is not enough.
+1. Confirm an authenticated web session for the host exists; an API token from a command-line client is usually not enough for attachment upload.
+2. Upload each image through the host's attachment flow, from the PR or issue page in that session.
+3. Keep only the final hosted attachment URL for each image.
+4. Put those URLs in the PR body: write the body to a temp file and pass it with the host client's body-file option instead of shell-quoting it.
 
-1. Open the target PR or issue page in that session and read its file-attachment CSRF token and repository id.
-2. `POST https://github.com/upload/policies/assets` with `repository_id`, `name`, `size`, `content_type`, and that token as `authenticity_token`.
-3. Upload the bytes to the returned storage URL with the returned form fields exactly as given.
-4. `PUT https://github.com/upload/assets/:id` with the returned `asset_upload_authenticity_token`.
-5. Put only the final `https://github.com/user-attachments/assets/<uuid>` URL in the PR body: write the body to a temp file and pass it with `gh pr edit --body-file`.
-
-If no authenticated browser session is available, leave the local evidence paths in the PR body and state the blocker. Do not improvise another host.
+If no authenticated session or attachment feature is available, skip the images and state the blocker in the PR body without publishing local file paths: local paths are unreadable to reviewers and expose host details. Do not improvise another host.
