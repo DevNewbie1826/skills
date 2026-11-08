@@ -10,6 +10,7 @@ const SCRIPT = join(import.meta.dir, "..", "scripts", "typescript", "check-copy-
 const EXPECTED: Record<string, Array<[number, RuleId]>> = {
   "em-dash-string.ts": [[1, "no-em-dash-copy"], [2, "no-em-dash-copy"]],
   "em-dash-template.tsx": [[1, "no-em-dash-copy"], [4, "no-em-dash-copy"]],
+  "jsx-text-quote.tsx": [[5, "no-em-dash-copy"], [10, "require-suppression-reason"]],
   "bare-ts-directives.ts": [
     [1, "require-suppression-reason"],
     [4, "require-suppression-reason"],
@@ -157,6 +158,77 @@ describe("#given shapes found by the review round", () => {
   })
 })
 
+describe("#given JSX text that opens with a quote", () => {
+  test("#when the text starts with an apostrophe #then later directives still scan", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>'Tis the season</p>\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when the text starts with a double quote #then a later comment stays a comment", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>He said \"hello</p>\n)\n// note — dash\n")).toEqual([])
+  })
+
+  test("#when a quote opens text inside nested tags and a fragment #then later directives still scan", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <>\n    <div><p>'quoted'</p></div>\n  </>\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 6, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a dash sits in a string inside a JSX expression container #then it is flagged", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>{'a — b'}</p>\n)\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+    ])
+  })
+
+  test("#when a dash sits in an attribute after a spread container #then it is flagged and the file returns to code", () => {
+    expect(lintSource("unit.tsx", "export const el = (props) => (\n  <p {...props} title=\"a — b\" />\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a generic parameter list opens a .tsx arrow #then the tag heuristic is not fooled", () => {
+    expect(lintSource("unit.tsx", "const id = <T,>(value: T) => value\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "require-suppression-reason" }),
+    ])
+    expect(lintSource("unit.tsx", "const id = <T extends object>(value: T) => value\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a comparison uses an angle bracket in a .ts file #then the quote heuristic is unchanged", () => {
+    expect(lintSource("unit.ts", "const label = count < 3 ? 'a — b' : 'c'\n")).toEqual([
+      expect.objectContaining({ line: 1, rule: "no-em-dash-copy" }),
+    ])
+  })
+
+  test("#when a .tsx comparison sits between two less-than signs #then it is not a tag", () => {
+    expect(lintSource("unit.tsx", "const flag = a<b && c>d ? 'a — b' : 'c'\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 1, rule: "no-em-dash-copy" }),
+      expect.objectContaining({ line: 2, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a self-closing tag follows a quoted sibling #then the scanner returns to code", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <div><p>'quoted'</p><br /></div>\n)\n// @ts-ignore\n")).toEqual([
+      expect.objectContaining({ line: 4, rule: "require-suppression-reason" }),
+    ])
+  })
+
+  test("#when a .tsx file ends inside JSX text #then an unterminated tag does not crash the scanner", () => {
+    expect(lintSource("unit.tsx", "export const el = () => (\n  <p>'unterminated — text\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+    ])
+  })
+
+  test("#when a nested expression holds a template with a dash #then it is flagged", () => {
+    expect(lintSource("unit.tsx", "export const el = (props) => (\n  <p title={props.label ?? `a — b`}>x</p>\n)\n")).toEqual([
+      expect.objectContaining({ line: 2, rule: "no-em-dash-copy" }),
+    ])
+  })
+})
+
 describe("#given the CLI", () => {
   const run = (...args: string[]) => spawnSync(process.execPath, [SCRIPT, ...args], { encoding: "utf8", timeout: 30_000 })
 
@@ -165,7 +237,7 @@ describe("#given the CLI", () => {
     expect(result.status).toBe(1)
     expect(result.stdout).toMatch(/em-dash-string\.ts:1 no-em-dash-copy/)
     expect(result.stdout).toMatch(/bare-tool-directives\.ts:4 require-suppression-reason/)
-    expect(result.stdout).toMatch(/check-copy-rules: 10 finding\(s\)/)
+    expect(result.stdout).toMatch(/check-copy-rules: 12 finding\(s\)/)
   })
 
   test("#when it scans the negative fixtures #then it exits 0 with no findings", () => {
