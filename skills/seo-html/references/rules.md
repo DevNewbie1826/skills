@@ -39,7 +39,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | H-01 | E | S | exactly one `<h1>` | FYSA seo.md; CS | unverified: reference repo only; Google does not require a single h1 |
 | H-02 | W | S | heading level skip (h2 -> h4) | CS | unverified: accessibility best practice; reference repo only |
 | H-03 | W | S | empty, digits-only, or <= 2 code point heading | CS | unverified: reference repo only |
-| LD-01 | E | S | every `application/ld+json` block parses; at least one block exists | SUS schema-templates; CS | unverified: Google requires valid markup to use it; one block per page is this skill's choice |
+| LD-01 | E | S | every `application/ld+json` block parses (nesting deeper than 500 levels counts as not parsing); at least one block exists | SUS schema-templates; CS | unverified: Google requires valid markup to use it; one block per page is this skill's choice |
 | LD-02 | E | S | `@context` missing on a top-level node; http://schema.org -> W | SUS schema-templates; CS | unverified: reference repo only |
 | LD-03 | E | S | node without `@type` (except @graph container) | SUS schema-templates; CS | unverified: reference repo only |
 | LD-04 | E | S | `@graph` not a list | CS | unverified: JSON-LD 1.1 syntax; not checked against the spec in this pass |

@@ -1147,10 +1147,11 @@ class TestHardenedParsing(RuleCase):
 
 
 class TestDeepNesting(RuleCase):
-    """FU-4: markup and JSON-LD nested far past the interpreter recursion
-    limit are walked with explicit stacks, so the CLI keeps its exit
-    contract, the JSON report stays parseable, and extracted text keeps
-    its source order."""
+    """FU-4: markup nested far past the interpreter recursion limit is
+    walked with explicit stacks, so the CLI keeps its exit contract, the
+    JSON report stays parseable, and extracted text keeps its source
+    order. JSON-LD nesting past the supported depth limit is reported
+    as LD-01 instead of walked (see TestJsonldDepthLimit)."""
 
     DEPTH = 5000
 
@@ -1205,6 +1206,54 @@ class TestDeepNesting(RuleCase):
         severities = {finding["id"]: finding["severity"]
                       for finding in report["findings"]}
         self.assertEqual(severities.get("LD-01"), "error")
+        self.assertEqual(report["summary"]["error"], 1)
+
+
+class TestJsonldDepthLimit(RuleCase):
+    """The too-deep ld+json verdict comes from the checker's explicit
+    depth limit, not from the JSON parser's recursion ceiling, so a
+    deeply nested block gets the same verdict on every supported
+    interpreter (that ceiling differs by more than an order of
+    magnitude between interpreter generations)."""
+
+    def deep_block(self, depth):
+        return ('<script type="application/ld+json">'
+                + '{"n":' * depth + "1" + "}" * depth + "</script>")
+
+    def run_depth_cli(self, depth):
+        text = self.mutated(
+            "good-en.html",
+            ('<script type="application/ld+json">',
+             self.deep_block(depth) + '<script type="application/ld+json">'))
+        path = write_temp_page(text, prefix="depth-")
+        try:
+            return run_checker_cli([path, "--json"])
+        finally:
+            Path(path).unlink()
+
+    def findings_by_id(self, process):
+        report = json.loads(process.stdout.decode("utf-8"))
+        return report, {finding["id"]: finding["severity"]
+                        for finding in report["findings"]}
+
+    def test_depth_at_or_below_limit_parses_without_ld_01(self):
+        for depth in (cp.MAX_JSONLD_DEPTH - 1, cp.MAX_JSONLD_DEPTH):
+            with self.subTest(depth=depth):
+                process = self.run_depth_cli(depth)
+                self.assertNotIn(b"Traceback", process.stderr)
+                self.assertEqual(process.returncode, 1)
+                report, severities = self.findings_by_id(process)
+                self.assertNotIn("LD-01", severities)
+                self.assertEqual(severities, {"LD-02": "error",
+                                              "LD-03": "error"})
+                self.assertEqual(report["summary"]["error"], 2)
+
+    def test_depth_one_over_limit_fires_single_ld_01(self):
+        process = self.run_depth_cli(cp.MAX_JSONLD_DEPTH + 1)
+        self.assertNotIn(b"Traceback", process.stderr)
+        self.assertEqual(process.returncode, 1)
+        report, severities = self.findings_by_id(process)
+        self.assertEqual(severities, {"LD-01": "error"})
         self.assertEqual(report["summary"]["error"], 1)
 
 
