@@ -11,11 +11,11 @@ Apply the deletion ladder before category work:
 1. **Delete entirely** when behavior is unnecessary, speculative, or dead on arrival.
 2. **Reuse** an existing project helper or established pattern when it already owns the behavior.
 3. **Use platform, standard-library, runtime, or installed-dependency support** instead of a hand-rolled equivalent.
-4. **Simplify in place** only when the code must remain.
+4. **Simplify in place** only when the code must remain. When a bounded simplification is kept on purpose (a naive scan fine under a known size, a global lock), mark it with a `debt:` comment naming the ceiling and the upgrade trigger and list it in the report's debt ledger; a known ceiling without a marker is indistinguishable from a defect.
 
 For a bug-fix diff, inspect callers of each shared function it changes. Prefer a root-cause fix at the shared seam over repeated caller-side guards that leave sibling callers broken.
 
-Evaluate all ten categories below in this order: obvious comments, dead code, over-defensive code, duplication, excessive complexity, needless abstraction and boundary violations, performance equivalences, missing tests, oversized modules. Keep separate changes reviewable; do not bundle unrelated refactors.
+Evaluate all ten categories below in this order: obvious comments, dead code, over-defensive code, duplication, excessive complexity, needless abstraction and boundary violations, performance equivalences, missing or junk tests, oversized modules. Keep separate changes reviewable; do not bundle unrelated refactors.
 
 ## 1. Obvious comments
 
@@ -81,15 +81,19 @@ Apply only changes with obvious semantic equivalence and a clear time or space b
 
 Do not alter an algorithm whose correctness has subtle implications. Do not micro-optimize a hot path without a benchmark. If equivalence requires a proof rather than direct inspection, skip the optimization.
 
-## 9. Missing tests
+## 9. Missing or junk tests
 
-For behavior exposed by changed source files, find existing coverage and add the narrowest regression test that pins observable output, side effects, errors, or edge cases before cleanup begins. Do not pin private implementation details.
+Tests are code in scope. The single table of junk classes, the retention bar, the `R`/`F`/`C`/`D` marks, and the proof rule live in [test-junk.md](test-junk.md); read it before marking or cutting any test.
+
+- **Missing:** for behavior exposed by changed source files, find existing coverage and add the narrowest regression test that pins observable output, side effects, errors, or edge cases before cleanup begins. Do not pin private implementation details.
+- **Junk:** mark every in-scope test declaration. A `D` or `C` mark needs the proof its class names before the cut: a mutation of the production owner run against the candidate and its keeper, the assertion line plus the repository prose rule, the revert that turns a change certificate red, or the owner that already generates or consumes a copied inventory.
+- **Keep:** everything under the retention bar, and every test that is red on the unchanged base (a product bug to report, never a deletion). Static or slow is never a reason to delete.
 
 A prose file, prompt, rule, or markdown document has no behavioral seam by itself. Do not add word-count or phrase-pinning tests for prose. Test only a machine-consumed value through its real parser, validator, or runtime behavior; otherwise rely on review.
 
 ## 10. Oversized modules
 
-A source file over **250 pure LOC** is an architectural defect, not a style preference. Pure LOC means non-blank, non-comment lines. Use the project's configured size checker when available; otherwise count those lines with an available line-counting tool and state the method used.
+A source file over **250 pure LOC** is an architectural defect, not a style preference. Pure LOC means non-blank, non-comment lines. Use the project's configured size checker when available; otherwise count them, for example with `awk '!/^[[:space:]]*$/ && !/^[[:space:]]*(#|\/\/)/' <file> | wc -l`, and state the method used.
 
 When a file exceeds the limit, do not merely flag it:
 
@@ -102,7 +106,7 @@ When a file exceeds the limit, do not merely flag it:
 
 Forbidden escapes include counting blanks or comments toward the budget, splitting by token count rather than responsibility, hiding code in a catch-all module, and claiming generated status unless the file is actually in a build-output directory. A 230-line module that is about to grow should be split now.
 
-Keep a genuinely self-contained, single-responsibility script when appropriate. Use the project's explicit size-exception convention only within the first five lines and only with a comment explaining why.
+Keep a genuinely self-contained, single-responsibility script when appropriate. Use the project's explicit size-exception marker only within the first ten lines and only with a comment explaining why.
 
 ## Per-file cleanup brief
 
@@ -114,4 +118,5 @@ When another reviewer or delegated worker evaluates a file, give it the complete
 - Preserve behavior, public APIs, type information, and exception behavior.
 - Add no dependency or speculative abstraction.
 - For each edit, report the category, before/after, why it is slop, and why the change is safe.
+- For a test file, do not cut: return one ledger row per `D`, `C`, or `F` mark (`test | mark | keeper or reason | proposed proof`), where the proof names its kind and, for a mutation, the owner file, the exact find and replace, and the keeper to run. Apply `F` repairs in the file you own and report them as applied.
 - For each skipped issue, report the reason.
