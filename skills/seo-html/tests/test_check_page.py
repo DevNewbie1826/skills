@@ -122,8 +122,8 @@ def fixture_text(name):
     return (FIXTURES_DIR / name).read_text(encoding="utf-8")
 
 
-# Delta re-review round 2: the surviving malformed authorities from the
-# review table, and the positive controls that must stay clean.
+# Malformed authorities the shared validator must reject, and the
+# positive controls that must stay clean.
 DELTA2_BAD_AUTHORITIES = (
     "https://[2001:db8::1]junk/",
     "https://[2001:db8::1]junk:443/",
@@ -142,19 +142,18 @@ DELTA2_GOOD_AUTHORITIES = (
     "https://192.0.2.1:8000/path",
 )
 
-# Delta re-review round 3, required change 1: scoped IPv6 literals.
-# RFC 9844 (August 2025) obsoleted RFC 6874 and removed zone
-# identifiers from URI syntax, and ipaddress.IPv6Address accepts any
-# non-empty scope text, so every "%" (and any other character outside
-# RFC 3986 IPv6address) must be rejected by the shared validator.
+# RFC 9844 removed zone identifiers from URI syntax, and
+# ipaddress.IPv6Address accepts any non-empty scope text, so every "%"
+# (and any other character outside RFC 3986 IPv6address) is rejected by
+# the shared validator.
 DELTA3_ZONE_AUTHORITIES = (
     "https://[::1%25bad scope]/",
     "https://[::1%25bad|scope]/",
     "https://[::1%25bad\\scope]/",
     "https://[fe80::1%25eth0]/",
 )
-# Delta re-review round 3, required change 2: RFC 3986 port is *DIGIT,
-# so zero padding is spelling, not value; the value stays bounded.
+# RFC 3986 port is *DIGIT, so zero padding is spelling, not value;
+# the value stays bounded.
 DELTA3_PADDED_GOOD_AUTHORITIES = (
     "https://example.com:000443/",
     "https://[2001:db8::1]:000443/",
@@ -168,11 +167,10 @@ DELTA3_PADDED_BAD_AUTHORITIES = (
     "https://example.com:" + "0" * 5000 + "65536/",
 )
 
-# Delta re-review round 4, required change 1: RFC 3986 section 3.2.1
-# userinfo = *( unreserved / pct-encoded / sub-delims / ":" ). The text
-# before the last "@" is validated whole before it is split away, so
-# raw space, "|", "\", a second "@", and malformed percent escapes
-# never reach the host checks. Empty userinfo, "user:pass", encoded
+# RFC 3986 section 3.2.1 userinfo = *( unreserved / pct-encoded /
+# sub-delims / ":" ), validated whole before the last "@" is split
+# away: raw space, "|", "\", a second "@", and malformed percent
+# escapes are rejected; empty userinfo, "user:pass", encoded
 # delimiters (%40, %3A), the sub-delims, and a bracketed IPv6 host
 # behind userinfo all stay valid.
 DELTA4_BAD_USERINFO_URLS = (
@@ -191,11 +189,10 @@ DELTA4_GOOD_USERINFO_URLS = (
     "https://a!$&'()*+,;=:_~.-012@example.com/path",
     "https://user:pass@[2001:db8::1]:443/path",
 )
-# Delta re-review round 4, required change 2: a C0 control (U+0000 to
-# U+001F), DEL, or a space is never valid anywhere in an RFC 3986 URI,
-# and urlsplit silently deletes internal TAB/LF/CR before the netloc
-# reaches the authority checks, so the raw URL is rejected before any
-# parsing - inside the host, the port, or the bracketed IPv6 literal.
+# A C0 control (U+0000 to U+001F), DEL, or a space is never valid
+# anywhere in an RFC 3986 URI, and urlsplit silently deletes internal
+# TAB/LF/CR before the netloc reaches the authority checks, so the raw
+# URL is rejected before any parsing.
 DELTA4_BAD_CONTROL_URLS = (
     "https://exa\tmple.com/",
     "https://example.com:4\t43/",
@@ -799,20 +796,44 @@ class TestHardenedParsing(RuleCase):
         finally:
             Path(path).unlink()
 
-    def test_r1_og_image_width_superscript_yields_parseable_json(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<meta property="og:image:width" content="1200">',
-             '<meta property="og:image:width" content="\u00b2">'))
-        process = self.run_json_cli(text)
-        self.assertNotIn("Traceback", process.stderr)
-        self.assertEqual(process.returncode, 0)
-        report = json.loads(process.stdout)
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("OG-07"), "info")
-        self.assertNotIn("OG-04", severities)
-        self.assertEqual(report["summary"]["error"], 0)
+    def test_r1_unusable_dimensions_yield_parseable_json(self):
+        og_w_1200 = '<meta property="og:image:width" content="1200">'
+        og_h_630 = '<meta property="og:image:height" content="630">'
+
+        def og_width(value):
+            return (og_w_1200,
+                    '<meta property="og:image:width" content="%s">' % value)
+
+        def og_height(value):
+            return (og_h_630,
+                    '<meta property="og:image:height" content="%s">' % value)
+
+        def img_width(value):
+            return ('width="1200" height="675"',
+                    'width="%s" height="675"' % value)
+
+        cases = (
+            ("og superscript digit", (og_width("\u00b2"),), "OG-07"),
+            ("og huge width", (og_width("9" * 400),), "OG-07"),
+            ("og huge both", (og_width("9" * 400), og_height("9" * 400)), "OG-07"),
+            ("img superscript digit", (img_width("\u00b2"),), "IMG-03"),
+            ("img huge width", (img_width("9" * 400),), "IMG-03"),
+        )
+        for label, mutations, expected_id in cases:
+            with self.subTest(case=label):
+                text = self.mutated("good-en.html", *mutations)
+                process = self.run_json_cli(text)
+                self.assertNotIn("Traceback", process.stderr)
+                self.assertEqual(process.returncode, 0)
+                report = json.loads(process.stdout)
+                severities = {finding["id"]: finding["severity"]
+                              for finding in report["findings"]}
+                if expected_id == "OG-07":
+                    self.assertEqual(severities.get("OG-07"), "info")
+                    self.assertNotIn("OG-04", severities)
+                else:
+                    self.assertEqual(severities.get("IMG-03"), "warn")
+                self.assertEqual(report["summary"]["error"], 0)
 
     def test_r1_unusable_og_dimensions_count_as_missing(self):
         for junk in ("", " ", "12px", "-5", "1e3", "\u00b2", "\uff11\uff12"):
@@ -826,19 +847,6 @@ class TestHardenedParsing(RuleCase):
                 self.assertNotIn(
                     "OG-04", {finding["id"] for finding in result["findings"]})
 
-    def test_r1_img_width_superscript_yields_parseable_json(self):
-        text = self.mutated(
-            "good-en.html",
-            ('width="1200" height="675"', 'width="\u00b2" height="675"'))
-        process = self.run_json_cli(text)
-        self.assertNotIn("Traceback", process.stderr)
-        self.assertEqual(process.returncode, 0)
-        report = json.loads(process.stdout)
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("IMG-03"), "warn")
-        self.assertEqual(report["summary"]["error"], 0)
-
     def test_r1_unusable_img_dimensions_fire_img_03(self):
         for junk in ("", "12px", "1e3", "-5"):
             with self.subTest(junk=junk):
@@ -847,52 +855,6 @@ class TestHardenedParsing(RuleCase):
                     ('width="1200" height="675"',
                      'width="%s" height="675"' % junk))
                 self.assert_rule("IMG-03", self.result_for(text))
-
-    def test_r1_huge_og_width_yields_parseable_json(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<meta property="og:image:width" content="1200">',
-             '<meta property="og:image:width" content="%s">' % ("9" * 400)))
-        process = self.run_json_cli(text)
-        self.assertNotIn("Traceback", process.stderr)
-        self.assertEqual(process.returncode, 0)
-        report = json.loads(process.stdout)
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("OG-07"), "info")
-        self.assertNotIn("OG-04", severities)
-        self.assertEqual(report["summary"]["error"], 0)
-
-    def test_r1_huge_og_dimensions_yield_parseable_json(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<meta property="og:image:width" content="1200">',
-             '<meta property="og:image:width" content="%s">' % ("9" * 400)),
-            ('<meta property="og:image:height" content="630">',
-             '<meta property="og:image:height" content="%s">' % ("9" * 400)))
-        process = self.run_json_cli(text)
-        self.assertNotIn("Traceback", process.stderr)
-        self.assertEqual(process.returncode, 0)
-        report = json.loads(process.stdout)
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("OG-07"), "info")
-        self.assertNotIn("OG-04", severities)
-        self.assertEqual(report["summary"]["error"], 0)
-
-    def test_r1_huge_img_width_yields_parseable_json(self):
-        text = self.mutated(
-            "good-en.html",
-            ('width="1200" height="675"',
-             'width="%s" height="675"' % ("9" * 400)))
-        process = self.run_json_cli(text)
-        self.assertNotIn("Traceback", process.stderr)
-        self.assertEqual(process.returncode, 0)
-        report = json.loads(process.stdout)
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("IMG-03"), "warn")
-        self.assertEqual(report["summary"]["error"], 0)
 
     def test_r1_dimension_magnitude_bound_from_constant(self):
         self.assertEqual(cp.MAX_DIMENSION, 100000)
@@ -913,16 +875,25 @@ class TestHardenedParsing(RuleCase):
              '<meta property="og:image:height" content="1000">'))
         self.assert_rule("OG-04", self.result_for(text))
 
-    def test_r2_hostless_canonical_fires_link_01(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
-             '<link rel="canonical" href="https://">'),
-            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
-             '<meta property="og:url" content="https://">'))
-        result = self.result_for(text)
-        self.assert_rule("LINK-01", result)
-        self.assert_rule("OG-06", result)
+    def test_r2_bad_authorities_at_canonical_fire_link_01_and_og_06(self):
+        canonical = ('<link rel="canonical" '
+                     'href="https://example.com/guide/seo-basics">')
+        og_url = ('<meta property="og:url" '
+                  'content="https://example.com/guide/seo-basics">')
+        cases = (
+            ("hostless", "https://"),
+            ("host characters", "https://exa mple.com/"),
+            ("port", "https://example.com:99999/"),
+        )
+        for label, url in cases:
+            with self.subTest(case=label):
+                text = self.mutated(
+                    "good-en.html",
+                    (canonical, '<link rel="canonical" href="%s">' % url),
+                    (og_url, '<meta property="og:url" content="%s">' % url))
+                result = self.result_for(text)
+                self.assert_rule("LINK-01", result)
+                self.assert_rule("OG-06", result)
 
     def test_r2_hostless_ld_image_fires_ld_13(self):
         text = self.mutated(
@@ -951,34 +922,12 @@ class TestHardenedParsing(RuleCase):
                     'hreflang="ko-KR" href="%s"' % broken_href)
                 self.assert_rule("LINK-02", self.result_for(broken))
 
-    def test_r2_invalid_host_characters_fire_link_01_and_og_06(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
-             '<link rel="canonical" href="https://exa mple.com/">'),
-            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
-             '<meta property="og:url" content="https://exa mple.com/">'))
-        result = self.result_for(text)
-        self.assert_rule("LINK-01", result)
-        self.assert_rule("OG-06", result)
-
     def test_r2_invalid_host_ld_image_fires_ld_13(self):
         text = self.mutated(
             "good-en.html",
             ('"image": "https://example.com/images/seo-basics.png",',
              '"image": "https://exa mple.com/images/seo-basics.png",'))
         self.assert_rule("LD-13", self.result_for(text))
-
-    def test_r2_out_of_range_port_fires_link_01(self):
-        text = self.mutated(
-            "good-en.html",
-            ('<link rel="canonical" href="https://example.com/guide/seo-basics">',
-             '<link rel="canonical" href="https://example.com:99999/">'),
-            ('<meta property="og:url" content="https://example.com/guide/seo-basics">',
-             '<meta property="og:url" content="https://example.com:99999/">'))
-        result = self.result_for(text)
-        self.assert_rule("LINK-01", result)
-        self.assert_rule("OG-06", result)
 
     def test_r2_valid_ipv6_and_internationalized_hosts_stay_clean(self):
         for url in ("https://[2001:db8::1]:443/path", "https://예시.한국/경로"):
@@ -1300,10 +1249,10 @@ class TestLdDepthDocstring(unittest.TestCase):
 
 
 class TestAuthorityValidation(RuleCase):
-    """Delta re-review round 2, required change 2: the shared URL
-    validator checks the complete raw authority - brackets, userinfo,
-    and the original port text - instead of the flattened hostname and
-    coerced integer port that urlsplit's accessors return."""
+    """The shared URL validator checks the complete raw authority -
+    brackets, userinfo, and the original port text - instead of the
+    flattened hostname and coerced integer port that urlsplit's
+    accessors return."""
 
     canonical_anchor = ('<link rel="canonical" '
                         'href="https://example.com/guide/seo-basics">')
@@ -1426,20 +1375,6 @@ class TestAuthorityValidation(RuleCase):
                 result = self.result_for(self.page_with_urls(url))
                 self.assert_rule("LINK-01", result)
                 self.assert_rule("OG-06", result)
-
-    def test_canonical_and_og_url_cli_rejects_zone_identifier(self):
-        path = write_temp_page(self.page_with_urls(DELTA3_ZONE_AUTHORITIES[0]))
-        try:
-            process = run_checker_cli([path, "--json"])
-        finally:
-            Path(path).unlink()
-        self.assertEqual(process.returncode, 1)
-        self.assertNotIn(b"Traceback", process.stderr)
-        report = json.loads(process.stdout.decode("utf-8"))
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("LINK-01"), "error")
-        self.assertEqual(severities.get("OG-06"), "warn")
 
     def test_hreflang_href_rejects_zone_identifiers(self):
         for url in DELTA3_ZONE_AUTHORITIES:
@@ -1620,24 +1555,9 @@ class TestAuthorityValidation(RuleCase):
     def test_control_characters_rejected_in_all_placements_cli(self):
         self.assert_placements_reject(DELTA4_BAD_CONTROL_URLS, cli=True)
 
-    def test_control_characters_cli_findings_and_strict_exits(self):
-        # Exact findings and the exit contract through the real CLI: a
-        # control character in the canonical is an error (exit 1 with
-        # LINK-01 error + OG-06 warn); in warn-only placements the page
-        # exits 0 and --strict turns the warn into exit 1.
-        path = write_temp_page(self.page_with_urls(DELTA4_BAD_CONTROL_URLS[0]))
-        try:
-            process = run_checker_cli([path, "--json"])
-        finally:
-            Path(path).unlink()
-        self.assertEqual(process.returncode, 1)
-        self.assertNotIn(b"Traceback", process.stderr)
-        report = json.loads(process.stdout.decode("utf-8"))
-        severities = {finding["id"]: finding["severity"]
-                      for finding in report["findings"]}
-        self.assertEqual(severities.get("LINK-01"), "error")
-        self.assertEqual(severities.get("OG-06"), "warn")
-
+    def test_control_characters_warn_placements_cli_strict_exits(self):
+        # In warn-only placements the page exits 0 through the real CLI
+        # and --strict turns the warn into exit 1.
         warn_pages = (
             ("LD-13", self.mutated(
                 "good-en.html",
@@ -1663,7 +1583,7 @@ class TestAuthorityValidation(RuleCase):
                 self.assertEqual(strict.returncode, 1)
 
 
-# FU-6: numeric character references to the code points CPython's
+# Numeric character references to the code points CPython's
 # html.unescape deletes (the C0 controls U+0001-0008, U+000B, U+000E-001F
 # and U+007F, plus the noncharacter code points in the same delete set)
 # must survive decoding with the code point itself, as HTML5 specifies:
@@ -1814,18 +1734,18 @@ class TestHtml5CharacterReferenceDecoder(RuleCase):
                 self.assertEqual(cp._decode_charrefs(text), expected)
 
 
-# Delta re-review round 5, required change 1: a numeric character
-# reference spelled with arbitrarily many digits must decode without
-# ever handing an unbounded digit string to int() or html.unescape -
-# CPython 3.11 raises ValueError from those conversions once a decimal
-# string passes the interpreter's 4300-digit int-str limit (leading
-# zeroes included) while 3.9 converts it, and the raised error used to
-# truncate the document at build_tree's silent boundary, hiding every
-# finding after the reference. The decoder strips leading zeroes and
-# bounds the spelling first: a stripped decimal spelling longer than 7
-# digits or hex spelling longer than 6 digits is above U+10FFFF and
-# decodes to U+FFFD per HTML5; every other value decodes exactly as
-# before, and the rest of the document keeps parsing and checking.
+# A numeric character reference spelled with arbitrarily many digits
+# must decode without ever handing an unbounded digit string to int()
+# or html.unescape - CPython 3.11 raises ValueError from those
+# conversions once a decimal string passes the interpreter's 4300-digit
+# int-str limit (leading zeroes included) while 3.9 converts it, and the
+# raised error used to truncate the document at build_tree's silent
+# boundary, hiding every finding after the reference. The decoder
+# strips leading zeroes and bounds the spelling first: a stripped
+# decimal spelling longer than 7 digits or hex spelling longer than 6
+# digits is above U+10FFFF and decodes to U+FFFD per HTML5; every other
+# value decodes exactly as before, and the rest of the document keeps
+# parsing and checking.
 LONG_CONTROL_REF = "&#" + "0" * 5000 + "1;"
 LONG_VALID_A_REF = "&#" + "0" * 5000 + "65;"
 LONG_OUT_OF_RANGE_REF = "&#" + "9" * 5001 + ";"
@@ -1928,11 +1848,11 @@ class TestBoundedNumericReferences(RuleCase):
 
 
 class TestSafeReportOutput(RuleCase):
-    """Delta re-review round 2, required change 1: printing the report
-    (JSON and text mode, and the stderr file-echo messages) never raises
-    on content the stream encoding cannot represent - a lone surrogate
-    inside a finding, Korean text under an ASCII stdout encoding - and
-    the JSON stays parseable UTF-8 with severities unchanged."""
+    """Printing the report (JSON and text mode, and the stderr file-echo
+    messages) never raises on content the stream encoding cannot
+    represent - a lone surrogate inside a finding, Korean text under an
+    ASCII stdout encoding - and the JSON stays parseable UTF-8 with
+    severities unchanged."""
 
     surrogate_image = ('"image": "https://example.com/images/seo-basics.png",',
                        '"image": "https://\\ud800.example/",')
@@ -2080,8 +2000,7 @@ class TestRobustnessBoundary(RuleCase):
         self.assertEqual(report["summary"]["error"], 0)
 
     def test_forced_parse_exception_yields_internal_error_finding(self):
-        # Delta re-review round 5, required change 1 (truncation half):
-        # a parser exception must not return a silent partial tree. The
+        # A parser exception must not return a silent partial tree. The
         # internal-error convention fires with the parse rule's id, and
         # the remaining checks still run over the truncated tree.
         text = fixture_text("good-en.html")
