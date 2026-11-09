@@ -59,18 +59,18 @@ What makes Together AI distinctive is its type system. "The Future" handles all 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | The Future | 64px (4rem) | 400–500 | 1.00–1.10 (tight) | -1.92px | Maximum impact, dense blocks |
-| Section Heading | The Future | 40px (2.5rem) | 500 | 1.20 (tight) | -0.8px | Feature section titles |
-| Sub-heading | The Future | 28px (1.75rem) | 500 | 1.15 (tight) | -0.42px | Card headings |
-| Feature Title | The Future | 22px (1.38rem) | 500 | 1.15 (tight) | -0.22px | Small feature headings |
-| Body Large | The Future | 18px (1.13rem) | 400–500 | 1.30 (tight) | -0.18px | Descriptions, sections |
-| Body / Button | The Future | 16px (1rem) | 400–500 | 1.25–1.30 | -0.16px | Standard body, nav, buttons |
-| Caption | The Future | 14px (0.88rem) | 400–500 | 1.40 | normal | Metadata, descriptions |
-| Mono Label | PP Neue Montreal Mono | 16px (1rem) | 500 | 1.00 (tight) | 0.08px | Uppercase section labels |
-| Mono Small | PP Neue Montreal Mono | 11px (0.69rem) | 500 | 1.00–1.40 | 0.055–0.08px | Small uppercase tags |
-| Mono Micro | PP Neue Montreal Mono | 10px (0.63rem) | 400 | 1.40 | 0.05px | Smallest uppercase labels |
+| The Future | Display / Hero | 64px (4rem) | 400–500 | 1.00–1.10 (tight) | -1.92px | Maximum impact, dense blocks |
+| The Future | Section Heading | 40px (2.5rem) | 500 | 1.20 (tight) | -0.8px | Feature section titles |
+| The Future | Sub-heading | 28px (1.75rem) | 500 | 1.15 (tight) | -0.42px | Card headings |
+| The Future | Feature Title | 22px (1.38rem) | 500 | 1.15 (tight) | -0.22px | Small feature headings |
+| The Future | Body Large | 18px (1.13rem) | 400–500 | 1.30 (tight) | -0.18px | Descriptions, sections |
+| The Future | Body / Button | 16px (1rem) | 400–500 | 1.25–1.30 | -0.16px | Standard body, nav, buttons |
+| The Future | Caption | 14px (0.88rem) | 400–500 | 1.40 | normal | Metadata, descriptions |
+| PP Neue Montreal Mono | Mono Label | 16px (1rem) | 500 | 1.00 (tight) | 0.08px | Uppercase section labels |
+| PP Neue Montreal Mono | Mono Small | 11px (0.69rem) | 500 | 1.00–1.40 | 0.055–0.08px | Small uppercase tags |
+| PP Neue Montreal Mono | Mono Micro | 10px (0.63rem) | 400 | 1.40 | 0.05px | Smallest uppercase labels |
 
 ### Principles
 - **Negative tracking everywhere**: Every size of "The Future" uses negative letter-spacing (-0.16px to -1.92px), creating consistently tight, modern text.

@@ -566,7 +566,7 @@ Inferred from component width tokens and progressive nav heights:
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

@@ -59,21 +59,21 @@ What distinguishes Intercom is its remarkably sharp geometry — 4px border-radi
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing |
+| Font | Role | Size | Weight | Line Height | Letter Spacing |
 |------|------|------|--------|-------------|----------------|
-| Display Hero | Saans | 80px | 400 | 1.00 (tight) | -2.4px |
-| Section Heading | Saans | 54px | 400 | 1.00 | -1.6px |
-| Sub-heading | Saans | 40px | 400 | 1.00 | -1.2px |
-| Card Title | Saans | 32px | 400 | 1.00 | -0.96px |
-| Feature Title | Saans | 24px | 400 | 1.00 | -0.48px |
-| Body Emphasis | Saans | 20px | 400 | 0.95 | -0.2px |
-| Nav / UI | Saans | 18px | 400 | 1.00 | normal |
-| Body | Saans | 16px | 400 | 1.50 | normal |
-| Body Light | Saans | 14px | 300 | 1.40 | normal |
-| Button | Saans | 16px / 14px | 400 | 1.50 / 1.43 | normal |
-| Button Bold | LLMedium | 16px | 700 | 1.20 | 0.16px |
-| Serif Body | Serrif | 16px | 300 | 1.40 | -0.16px |
-| Mono Label | SaansMono | 12px | 400–500 | 1.00–1.30 | 0.6px–1.2px uppercase |
+| Saans | Display Hero | 80px | 400 | 1.00 (tight) | -2.4px |
+| Saans | Section Heading | 54px | 400 | 1.00 | -1.6px |
+| Saans | Sub-heading | 40px | 400 | 1.00 | -1.2px |
+| Saans | Card Title | 32px | 400 | 1.00 | -0.96px |
+| Saans | Feature Title | 24px | 400 | 1.00 | -0.48px |
+| Saans | Body Emphasis | 20px | 400 | 0.95 | -0.2px |
+| Saans | Nav / UI | 18px | 400 | 1.00 | normal |
+| Saans | Body | 16px | 400 | 1.50 | normal |
+| Saans | Body Light | 14px | 300 | 1.40 | normal |
+| Saans | Button | 16px / 14px | 400 | 1.50 / 1.43 | normal |
+| LLMedium | Button Bold | 16px | 700 | 1.20 | 0.16px |
+| Serrif | Serif Body | 16px | 300 | 1.40 | -0.16px |
+| SaansMono | Mono Label | 12px | 400–500 | 1.00–1.30 | 0.6px–1.2px uppercase |
 
 ## 4. Component Stylings
 
@@ -114,7 +114,9 @@ What distinguishes Intercom is its remarkably sharp geometry — 4px border-radi
 
 ## 5. Layout Principles
 
-### Spacing: 8px, 10px, 12px, 14px, 16px, 20px, 24px, 32px, 40px, 48px, 60px, 64px, 80px, 96px
+### Spacing System
+- Scale: 8px, 10px, 12px, 14px, 16px, 20px, 24px, 32px, 40px, 48px, 60px, 64px, 80px, 96px
+
 ### Border Radius: 4px (buttons), 6px (nav items), 8px (cards, containers)
 
 ## 6. Depth & Elevation
@@ -136,7 +138,9 @@ Minimal shadows. Depth through warm border colors and surface tints.
 - Don't skip the negative tracking on headings
 
 ## 8. Responsive Behavior
-Breakpoints: 425px, 530px, 600px, 640px, 768px, 896px
+
+### Breakpoints
+- 425px, 530px, 600px, 640px, 768px, 896px
 
 ## 9. Agent Prompt Guide
 

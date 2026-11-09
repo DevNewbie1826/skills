@@ -87,32 +87,32 @@ Color is used with extreme restraint. The primary accent is Shopify Neon Green (
 
 ### Hierarchy
 
-| Role | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|--------|-------------|----------------|-------|
-| Display XL | 96px | 400 | 1.00 | — | NeueHaasGrotesk, hero headlines, "ss03" |
-| Display XL Bold | 90.74px | 750 | 1.00 | 4.54px | NeueHaasGrotesk, emphasis display |
-| Display XL Tracked | 96px | 400 | 1.00 | 2.4px | NeueHaasGrotesk, spaced display |
-| Display Light | 96px | 330 | 0.96 | — | NeueHaasGrotesk, ethereal display |
-| Heading 1 | 70px | 330 | 1.00 | — | NeueHaasGrotesk, section titles |
-| Heading 2 | 55px | 330 | 1.16 | — | NeueHaasGrotesk, subsections |
-| Heading 3 | 48px | 330 | 1.14 | — | NeueHaasGrotesk, feature titles |
-| Heading 4 | 32px | 360 | 1.14 | 0.32px | NeueHaasGrotesk, card headings |
-| Heading 5 | 28px | 500 | 1.28 | 0.42px | NeueHaasGrotesk, small headings |
-| Heading 6 | 24px | 400 | 1.14 | 0.36px | NeueHaasGrotesk, minor headings |
-| Body Large | 20px | 500 | 1.40 | 0.3px | NeueHaasGrotesk / Inter, lead paragraphs |
-| Body | 18px | 400 | 1.56 | — | Inter-Variable, standard body |
-| Body Medium | 18px | 550 | 1.56 | — | Inter-Variable, emphasized body |
-| Body Small | 16px | 400 | 1.50 | — | Inter / NeueHaasGrotesk, compact body |
-| Body Small Medium | 16px | 420 | 1.50 | — | Inter-Variable, slightly emphasized |
-| Button | 16px | 400 | 1.50 | — | NeueHaasGrotesk, CTA text |
-| Nav Link | 18px | 500 | 1.25 | 0.72px | NeueHaasGrotesk, navigation items |
-| Caption | 14px | 500 | 1.49 | 0.28px | NeueHaasGrotesk / Inter, metadata |
-| Caption Medium | 14px | 550 | 1.49 | 0.28px | Inter-Variable, emphasized caption |
-| Overline | 15.36px | 400 | 1.50 | 1.54px | NeueHaasGrotesk, wide-tracked labels |
-| Micro | 13px | 500 | 1.50 | -0.13px | Inter, tight-tracked small text |
-| Label | 12px | 400 | 1.20 | 0.72px | Inter, uppercase labels |
-| Code | 16px | 400 | 1.50 | — | ui-monospace, uppercase, code blocks |
-| Code Small | 12px | 400 | 1.33 | — | ui-monospace, uppercase, inline code |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|------|--------|-------------|----------------|-------|
+| NeueHaasGrotesk | Display XL | 96px | 400 | 1.00 | — | NeueHaasGrotesk, hero headlines, "ss03" |
+| NeueHaasGrotesk | Display XL Bold | 90.74px | 750 | 1.00 | 4.54px | NeueHaasGrotesk, emphasis display |
+| NeueHaasGrotesk | Display XL Tracked | 96px | 400 | 1.00 | 2.4px | NeueHaasGrotesk, spaced display |
+| NeueHaasGrotesk | Display Light | 96px | 330 | 0.96 | — | NeueHaasGrotesk, ethereal display |
+| NeueHaasGrotesk | Heading 1 | 70px | 330 | 1.00 | — | NeueHaasGrotesk, section titles |
+| NeueHaasGrotesk | Heading 2 | 55px | 330 | 1.16 | — | NeueHaasGrotesk, subsections |
+| NeueHaasGrotesk | Heading 3 | 48px | 330 | 1.14 | — | NeueHaasGrotesk, feature titles |
+| NeueHaasGrotesk | Heading 4 | 32px | 360 | 1.14 | 0.32px | NeueHaasGrotesk, card headings |
+| NeueHaasGrotesk | Heading 5 | 28px | 500 | 1.28 | 0.42px | NeueHaasGrotesk, small headings |
+| NeueHaasGrotesk | Heading 6 | 24px | 400 | 1.14 | 0.36px | NeueHaasGrotesk, minor headings |
+| NeueHaasGrotesk / Inter | Body Large | 20px | 500 | 1.40 | 0.3px | NeueHaasGrotesk / Inter, lead paragraphs |
+| Inter-Variable | Body | 18px | 400 | 1.56 | — | Inter-Variable, standard body |
+| Inter-Variable | Body Medium | 18px | 550 | 1.56 | — | Inter-Variable, emphasized body |
+| Inter / NeueHaasGrotesk | Body Small | 16px | 400 | 1.50 | — | Inter / NeueHaasGrotesk, compact body |
+| Inter-Variable | Body Small Medium | 16px | 420 | 1.50 | — | Inter-Variable, slightly emphasized |
+| NeueHaasGrotesk | Button | 16px | 400 | 1.50 | — | NeueHaasGrotesk, CTA text |
+| NeueHaasGrotesk | Nav Link | 18px | 500 | 1.25 | 0.72px | NeueHaasGrotesk, navigation items |
+| NeueHaasGrotesk / Inter | Caption | 14px | 500 | 1.49 | 0.28px | NeueHaasGrotesk / Inter, metadata |
+| Inter-Variable | Caption Medium | 14px | 550 | 1.49 | 0.28px | Inter-Variable, emphasized caption |
+| NeueHaasGrotesk | Overline | 15.36px | 400 | 1.50 | 1.54px | NeueHaasGrotesk, wide-tracked labels |
+| Inter | Micro | 13px | 500 | 1.50 | -0.13px | Inter, tight-tracked small text |
+| Inter | Label | 12px | 400 | 1.20 | 0.72px | Inter, uppercase labels |
+| ui-monospace | Code | 16px | 400 | 1.50 | — | ui-monospace, uppercase, code blocks |
+| ui-monospace | Code Small | 12px | 400 | 1.33 | — | ui-monospace, uppercase, inline code |
 
 ### Principles
 
@@ -344,7 +344,7 @@ Shopify's shadow system is unusually sophisticated. Rather than single-value sha
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

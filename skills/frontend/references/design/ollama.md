@@ -58,19 +58,19 @@ What makes Ollama distinctive is the combination of SF Pro Rounded (Apple's roun
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | SF Pro Rounded | 48px (3rem) | 500 | 1.00 (tight) | normal | Maximum impact, rounded letterforms |
-| Section Heading | SF Pro Rounded | 36px (2.25rem) | 500 | 1.11 (tight) | normal | Feature section titles |
-| Sub-heading | SF Pro Rounded / ui-sans-serif | 30px (1.88rem) | 400–500 | 1.20 (tight) | normal | Card headings, feature names |
-| Card Title | ui-sans-serif | 24px (1.5rem) | 400 | 1.33 | normal | Medium emphasis headings |
-| Body Large | ui-sans-serif | 18px (1.13rem) | 400–500 | 1.56 | normal | Hero descriptions, button text |
-| Body / Link | ui-sans-serif | 16px (1rem) | 400–500 | 1.50 | normal | Standard body text, navigation |
-| Caption | ui-sans-serif | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, descriptions |
-| Small | ui-sans-serif | 12px (0.75rem) | 400 | 1.33 | normal | Smallest sans-serif text |
-| Code Body | ui-monospace | 16px (1rem) | 400 | 1.50 | normal | Inline code, commands |
-| Code Caption | ui-monospace | 14px (0.88rem) | 400 | 1.43 | normal | Code snippets, secondary |
-| Code Small | ui-monospace | 12px (0.75rem) | 400–700 | 1.63 | normal | Tags, labels |
+| SF Pro Rounded | Display / Hero | 48px (3rem) | 500 | 1.00 (tight) | normal | Maximum impact, rounded letterforms |
+| SF Pro Rounded | Section Heading | 36px (2.25rem) | 500 | 1.11 (tight) | normal | Feature section titles |
+| SF Pro Rounded / ui-sans-serif | Sub-heading | 30px (1.88rem) | 400–500 | 1.20 (tight) | normal | Card headings, feature names |
+| ui-sans-serif | Card Title | 24px (1.5rem) | 400 | 1.33 | normal | Medium emphasis headings |
+| ui-sans-serif | Body Large | 18px (1.13rem) | 400–500 | 1.56 | normal | Hero descriptions, button text |
+| ui-sans-serif | Body / Link | 16px (1rem) | 400–500 | 1.50 | normal | Standard body text, navigation |
+| ui-sans-serif | Caption | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, descriptions |
+| ui-sans-serif | Small | 12px (0.75rem) | 400 | 1.33 | normal | Smallest sans-serif text |
+| ui-monospace | Code Body | 16px (1rem) | 400 | 1.50 | normal | Inline code, commands |
+| ui-monospace | Code Caption | 14px (0.88rem) | 400 | 1.43 | normal | Code snippets, secondary |
+| ui-monospace | Code Small | 12px (0.75rem) | 400–700 | 1.63 | normal | Tags, labels |
 
 ### Principles
 - **Rounded display, standard body**: SF Pro Rounded carries display headlines with its distinctive rounded terminals, while the standard system sans handles all body text. The rounded font IS the brand expression.
@@ -265,7 +265,7 @@ What makes Ollama distinctive is the combination of SF Pro Rounded (Apple's roun
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

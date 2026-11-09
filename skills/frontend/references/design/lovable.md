@@ -59,20 +59,20 @@ What makes Lovable's visual system distinctive is its opacity-driven depth model
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Camera Plain Variable | 60px (3.75rem) | 600 | 1.00–1.10 (tight) | -1.5px | Maximum impact, editorial |
-| Display Alt | Camera Plain Variable | 60px (3.75rem) | 480 | 1.00 (tight) | normal | Lighter hero variant |
-| Section Heading | Camera Plain Variable | 48px (3.00rem) | 600 | 1.00 (tight) | -1.2px | Feature section titles |
-| Sub-heading | Camera Plain Variable | 36px (2.25rem) | 600 | 1.10 (tight) | -0.9px | Sub-sections |
-| Card Title | Camera Plain Variable | 20px (1.25rem) | 400 | 1.25 (tight) | normal | Card headings |
-| Body Large | Camera Plain Variable | 18px (1.13rem) | 400 | 1.38 | normal | Introductions |
-| Body | Camera Plain Variable | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
-| Button | Camera Plain Variable | 16px (1.00rem) | 400 | 1.50 | normal | Button labels |
-| Button Small | Camera Plain Variable | 14px (0.88rem) | 400 | 1.50 | normal | Compact buttons |
-| Link | Camera Plain Variable | 16px (1.00rem) | 400 | 1.50 | normal | Underline decoration |
-| Link Small | Camera Plain Variable | 14px (0.88rem) | 400 | 1.50 | normal | Footer links |
-| Caption | Camera Plain Variable | 14px (0.88rem) | 400 | 1.50 | normal | Metadata, small text |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Display Hero | 60px (3.75rem) | 600 | 1.00–1.10 (tight) | -1.5px | Maximum impact, editorial |
+| Display Alt | 60px (3.75rem) | 480 | 1.00 (tight) | normal | Lighter hero variant |
+| Section Heading | 48px (3.00rem) | 600 | 1.00 (tight) | -1.2px | Feature section titles |
+| Sub-heading | 36px (2.25rem) | 600 | 1.10 (tight) | -0.9px | Sub-sections |
+| Card Title | 20px (1.25rem) | 400 | 1.25 (tight) | normal | Card headings |
+| Body Large | 18px (1.13rem) | 400 | 1.38 | normal | Introductions |
+| Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
+| Button | 16px (1.00rem) | 400 | 1.50 | normal | Button labels |
+| Button Small | 14px (0.88rem) | 400 | 1.50 | normal | Compact buttons |
+| Link | 16px (1.00rem) | 400 | 1.50 | normal | Underline decoration |
+| Link Small | 14px (0.88rem) | 400 | 1.50 | normal | Footer links |
+| Caption | 14px (0.88rem) | 400 | 1.50 | normal | Metadata, small text |
 
 ### Principles
 - **Warm humanist voice**: Camera Plain Variable gives Lovable its approachable personality. The slightly rounded terminals and organic curves contrast with the sharp geometric sans-serifs used by most developer tools.

@@ -64,22 +64,22 @@ What distinguishes Spotify is its pill-and-circle geometry. Primary buttons use 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Section Title | SpotifyMixUITitle | 24px (1.50rem) | 700 | normal | normal | Bold title weight |
-| Feature Heading | SpotifyMixUI | 18px (1.13rem) | 600 | 1.30 (tight) | normal | Semibold section heads |
-| Body Bold | SpotifyMixUI | 16px (1.00rem) | 700 | normal | normal | Emphasized text |
-| Body | SpotifyMixUI | 16px (1.00rem) | 400 | normal | normal | Standard body |
-| Button Uppercase | SpotifyMixUI | 14px (0.88rem) | 600–700 | 1.00 (tight) | 1.4px–2px | `text-transform: uppercase` |
-| Button | SpotifyMixUI | 14px (0.88rem) | 700 | normal | 0.14px | Standard button |
-| Nav Link Bold | SpotifyMixUI | 14px (0.88rem) | 700 | normal | normal | Navigation |
-| Nav Link | SpotifyMixUI | 14px (0.88rem) | 400 | normal | normal | Inactive nav |
-| Caption Bold | SpotifyMixUI | 14px (0.88rem) | 700 | 1.50–1.54 | normal | Bold metadata |
-| Caption | SpotifyMixUI | 14px (0.88rem) | 400 | normal | normal | Metadata |
-| Small Bold | SpotifyMixUI | 12px (0.75rem) | 700 | 1.50 | normal | Tags, counts |
-| Small | SpotifyMixUI | 12px (0.75rem) | 400 | normal | normal | Fine print |
-| Badge | SpotifyMixUI | 10.5px (0.66rem) | 600 | 1.33 | normal | `text-transform: capitalize` |
-| Micro | SpotifyMixUI | 10px (0.63rem) | 400 | normal | normal | Smallest text |
+| SpotifyMixUITitle | Section Title | 24px (1.50rem) | 700 | normal | normal | Bold title weight |
+| SpotifyMixUI | Feature Heading | 18px (1.13rem) | 600 | 1.30 (tight) | normal | Semibold section heads |
+| SpotifyMixUI | Body Bold | 16px (1.00rem) | 700 | normal | normal | Emphasized text |
+| SpotifyMixUI | Body | 16px (1.00rem) | 400 | normal | normal | Standard body |
+| SpotifyMixUI | Button Uppercase | 14px (0.88rem) | 600–700 | 1.00 (tight) | 1.4px–2px | `text-transform: uppercase` |
+| SpotifyMixUI | Button | 14px (0.88rem) | 700 | normal | 0.14px | Standard button |
+| SpotifyMixUI | Nav Link Bold | 14px (0.88rem) | 700 | normal | normal | Navigation |
+| SpotifyMixUI | Nav Link | 14px (0.88rem) | 400 | normal | normal | Inactive nav |
+| SpotifyMixUI | Caption Bold | 14px (0.88rem) | 700 | 1.50–1.54 | normal | Bold metadata |
+| SpotifyMixUI | Caption | 14px (0.88rem) | 400 | normal | normal | Metadata |
+| SpotifyMixUI | Small Bold | 12px (0.75rem) | 700 | 1.50 | normal | Tags, counts |
+| SpotifyMixUI | Small | 12px (0.75rem) | 400 | normal | normal | Fine print |
+| SpotifyMixUI | Badge | 10.5px (0.66rem) | 600 | 1.33 | normal | `text-transform: capitalize` |
+| SpotifyMixUI | Micro | 10px (0.63rem) | 400 | normal | normal | Smallest text |
 
 ### Principles
 - **Bold/regular binary**: Most text is either 700 (bold) or 400 (regular), with 600 used sparingly. This creates a clear visual hierarchy through weight contrast rather than size variation.

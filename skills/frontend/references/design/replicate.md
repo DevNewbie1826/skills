@@ -59,20 +59,20 @@ What makes Replicate distinctive is its community-powered energy. The model gall
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Mega | rb-freigeist-neue | 128px (8rem) | 700 | 1.00 (tight) | normal | The maximum: closing manifesto |
-| Display / Hero | rb-freigeist-neue | 72px (4.5rem) | 700 | 1.00 (tight) | -1.8px | Hero section headline |
-| Section Heading | rb-freigeist-neue | 48px (3rem) | 400–700 | 1.00 (tight) | normal | Feature section titles |
-| Sub-heading | rb-freigeist-neue | 30px (1.88rem) | 600 | 1.20 (tight) | normal | Card headings |
-| Sub-heading Sans | basier-square | 38.4px (2.4rem) | 400 | 0.83 (ultra-tight) | normal | Large body headings |
-| Feature Title | basier-square / rb-freigeist-neue | 18px (1.13rem) | 600 | 1.56 | normal | Small section titles, labels |
-| Body Large | basier-square | 20px (1.25rem) | 400 | 1.40 | normal | Intro paragraphs |
-| Body / Button | basier-square | 16–18px (1–1.13rem) | 400–600 | 1.50–1.56 | normal | Standard text, buttons |
-| Caption | basier-square | 14px (0.88rem) | 400–600 | 1.43 | -0.35px to normal | Metadata, descriptions |
-| Small / Tag | basier-square | 12px (0.75rem) | 400 | 1.33 | normal | Tags (lowercase transform) |
-| Code | jetbrains-mono | 14px (0.88rem) | 400 | 1.43 | normal | Code snippets, API examples |
-| Code Small | jetbrains-mono | 11px (0.69rem) | 400 | 1.50 | normal | Tiny code references |
+| rb-freigeist-neue | Display Mega | 128px (8rem) | 700 | 1.00 (tight) | normal | The maximum: closing manifesto |
+| rb-freigeist-neue | Display / Hero | 72px (4.5rem) | 700 | 1.00 (tight) | -1.8px | Hero section headline |
+| rb-freigeist-neue | Section Heading | 48px (3rem) | 400–700 | 1.00 (tight) | normal | Feature section titles |
+| rb-freigeist-neue | Sub-heading | 30px (1.88rem) | 600 | 1.20 (tight) | normal | Card headings |
+| basier-square | Sub-heading Sans | 38.4px (2.4rem) | 400 | 0.83 (ultra-tight) | normal | Large body headings |
+| basier-square / rb-freigeist-neue | Feature Title | 18px (1.13rem) | 600 | 1.56 | normal | Small section titles, labels |
+| basier-square | Body Large | 20px (1.25rem) | 400 | 1.40 | normal | Intro paragraphs |
+| basier-square | Body / Button | 16–18px (1–1.13rem) | 400–600 | 1.50–1.56 | normal | Standard text, buttons |
+| basier-square | Caption | 14px (0.88rem) | 400–600 | 1.43 | -0.35px to normal | Metadata, descriptions |
+| basier-square | Small / Tag | 12px (0.75rem) | 400 | 1.33 | normal | Tags (lowercase transform) |
+| jetbrains-mono | Code | 14px (0.88rem) | 400 | 1.43 | normal | Code snippets, API examples |
+| jetbrains-mono | Code Small | 11px (0.69rem) | 400 | 1.50 | normal | Tiny code references |
 
 ### Principles
 - **Heavy display, light body**: rb-freigeist-neue at 700 weight creates thundering headlines, while basier-square at 400 handles body text with quiet efficiency. The contrast is extreme and intentional.

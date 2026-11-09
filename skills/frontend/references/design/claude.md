@@ -70,24 +70,24 @@ What makes Claude's design truly distinctive is its warm neutral palette. Every 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | Anthropic Serif | 64px (4rem) | 500 | 1.10 (tight) | normal | Maximum impact, book-title presence |
-| Section Heading | Anthropic Serif | 52px (3.25rem) | 500 | 1.20 (tight) | normal | Feature section anchors |
-| Sub-heading Large | Anthropic Serif | 36–36.8px (~2.3rem) | 500 | 1.30 | normal | Secondary section markers |
-| Sub-heading | Anthropic Serif | 32px (2rem) | 500 | 1.10 (tight) | normal | Card titles, feature names |
-| Sub-heading Small | Anthropic Serif | 25–25.6px (~1.6rem) | 500 | 1.20 | normal | Smaller section titles |
-| Feature Title | Anthropic Serif | 20.8px (1.3rem) | 500 | 1.20 | normal | Small feature headings |
-| Body Serif | Anthropic Serif | 17px (1.06rem) | 400 | 1.60 (relaxed) | normal | Serif body text (editorial passages) |
-| Body Large | Anthropic Sans | 20px (1.25rem) | 400 | 1.60 (relaxed) | normal | Intro paragraphs |
-| Body / Nav | Anthropic Sans | 17px (1.06rem) | 400–500 | 1.00–1.60 | normal | Navigation links, UI text |
-| Body Standard | Anthropic Sans | 16px (1rem) | 400–500 | 1.25–1.60 | normal | Standard body, button text |
-| Body Small | Anthropic Sans | 15px (0.94rem) | 400–500 | 1.00–1.60 | normal | Compact body text |
-| Caption | Anthropic Sans | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, descriptions |
-| Label | Anthropic Sans | 12px (0.75rem) | 400–500 | 1.25–1.60 | 0.12px | Badges, small labels |
-| Overline | Anthropic Sans | 10px (0.63rem) | 400 | 1.60 | 0.5px | Uppercase overline labels |
-| Micro | Anthropic Sans | 9.6px (0.6rem) | 400 | 1.60 | 0.096px | Smallest text |
-| Code | Anthropic Mono | 15px (0.94rem) | 400 | 1.60 | -0.32px | Inline code, terminal |
+| Anthropic Serif | Display / Hero | 64px (4rem) | 500 | 1.10 (tight) | normal | Maximum impact, book-title presence |
+| Anthropic Serif | Section Heading | 52px (3.25rem) | 500 | 1.20 (tight) | normal | Feature section anchors |
+| Anthropic Serif | Sub-heading Large | 36–36.8px (~2.3rem) | 500 | 1.30 | normal | Secondary section markers |
+| Anthropic Serif | Sub-heading | 32px (2rem) | 500 | 1.10 (tight) | normal | Card titles, feature names |
+| Anthropic Serif | Sub-heading Small | 25–25.6px (~1.6rem) | 500 | 1.20 | normal | Smaller section titles |
+| Anthropic Serif | Feature Title | 20.8px (1.3rem) | 500 | 1.20 | normal | Small feature headings |
+| Anthropic Serif | Body Serif | 17px (1.06rem) | 400 | 1.60 (relaxed) | normal | Serif body text (editorial passages) |
+| Anthropic Sans | Body Large | 20px (1.25rem) | 400 | 1.60 (relaxed) | normal | Intro paragraphs |
+| Anthropic Sans | Body / Nav | 17px (1.06rem) | 400–500 | 1.00–1.60 | normal | Navigation links, UI text |
+| Anthropic Sans | Body Standard | 16px (1rem) | 400–500 | 1.25–1.60 | normal | Standard body, button text |
+| Anthropic Sans | Body Small | 15px (0.94rem) | 400–500 | 1.00–1.60 | normal | Compact body text |
+| Anthropic Sans | Caption | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, descriptions |
+| Anthropic Sans | Label | 12px (0.75rem) | 400–500 | 1.25–1.60 | 0.12px | Badges, small labels |
+| Anthropic Sans | Overline | 10px (0.63rem) | 400 | 1.60 | 0.5px | Uppercase overline labels |
+| Anthropic Sans | Micro | 9.6px (0.6rem) | 400 | 1.60 | 0.096px | Smallest text |
+| Anthropic Mono | Code | 15px (0.94rem) | 400 | 1.60 | -0.32px | Inline code, terminal |
 
 ### Principles
 - **Serif for authority, sans for utility**: Anthropic Serif carries all headline content with medium weight (500), giving every heading the gravitas of a published title. Anthropic Sans handles all functional UI text — buttons, labels, navigation — with quiet efficiency.
@@ -309,7 +309,7 @@ What makes Claude's design truly distinctive is its warm neutral palette. Every 
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

@@ -68,18 +68,18 @@ What makes Expo distinctive is its pill-shaped geometry. Buttons, tabs, video co
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | Inter | 64px (4rem) | 700–900 | 1.10 (tight) | -1.6px to -3px | Maximum impact, extreme tracking |
-| Section Heading | Inter | 48px (3rem) | 600 | 1.10 (tight) | -2px | Feature section anchors |
-| Sub-heading | Inter | 20px (1.25rem) | 600 | 1.20 (tight) | -0.25px | Card titles, feature names |
-| Body Large | Inter | 18px (1.13rem) | 400–500 | 1.40 | normal | Intro paragraphs, section descriptions |
-| Body / Button | Inter | 16px (1rem) | 400–700 | 1.25–1.40 | normal | Standard text, nav links, buttons |
-| Caption / Label | Inter | 14px (0.88rem) | 400–600 | 1.00–1.40 | normal | Descriptions, metadata, badge text |
-| Tag / Small | Inter | 12px (0.75rem) | 500 | 1.00–1.60 | normal | Smallest sans-serif text, badges |
-| Code Body | JetBrains Mono | 16px (1rem) | 400–600 | 1.40 | normal | Inline code, terminal commands |
-| Code Caption | JetBrains Mono | 14px (0.88rem) | 400–600 | 1.40 | normal | Code snippets, technical labels |
-| Code Small | JetBrains Mono | 12px (0.75rem) | 400 | 1.60 | normal | Uppercase tech tags |
+| Inter | Display / Hero | 64px (4rem) | 700–900 | 1.10 (tight) | -1.6px to -3px | Maximum impact, extreme tracking |
+| Inter | Section Heading | 48px (3rem) | 600 | 1.10 (tight) | -2px | Feature section anchors |
+| Inter | Sub-heading | 20px (1.25rem) | 600 | 1.20 (tight) | -0.25px | Card titles, feature names |
+| Inter | Body Large | 18px (1.13rem) | 400–500 | 1.40 | normal | Intro paragraphs, section descriptions |
+| Inter | Body / Button | 16px (1rem) | 400–700 | 1.25–1.40 | normal | Standard text, nav links, buttons |
+| Inter | Caption / Label | 14px (0.88rem) | 400–600 | 1.00–1.40 | normal | Descriptions, metadata, badge text |
+| Inter | Tag / Small | 12px (0.75rem) | 500 | 1.00–1.60 | normal | Smallest sans-serif text, badges |
+| JetBrains Mono | Code Body | 16px (1rem) | 400–600 | 1.40 | normal | Inline code, terminal commands |
+| JetBrains Mono | Code Caption | 14px (0.88rem) | 400–600 | 1.40 | normal | Code snippets, technical labels |
+| JetBrains Mono | Code Small | 12px (0.75rem) | 400 | 1.60 | normal | Uppercase tech tags |
 
 ### Principles
 - **One typeface, full expression**: Inter is the only sans-serif, used from weight 400 (regular) through 900 (black). This gives the design a unified voice while still achieving dramatic contrast between whisper-light body text and thundering display headlines.
@@ -278,7 +278,7 @@ What makes Expo distinctive is its pill-shaped geometry. Buttons, tabs, video co
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

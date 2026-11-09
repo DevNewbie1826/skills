@@ -73,23 +73,23 @@ Typography leans on the system font stack for headings — achieving maximum ren
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | system-ui | 60px (3.75rem) | 400 | 1.00 (tight) | -0.65px | Maximum impact, compressed blocks |
-| Section Heading | system-ui | 36px (2.25rem) | 400 | 1.11 (tight) | -0.9px | Tightest letter-spacing in the system |
-| Sub-heading | system-ui | 24px (1.50rem) | 700 | 1.33 | -0.6px | Bold weight for emphasis at this size |
-| Sub-heading Light | system-ui / Inter | 24px (1.50rem) | 300–400 | 1.33 | -0.6px | Light weight variant for softer hierarchy |
-| Overline | system-ui | 20px (1.25rem) | 600 | 1.40 | 0.5px | Uppercase transform, positive letter-spacing |
-| Feature Title | Inter | 20px (1.25rem) | 500–600 | 1.40 | normal | Card headings, feature names |
-| Overline Small | Inter | 18px (1.13rem) | 600 | 1.56 | 0.45px | Uppercase section labels |
-| Body / Button | Inter | 16px (1.00rem) | 400–600 | 1.50–1.65 | normal | Standard text, nav links, buttons |
-| Nav Link | Inter | 14.45px (0.90rem) | 500 | 1.65 | normal | Navigation-specific sizing |
-| Caption / Label | Inter | 14px (0.88rem) | 400–600 | 1.43–1.65 | normal | Descriptions, metadata, badge text |
-| Tag / Overline Tiny | system-ui | 14px (0.88rem) | 600 | 1.43 | 2.52px | Widest letter-spacing — reserved for uppercase tags |
-| Micro | Inter | 12px (0.75rem) | 400–500 | 1.33 | normal | Smallest sans-serif text |
-| Code Body | SFMono-Regular | 13–14px | 400–686 | 1.23–1.43 | normal | Inline code, terminal output, variable weight for syntax |
-| Code Small | SFMono-Regular | 11–12px | 400 | 1.33–1.45 | normal | Tiny code references, line numbers |
-| Code Button | monospace | 13px (0.81rem) | 700 | 1.65 | normal | Copy-to-clipboard button labels |
+| system-ui | Display / Hero | 60px (3.75rem) | 400 | 1.00 (tight) | -0.65px | Maximum impact, compressed blocks |
+| system-ui | Section Heading | 36px (2.25rem) | 400 | 1.11 (tight) | -0.9px | Tightest letter-spacing in the system |
+| system-ui | Sub-heading | 24px (1.50rem) | 700 | 1.33 | -0.6px | Bold weight for emphasis at this size |
+| system-ui / Inter | Sub-heading Light | 24px (1.50rem) | 300–400 | 1.33 | -0.6px | Light weight variant for softer hierarchy |
+| system-ui | Overline | 20px (1.25rem) | 600 | 1.40 | 0.5px | Uppercase transform, positive letter-spacing |
+| Inter | Feature Title | 20px (1.25rem) | 500–600 | 1.40 | normal | Card headings, feature names |
+| Inter | Overline Small | 18px (1.13rem) | 600 | 1.56 | 0.45px | Uppercase section labels |
+| Inter | Body / Button | 16px (1.00rem) | 400–600 | 1.50–1.65 | normal | Standard text, nav links, buttons |
+| Inter | Nav Link | 14.45px (0.90rem) | 500 | 1.65 | normal | Navigation-specific sizing |
+| Inter | Caption / Label | 14px (0.88rem) | 400–600 | 1.43–1.65 | normal | Descriptions, metadata, badge text |
+| system-ui | Tag / Overline Tiny | 14px (0.88rem) | 600 | 1.43 | 2.52px | Widest letter-spacing — reserved for uppercase tags |
+| Inter | Micro | 12px (0.75rem) | 400–500 | 1.33 | normal | Smallest sans-serif text |
+| SFMono-Regular | Code Body | 13–14px | 400–686 | 1.23–1.43 | normal | Inline code, terminal output, variable weight for syntax |
+| SFMono-Regular | Code Small | 11–12px | 400 | 1.33–1.45 | normal | Tiny code references, line numbers |
+| monospace | Code Button | 13px (0.81rem) | 700 | 1.65 | normal | Copy-to-clipboard button labels |
 
 ### Principles
 - **System-native authority**: Display headings use system-ui rather than a custom web font — this means the largest text renders instantly (no FOIT/FOUT) and inherits the operating system's native personality. On macOS it's SF Pro, on Windows it's Segoe UI. The design accepts this variability as a feature, not a bug.
@@ -139,7 +139,7 @@ Typography leans on the system font stack for headings — achieving maximum ren
 - Dashed variant: `1px dashed rgba(79, 93, 117, 0.4)` for workflow/diagram containers — visually distinct from solid-border content cards
 
 ### Inputs & Forms
-- No explicit input token data extracted — the site is landing-page focused with minimal form UI
+- No explicit input token data — the site is landing-page focused with minimal form UI
 - The npm install command (`npm create voltagent-app@latest`) is presented as a code block rather than an input field
 - Inferred style: Carbon Surface background, Warm Charcoal border, VoltAgent Mint focus ring, Snow White text
 
@@ -274,7 +274,7 @@ Typography leans on the system font stack for headings — achieving maximum ren
 | Desktop | 1025–1440px | Full multi-column layout, expanded nav with dropdowns, large hero (60px) |
 | Large Desktop | >1440px | Max-width container centered (est. 1280–1440px), generous horizontal margins |
 
-*23 breakpoints detected in total, ranging from 360px to 1992px — indicating a fluid, heavily responsive grid system rather than fixed breakpoint snapping.*
+*23 breakpoints in total, ranging from 360px to 1992px — indicating a fluid, heavily responsive grid system rather than fixed breakpoint snapping.*
 
 ### Touch Targets
 - Buttons use comfortable padding (12px 16px minimum) ensuring adequate touch area
@@ -319,7 +319,7 @@ Typography leans on the system font stack for headings — achieving maximum ren
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

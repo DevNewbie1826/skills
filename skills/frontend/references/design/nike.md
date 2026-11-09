@@ -104,21 +104,21 @@ Nike avoids UI gradients. When gradients appear, they are photographic — appli
 
 ### Hierarchy
 
-| Role | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|--------|-------------|----------------|-------|
-| Display | 96px | 500 | 0.90 | — | Nike Futura ND, uppercase, hero headlines |
-| Heading 1 | 32px | 500 | 1.20 | — | Helvetica Now Display Medium, section titles |
-| Heading 2 | 24px | 500 | 1.20 | — | Helvetica Now Display Medium, subsections |
-| Heading 3 | 16px | 500 | 1.50 | — | Helvetica Now Text Medium, card titles |
-| Body | 16px | 400 | 1.75 | — | Helvetica Now Text, product descriptions |
-| Body Medium | 16px | 500 | 1.75 | — | Helvetica Now Text Medium, emphasized text |
-| Link | 16px | 500 | 1.75 | — | Helvetica Now Text Medium, navigation links |
-| Link Small | 14px | 500 | 1.86 | — | Helvetica Now Text Medium, footer/utility links |
-| Button | 16px | 500 | 1.50 | — | Helvetica Now Text Medium, CTA text |
-| Button Small | 14px | 500 | 1.50 | — | Helvetica Now Text Medium, secondary buttons |
-| Caption | 14px | 500 | 1.50 | — | Helvetica Now Text Medium, price labels |
-| Small | 12px | 500 | 1.50 | — | Helvetica Now Text Medium, timestamps |
-| Tiny | 12px | 400 | 1.50 | — | Helvetica Now Text, legal text |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|------|--------|-------------|----------------|-------|
+| Nike Futura ND | Display | 96px | 500 | 0.90 | — | Nike Futura ND, uppercase, hero headlines |
+| Helvetica Now Display Medium | Heading 1 | 32px | 500 | 1.20 | — | Helvetica Now Display Medium, section titles |
+| Helvetica Now Display Medium | Heading 2 | 24px | 500 | 1.20 | — | Helvetica Now Display Medium, subsections |
+| Helvetica Now Text Medium | Heading 3 | 16px | 500 | 1.50 | — | Helvetica Now Text Medium, card titles |
+| Helvetica Now Text | Body | 16px | 400 | 1.75 | — | Helvetica Now Text, product descriptions |
+| Helvetica Now Text Medium | Body Medium | 16px | 500 | 1.75 | — | Helvetica Now Text Medium, emphasized text |
+| Helvetica Now Text Medium | Link | 16px | 500 | 1.75 | — | Helvetica Now Text Medium, navigation links |
+| Helvetica Now Text Medium | Link Small | 14px | 500 | 1.86 | — | Helvetica Now Text Medium, footer/utility links |
+| Helvetica Now Text Medium | Button | 16px | 500 | 1.50 | — | Helvetica Now Text Medium, CTA text |
+| Helvetica Now Text Medium | Button Small | 14px | 500 | 1.50 | — | Helvetica Now Text Medium, secondary buttons |
+| Helvetica Now Text Medium | Caption | 14px | 500 | 1.50 | — | Helvetica Now Text Medium, price labels |
+| Helvetica Now Text Medium | Small | 12px | 500 | 1.50 | — | Helvetica Now Text Medium, timestamps |
+| Helvetica Now Text | Tiny | 12px | 400 | 1.50 | — | Helvetica Now Text, legal text |
 
 ### Principles
 
@@ -358,7 +358,7 @@ Nike's elevation philosophy is radically flat. There are no card shadows, no hov
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

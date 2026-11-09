@@ -65,23 +65,23 @@ What makes Sentry distinctive is its embrace of the "dark IDE" aesthetic without
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Dammit Sans | 88px (5.50rem) | 700 | 1.20 (tight) | normal | Maximum impact, brand voice |
-| Display Secondary | Dammit Sans | 60px (3.75rem) | 500 | 1.10 (tight) | normal | Secondary hero text |
-| Section Heading | Rubik | 30px (1.88rem) | 400 | 1.20 (tight) | normal | Major section titles |
-| Sub-heading | Rubik | 27px (1.69rem) | 500 | 1.25 (tight) | normal | Feature section headers |
-| Card Title | Rubik | 24px (1.50rem) | 500 | 1.25 (tight) | normal | Card and block headings |
-| Feature Title | Rubik | 20px (1.25rem) | 600 | 1.25 (tight) | normal | Emphasized feature names |
-| Body | Rubik | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
-| Body Emphasis | Rubik | 16px (1.00rem) | 500–600 | 1.50 | normal | Bold body, nav items |
-| Nav Label | Rubik | 15px (0.94rem) | 500 | 1.40 | normal | Navigation links |
-| Uppercase Label | Rubik | 15px (0.94rem) | 500 | 1.25 (tight) | normal | `text-transform: uppercase` |
-| Button Text | Rubik | 14px (0.88rem) | 500–700 | 1.14–1.29 (tight) | 0.2px | `text-transform: uppercase` |
-| Caption | Rubik | 14px (0.88rem) | 500–700 | 1.00–1.43 | 0.2px | Often uppercase |
-| Small Caption | Rubik | 12px (0.75rem) | 600 | 2.00 (relaxed) | normal | Subtle annotations |
-| Micro Label | Rubik | 10px (0.63rem) | 600 | 1.80 (relaxed) | 0.25px | `text-transform: uppercase` |
-| Code | Monaco | 16px (1.00rem) | 400–700 | 1.50 | normal | Code blocks, technical text |
+| Dammit Sans | Display Hero | 88px (5.50rem) | 700 | 1.20 (tight) | normal | Maximum impact, brand voice |
+| Dammit Sans | Display Secondary | 60px (3.75rem) | 500 | 1.10 (tight) | normal | Secondary hero text |
+| Rubik | Section Heading | 30px (1.88rem) | 400 | 1.20 (tight) | normal | Major section titles |
+| Rubik | Sub-heading | 27px (1.69rem) | 500 | 1.25 (tight) | normal | Feature section headers |
+| Rubik | Card Title | 24px (1.50rem) | 500 | 1.25 (tight) | normal | Card and block headings |
+| Rubik | Feature Title | 20px (1.25rem) | 600 | 1.25 (tight) | normal | Emphasized feature names |
+| Rubik | Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
+| Rubik | Body Emphasis | 16px (1.00rem) | 500–600 | 1.50 | normal | Bold body, nav items |
+| Rubik | Nav Label | 15px (0.94rem) | 500 | 1.40 | normal | Navigation links |
+| Rubik | Uppercase Label | 15px (0.94rem) | 500 | 1.25 (tight) | normal | `text-transform: uppercase` |
+| Rubik | Button Text | 14px (0.88rem) | 500–700 | 1.14–1.29 (tight) | 0.2px | `text-transform: uppercase` |
+| Rubik | Caption | 14px (0.88rem) | 500–700 | 1.00–1.43 | 0.2px | Often uppercase |
+| Rubik | Small Caption | 12px (0.75rem) | 600 | 2.00 (relaxed) | normal | Subtle annotations |
+| Rubik | Micro Label | 10px (0.63rem) | 600 | 1.80 (relaxed) | 0.25px | `text-transform: uppercase` |
+| Monaco | Code | 16px (1.00rem) | 400–700 | 1.50 | normal | Code blocks, technical text |
 
 ### Principles
 - **Dual personality**: Dammit Sans brings irreverent brand character at display scale; Rubik provides clean professionalism for everything functional.

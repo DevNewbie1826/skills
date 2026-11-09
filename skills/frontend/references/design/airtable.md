@@ -49,18 +49,18 @@ Airtable's website is a clean, enterprise-friendly platform that communicates "s
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing |
+| Font | Role | Size | Weight | Line Height | Letter Spacing |
 |------|------|------|--------|-------------|----------------|
-| Display Hero | Haas | 48px | 400 | 1.15 | normal |
-| Display Bold | Haas Groot Disp | 48px | 900 | 1.50 | normal |
-| Section Heading | Haas | 40px | 400 | 1.25 | normal |
-| Sub-heading | Haas | 32px | 400–500 | 1.15–1.25 | normal |
-| Card Title | Haas | 24px | 400 | 1.20–1.30 | 0.12px |
-| Feature | Haas | 20px | 400 | 1.25–1.50 | 0.1px |
-| Body | Haas | 18px | 400 | 1.35 | 0.18px |
-| Body Medium | Haas | 16px | 500 | 1.30 | 0.08–0.16px |
-| Button | Haas | 16px | 500 | 1.25–1.30 | 0.08px |
-| Caption | Haas | 14px | 400–500 | 1.25–1.35 | 0.07–0.28px |
+| Haas | Display Hero | 48px | 400 | 1.15 | normal |
+| Haas Groot Disp | Display Bold | 48px | 900 | 1.50 | normal |
+| Haas | Section Heading | 40px | 400 | 1.25 | normal |
+| Haas | Sub-heading | 32px | 400–500 | 1.15–1.25 | normal |
+| Haas | Card Title | 24px | 400 | 1.20–1.30 | 0.12px |
+| Haas | Feature | 20px | 400 | 1.25–1.50 | 0.1px |
+| Haas | Body | 18px | 400 | 1.35 | 0.18px |
+| Haas | Body Medium | 16px | 500 | 1.30 | 0.08–0.16px |
+| Haas | Button | 16px | 500 | 1.25–1.30 | 0.08px |
+| Haas | Caption | 14px | 400–500 | 1.25–1.35 | 0.07–0.28px |
 
 ## 4. Component Stylings
 

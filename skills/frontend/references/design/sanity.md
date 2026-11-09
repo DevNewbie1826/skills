@@ -74,24 +74,24 @@ What makes Sanity distinctive is the interplay between its monochromatic dark pa
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | waldenburgNormal | 112px (7rem) | 400 | 1.00 (tight) | -4.48px | Maximum impact, compressed tracking |
-| Hero Secondary | waldenburgNormal | 72px (4.5rem) | 400 | 1.05 (tight) | -2.88px | Large section headers |
-| Section Heading | waldenburgNormal | 48px (3rem) | 400 | 1.08 (tight) | -1.68px | Primary section anchors |
-| Heading Large | waldenburgNormal | 38px (2.38rem) | 400 | 1.10 (tight) | -1.14px | Feature section titles |
-| Heading Medium | waldenburgNormal | 32px (2rem) | 425 | 1.24 (tight) | -0.32px | Card titles, subsection headers |
-| Heading Small | waldenburgNormal | 24px (1.5rem) | 425 | 1.24 (tight) | -0.24px | Smaller feature headings |
-| Subheading | waldenburgNormal | 20px (1.25rem) | 425 | 1.13 (tight) | -0.2px | Sub-section markers |
-| Body Large | waldenburgNormal | 18px (1.13rem) | 400 | 1.50 | -0.18px | Intro paragraphs, descriptions |
-| Body | waldenburgNormal | 16px (1rem) | 400 | 1.50 | normal | Standard body text |
-| Body Small | waldenburgNormal | 15px (0.94rem) | 400 | 1.50 | -0.15px | Compact body text |
-| Caption | waldenburgNormal | 13px (0.81rem) | 400-500 | 1.30-1.50 | -0.13px | Metadata, descriptions, tags |
-| Small Caption | waldenburgNormal | 12px (0.75rem) | 400 | 1.50 | -0.12px | Footnotes, timestamps |
-| Micro / Label | waldenburgNormal | 11px (0.69rem) | 500-600 | 1.00-1.50 | normal | Uppercase labels, tiny badges |
-| Code Body | IBM Plex Mono | 15px (0.94rem) | 400 | 1.50 | normal | Code blocks, technical content |
-| Code Caption | IBM Plex Mono | 13px (0.81rem) | 400-500 | 1.30-1.50 | normal | Inline code, small technical labels |
-| Code Micro | IBM Plex Mono | 10-12px | 400 | 1.30-1.50 | normal | Tiny code labels, uppercase tags |
+| waldenburgNormal | Display / Hero | 112px (7rem) | 400 | 1.00 (tight) | -4.48px | Maximum impact, compressed tracking |
+| waldenburgNormal | Hero Secondary | 72px (4.5rem) | 400 | 1.05 (tight) | -2.88px | Large section headers |
+| waldenburgNormal | Section Heading | 48px (3rem) | 400 | 1.08 (tight) | -1.68px | Primary section anchors |
+| waldenburgNormal | Heading Large | 38px (2.38rem) | 400 | 1.10 (tight) | -1.14px | Feature section titles |
+| waldenburgNormal | Heading Medium | 32px (2rem) | 425 | 1.24 (tight) | -0.32px | Card titles, subsection headers |
+| waldenburgNormal | Heading Small | 24px (1.5rem) | 425 | 1.24 (tight) | -0.24px | Smaller feature headings |
+| waldenburgNormal | Subheading | 20px (1.25rem) | 425 | 1.13 (tight) | -0.2px | Sub-section markers |
+| waldenburgNormal | Body Large | 18px (1.13rem) | 400 | 1.50 | -0.18px | Intro paragraphs, descriptions |
+| waldenburgNormal | Body | 16px (1rem) | 400 | 1.50 | normal | Standard body text |
+| waldenburgNormal | Body Small | 15px (0.94rem) | 400 | 1.50 | -0.15px | Compact body text |
+| waldenburgNormal | Caption | 13px (0.81rem) | 400-500 | 1.30-1.50 | -0.13px | Metadata, descriptions, tags |
+| waldenburgNormal | Small Caption | 12px (0.75rem) | 400 | 1.50 | -0.12px | Footnotes, timestamps |
+| waldenburgNormal | Micro / Label | 11px (0.69rem) | 500-600 | 1.00-1.50 | normal | Uppercase labels, tiny badges |
+| IBM Plex Mono | Code Body | 15px (0.94rem) | 400 | 1.50 | normal | Code blocks, technical content |
+| IBM Plex Mono | Code Caption | 13px (0.81rem) | 400-500 | 1.30-1.50 | normal | Inline code, small technical labels |
+| IBM Plex Mono | Code Micro | 10-12px | 400 | 1.30-1.50 | normal | Tiny code labels, uppercase tags |
 
 ### Principles
 - **Extreme negative tracking at scale**: Display headings at 72px+ use aggressive negative letter-spacing (-2.88px to -4.48px), creating a tight, engineered quality that distinguishes Sanity from looser editorial typography.

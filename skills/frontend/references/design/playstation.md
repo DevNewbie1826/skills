@@ -75,30 +75,30 @@ Both gradients are used **only as section backgrounds**, never inside components
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |---|---|---|---|---|---|---|
-| Hero Display (XL) | SST | 54px / 3.38rem | 300 | 1.25 | -0.1px | The biggest SST moment on the page — quiet-weight luxury headline |
-| Hero Display (L) | SST | 44px / 2.75rem | 300 | 1.25 | 0.1px | Secondary hero headlines |
-| Large Display | SST | 35px / 2.20rem | 300 | 1.25 | — | Feature panel headlines |
-| Mid Display | SST | 28px / 1.75rem | 300 | 1.25 | 0.1px | Section headings |
-| Compact Display | SST | 22px / 1.38rem | 300 | 1.25 | 0.1px | Module titles — still in light weight 300 |
-| Playstation SST Sub | Playstation SST | 22.5px / 1.41rem | 400 | 1.30 | — | Promotional sub-heading |
-| UI Heading Small | SST | 18px / 1.13rem | 600 | 1.00 | — | Tight UI headings |
-| Button / CTA | SST | 18px / 1.13rem | 500 | 1.25 | 0.4px | Primary button label |
-| Button / Emphasized | SST | 18px / 1.13rem | 700 | 1.25 | 0.45px | Higher-emphasis CTAs (buy, subscribe) |
-| Button Serif | SST | 18px / 1.13rem | 600 | 1.50 | — | Secondary button label |
-| Body Relaxed | SST | 18px / 1.13rem | 400 | 1.50 | 0.1px | Standard reading body |
-| Link Body | SST | 18px / 1.13rem | 400 | 1.50 | — | Inline link text |
-| Compact Button | SST | 14px / 0.88rem | 700 | 1.25 | 0.324px | Mini CTAs in cards |
-| Utility Caption | SST | 14px / 0.88rem | 500 | 1.50 | — | Captions, tag labels |
-| Caption Body | SST | 14px / 0.88rem | 400 | 1.50 | — | Standard metadata |
-| Playstation Caption Bold | Playstation SST | 14px / 0.88rem | 700 | 1.40 | — | Emphasized caption |
-| Playstation Caption Mid | Playstation SST | 14px / 0.88rem | 600 | 1.40 | — | Semi-bold caption |
-| Playstation Button | Playstation SST | 14.4px / 0.90rem | 700 | 1.00 | 0.144px | UI button with tight leading |
-| Playstation Tab | Playstation SST | 14px / 0.88rem | 400 | 1.10 | 0.14px | Tab/pill label |
-| Playstation Compact Caption | Playstation SST | 12.8px / 0.80rem | 400 | 1.10 | — | Smallest UI caption |
-| Micro Caption | SST | 12px / 0.75rem | 500 | 1.50 | — | Footer microcopy, legal text |
-| Compact Caption Bold | SST | 12.06px / 0.75rem | 700 | 1.50 | — | Emphasized micro text |
+| SST | Hero Display (XL) | 54px / 3.38rem | 300 | 1.25 | -0.1px | The biggest SST moment on the page — quiet-weight luxury headline |
+| SST | Hero Display (L) | 44px / 2.75rem | 300 | 1.25 | 0.1px | Secondary hero headlines |
+| SST | Large Display | 35px / 2.20rem | 300 | 1.25 | — | Feature panel headlines |
+| SST | Mid Display | 28px / 1.75rem | 300 | 1.25 | 0.1px | Section headings |
+| SST | Compact Display | 22px / 1.38rem | 300 | 1.25 | 0.1px | Module titles — still in light weight 300 |
+| Playstation SST | Playstation SST Sub | 22.5px / 1.41rem | 400 | 1.30 | — | Promotional sub-heading |
+| SST | UI Heading Small | 18px / 1.13rem | 600 | 1.00 | — | Tight UI headings |
+| SST | Button / CTA | 18px / 1.13rem | 500 | 1.25 | 0.4px | Primary button label |
+| SST | Button / Emphasized | 18px / 1.13rem | 700 | 1.25 | 0.45px | Higher-emphasis CTAs (buy, subscribe) |
+| SST | Button Serif | 18px / 1.13rem | 600 | 1.50 | — | Secondary button label |
+| SST | Body Relaxed | 18px / 1.13rem | 400 | 1.50 | 0.1px | Standard reading body |
+| SST | Link Body | 18px / 1.13rem | 400 | 1.50 | — | Inline link text |
+| SST | Compact Button | 14px / 0.88rem | 700 | 1.25 | 0.324px | Mini CTAs in cards |
+| SST | Utility Caption | 14px / 0.88rem | 500 | 1.50 | — | Captions, tag labels |
+| SST | Caption Body | 14px / 0.88rem | 400 | 1.50 | — | Standard metadata |
+| Playstation SST | Playstation Caption Bold | 14px / 0.88rem | 700 | 1.40 | — | Emphasized caption |
+| Playstation SST | Playstation Caption Mid | 14px / 0.88rem | 600 | 1.40 | — | Semi-bold caption |
+| Playstation SST | Playstation Button | 14.4px / 0.90rem | 700 | 1.00 | 0.144px | UI button with tight leading |
+| Playstation SST | Playstation Tab | 14px / 0.88rem | 400 | 1.10 | 0.14px | Tab/pill label |
+| Playstation SST | Playstation Compact Caption | 12.8px / 0.80rem | 400 | 1.10 | — | Smallest UI caption |
+| SST | Micro Caption | 12px / 0.75rem | 500 | 1.50 | — | Footer microcopy, legal text |
+| SST | Compact Caption Bold | 12.06px / 0.75rem | 700 | 1.50 | — | Emphasized micro text |
 
 ### Principles
 - **Weight 300 at large sizes is the voice.** PlayStation is the only major console brand that uses a light-weight display for its hero headlines. Resist the urge to "upgrade" display type to 500 or 700 — the quietness is the personality.
@@ -234,7 +234,7 @@ Both gradients are used **only as section backgrounds**, never inside components
 - **Micro-scale**: The 1/2/3/4.5/5/9/10/12 values are used for pill padding, caption spacing, and border offsets — not for editorial rhythm.
 
 ### Grid & Container
-- **Max width**: ~1920px (dembrandt detected breakpoints up to 2120px). Container caps typically around `1280–1920px` depending on panel.
+- **Max width**: ~1920px. Container caps typically around `1280–1920px` depending on panel.
 - **Column patterns**: 12-column responsive grid that resolves into 3/4/6-column game tile rows depending on hierarchy. Hero zones often span 12 columns; featured tiles sit in 6+3+3 or 4+4+4 configurations.
 - **Outer padding**: 16px mobile → 48px tablet → 64–96px desktop.
 - **Gutters**: 16–24px between columns, tighter (8–12px) inside tile clusters.
@@ -318,7 +318,7 @@ PlayStation's depth philosophy is **layered but restrained**. The shadow scale r
 | 4K / Big-Screen | ≥1920px | Container expands to 1920px max, hero content scales up to match TV viewing distance |
 | Ultra-Wide | ≥2120px | Extreme breakpoint — page stays anchored, outer margins absorb extra width |
 
-The dembrandt sweep detected 30 breakpoints between 320px and 2120px — an unusually wide responsive range. PlayStation tunes specifically for **big-screen contexts** (1920–2120px) because PS5 owners frequently browse the site on TVs via the console's browser or via cast-to-TV from a phone. Most retail sites stop tuning at 1440px; PlayStation keeps tuning through 4K.
+The site defines 30 breakpoints between 320px and 2120px — an unusually wide responsive range. PlayStation tunes specifically for **big-screen contexts** (1920–2120px) because PS5 owners frequently browse the site on TVs via the console's browser or via cast-to-TV from a phone. Most retail sites stop tuning at 1440px; PlayStation keeps tuning through 4K.
 
 ### Touch Targets
 - Primary pill buttons are ~48–56px tall (SST 18px text + ~12–16px vertical padding) — comfortably WCAG AAA.
@@ -359,7 +359,7 @@ The dembrandt sweep detected 30 breakpoints between 320px and 2120px — an unus
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

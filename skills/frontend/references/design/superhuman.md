@@ -63,26 +63,26 @@ The design philosophy is maximum confidence through minimum decoration. Warm cre
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Super Sans VF | 64px | 540 | 0.96 | 0px | Maximum compression, powerful block headlines |
-| Section Display | Super Sans VF | 48px | 460 | 0.96 | -1.32px | Lighter weight for section introductions |
-| Section Heading | Super Sans VF | 48px | 460 | 0.96 | 0px | Alternate section heading without tracking |
-| Feature Title | Super Sans VF | 28px | 540 | 1.14 | -0.63px | Feature block headlines, tighter |
-| Sub-heading Large | Super Sans VF | 26px | 460 | 1.30 | 0px | Content sub-sections |
-| Card Heading | Super Sans VF | 22px | 460 | 0.76 | -0.315px | Card title with extreme compression |
-| Body Heading | Super Sans VF | 20px | 460 | 1.20 | 0px | Bold content intros |
-| Body Heading Alt | Super Sans VF | 20px | 460 | 1.10 | -0.55px | Tighter variant for emphasis |
-| Body Heading Relaxed | Super Sans VF | 20px | 460 | 1.25 | -0.4px | More breathing room variant |
-| Emphasis Body | Super Sans VF | 18px | 540 | 1.50 | -0.135px | Medium-weight body for callouts |
-| Body | Super Sans VF | 16px | 460 | 1.50 | 0px | Standard reading text — generous line-height |
-| Button / UI Bold | Super Sans VF | 16px | 700 | 1.00 | 0px | Bold UI elements |
-| Button / UI Semi | Super Sans VF | 16px | 600 | 1.00 | 0px | Semi-bold navigation and labels |
-| Nav Link | Super Sans VF | 16px | 460 | 1.20 | 0px | Navigation items |
-| Caption | Super Sans VF | 14px | 500 | 1.20 | -0.315px | Small labels, metadata |
-| Caption Semi | Super Sans VF | 14px | 600 | 1.29 | 0px | Emphasized small text |
-| Caption Body | Super Sans VF | 14px | 460 | 1.50 | 0px | Small body text |
-| Micro Label | Super Sans VF | 12px | 700 | 1.50 | 0px | Smallest text — badges, tags |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Display Hero | 64px | 540 | 0.96 | 0px | Maximum compression, powerful block headlines |
+| Section Display | 48px | 460 | 0.96 | -1.32px | Lighter weight for section introductions |
+| Section Heading | 48px | 460 | 0.96 | 0px | Alternate section heading without tracking |
+| Feature Title | 28px | 540 | 1.14 | -0.63px | Feature block headlines, tighter |
+| Sub-heading Large | 26px | 460 | 1.30 | 0px | Content sub-sections |
+| Card Heading | 22px | 460 | 0.76 | -0.315px | Card title with extreme compression |
+| Body Heading | 20px | 460 | 1.20 | 0px | Bold content intros |
+| Body Heading Alt | 20px | 460 | 1.10 | -0.55px | Tighter variant for emphasis |
+| Body Heading Relaxed | 20px | 460 | 1.25 | -0.4px | More breathing room variant |
+| Emphasis Body | 18px | 540 | 1.50 | -0.135px | Medium-weight body for callouts |
+| Body | 16px | 460 | 1.50 | 0px | Standard reading text — generous line-height |
+| Button / UI Bold | 16px | 700 | 1.00 | 0px | Bold UI elements |
+| Button / UI Semi | 16px | 600 | 1.00 | 0px | Semi-bold navigation and labels |
+| Nav Link | 16px | 460 | 1.20 | 0px | Navigation items |
+| Caption | 14px | 500 | 1.20 | -0.315px | Small labels, metadata |
+| Caption Semi | 14px | 600 | 1.29 | 0px | Emphasized small text |
+| Caption Body | 14px | 460 | 1.50 | 0px | Small body text |
+| Micro Label | 12px | 700 | 1.50 | 0px | Smallest text — badges, tags |
 
 ### Principles
 - **Non-standard weight axis**: Weights 460 and 540 are deliberately between conventional Regular (400) and Medium (500), creating a typographic texture that feels subtly "off" in a confident way — slightly heavier than expected, never quite bold
@@ -162,7 +162,7 @@ The design philosophy is maximum confidence through minimum decoration. Warm cre
 | Level 0 (Flat) | No shadow, white background | Primary page canvas, most content surfaces |
 | Level 1 (Border) | `1px solid #dcd7d3` (Parchment Border) | Card containment, section dividers |
 | Level 2 (Dark Border) | `1px solid #292827` | Header elements, dark section separators |
-| Level 3 (Glow) | Subtle shadow (from 6 shadow definitions detected) | Product screenshot containers, elevated cards |
+| Level 3 (Glow) | Subtle shadow | Product screenshot containers, elevated cards |
 | Level 4 (Hero Depth) | `rgba(255, 255, 255, 0.2)` transparent border | Elements on the dark purple gradient hero |
 
 ### Shadow Philosophy
@@ -250,7 +250,7 @@ Superhuman's elevation system is remarkably restrained on the marketing site. De
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

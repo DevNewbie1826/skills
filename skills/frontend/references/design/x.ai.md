@@ -55,14 +55,14 @@ The spacing system operates on an 8px base grid with values concentrated at the 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Transform | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Transform | Notes |
 |------|------|------|--------|-------------|----------------|-----------|-------|
-| Display Hero | GeistMono | 320px (20rem) | 300 | 1.50 | normal | none | Extreme scale, monospace luxury |
-| Section Heading | universalSans | 30px (1.88rem) | 400 | 1.20 (tight) | normal | none | Clean sans-serif contrast |
-| Body | universalSans | 16px (1rem) | 400 | 1.50 | normal | none | Standard reading text |
-| Button | GeistMono | 14px (0.88rem) | 400 | 1.43 | 1.4px | uppercase | Tracked monospace, commanding |
-| Label / Caption | universalSans | 14px (0.88rem) | 400 | 1.50 | normal | none | Supporting text |
-| Small / Meta | universalSans | 12px (0.75rem) | 400 | 1.50 | normal | none | Timestamps, footnotes |
+| GeistMono | Display Hero | 320px (20rem) | 300 | 1.50 | normal | none | Extreme scale, monospace luxury |
+| universalSans | Section Heading | 30px (1.88rem) | 400 | 1.20 (tight) | normal | none | Clean sans-serif contrast |
+| universalSans | Body | 16px (1rem) | 400 | 1.50 | normal | none | Standard reading text |
+| GeistMono | Button | 14px (0.88rem) | 400 | 1.43 | 1.4px | uppercase | Tracked monospace, commanding |
+| universalSans | Label / Caption | 14px (0.88rem) | 400 | 1.50 | normal | none | Supporting text |
+| universalSans | Small / Meta | 12px (0.75rem) | 400 | 1.50 | normal | none | Timestamps, footnotes |
 
 ### Principles
 - **Monospace as display**: GeistMono at 320px is not a gimmick -- it is the brand statement. The fixed-width characters at extreme scale create a rhythmic, architectural quality that no proportional font can achieve.
@@ -153,10 +153,6 @@ The spacing system operates on an 8px base grid with values concentrated at the 
 - **Vertical rhythm over horizontal density**: Content stacks vertically with large gaps between sections rather than packing horizontally. This creates a scroll-driven experience that feels deliberate and cinematic.
 - **No visual noise**: The absence of decorative elements, borders between sections, and color variety means whitespace is the primary structural tool.
 
-### Breakpoints
-- 2000px, 1536px, 1280px, 1024px, 1000px, 768px, 640px
-- Tailwind responsive modifiers drive breakpoint behavior
-
 ### Border Radius Scale
 - Sharp (0px): Primary treatment for buttons, cards, inputs -- the default
 - Subtle (4px): Occasional softening on secondary containers
@@ -208,6 +204,8 @@ The spacing system operates on an 8px base grid with values concentrated at the 
 | Large | 1280-1536px | Wider containers, more breathing room |
 | Extra Large | 1536-2000px | Maximum content width, centered |
 | Ultra | >2000px | Content stays centered, extreme margins |
+
+- Tailwind responsive modifiers drive breakpoint behavior
 
 ### Touch Targets
 - Buttons use 12px 24px padding for comfortable touch

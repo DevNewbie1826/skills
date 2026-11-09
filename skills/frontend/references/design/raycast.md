@@ -74,24 +74,24 @@ Inter is used everywhere — headings, body, buttons, captions — with extensiv
 
 ### Hierarchy
 
-| Role | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|--------|-------------|----------------|-------|
-| Display Hero | 64px | 600 | 1.10 | 0px | OpenType: liga 0, ss02, ss08 |
-| Section Display | 56px | 400 | 1.17 | 0.2px | OpenType: calt, kern, liga, ss03 |
-| Section Heading | 24px | 500 | normal | 0.2px | OpenType: calt, kern, liga, ss03 |
-| Card Heading | 22px | 400 | 1.15 | 0px | OpenType: calt, kern, liga, ss03 |
-| Sub-heading | 20px | 500 | 1.60 | 0.2px | Relaxed line-height for readability |
-| Body Large | 18px | 400 | 1.15 | 0.2px | OpenType: calt, kern, liga, ss03 |
-| Body | 16px | 500 | 1.60 | 0.2px | Primary body text, relaxed rhythm |
-| Body Tight | 16px | 400 | 1.15 | 0.1px | UI labels, compact contexts |
-| Button | 16px | 600 | 1.15 | 0.3px | Semibold, slightly wider tracking |
-| Nav Link | 16px | 500 | 1.40 | 0.3px | Links in navigation |
-| Caption | 14px | 500 | 1.14 | 0.2px | Small labels, metadata |
-| Caption Bold | 14px | 600 | 1.40 | 0px | Emphasized captions |
-| Small | 12px | 600 | 1.33 | 0px | Badges, tags, micro-labels |
-| Small Link | 12px | 400 | 1.50 | 0.4px | Footer links, fine print |
-| Code | 14px (GeistMono) | 500 | 1.60 | 0.3px | Code blocks, technical content |
-| Code Small | 12px (GeistMono) | 400 | 1.60 | 0.2px | Inline code, terminal output |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|------|--------|-------------|----------------|-------|
+| Inter | Display Hero | 64px | 600 | 1.10 | 0px | OpenType: liga 0, ss02, ss08 |
+| Inter | Section Display | 56px | 400 | 1.17 | 0.2px | OpenType: calt, kern, liga, ss03 |
+| Inter | Section Heading | 24px | 500 | normal | 0.2px | OpenType: calt, kern, liga, ss03 |
+| Inter | Card Heading | 22px | 400 | 1.15 | 0px | OpenType: calt, kern, liga, ss03 |
+| Inter | Sub-heading | 20px | 500 | 1.60 | 0.2px | Relaxed line-height for readability |
+| Inter | Body Large | 18px | 400 | 1.15 | 0.2px | OpenType: calt, kern, liga, ss03 |
+| Inter | Body | 16px | 500 | 1.60 | 0.2px | Primary body text, relaxed rhythm |
+| Inter | Body Tight | 16px | 400 | 1.15 | 0.1px | UI labels, compact contexts |
+| Inter | Button | 16px | 600 | 1.15 | 0.3px | Semibold, slightly wider tracking |
+| Inter | Nav Link | 16px | 500 | 1.40 | 0.3px | Links in navigation |
+| Inter | Caption | 14px | 500 | 1.14 | 0.2px | Small labels, metadata |
+| Inter | Caption Bold | 14px | 600 | 1.40 | 0px | Emphasized captions |
+| Inter | Small | 12px | 600 | 1.33 | 0px | Badges, tags, micro-labels |
+| Inter | Small Link | 12px | 400 | 1.50 | 0.4px | Footer links, fine print |
+| GeistMono | Code | 14px (GeistMono) | 500 | 1.60 | 0.3px | Code blocks, technical content |
+| GeistMono | Code Small | 12px (GeistMono) | 400 | 1.60 | 0.2px | Inline code, terminal output |
 
 ### Principles
 - **Positive tracking on dark**: Unlike most dark UIs that use tight or neutral letter-spacing, Raycast applies +0.2px to +0.4px — creating an airy, readable feel that compensates for the dark background
@@ -266,7 +266,7 @@ Raycast's shadow system is the most macOS-native on the web. Multi-layer shadows
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

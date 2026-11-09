@@ -48,18 +48,18 @@ What makes Figma distinctive beyond the variable font is its circle-and-pill geo
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | figmaSans | 86px (5.38rem) | 400 | 1.00 (tight) | -1.72px | Maximum impact, extreme tracking |
-| Section Heading | figmaSans | 64px (4rem) | 400 | 1.10 (tight) | -0.96px | Feature section titles |
-| Sub-heading | figmaSans | 26px (1.63rem) | 540 | 1.35 | -0.26px | Emphasized section text |
-| Sub-heading Light | figmaSans | 26px (1.63rem) | 340 | 1.35 | -0.26px | Light-weight section text |
-| Feature Title | figmaSans | 24px (1.5rem) | 700 | 1.45 | normal | Bold card headings |
-| Body Large | figmaSans | 20px (1.25rem) | 330–450 | 1.30–1.40 | -0.1px to -0.14px | Descriptions, intros |
-| Body / Button | figmaSans | 16px (1rem) | 330–400 | 1.40–1.45 | -0.14px to normal | Standard body, nav, buttons |
-| Body Light | figmaSans | 18px (1.13rem) | 320 | 1.45 | -0.26px to normal | Light-weight body text |
-| Mono Label | figmaMono | 18px (1.13rem) | 400 | 1.30 (tight) | 0.54px | Uppercase section labels |
-| Mono Small | figmaMono | 12px (0.75rem) | 400 | 1.00 (tight) | 0.6px | Uppercase tiny tags |
+| figmaSans | Display / Hero | 86px (5.38rem) | 400 | 1.00 (tight) | -1.72px | Maximum impact, extreme tracking |
+| figmaSans | Section Heading | 64px (4rem) | 400 | 1.10 (tight) | -0.96px | Feature section titles |
+| figmaSans | Sub-heading | 26px (1.63rem) | 540 | 1.35 | -0.26px | Emphasized section text |
+| figmaSans | Sub-heading Light | 26px (1.63rem) | 340 | 1.35 | -0.26px | Light-weight section text |
+| figmaSans | Feature Title | 24px (1.5rem) | 700 | 1.45 | normal | Bold card headings |
+| figmaSans | Body Large | 20px (1.25rem) | 330–450 | 1.30–1.40 | -0.1px to -0.14px | Descriptions, intros |
+| figmaSans | Body / Button | 16px (1rem) | 330–400 | 1.40–1.45 | -0.14px to normal | Standard body, nav, buttons |
+| figmaSans | Body Light | 18px (1.13rem) | 320 | 1.45 | -0.26px to normal | Light-weight body text |
+| figmaMono | Mono Label | 18px (1.13rem) | 400 | 1.30 (tight) | 0.54px | Uppercase section labels |
+| figmaMono | Mono Small | 12px (0.75rem) | 400 | 1.00 (tight) | 0.6px | Uppercase tiny tags |
 
 ### Principles
 - **Variable font precision**: figmaSans uses weights that most systems never touch — 320, 330, 340, 450, 480, 540. This creates hierarchy through subtle weight differences rather than dramatic jumps. The difference between 330 and 340 is nearly imperceptible but structurally significant.

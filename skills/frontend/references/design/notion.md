@@ -68,24 +68,24 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | NotionInter | 64px (4.00rem) | 700 | 1.00 (tight) | -2.125px | Maximum compression, billboard headlines |
-| Display Secondary | NotionInter | 54px (3.38rem) | 700 | 1.04 (tight) | -1.875px | Secondary hero, feature headlines |
-| Section Heading | NotionInter | 48px (3.00rem) | 700 | 1.00 (tight) | -1.5px | Feature section titles, with `"lnum"` |
-| Sub-heading Large | NotionInter | 40px (2.50rem) | 700 | 1.50 | normal | Card headings, feature sub-sections |
-| Sub-heading | NotionInter | 26px (1.63rem) | 700 | 1.23 (tight) | -0.625px | Section sub-titles, content headers |
-| Card Title | NotionInter | 22px (1.38rem) | 700 | 1.27 (tight) | -0.25px | Feature cards, list titles |
-| Body Large | NotionInter | 20px (1.25rem) | 600 | 1.40 | -0.125px | Introductions, feature descriptions |
-| Body | NotionInter | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
-| Body Medium | NotionInter | 16px (1.00rem) | 500 | 1.50 | normal | Navigation, emphasized UI text |
-| Body Semibold | NotionInter | 16px (1.00rem) | 600 | 1.50 | normal | Strong labels, active states |
-| Body Bold | NotionInter | 16px (1.00rem) | 700 | 1.50 | normal | Headlines at body size |
-| Nav / Button | NotionInter | 15px (0.94rem) | 600 | 1.33 | normal | Navigation links, button text |
-| Caption | NotionInter | 14px (0.88rem) | 500 | 1.43 | normal | Metadata, secondary labels |
-| Caption Light | NotionInter | 14px (0.88rem) | 400 | 1.43 | normal | Body captions, descriptions |
-| Badge | NotionInter | 12px (0.75rem) | 600 | 1.33 | 0.125px | Pill badges, tags, status labels |
-| Micro Label | NotionInter | 12px (0.75rem) | 400 | 1.33 | 0.125px | Small metadata, timestamps |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Display Hero | 64px (4.00rem) | 700 | 1.00 (tight) | -2.125px | Maximum compression, billboard headlines |
+| Display Secondary | 54px (3.38rem) | 700 | 1.04 (tight) | -1.875px | Secondary hero, feature headlines |
+| Section Heading | 48px (3.00rem) | 700 | 1.00 (tight) | -1.5px | Feature section titles, with `"lnum"` |
+| Sub-heading Large | 40px (2.50rem) | 700 | 1.50 | normal | Card headings, feature sub-sections |
+| Sub-heading | 26px (1.63rem) | 700 | 1.23 (tight) | -0.625px | Section sub-titles, content headers |
+| Card Title | 22px (1.38rem) | 700 | 1.27 (tight) | -0.25px | Feature cards, list titles |
+| Body Large | 20px (1.25rem) | 600 | 1.40 | -0.125px | Introductions, feature descriptions |
+| Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
+| Body Medium | 16px (1.00rem) | 500 | 1.50 | normal | Navigation, emphasized UI text |
+| Body Semibold | 16px (1.00rem) | 600 | 1.50 | normal | Strong labels, active states |
+| Body Bold | 16px (1.00rem) | 700 | 1.50 | normal | Headlines at body size |
+| Nav / Button | 15px (0.94rem) | 600 | 1.33 | normal | Navigation links, button text |
+| Caption | 14px (0.88rem) | 500 | 1.43 | normal | Metadata, secondary labels |
+| Caption Light | 14px (0.88rem) | 400 | 1.43 | normal | Body captions, descriptions |
+| Badge | 12px (0.75rem) | 600 | 1.33 | 0.125px | Pill badges, tags, status labels |
+| Micro Label | 12px (0.75rem) | 400 | 1.33 | 0.125px | Small metadata, timestamps |
 
 ### Principles
 - **Compression at scale**: NotionInter at display sizes uses -2.125px letter-spacing at 64px, progressively relaxing to -0.625px at 26px and normal at 16px. The compression creates density at headlines while maintaining readability at body sizes.

@@ -52,20 +52,20 @@ What distinguishes Wise is its green-on-white-on-black material palette. Lime Gr
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Mega | Wise Sans | 126px (7.88rem) | 900 | 0.85 (ultra-tight) | normal | `"calt"` |
-| Display Hero | Wise Sans | 96px (6.00rem) | 900 | 0.85 | normal | `"calt"` |
-| Section Heading | Wise Sans | 64px (4.00rem) | 900 | 0.85 | normal | `"calt"` |
-| Sub-heading | Wise Sans | 40px (2.50rem) | 900 | 0.85 | normal | `"calt"` |
-| Alt Heading | Inter | 78px (4.88rem) | 600 | 1.10 (tight) | -2.34px | `"calt"` |
-| Card Title | Inter | 26px (1.62rem) | 600 | 1.23 (tight) | -0.39px | `"calt"` |
-| Feature Title | Inter | 22px (1.38rem) | 600 | 1.25 (tight) | -0.396px | `"calt"` |
-| Body | Inter | 18px (1.13rem) | 400 | 1.44 | 0.18px | `"calt"` |
-| Body Semibold | Inter | 18px (1.13rem) | 600 | 1.44 | -0.108px | `"calt"` |
-| Button | Inter | 18px–22px | 600 | 1.00–1.44 | -0.108px | `"calt"` |
-| Caption | Inter | 14px (0.88rem) | 400–600 | 1.50–1.86 | -0.084px to -0.108px | `"calt"` |
-| Small | Inter | 12px (0.75rem) | 400–600 | 1.00–2.17 | -0.084px to -0.108px | `"calt"` |
+| Wise Sans | Display Mega | 126px (7.88rem) | 900 | 0.85 (ultra-tight) | normal | `"calt"` |
+| Wise Sans | Display Hero | 96px (6.00rem) | 900 | 0.85 | normal | `"calt"` |
+| Wise Sans | Section Heading | 64px (4.00rem) | 900 | 0.85 | normal | `"calt"` |
+| Wise Sans | Sub-heading | 40px (2.50rem) | 900 | 0.85 | normal | `"calt"` |
+| Inter | Alt Heading | 78px (4.88rem) | 600 | 1.10 (tight) | -2.34px | `"calt"` |
+| Inter | Card Title | 26px (1.62rem) | 600 | 1.23 (tight) | -0.39px | `"calt"` |
+| Inter | Feature Title | 22px (1.38rem) | 600 | 1.25 (tight) | -0.396px | `"calt"` |
+| Inter | Body | 18px (1.13rem) | 400 | 1.44 | 0.18px | `"calt"` |
+| Inter | Body Semibold | 18px (1.13rem) | 600 | 1.44 | -0.108px | `"calt"` |
+| Inter | Button | 18px–22px | 600 | 1.00–1.44 | -0.108px | `"calt"` |
+| Inter | Caption | 14px (0.88rem) | 400–600 | 1.50–1.86 | -0.084px to -0.108px | `"calt"` |
+| Inter | Small | 12px (0.75rem) | 400–600 | 1.00–2.17 | -0.084px to -0.108px | `"calt"` |
 
 ### Principles
 - **Weight 900 as identity**: Wise Sans Black (900) is used exclusively for display — the heaviest weight in any analyzed system. It creates text that feels stamped, pressed, physical.
@@ -156,6 +156,8 @@ What distinguishes Wise is its green-on-white-on-black material palette. Lime Gr
 | Tablet | 576–992px | 2-column |
 | Desktop | 992–1440px | Full layout |
 | Large | >1440px | Expanded |
+
+No imagery; no collapsing strategy.
 
 ## 9. Agent Prompt Guide
 

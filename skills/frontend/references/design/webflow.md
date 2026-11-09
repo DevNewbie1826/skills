@@ -15,7 +15,6 @@ Webflow's website is a visually rich, tool-forward platform that communicates "d
 - WF Visual Sans Variable — custom variable font with weight 500–600
 - Rich secondary palette: purple `#7a3dff`, pink `#ed52cb`, green `#00d722`, orange `#ff6b00`, yellow `#ffae13`, red `#ee1d36`
 - Conservative 4px–8px border-radius — sharp, not rounded
-- Multi-layer shadow stacks (5-layer cascading shadows)
 - Uppercase labels: 10px–15px, weight 500–600, wide letter-spacing (0.6px–1.5px)
 - translate(6px) hover animation on buttons
 
@@ -23,18 +22,18 @@ Webflow's website is a visually rich, tool-forward platform that communicates "d
 
 ### Primary
 - **Near Black** (`#080808`): Primary text
-- **Webflow Blue** (`#146ef5`): `--_color---primary--webflow-blue`, primary CTA and links
-- **Blue 400** (`#3b89ff`): `--_color---primary--blue-400`, lighter interactive blue
-- **Blue 300** (`#006acc`): `--_color---blue-300`, darker blue variant
-- **Button Hover Blue** (`#0055d4`): `--mkto-embed-color-button-hover`
+- **Webflow Blue** (`#146ef5`): primary CTA and links
+- **Blue 400** (`#3b89ff`): lighter interactive blue
+- **Blue 300** (`#006acc`): darker blue variant
+- **Button Hover Blue** (`#0055d4`)
 
 ### Secondary Accents
-- **Purple** (`#7a3dff`): `--_color---secondary--purple`
-- **Pink** (`#ed52cb`): `--_color---secondary--pink`
-- **Green** (`#00d722`): `--_color---secondary--green`
-- **Orange** (`#ff6b00`): `--_color---secondary--orange`
-- **Yellow** (`#ffae13`): `--_color---secondary--yellow`
-- **Red** (`#ee1d36`): `--_color---secondary--red`
+- **Purple** (`#7a3dff`)
+- **Pink** (`#ed52cb`)
+- **Green** (`#00d722`)
+- **Orange** (`#ff6b00`)
+- **Yellow** (`#ffae13`)
+- **Red** (`#ee1d36`)
 
 ### Neutral
 - **Gray 800** (`#222222`): Dark secondary text
@@ -64,7 +63,8 @@ Webflow's website is a visually rich, tool-forward platform that communicates "d
 | Caption | 14px | 400–500 | 1.40–1.60 | normal | |
 | Badge Uppercase | 12.8px | 550 | 1.20 | normal | uppercase |
 | Micro Uppercase | 10px | 500–600 | 1.30 | 1px | uppercase |
-| Code: Inconsolata (companion monospace font)
+
+- Code: Inconsolata (companion monospace font)
 
 ## 4. Component Stylings
 
@@ -81,7 +81,8 @@ Webflow's website is a visually rich, tool-forward platform that communicates "d
 - Radius: 2px, 4px, 8px, 50% — conservative, sharp
 - Breakpoints: 479px, 768px, 992px
 
-## 6. Depth: 5-layer cascading shadow system
+## 6. Depth
+- Shadows: see the cascade stack in Section 2 (Color Palette).
 
 ## 7. Do's and Don'ts
 - Do: Use WF Visual Sans Variable at 500–600. Blue (#146ef5) for CTAs. 4px radius. translate(6px) hover.
