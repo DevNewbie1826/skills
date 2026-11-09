@@ -156,8 +156,6 @@ if len(errs) > 0 {
   ```
 - `default:` case of an exhaustive sealed-interface switch — see `type-patterns.md`.
 
-The `revive` linter rule `error-return` will flag suspect panic sites; treat them as bugs.
-
 ---
 
 ## `defer` for resources — the only safe pattern
@@ -273,37 +271,7 @@ func (h *Handler) Create(c *gin.Context) {
 
 ## errgroup — error propagation across goroutines
 
-```go
-import "golang.org/x/sync/errgroup"
-
-func fetchAll(ctx context.Context, urls []string) ([][]byte, error) {
-    g, ctx := errgroup.WithContext(ctx)
-    g.SetLimit(8)  // concurrency cap
-
-    results := make([][]byte, len(urls))
-    for i, u := range urls {
-        g.Go(func() error {
-            body, err := fetch(ctx, u)
-            if err != nil {
-                return fmt.Errorf("fetch %s: %w", u, err)
-            }
-            results[i] = body
-            return nil
-        })
-    }
-
-    if err := g.Wait(); err != nil {
-        return nil, err
-    }
-    return results, nil
-}
-```
-
-- `errgroup.WithContext` cancels remaining tasks on first error.
-- `SetLimit` bounds concurrency.
-- First non-nil error is returned; others are discarded — by design.
-
-See `concurrency.md` for the full pattern.
+`errgroup.WithContext` cancels the remaining tasks on the first error and returns that error. The canonical pattern lives in [`concurrency.md`](concurrency.md).
 
 ---
 
@@ -318,7 +286,7 @@ slog.ErrorContext(ctx, "save user failed",
 
 **Log once, at the outermost frame.** Logging at every wrap site produces five log lines for one error.
 
-The `sloglint` linter enforces `slog.Any("err", err)` over `slog.String("err", err.Error())` — the former preserves the chain when handlers walk the value.
+The bundle's `sloglint` settings (`attr-only`) require attrs, and `slog.Any("err", err)` is the attr to prefer over `slog.String("err", err.Error())` — the former preserves the chain when handlers walk the value.
 
 ---
 

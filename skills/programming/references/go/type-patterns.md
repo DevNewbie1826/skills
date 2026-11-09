@@ -2,9 +2,9 @@
 
 > Read this when modeling Go identifiers, invariants, variants, constructors, or generic APIs.
 
-How to use Go's *limited* type system to catch bugs at compile time. Go gives you fewer tools than Python/TS/Rust — this document covers the four patterns that buy back most of the safety.
+How to use Go's *limited* type system to catch bugs at compile time. Go gives you fewer tools than Python/TS/Rust — this document covers the patterns that buy back most of the safety.
 
-The four patterns:
+The first four, plus type assertions and the sections after them:
 
 1. **Named types** for branding primitives (the Go answer to `NewType` / branded TS).
 2. **Smart constructors with unexported fields** for parse-don't-validate.
@@ -119,7 +119,7 @@ func (e *Email) UnmarshalJSON(data []byte) error {
 
 ### The "zero value problem"
 
-Go's zero value (`Email{}`) is reachable. The mitigation is documentation + a `IsValid()` method when needed:
+Go's zero value (`Email{}`) is reachable. The mitigation is documentation + an `IsZero()` method when needed:
 
 ```go
 func (e Email) IsZero() bool { return e.raw == "" }
@@ -189,17 +189,7 @@ The `panic` in `default` is the Go equivalent of TS's `assertNever` or Python's 
 
 ### The `exhaustive` linter — your compiler
 
-```yaml
-# .golangci.yml
-linters:
-  enable: [exhaustive]
-linters-settings:
-  exhaustive:
-    check:
-      - switch
-      - map
-    default-signifies-exhaustive: false
-```
+The bundle in [`golangci-strict.md`](golangci-strict.md) enables it with `check: [switch, map]` and `default-signifies-exhaustive: false`.
 
 Now adding `event.Suspended` without updating `Render` is a **lint error**. This is the closest thing Go has to Rust's match exhaustiveness check. **Treat it as compulsory.**
 

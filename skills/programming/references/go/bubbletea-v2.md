@@ -138,7 +138,7 @@ for _, r := range s {
     w := runewidth.RuneWidth(r)
     canvas = append(canvas, cell)
     if w == 2 {
-        canvas = append(canvas, "")  // placeholder for second cell
+        canvas = append(canvas, " ")  // pad for second cell
     }
 }
 ```
@@ -205,8 +205,6 @@ titleStyle := lipgloss.NewStyle().
 
 rendered := titleStyle.Render("\u4e2d\u6587")
 ```
-
-`lipgloss/v2` width and padding correctly account for CJK display width. v1 did too — this is not a v2-specific fix, just a reminder.
 
 ---
 

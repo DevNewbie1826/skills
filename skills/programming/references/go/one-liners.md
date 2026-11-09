@@ -108,7 +108,8 @@ Even a 30-line script follows the philosophy:
    ```go
    ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
    defer cancel()
-   req, _ := http.NewRequestWithContext(ctx, "GET", *url, nil)
+   req, err := http.NewRequestWithContext(ctx, "GET", *url, nil)
+   if err != nil { log.Fatal(err) }
    ```
 
 3. **`log.Fatal` is fine in `main()`** of a script (programmer error / fatal path), but **never inside any function the script imports.** Library code returns errors.
@@ -179,7 +180,7 @@ If your script needs:
 - Help text more than a paragraph
 - Repeated invocations from CI
 
-... promote it to a real CLI tool via `cobra` — see `cobra-stack.md`. The boundary is fuzzy; trust your judgment, but **a 500-line "script" is not a script.**
+... promote it to a real CLI tool via `cobra` — see `cobra-stack.md`. The boundary is fuzzy; trust your judgment, but **a script past 250 pure LOC is not a script.**
 
 ---
 
@@ -192,7 +193,7 @@ If your script needs:
 | `panic(err)` for expected failures | Same as above | `log.Fatal` in `main`, error return elsewhere |
 | Skipping `defer resp.Body.Close()` because "it's a script" | Leaks fd | Always close |
 | One 800-LOC `main.go` "to keep it simple" | Now harder to read than a real CLI | Promote to `cmd/<name>/` with subcommands |
-| `// TODO: handle error` | Production-grade hygiene means production-grade hygiene | Handle now or document why ignored |
+| `// TODO: handle error` | The error stays silently dropped | Handle now or document why ignored |
 
 ---
 

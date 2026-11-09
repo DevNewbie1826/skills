@@ -140,26 +140,7 @@ Use sparingly. Most domain rules belong in smart constructors, not validators.
 
 ## Layer 2: Domain — smart constructors
 
-Covered in detail in `type-patterns.md`. Recap:
-
-```go
-package domain
-
-type Username struct{ raw string }
-
-func NewUsername(s string) (Username, error) {
-    s = strings.TrimSpace(s)
-    if len(s) < 3 || len(s) > 32 {
-        return Username{}, ErrInvalidUsername
-    }
-    if !isAlphanum(s) {
-        return Username{}, ErrInvalidUsername
-    }
-    return Username{raw: s}, nil
-}
-
-func (u Username) String() string { return u.raw }
-```
+The canonical smart constructor (`Email`) and its rationale live in [`type-patterns.md`](type-patterns.md).
 
 **Rule**: every domain type that has invariants has:
 
@@ -295,7 +276,7 @@ Use the validator tag `binding:"oneof=pending active closed"` to enforce at the 
 Three choices, in order of preference:
 
 1. **Sentinel zero value**: `Age int` with `0` meaning "unknown". Works when zero is genuinely unreachable as a valid value.
-2. **`sql.Null<T>`** for DB columns: `sql.NullString`, `sql.NullInt64`, `sql.NullTime`. sqlc generates these for nullable columns.
+2. **`*T` from sqlc** for nullable DB columns: the shipped `sqlc.yaml` sets `emit_pointers_for_null_types: true` (see `sqlc-pgx.md`), so map the pointer into a domain type at the store boundary.
 3. **`*T`**: only when you need to distinguish "not provided" from "set to zero" in a JSON payload (PATCH semantics).
 
 ```go

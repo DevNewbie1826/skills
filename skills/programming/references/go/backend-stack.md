@@ -28,7 +28,7 @@ require (
 ## Project structure
 
 ```
-cmd/server/main.go          # ≤ 50 LOC; flags → run.Execute(ctx)
+cmd/server/main.go          # ≤ 50 LOC; signals → cmd.Execute(ctx)
 internal/
   cmd/run.go                # ~150 LOC; signal handling, config load, server.Run
   config/config.go          # env-driven Config struct
@@ -132,7 +132,9 @@ var requestIDKey = ctxKey{"request_id"}
 
 func NewLogger(level, format string) *slog.Logger {
     var lvl slog.Level
-    _ = lvl.UnmarshalText([]byte(level))
+    if err := lvl.UnmarshalText([]byte(level)); err != nil {
+        lvl = slog.LevelInfo // unknown level string: fall back to info
+    }
 
     opts := &slog.HandlerOptions{Level: lvl, AddSource: true}
 
@@ -248,15 +250,15 @@ Notes:
 ## Middleware ordering — the rule that actually matters
 
 ```
-RequestID    →   Recovery    →   Logger    →   CORS    →   Auth    →   Handler
-   (1)            (2)              (3)            (4)         (5)
+RequestID    →   Recovery    →   Logger    →   CORS    →   [Auth, per group]    →   Handler
+   (1)            (2)              (3)            (4)            (5)
 ```
 
 1. **RequestID** is first so every subsequent middleware sees it.
-2. **Recovery** wraps everything after it. Order: a panic in CORS still gets caught.
+2. **Recovery** wraps the stages after it, so a panic in CORS is still caught.
 3. **Logger** sees the request_id and the recovered panic.
 4. **CORS** before Auth — OPTIONS preflight must return without auth.
-5. **Auth** is the last cross-cutting middleware. Per-route auth (admin-only) is mounted on a sub-router with extra middleware.
+5. **Auth** is not global: it is attached per route group (below), after the four global stages. Per-route auth (admin-only) is mounted on a sub-router with extra middleware.
 
 ```go
 // Public routes — no auth
@@ -462,7 +464,7 @@ See `data-modeling.md` for the validator tag reference; see `error-handling.md` 
 
 ## SSE streaming — the production pattern
 
-A production proxy workload streams provider-compatible SSE for hundreds of concurrent clients. The pattern:
+For a proxy that streams provider-compatible SSE to many concurrent clients, the pattern:
 
 ```go
 func (h *Handler) StreamChat(c *gin.Context) {
@@ -552,38 +554,7 @@ For long-lived connections, use `conn.SetReadDeadline` + `SetPongHandler` for ke
 
 ## Database wiring — pgx pool, injected, never global
 
-```go
-package store
-
-import (
-    "context"
-    "fmt"
-    "github.com/jackc/pgx/v5/pgxpool"
-)
-
-func NewPool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
-    cfg, err := pgxpool.ParseConfig(dsn)
-    if err != nil {
-        return nil, fmt.Errorf("parse dsn: %w", err)
-    }
-    cfg.MaxConns = 25
-    cfg.MinConns = 5
-    cfg.MaxConnLifetime = time.Hour
-    cfg.MaxConnIdleTime = 30 * time.Minute
-
-    pool, err := pgxpool.NewWithConfig(ctx, cfg)
-    if err != nil {
-        return nil, fmt.Errorf("connect: %w", err)
-    }
-    if err := pool.Ping(ctx); err != nil {
-        pool.Close()
-        return nil, fmt.Errorf("ping: %w", err)
-    }
-    return pool, nil
-}
-```
-
-See `sqlc-pgx.md` for queries.
+Build the `*pgxpool.Pool` once in `internal/cmd`, pass it to stores, never hold it in a package global. `NewPool` and its settings live in [`sqlc-pgx.md`](sqlc-pgx.md).
 
 ---
 
@@ -605,30 +576,7 @@ Mount BEFORE auth. Health checks must be unauthenticated.
 
 ## Testing the server
 
-```go
-func TestCreateUser_returns_201_for_valid_input(t *testing.T) {
-    // Given
-    h := newTestHandler(t)
-    r := gin.New()
-    h.Mount(r)
-
-    body := `{"email":"a@b.com","username":"alice"}`
-    req := httptest.NewRequest("POST", "/api/v1/users", strings.NewReader(body))
-    req.Header.Set("Content-Type", "application/json")
-    rec := httptest.NewRecorder()
-
-    // When
-    r.ServeHTTP(rec, req)
-
-    // Then
-    require.Equal(t, http.StatusCreated, rec.Code)
-    var got struct{ ID string `json:"id"` }
-    require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
-    require.NotEmpty(t, got.ID)
-}
-```
-
-See `testing.md` for full patterns (testcontainers integration, table-driven, goleak).
+See [`testing.md`](testing.md) for the `httptest` server pattern, testcontainers integration, table-driven tests, and goleak.
 
 ---
 

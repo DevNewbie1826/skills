@@ -270,7 +270,7 @@ First run: `go test -update ./...` writes `testdata/Test_RenderHelp.golden`. Fut
 - CLI `--help` output
 - JSON response shape
 - Generated SQL queries
-- Rendered prompts (assert the structure, not exact wording — see SKILL.md prompt-test rule)
+- Rendered prompts (assert the structure, not exact wording — see [`../testing/README.md`](../testing/README.md))
 
 Bad targets: a function's return value where you should `require.Equal` on the actual structure.
 
@@ -369,8 +369,7 @@ func Test_Client_retries_on_500(t *testing.T) {
 ## Determinism — the cardinal rules
 
 - **No `time.Sleep` in tests.** If you need delay, you need a Clock injection.
-- **`go test -shuffle=on`** in every CI run.
-- **`go test -count=1`** to defeat the cache.
+- **`go test -shuffle=on -count=1`** in every CI run (flags explained in [`concurrency.md`](concurrency.md)).
 - **Subscribe to the event, do not poll for it.** Channels, callbacks, `t.Cleanup` over polling. When no subscribable hook exists (black-box or eventually consistent systems), a bounded poll with a timeout and a diagnostic failure is the fallback — see the `tdd` skill.
 - **`t.Parallel()`** for tests that share no state. Speeds up large suites by 4-8x.
 

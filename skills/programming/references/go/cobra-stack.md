@@ -24,7 +24,7 @@ cobra-cli add migrate
 ```
 mytool/
 ├── go.mod
-├── main.go                  # ≤ 30 LOC, calls cmd.Execute
+├── main.go                  # ≤ 50 LOC, calls cmd.Execute
 ├── cmd/
 │   ├── root.go              # rootCmd, persistent flags, slog setup
 │   ├── server.go            # `mytool server` subcommand
@@ -280,9 +280,10 @@ var (
 var versionCmd = &cobra.Command{
     Use:   "version",
     Short: "Print version",
-    Run: func(c *cobra.Command, args []string) {
+    RunE: func(c *cobra.Command, args []string) error {
         v, c2, d := resolveVersion()
-        fmt.Printf("mytool %s (commit %s, built %s)\n", v, c2, d)
+        _, err := fmt.Fprintf(c.OutOrStdout(), "mytool %s (commit %s, built %s)\n", v, c2, d)
+        return err
     },
 }
 
