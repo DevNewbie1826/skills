@@ -2,7 +2,7 @@
 
 > Read this when classifying a suspected Rust undefined-behavior finding before fixing it.
 
-Every category of UB the Rust compiler, Miri, and the language specification recognize. The agent must know the full surface to hunt systematically. Each entry names the UB class, its root cause, canonical trigger, Miri detection status, and the canonical fix.
+Every category of UB that the Rust compiler, Miri, and the language specification recognize. The agent must know the full surface to hunt systematically. Each entry names the UB class, its root cause, canonical trigger, Miri detection status, and the canonical fix.
 
 ## 1. Aliasing Violations (Stacked Borrows / Tree Borrows)
 
@@ -15,14 +15,9 @@ Every category of UB the Rust compiler, Miri, and the language specification rec
 - Interior mutability through `UnsafeCell` without going through the `UnsafeCell` API.
 - Casting `&T` to `*mut T` and writing through it (even via FFI).
 
-**Miri detection:** YES — Stacked Borrows is the default model. Tree Borrows (`-Zmiri-tree-borrows`) is the newer, more permissive model. Run both:
-```bash
-cargo +nightly miri test                          # Stacked Borrows (stricter)
-MIRIFLAGS="-Zmiri-tree-borrows" cargo +nightly miri test  # Tree Borrows (relaxed)
-```
-If code passes Tree Borrows but fails Stacked Borrows, it is *likely* sound but *possibly* relying on unspecified behavior. Fix it anyway — Stacked Borrows is the conservative bet.
+**Miri detection:** YES — Stacked Borrows is the default model. Tree Borrows (`-Zmiri-tree-borrows`) is the newer, more permissive model. Run both. The models disagree in both directions: Stacked Borrows rejects most reborrow patterns Tree Borrows accepts, and Tree Borrows rejects some code Stacked Borrows accepts. Treat a failure under either model as UB and fix the code until both pass.
 
-**Fix pattern:** Use `UnsafeCell` for all interior mutability. Never cast `&T` to `*mut T`. Derive mutable pointers from `*mut T` obtained via `UnsafeCell::get()` or `addr_of_mut!()`.
+**Fix pattern:** Use `UnsafeCell` for all interior mutability, or restructure so no raw pointer is created or used across a `&mut` borrow. Never cast `&T` to `*mut T`. Derive mutable pointers from `*mut T` obtained via `UnsafeCell::get()` or `addr_of_mut!()`.
 
 ---
 
@@ -36,10 +31,7 @@ If code passes Tree Borrows but fails Stacked Borrows, it is *likely* sound but 
 - Using `std::ptr::write` from multiple threads to the same allocation.
 - Shared `&T` where `T` has interior mutability but no atomic/lock guard.
 
-**Miri detection:** YES — Miri's data-race detector is on by default. It detects races on non-atomic accesses. For **preemptive scheduling** stress, use:
-```bash
-MIRIFLAGS="-Zmiri-preemption-rate=0.1" cargo +nightly miri test
-```
+**Miri detection:** YES — Miri's data-race detector is on by default. It detects races on non-atomic accesses. Preemptive scheduling stress is a flag (see the preemption-rate section of [miri-sanitizers-loom.md](miri-sanitizers-loom.md)).
 
 **Complementary tools:** `loom` for exhaustive interleaving exploration on lock-free algorithms. ThreadSanitizer (TSAN) for integration tests Miri cannot run (I/O, FFI).
 
@@ -76,7 +68,7 @@ MIRIFLAGS="-Zmiri-preemption-rate=0.1" cargo +nightly miri test
 
 **Miri detection:** YES — tracks initialization state per byte. Catches partial-init structs, padding reads, and premature `assume_init`.
 
-**Fix pattern:** Use `MaybeUninit::zeroed()` when zero-init is acceptable. Write every field before calling `assume_init()`. Use `MaybeUninit::write()` instead of raw pointer writes. Never `transmute` structs with padding unless you zeroed the padding.
+**Fix pattern:** Replace `mem::uninitialized()` with `MaybeUninit::uninit()` + `write()` + `assume_init()`. Use `MaybeUninit::zeroed()` when zero-init is acceptable. Write every field before calling `assume_init()`. Use `MaybeUninit::write()` instead of raw pointer writes. Never `transmute` structs with padding unless you zeroed the padding.
 
 ---
 
@@ -93,10 +85,7 @@ MIRIFLAGS="-Zmiri-preemption-rate=0.1" cargo +nightly miri test
 - `str` containing non-UTF-8 bytes.
 - `fn` pointer that is null.
 
-**Miri detection:** YES — validity checks are on by default. Extra strictness:
-```bash
-MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
-```
+**Miri detection:** YES — validity checks are on by default.
 
 **Fix pattern:** Validate before transmuting. Use `TryFrom` at boundaries. Never `transmute` to enum types — use a checked conversion function.
 
@@ -108,7 +97,7 @@ MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
 
 **Canonical triggers:**
 - Casting `*const u8` to `*const u64` and dereferencing (alignment goes from 1 to 8).
-- `#[repr(packed)]` struct field references (the compiler warns, but raw pointers bypass the warning).
+- References to fields of a `#[repr(packed)]` struct (the compiler warns, but raw pointers bypass the warning).
 - Network buffer parsing where offsets are arbitrary.
 
 **Miri detection:** YES — immediate trap on misaligned read/write.
@@ -142,14 +131,13 @@ MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
 - Passing a Rust `enum` to C without `#[repr(C)]` or `#[repr(i32)]`.
 - Null pointer passed where C expects non-null (and Rust wraps it in `&T`).
 - C code writing to Rust-owned memory through a pointer Rust considers immutable.
-- Declaring a foreign function `safe fn` inside `unsafe extern` when it has caller preconditions (null, length, lifetime), so safe code can violate them.
-- longjmp/setjmp across Rust frames (unwinding UB).
+- Declaring a foreign function as `safe fn` inside `unsafe extern` when it has caller preconditions (null, length, lifetime), so safe code can violate them.
 
 **Miri detection:** LIMITED — Miri cannot execute foreign code. It detects UB in the Rust-side handling of FFI return values.
 
 **Complementary tools:** AddressSanitizer (ASAN), MemorySanitizer (MSAN) for detecting actual FFI-side corruption. Valgrind as a last resort.
 
-**Fix pattern:** Validate every FFI return at the boundary. Use `Option<NonNull<T>>` for nullable pointers. Use `CStr`/`CString` for strings. Add `cbindgen` to CI to verify layout agreement. Wrap every FFI call in a safe Rust function that checks preconditions.
+**Fix pattern:** Validate every FFI return at the boundary. Use `Option<NonNull<T>>` for nullable pointers (`NonNull::new(raw).ok_or(Error::NullFromFfi)?`). Use `CStr`/`CString` for strings. Add `cbindgen` to CI to verify layout agreement. Wrap every FFI call in a safe Rust function that checks preconditions.
 
 ---
 
@@ -160,11 +148,11 @@ MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
 **Canonical triggers:**
 - `unsafe impl Send for Wrapper(*mut T)` when `T` is not `Send`.
 - `unsafe impl Sync for Wrapper(UnsafeCell<T>)` without a lock, atomic, or other synchronization.
-- Types containing `Rc<T>` with a manual `Send` impl (Rc is explicitly !Send).
+- Types containing `Rc<T>` with a manual `Send` impl (Rc is not `Send`: the auto trait is derived as negative).
 
 **Miri detection:** YES for the *resulting* data race if exercised. Miri's data-race detector will fire when two threads access the same location unsynchronized.
 
-**Fix pattern:** Never manually implement `Send`/`Sync` unless you can write a SAFETY proof naming the synchronization mechanism. Use `PhantomData<*const ()>` to opt-out of auto-`Send`/`Sync` when in doubt.
+**Fix pattern:** Never manually implement `Send`/`Sync` unless you can write a SAFETY proof naming the synchronization mechanism (for example, the `Mutex` guarding the only non-`Send` field). Use `PhantomData<*const ()>` to opt-out of auto-`Send`/`Sync` when in doubt.
 
 ---
 
@@ -191,14 +179,11 @@ MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
 **Canonical triggers:**
 - Casting an integer to a pointer and dereferencing it (`addr as *const T`).
 - Roundtripping a pointer through `usize` and back (`ptr as usize as *const T`) — the provenance is lost.
-- Using `ptr::from_exposed_addr` without a corresponding `ptr.expose_provenance()`.
+- Using `ptr::with_exposed_provenance` on an address that was never exposed with `ptr.expose_provenance()`.
 
-**Miri detection:** YES with strict provenance:
-```bash
-MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
-```
+**Miri detection:** YES with strict provenance.
 
-**Fix pattern:** Use `ptr::with_exposed_provenance` / `ptr.expose_provenance()` for legitimate int-to-ptr roundtrips. Avoid `as usize as *const T` entirely. Use `sptr` crate for provenance-safe pointer manipulation on stable.
+**Fix pattern:** Use `ptr::with_exposed_provenance` / `ptr.expose_provenance()` for legitimate int-to-ptr roundtrips. Avoid `as usize as *const T` entirely. These APIs are stable since Rust 1.84; the `sptr` crate provides them on older toolchains.
 
 ---
 
@@ -224,10 +209,10 @@ MIRIFLAGS="-Zmiri-strict-provenance" cargo +nightly miri test
 **Canonical triggers:**
 - `Vec::set_len(n)` where the first `n` elements are not initialized.
 - `String::from_utf8_unchecked` on non-UTF-8 bytes.
-- `HashMap` key mutated after insertion (violates hash invariant — not UB per se, but unsound and Miri may detect downstream effects).
+- `HashMap` key mutated after insertion (breaks the hash invariant: a logic error on its own, UB once `unsafe` code relies on the invariant, and Miri may detect the downstream effects).
 - `BTreeMap` key with broken `Ord` impl (the standard library assumes a total order).
 
-**Miri detection:** DEPENDS — Miri catches the downstream UB (e.g., reading uninitialized bytes from a `Vec` with inflated len). It does not catch "you violated the documented contract" if no memory-level UB results.
+**Miri detection:** PARTIAL — Miri catches the downstream UB (e.g., reading uninitialized bytes from a `Vec` with inflated len). It does not catch "you violated the documented contract" if no memory-level UB results.
 
 **Fix pattern:** Read the `# Safety` section of every `unsafe fn` you call. Document the invariant in your SAFETY comment. When in doubt, use the safe API and pay the cost.
 
@@ -248,27 +233,3 @@ Since Rust 1.81 a Rust panic that reaches an `extern "C"` boundary aborts the pr
 
 **Fix pattern:** Use `std::panic::catch_unwind` at every FFI entry point and return an error code. Declare the ABI `extern "C-unwind"` (stable since 1.71) only when both sides are built to let unwinding cross.
 
----
-
-## Summary Table
-
-| # | Category | Miri Detects? | Complementary Tool |
-|---|----------|--------------|-------------------|
-| 1 | Aliasing (Stacked/Tree Borrows) | YES | — |
-| 2 | Data races | YES | loom, TSAN |
-| 3 | Use-after-free / dangling | YES | ASAN |
-| 4 | Uninitialized memory | YES | MSAN |
-| 5 | Invalid values | YES | — |
-| 6 | Misaligned access | YES | UBSAN |
-| 7 | Pin invariant violation | PARTIAL | manual review |
-| 8 | FFI boundary UB | LIMITED | ASAN, MSAN, Valgrind |
-| 9 | Incorrect Send/Sync | YES (via race) | loom |
-| 10 | Out-of-bounds access | YES | ASAN |
-| 11 | Provenance violations | YES (strict mode) | — |
-| 12 | Double free | YES | ASAN |
-| 13 | Library contract violations | PARTIAL | proptest, fuzzing |
-| 14 | Unwinding across FFI | PARTIAL | — |
-
-## Miri Coverage Assessment
-
-Miri catches categories 1-6, 9-12 with high confidence. Categories 7, 8, 13, 14 require supplementary tools or manual audit. **Miri is the single highest-leverage tool** — it should run on every PR that touches `unsafe`, and ideally on the full test suite regularly.
