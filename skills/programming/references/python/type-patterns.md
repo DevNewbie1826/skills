@@ -169,6 +169,26 @@ def f(x: int | None) -> str | int: ...
 
 ---
 
+## `object` is banned as an annotation
+
+`object` gives zero narrowing and zero attributes. Use a `Protocol`, a `TypeVar`, or an explicit union instead.
+
+```python
+# BANNED
+def process(data: object) -> object: ...
+
+# GOOD — Protocol for structural typing
+class Serializable(Protocol):
+    def serialize(self) -> bytes: ...
+def process(data: Serializable) -> ProcessResult: ...
+
+# GOOD — TypeVar for generic pass-through
+def first[T](items: Sequence[T]) -> T: ...
+
+# GOOD — explicit union for known variants
+def parse(raw: str | bytes) -> Document: ...
+```
+
 ## Sources
 
 - Python docs: [typing — NewType](https://docs.python.org/3/library/typing.html#newtype)

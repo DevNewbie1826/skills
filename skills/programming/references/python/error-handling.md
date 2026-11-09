@@ -83,7 +83,7 @@ def handle_result(result: GetUserResult) -> str:
             return f"No user with id {uid}"
         case PermissionDenied(reason=reason):
             return f"Denied: {reason}"
-        case _ as unreachable:
+        case unreachable:
             assert_never(unreachable)
 ```
 
@@ -107,7 +107,17 @@ def handle_result(result: GetUserResult) -> str:
 
 ## Exhaustive match — every match needs a default
 
-Every `match` statement ends with `case _: assert_never(x)`. No exceptions.
+Every `match` statement ends with `case unreachable: assert_never(unreachable)`. No exceptions. An `if/elif` chain on type or enum value loses this check, so it is banned for variant discrimination:
+
+```python
+# BANNED — a new variant falls through to a runtime error
+if isinstance(event, Click):
+    handle_click(event.x, event.y)
+elif isinstance(event, Scroll):
+    handle_scroll(event.delta)
+else:
+    raise ValueError(f"Unknown: {event}")
+```
 
 ```python
 from enum import StrEnum
@@ -126,7 +136,7 @@ def describe(status: Status) -> str:
             return "live"
         case Status.DELETED:
             return "gone"
-        case _ as unreachable:
+        case unreachable:
             assert_never(unreachable)
 ```
 
@@ -153,10 +163,10 @@ data = Path("data.txt").read_text()
 ### Async resources
 
 ```python
-import httpx
+from myapp.http import create_async_client  # factory from httpx2-optimization.md
 
 async def fetch_users() -> list[User]:
-    async with httpx.AsyncClient() as client:
+    async with create_async_client() as client:
         response = await client.get("https://api.example.com/users")
         response.raise_for_status()
         return [User(**u) for u in response.json()]
@@ -179,6 +189,36 @@ async def managed_connection(url: str) -> AsyncIterator[Connection]:
 async with managed_connection("postgres://...") as conn:
     await conn.execute("SELECT 1")
 # conn is closed here, guaranteed
+```
+
+---
+
+## Broad `except` — banned outside the top-level boundary
+
+`except Exception` hides `KeyError`, `TypeError`, and `AttributeError` along with their stack traces. Name the exception you expect.
+
+```python
+# BANNED — swallows bugs
+try:
+    result = api.fetch(url)
+except Exception as e:
+    logger.error(e)
+    return None
+
+# GOOD — catch what you expect
+try:
+    result = api.fetch(url)
+except httpx2.HTTPStatusError as e:
+    logger.error("API %d: %s", e.response.status_code, e.request.url)
+    return None
+
+# GOOD — top-level boundary (CLI entry or HTTP handler only)
+def main() -> int:
+    try:
+        return run()
+    except Exception:  # noqa: BROAD_EXCEPT_OK
+        logger.exception("unhandled error")
+        raise
 ```
 
 ---

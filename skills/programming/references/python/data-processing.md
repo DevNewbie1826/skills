@@ -21,7 +21,7 @@ NEVER pandas. Polars (with numpy) plus DuckDB. Pandas is slower on large frames,
 | Larger than RAM | Polars streaming or DuckDB out-of-core | Both handle OOM |
 | Mixed pipeline | Hybrid (zero-copy via Arrow) | Use each tool's strengths |
 
-Engine choice depends on data size and shape: when it matters, measure on the actual data before committing to one engine, and use a data-analysis capability of your runtime, if available, for out-of-memory strategies and execution templates.
+Engine choice depends on data size and shape. When it matters, measure on the actual data before committing to one engine.
 
 ## Standard imports
 
