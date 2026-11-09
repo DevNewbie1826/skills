@@ -74,18 +74,18 @@ The green accent (`#3ecf8e`) appears selectively — in the Supabase logo, in li
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Circular | 72px (4.50rem) | 400 | 1.00 (tight) | normal | Maximum density, zero waste |
-| Section Heading | Circular | 36px (2.25rem) | 400 | 1.25 (tight) | normal | Feature section titles |
-| Card Title | Circular | 24px (1.50rem) | 400 | 1.33 | -0.16px | Slight negative tracking |
-| Sub-heading | Circular | 18px (1.13rem) | 400 | 1.56 | normal | Secondary headings |
-| Body | Circular | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
-| Nav Link | Circular | 14px (0.88rem) | 500 | 1.00–1.43 | normal | Navigation items |
-| Button | Circular | 14px (0.88rem) | 500 | 1.14 (tight) | normal | Button labels |
-| Caption | Circular | 14px (0.88rem) | 400–500 | 1.43 | normal | Metadata, tags |
-| Small | Circular | 12px (0.75rem) | 400 | 1.33 | normal | Fine print, footer links |
-| Code Label | Source Code Pro | 12px (0.75rem) | 400 | 1.33 | 1.2px | `text-transform: uppercase` |
+| Circular | Display Hero | 72px (4.50rem) | 400 | 1.00 (tight) | normal | Maximum density, zero waste |
+| Circular | Section Heading | 36px (2.25rem) | 400 | 1.25 (tight) | normal | Feature section titles |
+| Circular | Card Title | 24px (1.50rem) | 400 | 1.33 | -0.16px | Slight negative tracking |
+| Circular | Sub-heading | 18px (1.13rem) | 400 | 1.56 | normal | Secondary headings |
+| Circular | Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
+| Circular | Nav Link | 14px (0.88rem) | 500 | 1.00–1.43 | normal | Navigation items |
+| Circular | Button | 14px (0.88rem) | 500 | 1.14 (tight) | normal | Button labels |
+| Circular | Caption | 14px (0.88rem) | 400–500 | 1.43 | normal | Metadata, tags |
+| Circular | Small | 12px (0.75rem) | 400 | 1.33 | normal | Fine print, footer links |
+| Source Code Pro | Code Label | 12px (0.75rem) | 400 | 1.33 | 1.2px | `text-transform: uppercase` |
 
 ### Principles
 - **Weight restraint**: Nearly all text uses weight 400 (regular/book). Weight 500 appears only for navigation links and button labels. There is no bold (700) in the detected system — hierarchy is created through size, not weight.

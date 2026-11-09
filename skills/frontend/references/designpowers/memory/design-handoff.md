@@ -1,8 +1,3 @@
----
-name: design-handoff
-description: "Use when design work is complete and needs to be communicated to engineering — creates specifications, documents rationale, accessibility requirements, and interaction details in a format engineers can implement directly"
----
-
 # Design Handoff
 
 Read this when completed design work must be communicated to engineering — component specifications, rationale, trade-offs, and accessibility requirements an implementer can follow directly.
@@ -25,7 +20,7 @@ Gather all artefacts from the design process:
 - Design brief (context and intent)
 - Personas (who this serves)
 - Design principles (what guides decisions)
-- Visual specifications (layouts, colours, typography)
+- Visual specifications (layouts, colors, typography)
 - Interaction specifications (states, transitions, feedback)
 - Accessibility requirements (per component)
 - Design system references (tokens, components used)
@@ -43,7 +38,7 @@ For each component or screen, provide:
 ### Visual Specification
 - Layout: [positioning, spacing, alignment — reference tokens]
 - Typography: [font, size, weight, line-height — reference tokens]
-- Colour: [foreground, background, borders — reference tokens]
+- Color: [foreground, background, borders — reference tokens]
 - Responsive behaviour: [how this adapts at each breakpoint]
 
 ### Interaction Specification
@@ -78,40 +73,9 @@ For decisions that might seem arbitrary or surprising to an engineer, explain:
 - **The reason:** why this option serves users better
 - **The accessibility driver:** which inclusive design requirement influenced this
 
-### Step 4: Create an Accessibility Checklist
+### Step 4: Name the Accessibility Requirements
 
-Provide a testing checklist specific to this design:
-
-```markdown
-## Accessibility Testing Checklist
-
-### Automated Testing
-- [ ] Run axe-core or similar on all screens
-- [ ] Verify colour contrast programmatically
-- [ ] Validate HTML for correct semantics
-
-### Keyboard Testing
-- [ ] Tab through all interactive elements — order is logical
-- [ ] Activate every interactive element via keyboard
-- [ ] Verify no keyboard traps
-- [ ] Verify focus is visible at all times
-
-### Screen Reader Testing
-- [ ] Navigate by headings — structure is clear
-- [ ] Navigate by landmarks — regions are labelled
-- [ ] Interact with forms — labels and errors are announced
-- [ ] Verify live regions announce dynamic content
-
-### Visual Testing
-- [ ] Zoom to 200% — layout remains usable
-- [ ] Enable high contrast mode — content is readable
-- [ ] Enable dark mode — contrast ratios hold
-- [ ] Simulate colour blindness — information is not lost
-
-### Motion Testing
-- [ ] Enable prefers-reduced-motion — animations are removed or reduced
-- [ ] Verify no content flashes more than 3 times per second
-```
+Specify each component's requirements in Step 2 and let the WCAG gate own the evidence: run [perfection/wcag-gate.md](../../perfection/wcag-gate.md) and record its PASS/FAIL table with the handoff. Do not carry a second checklist here.
 
 ### Step 5: User Review
 
@@ -120,10 +84,7 @@ Present the handoff package to the user before sharing with engineering. Confirm
 - Are there any design decisions that need more context?
 - Are the accessibility requirements complete?
 
-Save to: `docs/designpowers/handoff/YYYY-MM-DD-<feature>-handoff.md`
-
 ## Integration
 
-- **Called by:** `designpowers-critique` (after critique passes)
-- **Follows:** All design skills
-- **Pairs with:** `verification-before-shipping` (final check before declaring complete)
+- **Follows:** critique that passed its findings
+- **Pairs with:** [design-review.md](../review/design-review.md) and final verification before declaring work complete

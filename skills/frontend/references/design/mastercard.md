@@ -235,7 +235,7 @@ A signature motif: thin (~1–1.5px) single-weight curved lines in Light Signal 
 ## 5. Layout Principles
 
 ### Spacing System
-- **Base unit**: 8px (confirmed by dembrandt extraction and computed styles)
+- **Base unit**: 8px (confirmed by computed styles)
 - **Scale**: 8 / 16 / 24 / 32 / 48 / 64 / 96 / 128 (powers of 8)
 - **Section vertical padding**: ~96–128px between major sections on desktop; ~48–64px on mobile
 - **Card internal padding**: 32–40px on desktop, ~24px on mobile
@@ -355,7 +355,7 @@ Circular portraits scale proportionally (maintaining the perfect circle at every
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

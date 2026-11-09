@@ -59,20 +59,20 @@ Color is used with extreme restraint — the interface is almost entirely black-
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | CohereText | 72px (4.5rem) | 400 | 1.00 (tight) | -1.44px | Maximum impact, serif authority |
-| Display Secondary | CohereText | 60px (3.75rem) | 400 | 1.00 (tight) | -1.2px | Large section headings |
-| Section Heading | Unica77 | 48px (3rem) | 400 | 1.20 (tight) | -0.48px | Feature section titles |
-| Sub-heading | Unica77 | 32px (2rem) | 400 | 1.20 (tight) | -0.32px | Card headings, feature names |
-| Feature Title | Unica77 | 24px (1.5rem) | 400 | 1.30 | normal | Smaller section titles |
-| Body Large | Unica77 | 18px (1.13rem) | 400 | 1.40 | normal | Intro paragraphs |
-| Body / Button | Unica77 | 16px (1rem) | 400 | 1.50 | normal | Standard body, button text |
-| Button Medium | Unica77 | 14px (0.88rem) | 500 | 1.71 (relaxed) | normal | Smaller buttons, emphasized labels |
-| Caption | Unica77 | 14px (0.88rem) | 400 | 1.40 | normal | Metadata, descriptions |
-| Uppercase Label | Unica77 / CohereMono | 14px (0.88rem) | 400 | 1.40 | 0.28px | Uppercase section labels |
-| Small | Unica77 | 12px (0.75rem) | 400 | 1.40 | normal | Smallest text, footer links |
-| Code Micro | CohereMono | 8px (0.5rem) | 400 | 1.40 | 0.16px | Tiny uppercase code labels |
+| CohereText | Display / Hero | 72px (4.5rem) | 400 | 1.00 (tight) | -1.44px | Maximum impact, serif authority |
+| CohereText | Display Secondary | 60px (3.75rem) | 400 | 1.00 (tight) | -1.2px | Large section headings |
+| Unica77 | Section Heading | 48px (3rem) | 400 | 1.20 (tight) | -0.48px | Feature section titles |
+| Unica77 | Sub-heading | 32px (2rem) | 400 | 1.20 (tight) | -0.32px | Card headings, feature names |
+| Unica77 | Feature Title | 24px (1.5rem) | 400 | 1.30 | normal | Smaller section titles |
+| Unica77 | Body Large | 18px (1.13rem) | 400 | 1.40 | normal | Intro paragraphs |
+| Unica77 | Body / Button | 16px (1rem) | 400 | 1.50 | normal | Standard body, button text |
+| Unica77 | Button Medium | 14px (0.88rem) | 500 | 1.71 (relaxed) | normal | Smaller buttons, emphasized labels |
+| Unica77 | Caption | 14px (0.88rem) | 400 | 1.40 | normal | Metadata, descriptions |
+| Unica77 / CohereMono | Uppercase Label | 14px (0.88rem) | 400 | 1.40 | 0.28px | Uppercase section labels |
+| Unica77 | Small | 12px (0.75rem) | 400 | 1.40 | normal | Smallest text, footer links |
+| CohereMono | Code Micro | 8px (0.5rem) | 400 | 1.40 | 0.16px | Tiny uppercase code labels |
 
 ### Principles
 - **Serif for declaration, sans for utility**: CohereText carries the brand voice at display scale — its serif terminals give headlines the authority of published research. Unica77 handles everything functional with Swiss-geometric neutrality.
@@ -264,7 +264,7 @@ Color is used with extreme restraint — the interface is almost entirely black-
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

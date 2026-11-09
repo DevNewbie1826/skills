@@ -105,11 +105,11 @@ export type SourceFile = { readonly path: string; readonly text: string }
 export type DetectConfig = {
 	/** Per-rule override: a severity, or "off". */
 	readonly rules?: Readonly<Record<string, RuleSetting>>
-	/** Typefaces the project chose on purpose; never reported as overused. Case-insensitive family names. */
+	/** Accepted and validated for forward compatibility; no rule in this port reads it yet. Case-insensitive family names. */
 	readonly allowFonts?: readonly string[]
 	/** Timing functions the project's design tokens name on purpose (for example an intentional spring). */
 	readonly allowEasings?: readonly string[]
-	/** The project's design-system tokens; the design-system-* rules report values outside them and stay silent without them. */
+	/** The project's design tokens. Token rules read `colors`; the other keys are accepted and validated for forward compatibility. */
 	readonly designTokens?: DesignTokens
 }
 

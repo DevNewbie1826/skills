@@ -64,17 +64,17 @@ What makes Uber's design truly distinctive is its use of full-bleed photography 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Notes |
+| Font | Role | Size | Weight | Line Height | Notes |
 |------|------|------|--------|-------------|-------|
-| Display / Hero | UberMove | 52px (3.25rem) | 700 | 1.23 (tight) | Maximum impact, billboard presence |
-| Section Heading | UberMove | 36px (2.25rem) | 700 | 1.22 (tight) | Major section anchors |
-| Card Title | UberMove | 32px (2rem) | 700 | 1.25 (tight) | Card and feature headings |
-| Sub-heading | UberMove | 24px (1.5rem) | 700 | 1.33 | Secondary section headers |
-| Small Heading | UberMove | 20px (1.25rem) | 700 | 1.40 | Compact headings, list titles |
-| Nav / UI Large | UberMoveText | 18px (1.13rem) | 500 | 1.33 | Navigation links, prominent UI text |
-| Body / Button | UberMoveText | 16px (1rem) | 400-500 | 1.25-1.50 | Standard body text, button labels |
-| Caption | UberMoveText | 14px (0.88rem) | 400-500 | 1.14-1.43 | Metadata, descriptions, small links |
-| Micro | UberMoveText | 12px (0.75rem) | 400 | 1.67 (relaxed) | Fine print, legal text |
+| UberMove | Display / Hero | 52px (3.25rem) | 700 | 1.23 (tight) | Maximum impact, billboard presence |
+| UberMove | Section Heading | 36px (2.25rem) | 700 | 1.22 (tight) | Major section anchors |
+| UberMove | Card Title | 32px (2rem) | 700 | 1.25 (tight) | Card and feature headings |
+| UberMove | Sub-heading | 24px (1.5rem) | 700 | 1.33 | Secondary section headers |
+| UberMove | Small Heading | 20px (1.25rem) | 700 | 1.40 | Compact headings, list titles |
+| UberMoveText | Nav / UI Large | 18px (1.13rem) | 500 | 1.33 | Navigation links, prominent UI text |
+| UberMoveText | Body / Button | 16px (1rem) | 400-500 | 1.25-1.50 | Standard body text, button labels |
+| UberMoveText | Caption | 14px (0.88rem) | 400-500 | 1.14-1.43 | Metadata, descriptions, small links |
+| UberMoveText | Micro | 12px (0.75rem) | 400 | 1.67 (relaxed) | Fine print, legal text |
 
 ### Principles
 - **Bold headlines, medium body**: UberMove headings are exclusively weight 700 (bold) -- every headline hits with billboard force. UberMoveText body and UI text uses 400-500, creating a clear visual hierarchy through weight contrast.
@@ -136,7 +136,7 @@ What makes Uber's design truly distinctive is its use of full-bleed photography 
 - Border: 1px solid Black (`#000000`) -- the only place visible borders appear prominently
 - Radius: 8px
 - Padding: standard comfortable spacing
-- Focus: no extracted custom focus state -- relies on standard browser focus ring
+- Focus: no custom focus state -- relies on standard browser focus ring
 
 ### Navigation
 - Sticky top navigation with white background
@@ -291,7 +291,7 @@ What makes Uber's design truly distinctive is its use of full-bleed photography 
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

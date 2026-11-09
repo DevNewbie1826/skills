@@ -11,7 +11,7 @@ When the user asks for a frontend design:
 3. **commit out loud** to the section count and announce it ("Generating N horizontal images, one per section")
 4. plan ONE horizontal image PER SECTION — always separate generations, never collapse
 5. choose Hero Scale for the whole site (giant / mid / mini)
-5. choose a strong visual combination (theme, type, hero arch, section system, motion, narrative spine, second-read moment)
+6. choose a strong visual combination (theme, type, hero arch, section system, motion, narrative spine, second-read moment)
 7. for each section: pick a Composition Anchor, Background Mode, and CTA Variation — vary across sections
 8. choose 4 signature components used appropriately across sections
 9. enforce hero minimalism + section size variety (some giant, some mini)

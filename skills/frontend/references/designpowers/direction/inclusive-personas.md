@@ -1,8 +1,3 @@
----
-name: inclusive-personas
-description: "Use when defining who a design serves — creating personas, user stories, or scenarios — ensures the full ability spectrum and situational contexts are represented from the start, not retrofitted"
----
-
 # Inclusive Personas
 
 Read this when defining who a design serves — building personas, user stories, and scenarios that represent the full ability spectrum and situational contexts before design decisions are made.
@@ -22,7 +17,7 @@ Personas shape every design decision that follows. If your personas only represe
 For the design context, identify the relevant spectrum across:
 
 **Permanent conditions:**
-- Vision: blind, low vision, colour blind
+- Vision: blind, low vision, color blind
 - Hearing: deaf, hard of hearing
 - Motor: limited fine motor, limited reach, tremor, paralysis
 - Cognitive: learning differences, memory challenges, attention differences
@@ -84,13 +79,10 @@ Present personas to the user. Ask:
 - Do these feel like real people or cardboard cutouts?
 - Which persona makes you most uncomfortable? (That one probably needs the most attention)
 
-Save to: `docs/designpowers/personas/YYYY-MM-DD-<project>-personas.md`
-
 ## Integration
 
-- **Called by:** `research-planning`, `design-discovery`
-- **Informs:** Every subsequent design skill — personas should be referenced when making any design decision
-- **Pairs with:** `cognitive-accessibility`, `adaptive-interfaces`
+- **Informs:** every later design decision — reference the personas whenever a design choice is made
+- **Pairs with:** [cognitive-accessibility.md](../execution/cognitive-accessibility.md) and [accessible-content.md](../execution/accessible-content.md)
 
 ## Anti-Patterns
 

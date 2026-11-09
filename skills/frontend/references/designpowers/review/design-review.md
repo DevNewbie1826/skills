@@ -1,13 +1,8 @@
----
-name: design-review
-description: "Use when the user wants something that already exists evaluated — a screenshot, URL, prototype, or code — through one reconciled craft, accessibility, and usability critique, without rerunning discovery or build"
----
-
 # Design Review
 
 Read this when the user wants something that ALREADY EXISTS evaluated — a screenshot, a live URL, a prototype, or existing code/markup — critiqued for intent, craft, accessibility, and usability in one reconciled report, without rerunning discovery, strategy, or build.
 
-Back-link: [Lane C — Review & Repair](../lane-c-review.md)
+Back-link: [Lane C — Review](../lane-c-review.md)
 
 Most design work improves something that already exists. This is the review-only entry: take an existing artefact, evaluate it through three perspectives — craft and intent, accessibility, usability — and reconcile the findings into one prioritised report. It is the counterpart to building: the build lane asks "what are we designing?"; this leaf asks "what are we evaluating?"
 
@@ -64,16 +59,9 @@ Assess the artefact against the inferred brief from all three perspectives — c
 3. **Does it follow the design principles?** Name which principles it upholds or violates
 4. **Does it align with the design system**, where one applies?
 
-**Craft and taste evaluation (optional).** When a taste profile exists, evaluate against it: the intended emotional target (would the user describe the experience with the profile's words?), the agreed craft standards (spacing rhythm, colour restraint, consistent shadows/borders/radii, typography serving readability and personality, cohesive composition), the reference benchmark (would this sit next to the taste references; does quality match the agreed bar). Record craft findings per element as **taste expectation / current state / gap**. When no taste profile exists, say so plainly: craft evaluation is based on general quality standards only — do not substitute arbitrary personal preference.
+**Craft and taste evaluation (optional).** When a taste profile exists, evaluate against it: the intended emotional target (would the user describe the experience with the profile's words?), the agreed craft standards (spacing rhythm, color restraint, consistent shadows/borders/radii, typography serving readability and personality, cohesive composition), the reference benchmark (would this sit next to the taste references; does quality match the agreed bar). Record craft findings per element as **taste expectation / current state / gap**. When no taste profile exists, say so plainly: craft evaluation is based on general quality standards only — do not substitute arbitrary personal preference.
 
-**Accessibility review.** Every review includes an accessibility evaluation:
-
-- **Perceivable:** content available to screen readers; colour is not the sole indicator of meaning; contrast meets WCAG AA; text resizes to 200% without loss of function; alt text present and appropriate
-- **Operable:** all interactions keyboard accessible; logical focus order; visible focus indicators; touch targets at least 44x44px; motion respects reduced-motion preferences; no keyboard traps
-- **Understandable:** plain, clear language; consistent navigation; error messages explain the problem and the solution; visible, associated form labels; predictable behaviour
-- **Robust:** semantic HTML used correctly; ARIA only where necessary and correct; works across supported browsers and assistive technology
-
-On a static artefact, distinguish observed checks from inferred ones.
+**Accessibility review.** Every review includes an accessibility evaluation against the WCAG 2.2 AA gate in [perfection/wcag-gate.md](../../perfection/wcag-gate.md), which owns the checks and the PASS/FAIL evidence table. Record content and cognitive findings there, not as a second checklist. On a static artefact, distinguish observed checks from inferred ones.
 
 **Usability.** Nielsen H1–H10 plus per-task cognitive walkthroughs — see [heuristic-evaluation.md](heuristic-evaluation.md).
 

@@ -63,26 +63,26 @@ The overall effect is a nightclub for web designers: dark, precise, seductive, a
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | GT Walsheim Framer Medium | 110px | 500 | 0.85 | -5.5px | Extreme negative tracking, compressed impact |
-| Section Display | GT Walsheim Medium | 85px | 500 | 0.95 | -4.25px | OpenType: ss02, tnum |
-| Section Heading | GT Walsheim Medium | 62px | 500 | 1.00 | -3.1px | OpenType: ss02 |
-| Feature Heading | GT Walsheim Medium | 32px | 500 | 1.13 | -1px | Tightest of the smaller headings |
-| Accent Display | Mona Sans | 61.5px | 100 | 1.00 | -3.1px | Ultra-light weight, ethereal |
-| Card Title | Inter Variable | 24px | 400 | 1.30 | -0.01px | OpenType: cv01, cv05, cv09, cv11, ss03, ss07 |
-| Feature Title | Inter | 22px | 700 | 1.20 | -0.8px | OpenType: cv05 |
-| Sub-heading | Inter | 20px | 600 | 1.20 | -0.8px | OpenType: cv01, cv09 |
-| Body Large | Inter Variable | 18px | 400 | 1.30 | -0.01px | OpenType: cv01, cv05, cv09, cv11, ss03, ss07 |
-| Body | Inter Variable | 15px | 400 | 1.30 | -0.01px | OpenType: cv11 |
-| Nav/UI | Inter Variable | 15px | 400 | 1.00 | -0.15px | OpenType: cv06, cv11, dlig, ss03 |
-| Body Readable | Inter Framer Regular | 14px | 400 | 1.60 | normal | Long-form body text |
-| Caption | Inter Variable | 14px | 400 | 1.40 | normal | OpenType: cv01, cv06, cv09, cv11, ss03, ss07 |
-| Label | Inter | 13px | 500 | 1.60 | normal | OpenType: cv06, cv11, ss03 |
-| Small Caption | Inter Variable | 12px | 400 | 1.40 | normal | OpenType: cv01, cv06, cv09, cv11, ss03, ss07 |
-| Micro Code | Azeret Mono | 10.4px | 400 | 1.60 | normal | OpenType: cv06, cv11, ss03 |
-| Badge | Open Runde | 9px | 600 | 1.11 | normal | OpenType: cv01, cv09 |
-| Micro Uppercase | Inter Variable | 7px | 400 | 1.00 | 0.21px | uppercase transform |
+| GT Walsheim Framer Medium | Display Hero | 110px | 500 | 0.85 | -5.5px | Extreme negative tracking, compressed impact |
+| GT Walsheim Medium | Section Display | 85px | 500 | 0.95 | -4.25px | OpenType: ss02, tnum |
+| GT Walsheim Medium | Section Heading | 62px | 500 | 1.00 | -3.1px | OpenType: ss02 |
+| GT Walsheim Medium | Feature Heading | 32px | 500 | 1.13 | -1px | Tightest of the smaller headings |
+| Mona Sans | Accent Display | 61.5px | 100 | 1.00 | -3.1px | Ultra-light weight, ethereal |
+| Inter Variable | Card Title | 24px | 400 | 1.30 | -0.01px | OpenType: cv01, cv05, cv09, cv11, ss03, ss07 |
+| Inter | Feature Title | 22px | 700 | 1.20 | -0.8px | OpenType: cv05 |
+| Inter | Sub-heading | 20px | 600 | 1.20 | -0.8px | OpenType: cv01, cv09 |
+| Inter Variable | Body Large | 18px | 400 | 1.30 | -0.01px | OpenType: cv01, cv05, cv09, cv11, ss03, ss07 |
+| Inter Variable | Body | 15px | 400 | 1.30 | -0.01px | OpenType: cv11 |
+| Inter Variable | Nav/UI | 15px | 400 | 1.00 | -0.15px | OpenType: cv06, cv11, dlig, ss03 |
+| Inter Framer Regular | Body Readable | 14px | 400 | 1.60 | normal | Long-form body text |
+| Inter Variable | Caption | 14px | 400 | 1.40 | normal | OpenType: cv01, cv06, cv09, cv11, ss03, ss07 |
+| Inter | Label | 13px | 500 | 1.60 | normal | OpenType: cv06, cv11, ss03 |
+| Inter Variable | Small Caption | 12px | 400 | 1.40 | normal | OpenType: cv01, cv06, cv09, cv11, ss03, ss07 |
+| Azeret Mono | Micro Code | 10.4px | 400 | 1.60 | normal | OpenType: cv06, cv11, ss03 |
+| Open Runde | Badge | 9px | 600 | 1.11 | normal | OpenType: cv01, cv09 |
+| Inter Variable | Micro Uppercase | 7px | 400 | 1.00 | 0.21px | uppercase transform |
 
 ### Principles
 - **Compression as personality**: GT Walsheim's extreme negative letter-spacing (-5.5px at 110px) is the defining typographic gesture — headlines feel spring-loaded, urgent, almost breathless
@@ -244,7 +244,7 @@ Framer's elevation system is inverted from traditional light-theme designs. Inst
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

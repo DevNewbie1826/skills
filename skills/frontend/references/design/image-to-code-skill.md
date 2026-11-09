@@ -55,28 +55,13 @@ The output must feel:
 - realistic on a small laptop viewport
 
 IMPORTANT:
-For visual website tasks, you must first generate the design image(s) yourself.
-Then you must deeply analyze the generated image(s).
-Only after that should you implement the frontend.
-
-Do not skip image generation when image generation is available.
-Do not begin with freeform coding first.
-The generated image(s) are the primary visual source of truth.
-
-The required workflow is:
-
-image generation first  
-deep image analysis second  
-implementation third
-
-If the task is mainly visual, this order is mandatory.
-
 For visually important website tasks, the required order is mandatory:
+
 1. Generate the design image(s) first whenever image generation is available.
 2. Deeply analyze every generated image and extract its visible text, typography, spacing, colors, layout, and component logic.
 3. Implement the frontend only after that analysis, translating the references faithfully.
 
-Do not skip available image generation, begin with freeform coding, or treat memory and generic taste as a substitute for the generated visual source of truth.
+The generated image(s) are the primary visual source of truth. Do not skip available image generation, begin with freeform coding, or treat memory and generic taste as a substitute for them.
 
 ## Hard output constraints
 
@@ -98,4 +83,4 @@ Do not skip available image generation, begin with freeform coding, or treat mem
 
 ## Completion rule
 
-Complete only when the workflow checklist passes and the implementation is a premium, art-directed, clear, structured, readable, analyzable, memorable, anti-generic, implementation-friendly translation of generated, section-specific references that holds up as section images, a design system, under deep analysis, and as an implemented frontend—not an unreadable design board or a generic coded reinterpretation.
+Completion is judged once, in [Workflow, examples, and completion](image-to-code-skill/workflow-completion.md) (Section 37): complete only when its checklist passes and the implementation faithfully translates the generated, section-specific references.

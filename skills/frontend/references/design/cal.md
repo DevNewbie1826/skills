@@ -68,23 +68,23 @@ The elevation system is notably sophisticated for a minimal site — 11 shadow d
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Cal Sans | 64px | 600 | 1.10 | 0px | Maximum impact, tight default spacing |
-| Section Heading | Cal Sans | 48px | 600 | 1.10 | 0px | Large section titles |
-| Feature Heading | Cal Sans | 24px | 600 | 1.30 | 0px | Feature block headlines |
-| Sub-heading | Cal Sans | 20px | 600 | 1.20 | +0.2px | Positive spacing for readability at smaller size |
-| Sub-heading Alt | Cal Sans | 20px | 600 | 1.50 | 0px | Relaxed line-height variant |
-| Card Title | Cal Sans | 16px | 600 | 1.10 | 0px | Smallest Cal Sans usage |
-| Caption Label | Cal Sans | 12px | 600 | 1.50 | 0px | Small labels in Cal Sans |
-| Body Light | Cal Sans UI Light | 18px | 300 | 1.30 | -0.2px | Light-weight body intro text |
-| Body Light Standard | Cal Sans UI Light | 16px | 300 | 1.50 | -0.2px | Light-weight body text |
-| Caption Light | Cal Sans UI Light | 14px | 300 | 1.40–1.50 | -0.2 to -0.28px | Light captions and descriptions |
-| UI Label | Inter | 16px | 600 | 1.00 | 0px | UI buttons and nav labels |
-| Caption Inter | Inter | 14px | 500 | 1.14 | 0px | Small UI text |
-| Micro | Inter | 12px | 500 | 1.00 | 0px | Smallest Inter text |
-| Code | Roboto Mono | 14px | 600 | 1.00 | 0px | Code snippets, technical text |
-| Body Matter | Matter Regular | 14px | 400 | 1.14 | 0px | Alternate body text (product UI) |
+| Cal Sans | Display Hero | 64px | 600 | 1.10 | 0px | Maximum impact, tight default spacing |
+| Cal Sans | Section Heading | 48px | 600 | 1.10 | 0px | Large section titles |
+| Cal Sans | Feature Heading | 24px | 600 | 1.30 | 0px | Feature block headlines |
+| Cal Sans | Sub-heading | 20px | 600 | 1.20 | +0.2px | Positive spacing for readability at smaller size |
+| Cal Sans | Sub-heading Alt | 20px | 600 | 1.50 | 0px | Relaxed line-height variant |
+| Cal Sans | Card Title | 16px | 600 | 1.10 | 0px | Smallest Cal Sans usage |
+| Cal Sans | Caption Label | 12px | 600 | 1.50 | 0px | Small labels in Cal Sans |
+| Cal Sans UI Light | Body Light | 18px | 300 | 1.30 | -0.2px | Light-weight body intro text |
+| Cal Sans UI Light | Body Light Standard | 16px | 300 | 1.50 | -0.2px | Light-weight body text |
+| Cal Sans UI Light | Caption Light | 14px | 300 | 1.40–1.50 | -0.2 to -0.28px | Light captions and descriptions |
+| Inter | UI Label | 16px | 600 | 1.00 | 0px | UI buttons and nav labels |
+| Inter | Caption Inter | 14px | 500 | 1.14 | 0px | Small UI text |
+| Inter | Micro | 12px | 500 | 1.00 | 0px | Smallest Inter text |
+| Roboto Mono | Code | 14px | 600 | 1.00 | 0px | Code snippets, technical text |
+| Matter Regular | Body Matter | 14px | 400 | 1.14 | 0px | Alternate body text (product UI) |
 
 ### Principles
 - **Cal Sans at large, Inter at small**: Cal Sans is exclusively for headings and display — never for body text. The system enforces this division strictly
@@ -257,7 +257,7 @@ Cal.com's shadow system is the most sophisticated element of the design — 11 s
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

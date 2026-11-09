@@ -47,21 +47,21 @@ The button system uses a distinctive 56px radius for pill-shaped CTAs with hover
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Notes |
+| Font | Role | Size | Weight | Line Height | Notes |
 |------|------|------|--------|-------------|-------|
-| Display Hero | CoinbaseDisplay | 80px | 400 | 1.00 (tight) | Maximum impact |
-| Display Secondary | CoinbaseDisplay | 64px | 400 | 1.00 | Sub-hero |
-| Display Third | CoinbaseDisplay | 52px | 400 | 1.00 | Third tier |
-| Section Heading | CoinbaseSans | 36px | 400 | 1.11 (tight) | Feature sections |
-| Card Title | CoinbaseSans | 32px | 400 | 1.13 | Card headings |
-| Feature Title | CoinbaseSans | 18px | 600 | 1.33 | Feature emphasis |
-| Body Bold | CoinbaseSans | 16px | 700 | 1.50 | Strong body |
-| Body Semibold | CoinbaseSans | 16px | 600 | 1.25 | Buttons, nav |
-| Body | CoinbaseText | 18px | 400 | 1.56 | Standard reading |
-| Body Small | CoinbaseText | 16px | 400 | 1.50 | Secondary reading |
-| Button | CoinbaseSans | 16px | 600 | 1.20 | +0.16px tracking |
-| Caption | CoinbaseSans | 14px | 600–700 | 1.50 | Metadata |
-| Small | CoinbaseSans | 13px | 600 | 1.23 | Tags |
+| CoinbaseDisplay | Display Hero | 80px | 400 | 1.00 (tight) | Maximum impact |
+| CoinbaseDisplay | Display Secondary | 64px | 400 | 1.00 | Sub-hero |
+| CoinbaseDisplay | Display Third | 52px | 400 | 1.00 | Third tier |
+| CoinbaseSans | Section Heading | 36px | 400 | 1.11 (tight) | Feature sections |
+| CoinbaseSans | Card Title | 32px | 400 | 1.13 | Card headings |
+| CoinbaseSans | Feature Title | 18px | 600 | 1.33 | Feature emphasis |
+| CoinbaseSans | Body Bold | 16px | 700 | 1.50 | Strong body |
+| CoinbaseSans | Body Semibold | 16px | 600 | 1.25 | Buttons, nav |
+| CoinbaseText | Body | 18px | 400 | 1.56 | Standard reading |
+| CoinbaseText | Body Small | 16px | 400 | 1.50 | Secondary reading |
+| CoinbaseSans | Button | 16px | 600 | 1.20 | +0.16px tracking |
+| CoinbaseSans | Caption | 14px | 600–700 | 1.50 | Metadata |
+| CoinbaseSans | Small | 13px | 600 | 1.23 | Tags |
 
 ## 4. Component Stylings
 

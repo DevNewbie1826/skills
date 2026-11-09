@@ -76,9 +76,6 @@ const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const
 export const isHeading = (el: ElementSnapshot): boolean => HEADING_TAGS.some((tag) => tag === el.tag)
 export const headingLevel = (el: ElementSnapshot): number | null => (isHeading(el) ? Number(el.tag.slice(1)) : null)
 
-export const textElements = (snap: PageSnapshot): readonly ElementSnapshot[] =>
-	snap.elements.filter((el) => el.ownText !== "" && isRendered(snap, el))
-
 export const fontSizePx = (el: ElementSnapshot): number => px(styleOf(el, "font-size")) ?? 16
 
 export const shortSnippet = (el: ElementSnapshot): string => (el.text === "" ? `<${el.tag}>` : `<${el.tag}> ${el.text.slice(0, 80)}`)

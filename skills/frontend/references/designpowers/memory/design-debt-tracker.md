@@ -1,8 +1,3 @@
----
-name: design-debt-tracker
-description: "Use when critique or review produces deferred findings, when checking accumulated design compromises, or when deciding what to address in the next iteration. Maintains a living register of design debt — the minor issues, future-iteration notes, and conscious compromises that accumulate across a project"
----
-
 # Design Debt Tracker
 
 Read this when critique or review defers findings — the living register that captures minor issues, conscious compromises, and accessibility debt so deferred promises stay visible.
@@ -15,16 +10,16 @@ This skill maintains a living register that captures debt as it's created, track
 
 ## Why This Exists
 
-The design-critic classifies findings as Critical, Major, Minor, and Note. Critical and Major get fixed. Minor and Note get a shrug and "fix if time allows." They rarely get fixed because no one remembers them.
+Review classifies findings on the scale owned by [design-review.md](../review/design-review.md#step-5-classify-issues). Critical and Major get fixed. Minor and Note get a shrug and "fix if time allows." They rarely get fixed because no one remembers them.
 
-The accessibility-reviewer does the same — Minor issues with specific fixes that never happen because they're buried in a report that no one reopens.
+Accessibility findings follow the same path — Minor issues with specific fixes never happen when they are buried in a report no one reopens.
 
 Every "fix if time allows" is a promise to a persona. This skill makes those promises visible.
 
 ## When to Use
 
-- **After critique** — when the design-critic produces Minor or Note findings that won't be fixed this round
-- **After accessibility review** — when the accessibility-reviewer flags Minor issues that are deferred
+- **After critique** — when review produces Minor or Note findings that won't be fixed this round
+- **After accessibility review** — when that review flags Minor issues that are deferred
 - **After a fix round** — when not all issues were addressed and some were consciously deferred
 - **At project start** — to review accumulated debt from previous iterations
 - **Before planning** — to decide which debt items to address in the next cycle
@@ -32,7 +27,7 @@ Every "fix if time allows" is a promise to a persona. This skill makes those pro
 
 ## The Register
 
-Design debt lives in a `## Design Debt Register` section in `design-state.md`. One register per project. It persists across iterations.
+Design debt lives in a `## Design Debt Register` section of the project design record — the optional one described in [orchestration.md](../orchestration.md#shared-state), used only when the project already has a record or the user asks for durable state. One register per project. It persists across iterations.
 
 ### Register Format
 
@@ -43,10 +38,10 @@ _Items: [count] | Critical: [count] | Oldest: [date]_
 
 | ID | Date | Source | Severity | What | Who is affected | Suggested fix | Status | Notes |
 |----|------|--------|----------|------|----------------|---------------|--------|-------|
-| DD-001 | 2025-01-15 | design-critic | Minor | Settings form shows all fields at once — cognitive load | Persona: Jamie (cognitive disability) | Progressive disclosure with sections | Open | Deferred from v1 — setup is one-time flow |
-| DD-002 | 2025-01-15 | accessibility-reviewer | Minor | Category colour strips lack icon backup | Users with colour vision deficiency | Add icon per category alongside colour | Open | |
-| DD-003 | 2025-01-16 | design-critic | Note | Empty state illustration is placeholder | All users | Commission illustration that matches brand | Open | Low priority — functional without it |
-| DD-004 | 2025-01-15 | accessibility-reviewer | Minor | Toast notifications auto-dismiss before screen reader finishes | Screen reader users | Extend timeout to 8s or add persistent log | Resolved | Fixed in v1.1 |
+| DD-001 | 2025-01-15 | critique | Minor | Settings form shows all fields at once — cognitive load | Persona: Jamie (cognitive disability) | Progressive disclosure with sections | Open | Deferred from v1 — setup is one-time flow |
+| DD-002 | 2025-01-15 | accessibility review | Minor | Category color strips lack icon backup | Users with color vision deficiency | Add icon per category alongside color | Open | |
+| DD-003 | 2025-01-16 | critique | Note | Empty state illustration is placeholder | All users | Commission illustration that matches brand | Open | Low priority — functional without it |
+| DD-004 | 2025-01-15 | accessibility review | Minor | Toast notifications auto-dismiss before screen reader finishes | Screen reader users | Extend timeout to 8s or add persistent log | Resolved | Fixed in v1.1 |
 ```
 
 ### Field Definitions
@@ -55,7 +50,7 @@ _Items: [count] | Critical: [count] | Oldest: [date]_
 |-------|---------------|
 | **ID** | Sequential identifier (DD-001, DD-002, ...). Never reuse IDs |
 | **Date** | When the debt was recorded |
-| **Source** | Which agent or review identified it (design-critic, accessibility-reviewer, design-lead, user, etc.) |
+| **Source** | Which review identified it (critique, accessibility review, heuristic evaluation, usability testing, or user) |
 | **Severity** | The original severity classification: Minor or Note (Critical and Major should be fixed, not deferred) |
 | **What** | Specific description of the issue — not "needs improvement" but "form shows 12 fields at once" |
 | **Who is affected** | Which personas or user groups bear the cost of this debt. Be specific |
@@ -76,12 +71,12 @@ _Items: [count] | Critical: [count] | Oldest: [date]_
 
 ### Step 1: Capture Debt (After Review)
 
-When the design-critic or accessibility-reviewer completes a review:
+When critique or accessibility review completes:
 
 1. Read their findings
 2. Identify all Minor and Note severity items that will NOT be fixed in this round
 3. For each deferred item, create a register entry with all fields populated
-4. Append to the Design Debt Register in `design-state.md`
+4. Append to the Design Debt Register in the project design record
 5. Update the summary line (item count, critical count, oldest date)
 
 **Do not capture items that are being fixed.** The register tracks debt, not the fix list. If it's getting fixed now, it doesn't belong here.
@@ -144,8 +139,8 @@ When escalating:
 When a debt item is fixed:
 
 1. Update Status to "Resolved"
-2. Add a note: "Fixed in [iteration/date] by [agent]"
-3. Add the resolution to the Decisions Log in `design-state.md`
+2. Add a note: "Fixed in [iteration/date] by [who fixed it]"
+3. Add the resolution to the record's Decisions and rationale
 4. Do NOT delete the row — resolved items are history
 
 ### Step 5: Accept Debt
@@ -155,16 +150,15 @@ When the user consciously decides an item is not worth fixing:
 1. Confirm with the user: "This affects [personas]. Are you sure you want to accept this?"
 2. Update Status to "Accepted"
 3. Add the user's rationale in Notes
-4. Add the acceptance to the Decisions Log
+4. Add the acceptance to the record's Decisions and rationale
 
 **Accessibility debt requires explicit acknowledgement.** If a debt item affects users with disabilities, the user must explicitly accept the trade-off. Do not silently accept accessibility debt.
 
 ## Integration
 
-- **Receives from:** `designpowers-critique` (Minor/Note findings), `accessibility-reviewer` (Minor findings), `verification-before-shipping` (deferred items)
-- **Feeds into:** `writing-design-plans` (debt items become plan tasks), `design-retrospective` (debt trends are retrospective data)
-- **Updates:** `design-state.md` (Design Debt Register section)
-- **Called by:** `using-designpowers` (after reviews, at project start, on user request)
+- **Receives from:** critique (Minor/Note findings), accessibility review (Minor findings), and final verification (deferred items)
+- **Feeds into:** planning (debt items become plan tasks) and [design-retrospective.md](design-retrospective.md) (debt trends are retrospective data)
+- **Updates:** the Design Debt Register section of the project design record, when one exists
 
 ## Anti-Patterns
 

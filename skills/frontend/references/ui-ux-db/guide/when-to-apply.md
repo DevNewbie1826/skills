@@ -4,8 +4,6 @@ Read this when deciding whether this skill applies to a task, including the must
 
 Part of [UI/UX Pro Max - Design Intelligence](../README.md)
 
-## When to Apply
-
 This Skill should be used when the task involves **UI structure, visual design decisions, interaction patterns, or user experience quality control**.
 
 ### Must Use
@@ -41,5 +39,3 @@ This Skill is not needed in the following situations:
 - Non-visual scripts or automation tasks
 
 **Decision criteria**: If the task will change how a feature **looks, feels, moves, or is interacted with**, this Skill should be used.
-
-## Rule Categories by Priority

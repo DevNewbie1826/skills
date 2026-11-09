@@ -412,7 +412,7 @@ All interactive controls meet a 44Ã—44px minimum on mobile. Icon buttons use 40Ã
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

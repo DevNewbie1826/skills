@@ -1,13 +1,8 @@
----
-name: heuristic-evaluation
-description: "Use after a build — or on any existing interface — to evaluate usability against Nielsen's ten heuristics and run cognitive walkthroughs of every key task"
----
-
 # Heuristic Evaluation
 
 Read this when a built or existing interface needs a usability check — Nielsen H1–H10 assessed with concrete evidence plus a cognitive walkthrough of every key task — especially when a flow feels confusing and the problem needs a name.
 
-Back-link: [Lane C — Review & Repair](../lane-c-review.md)
+Back-link: [Lane C — Review](../lane-c-review.md)
 
 Heuristic evaluation is the usability lens. Craft critique asks "does this match the plan?" and accessibility review asks "can everyone access this?"; this leaf asks "will people actually be able to use this without getting lost, confused, or stuck?"
 
@@ -71,7 +66,7 @@ A critical **H1 violation** (the user is completely lost) or **H3 violation** (a
 
 ## What you get
 
-H1–H10 verdicts with evidence; a walkthrough result for each key task; findings grouped by severity; what works well; and a recommendation (Proceed / Revise / Rethink). This is the checklist's completion test; the full report format lives in [design-review.md](design-review.md).
+H1–H10 verdicts with evidence; a walkthrough result for each key task; findings grouped by severity; what works well; and a recommendation (Proceed / Revise / Rethink). The full report format lives in [design-review.md](design-review.md).
 
 ## Integration
 

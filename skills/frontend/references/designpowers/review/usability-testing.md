@@ -1,21 +1,16 @@
----
-name: usability-testing
-description: "Use when planning or conducting usability tests — writing test scripts, defining tasks, selecting participants, analysing findings, and turning observations into design actions"
----
-
 # Usability Testing
 
 Read this when planning or conducting usability tests with real participants — task scenarios, participant selection, test scripts, analysis, and turning observations into design actions.
 
-Back-link: [Lane C — Review & Repair](../lane-c-review.md)
+Back-link: [Lane C — Review](../lane-c-review.md)
 
 Testing with real people is how you find out if the design works — not by looking at it, but by watching someone use it.
 
 ## When to Use
 
-- After design-builder produces a working prototype
+- After implementation produces a working prototype
 - Before declaring a design complete
-- When the design-critic flags persona coverage gaps
+- When critique flags persona coverage gaps
 - When assumptions about user behaviour need evidence
 
 ## Process
@@ -63,20 +58,20 @@ Classify outcomes per task:
 - **Failed** — could not complete
 - **Completed wrong** — thought they succeeded but didn't
 
-Severity: Critical (blocks 2+ participants), Major (significant difficulty), Minor (noticed but not impeding).
+Severity: classify against the single scale owned by [design-review.md](design-review.md#step-5-classify-issues). In participant terms, Critical means the task cannot be completed, Major means significant difficulty, and Minor means noticed friction that does not impede.
 
 ### Step 6: Turn Findings Into Actions
 
-Every finding becomes a design action: "[Severity] [What happened] → [Design action] → [Which agent handles it]"
+Every finding becomes a design action: "[Severity] [What happened] → [Design action] → [Who implements it]"
 
 ## What You Deliver
 
 - Task success rates table
 - Ranked findings by severity
-- Design actions with agent assignments
+- Design actions with the owner for each
 - Recommendation: iterate / ship / rethink
 
 ## Integration
 
-- **Informed by:** `inclusive-personas`, `design-discovery`
-- **Feeds into:** `design-lead`, `design-builder`, `design-strategist`
+- **Informed by:** [inclusive-personas.md](../direction/inclusive-personas.md) and the design brief
+- **Feeds into:** planning, implementation, and the project's review workflow

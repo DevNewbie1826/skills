@@ -61,20 +61,20 @@ What makes ClickHouse distinctive is the electrifying tension between the near-b
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Mega | Inter | 96px (6rem) | 900 | 1.00 (tight) | normal | Maximum impact, extra-heavy |
-| Display / Hero | Inter | 72px (4.5rem) | 700 | 1.00 (tight) | normal | Section hero titles |
-| Feature Heading | Basier | 36px (2.25rem) | 600 | 1.30 (tight) | normal | Feature section anchors |
-| Sub-heading | Inter / Basier | 24px (1.5rem) | 600–700 | 1.17–1.38 | normal | Card headings |
-| Feature Title | Inter / Basier | 20px (1.25rem) | 600–700 | 1.40 | normal | Small feature titles |
-| Body Large | Inter | 18px (1.13rem) | 400–700 | 1.56 | normal | Intro paragraphs, button text |
-| Body / Button | Inter | 16px (1rem) | 400–700 | 1.50 | normal | Standard body, nav, buttons |
-| Caption | Inter | 14px (0.88rem) | 400–700 | 1.43 | normal | Metadata, descriptions, links |
-| Uppercase Label | Inter | 14px (0.88rem) | 600 | 1.43 | 1.4px | Section overlines, wide-tracked |
-| Code | Inconsolata | 16px (1rem) | 600 | 1.50 | normal | Code blocks, commands |
-| Small | Inter | 12px (0.75rem) | 500 | 1.33 | normal | Smallest text |
-| Micro | Inter | 11.2px (0.7rem) | 500 | 1.79 (relaxed) | normal | Tags, tiny labels |
+| Inter | Display Mega | 96px (6rem) | 900 | 1.00 (tight) | normal | Maximum impact, extra-heavy |
+| Inter | Display / Hero | 72px (4.5rem) | 700 | 1.00 (tight) | normal | Section hero titles |
+| Basier | Feature Heading | 36px (2.25rem) | 600 | 1.30 (tight) | normal | Feature section anchors |
+| Inter / Basier | Sub-heading | 24px (1.5rem) | 600–700 | 1.17–1.38 | normal | Card headings |
+| Inter / Basier | Feature Title | 20px (1.25rem) | 600–700 | 1.40 | normal | Small feature titles |
+| Inter | Body Large | 18px (1.13rem) | 400–700 | 1.56 | normal | Intro paragraphs, button text |
+| Inter | Body / Button | 16px (1rem) | 400–700 | 1.50 | normal | Standard body, nav, buttons |
+| Inter | Caption | 14px (0.88rem) | 400–700 | 1.43 | normal | Metadata, descriptions, links |
+| Inter | Uppercase Label | 14px (0.88rem) | 600 | 1.43 | 1.4px | Section overlines, wide-tracked |
+| Inconsolata | Code | 16px (1rem) | 600 | 1.50 | normal | Code blocks, commands |
+| Inter | Small | 12px (0.75rem) | 500 | 1.33 | normal | Smallest text |
+| Inter | Micro | 11.2px (0.7rem) | 500 | 1.79 (relaxed) | normal | Tags, tiny labels |
 
 ### Principles
 - **Weight 900 is the weapon**: The display headline uses Inter Black (900) — a weight most sites never touch. Combined with 96px size, this creates text with a physical, almost architectural presence.

@@ -84,28 +84,28 @@ What makes Resend distinctive is its icy, blue-tinted border system. Instead of 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | domaine | 96px (6.00rem) | 400 | 1.00 (tight) | -0.96px | `"ss01", "ss04", "ss11"` |
-| Display Hero Mobile | domaine | 76.8px (4.80rem) | 400 | 1.00 (tight) | -0.768px | Scaled for mobile |
-| Section Heading | aBCFavorit | 56px (3.50rem) | 400 | 1.20 (tight) | -2.8px | `"ss01", "ss04", "ss11"` |
-| Sub-heading | aBCFavorit | 20px (1.25rem) | 400 | 1.30 (tight) | normal | `"ss01", "ss04", "ss11"` |
-| Sub-heading Compact | aBCFavorit | 16px (1.00rem) | 400 | 1.50 | -0.8px | `"ss01", "ss04", "ss11"` |
-| Feature Title | inter | 24px (1.50rem) | 500 | 1.50 | normal | Section sub-headings |
-| Body Large | inter | 18px (1.13rem) | 400 | 1.50 | normal | Introductions |
-| Body | inter | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
-| Body Semibold | inter | 16px (1.00rem) | 600 | 1.50 | normal | Emphasis, active states |
-| Nav Link | aBCFavorit | 14px (0.88rem) | 500 | 1.43 | 0.35px | `"ss01", "ss03", "ss04"` — positive tracking |
-| Button / Link | inter | 14px (0.88rem) | 500–600 | 1.43 | normal | Buttons, nav, CTAs |
-| Caption | inter | 14px (0.88rem) | 400 | 1.60 (relaxed) | normal | Descriptions |
-| Helvetica Caption | Helvetica | 14px (0.88rem) | 400–600 | 1.00–1.71 | normal | UI elements |
-| Small | inter | 12px (0.75rem) | 400–500 | 1.33 | normal | Tags, meta, fine print |
-| Small Uppercase | inter | 12px (0.75rem) | 500 | 1.33 | normal | `text-transform: uppercase` |
-| Small Capitalize | inter | 12px (0.75rem) | 500 | 1.33 | normal | `text-transform: capitalize` |
-| Code Body | commitMono | 16px (1.00rem) | 400 | 1.50 | normal | Code blocks |
-| Code Small | commitMono | 14px (0.88rem) | 400 | 1.43 | normal | Inline code |
-| Code Tiny | commitMono | 12px (0.75rem) | 400 | 1.33 | normal | Small code labels |
-| Heading (Helvetica) | Helvetica | 24px (1.50rem) | 400 | 1.40 | normal | Alternate heading context |
+| domaine | Display Hero | 96px (6.00rem) | 400 | 1.00 (tight) | -0.96px | `"ss01", "ss04", "ss11"` |
+| domaine | Display Hero Mobile | 76.8px (4.80rem) | 400 | 1.00 (tight) | -0.768px | Scaled for mobile |
+| aBCFavorit | Section Heading | 56px (3.50rem) | 400 | 1.20 (tight) | -2.8px | `"ss01", "ss04", "ss11"` |
+| aBCFavorit | Sub-heading | 20px (1.25rem) | 400 | 1.30 (tight) | normal | `"ss01", "ss04", "ss11"` |
+| aBCFavorit | Sub-heading Compact | 16px (1.00rem) | 400 | 1.50 | -0.8px | `"ss01", "ss04", "ss11"` |
+| inter | Feature Title | 24px (1.50rem) | 500 | 1.50 | normal | Section sub-headings |
+| inter | Body Large | 18px (1.13rem) | 400 | 1.50 | normal | Introductions |
+| inter | Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard body text |
+| inter | Body Semibold | 16px (1.00rem) | 600 | 1.50 | normal | Emphasis, active states |
+| aBCFavorit | Nav Link | 14px (0.88rem) | 500 | 1.43 | 0.35px | `"ss01", "ss03", "ss04"` — positive tracking |
+| inter | Button / Link | 14px (0.88rem) | 500–600 | 1.43 | normal | Buttons, nav, CTAs |
+| inter | Caption | 14px (0.88rem) | 400 | 1.60 (relaxed) | normal | Descriptions |
+| Helvetica | Helvetica Caption | 14px (0.88rem) | 400–600 | 1.00–1.71 | normal | UI elements |
+| inter | Small | 12px (0.75rem) | 400–500 | 1.33 | normal | Tags, meta, fine print |
+| inter | Small Uppercase | 12px (0.75rem) | 500 | 1.33 | normal | `text-transform: uppercase` |
+| inter | Small Capitalize | 12px (0.75rem) | 500 | 1.33 | normal | `text-transform: capitalize` |
+| commitMono | Code Body | 16px (1.00rem) | 400 | 1.50 | normal | Code blocks |
+| commitMono | Code Small | 14px (0.88rem) | 400 | 1.43 | normal | Inline code |
+| commitMono | Code Tiny | 12px (0.75rem) | 400 | 1.33 | normal | Small code labels |
+| Helvetica | Heading (Helvetica) | 24px (1.50rem) | 400 | 1.40 | normal | Alternate heading context |
 
 ### Principles
 - **Three-font editorial hierarchy**: Domaine Display (serif, hero), ABC Favorit (geometric sans, sections), Inter (readable body). Each font has a strict role — they never cross lanes.

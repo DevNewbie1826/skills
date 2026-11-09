@@ -1,8 +1,3 @@
----
-name: accessible-content
-description: "Use when writing or structuring any user-facing content — interface copy, labels, error messages, help text, headings, alt text, link text, or form instructions — ensures content is readable, navigable, and meaningful for everyone"
----
-
 # Accessible Content
 
 Read this when writing or structuring user-facing content — labels, headings, error messages, help text, alt text, link text, and tables that must work for everyone.
@@ -89,19 +84,14 @@ Data tables need:
 
 ### Step 8: Content Review
 
-Before finalising any content, verify:
-- [ ] Every interactive element has a visible, descriptive label
-- [ ] Heading hierarchy is logical and complete
-- [ ] Link text makes sense out of context
-- [ ] Error messages explain both the problem and the solution
-- [ ] Alt text is present and appropriate for every image
-- [ ] Reading level is appropriate for the audience
-- [ ] Content works when translated (avoid idioms, cultural references that do not travel)
+Before finalising any content, confirm that each earlier step's rule holds for the strings that ship; the WCAG gate in [wcag-gate.md](../../perfection/wcag-gate.md) owns the accessibility evidence table. Two checks are easy to drop:
 
-For each empty state, check what belongs here, why it is empty (first use versus filtered/no results), and the next action (from former content-writer).
+- [ ] Reading level is appropriate for the audience (target reading age 12-14 for general consumers)
+- [ ] Content works when translated (avoid idioms and cultural references that do not travel)
+
+For each empty state, check what belongs here, why it is empty (first use versus filtered/no results), and the next action.
 
 ## Integration
 
-- **Called by:** `writing-design-plans`, `ui-composition`, `interaction-design`
-- **Pairs with:** `cognitive-accessibility` (reading load), `inclusive-personas` (audience awareness)
-- **Reviewed by:** `designpowers-critique`
+- **Pairs with:** [cognitive-accessibility.md](cognitive-accessibility.md) (reading load) and [inclusive-personas.md](../direction/inclusive-personas.md) (audience awareness)
+- **Reviewed by:** [design-review.md](../review/design-review.md)

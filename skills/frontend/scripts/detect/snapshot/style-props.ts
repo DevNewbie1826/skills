@@ -21,5 +21,3 @@ export const STYLE_PROPS = [
 	"transition-property", "transition-duration", "transition-timing-function",
 	"object-fit", "caret-color", "content", "list-style-type", "cursor", "pointer-events",
 ] as const
-
-export type StyleProp = (typeof STYLE_PROPS)[number]

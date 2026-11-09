@@ -113,19 +113,19 @@ The store's visual hierarchy is ruthlessly simple. Photography does the heavy li
 
 ### Hierarchy
 
-| Role | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|--------|-------------|----------------|-------|
-| Display 1 | 64px | 500 (Medium) | 1.16 | — | Hero headlines on desktop, ss01+ss02 |
-| Display 2 | 48px | 500 (Medium) | 1.17 | — | Section heroes, product titles |
-| Heading 1 | 36px | 500 (Medium) | 1.28 | — | Major section headings |
-| Heading 2 | 28px | 300 (Light) | 1.21 | — | Subheadings, lighter feel |
-| Heading 3 | 18px | 700 (Bold) | 1.44 | — | Card titles, bold callouts, ss01+ss02 |
-| Body | 18px | 400 (Regular) | 1.44 | — | Product descriptions, body copy |
-| Body Compact | 16px | 500 (Medium) | 1.50 | -0.16px | Navigation links, UI labels |
-| Caption Bold | 14px | 700 (Bold) | 1.43 | — | Emphasized labels, price text |
-| Caption | 14px | 400 (Regular) | 1.43 | -0.14px | Secondary labels, metadata |
-| Small | 12px | 400 (Regular) | 1.33 | — | Footer links, legal text, timestamps |
-| Button | 14px | 400 (Regular) | 1.43 | -0.14px | Button label text |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|------|--------|-------------|----------------|-------|
+| Optimistic VF | Display 1 | 64px | 500 (Medium) | 1.16 | — | Hero headlines on desktop, ss01+ss02 |
+| Optimistic VF | Display 2 | 48px | 500 (Medium) | 1.17 | — | Section heroes, product titles |
+| Optimistic VF | Heading 1 | 36px | 500 (Medium) | 1.28 | — | Major section headings |
+| Optimistic VF | Heading 2 | 28px | 300 (Light) | 1.21 | — | Subheadings, lighter feel |
+| Optimistic VF | Heading 3 | 18px | 700 (Bold) | 1.44 | — | Card titles, bold callouts, ss01+ss02 |
+| Optimistic VF | Body | 18px | 400 (Regular) | 1.44 | — | Product descriptions, body copy |
+| Optimistic VF | Body Compact | 16px | 500 (Medium) | 1.50 | -0.16px | Navigation links, UI labels |
+| Optimistic VF | Caption Bold | 14px | 700 (Bold) | 1.43 | — | Emphasized labels, price text |
+| Optimistic VF | Caption | 14px | 400 (Regular) | 1.43 | -0.14px | Secondary labels, metadata |
+| Helvetica | Small | 12px | 400 (Regular) | 1.33 | — | Footer links, legal text, timestamps |
+| Optimistic VF | Button | 14px | 400 (Regular) | 1.43 | -0.14px | Button label text |
 
 ### Principles
 
@@ -362,7 +362,7 @@ The Meta Store favors a primarily flat elevation model. Most surface differentia
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

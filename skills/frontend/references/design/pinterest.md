@@ -64,14 +64,14 @@ What distinguishes Pinterest is its generous border-radius system (12px–40px, 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Pin Sans | 70px (4.38rem) | 600 | normal | normal | Maximum impact |
-| Section Heading | Pin Sans | 28px (1.75rem) | 700 | normal | -1.2px | Negative tracking |
-| Body | Pin Sans | 16px (1.00rem) | 400 | 1.40 | normal | Standard reading |
-| Caption Bold | Pin Sans | 14px (0.88rem) | 700 | normal | normal | Strong metadata |
-| Caption | Pin Sans | 12px (0.75rem) | 400–500 | 1.50 | normal | Small text, tags |
-| Button | Pin Sans | 12px (0.75rem) | 400 | normal | normal | Button labels |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Display Hero | 70px (4.38rem) | 600 | normal | normal | Maximum impact |
+| Section Heading | 28px (1.75rem) | 700 | normal | -1.2px | Negative tracking |
+| Body | 16px (1.00rem) | 400 | 1.40 | normal | Standard reading |
+| Caption Bold | 14px (0.88rem) | 700 | normal | normal | Strong metadata |
+| Caption | 12px (0.75rem) | 400–500 | 1.50 | normal | Small text, tags |
+| Button | 12px (0.75rem) | 400 | normal | normal | Button labels |
 
 ### Principles
 - **Compact type scale**: The range is 12px–70px with a dramatic jump — most functional text is 12–16px, creating a dense, app-like information hierarchy.

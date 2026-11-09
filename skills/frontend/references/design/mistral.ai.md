@@ -66,17 +66,17 @@ What makes Mistral distinctive is the complete commitment to a warm color temper
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display / Hero | Arial (custom) | 82px (5.13rem) | 400 | 1.00 (tight) | -2.05px | Maximum impact, billboard scale |
-| Section Heading | Arial (custom) | 56px (3.5rem) | 400 | 0.95 (ultra-tight) | normal | Feature section anchors |
-| Sub-heading Large | Arial (custom) | 48px (3rem) | 400 | 0.95 (ultra-tight) | normal | Secondary section titles |
-| Sub-heading | Arial (custom) | 32px (2rem) | 400 | 1.15 (tight) | normal | Card headings, feature names |
-| Card Title | Arial (custom) | 30px (1.88rem) | 400 | 1.20 (tight) | normal | Mid-level headings |
-| Feature Title | Arial (custom) | 24px (1.5rem) | 400 | 1.33 | normal | Small headings |
-| Body / Button | Arial (custom) | 16px (1rem) | 400 | 1.50 | normal | Standard body, button text |
-| Button Uppercase | Arial (custom) | 16px (1rem) | 400 | 1.50 | normal | Uppercase CTA labels |
-| Caption / Link | Arial (custom) | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, secondary links |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Display / Hero | 82px (5.13rem) | 400 | 1.00 (tight) | -2.05px | Maximum impact, billboard scale |
+| Section Heading | 56px (3.5rem) | 400 | 0.95 (ultra-tight) | normal | Feature section anchors |
+| Sub-heading Large | 48px (3rem) | 400 | 0.95 (ultra-tight) | normal | Secondary section titles |
+| Sub-heading | 32px (2rem) | 400 | 1.15 (tight) | normal | Card headings, feature names |
+| Card Title | 30px (1.88rem) | 400 | 1.20 (tight) | normal | Mid-level headings |
+| Feature Title | 24px (1.5rem) | 400 | 1.33 | normal | Small headings |
+| Body / Button | 16px (1rem) | 400 | 1.50 | normal | Standard body, button text |
+| Button Uppercase | 16px (1rem) | 400 | 1.50 | normal | Uppercase CTA labels |
+| Caption / Link | 14px (0.88rem) | 400 | 1.43 | normal | Metadata, secondary links |
 
 ### Principles
 - **Single weight, maximum impact**: The entire system uses weight 400 (regular) — even at 82px. This creates a surprisingly elegant effect where the size alone carries authority without needing bold weight.

@@ -18,22 +18,7 @@ Check if Python is installed:
 python3 --version || python --version
 ```
 
-If Python is not installed, install it based on user's OS:
-
-**macOS:**
-```bash
-brew install python3
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt update && sudo apt install python3
-```
-
-**Windows:**
-```powershell
-winget install Python.Python.3.12
-```
+If Python is not installed, install it for your OS (e.g., `brew install python3` on macOS).
 
 ---
 
@@ -41,17 +26,17 @@ winget install Python.Python.3.12
 
 Use this skill when the user requests any of the following:
 
-| Scenario | Trigger Examples | Start From |
-|----------|-----------------|------------|
-| **New project / page** | "Build a landing page", "Build a dashboard" | Step 1 → Step 2 (design system) |
-| **New component** | "Create a pricing card", "Add a modal" | Step 3 (domain search: style, ux) |
-| **Choose style / color / font** | "What style fits a fintech app?", "Recommend a color palette" | Step 2 (design system) |
-| **Review existing UI** | "Review this page for UX issues", "Check accessibility" | [Quick Reference](quick-reference.md#quick-reference) |
-| **Fix a UI bug** | "Button hover is broken", "Layout shifts on load" | [Quick Reference](quick-reference.md#quick-reference) → relevant section |
-| **Improve / optimize** | "Make this faster", "Improve mobile experience" | Step 3 (domain search: ux, react) |
-| **Implement dark mode** | "Add dark mode support" | Step 3 (domain: style "dark mode") |
-| **Add charts / data viz** | "Add an analytics dashboard chart" | Step 3 (domain: chart) |
-| **Stack best practices** | "React performance tips"、"SwiftUI navigation" | Step 4 (stack search) |
+| Scenario | Start From |
+|----------|------------|
+| **New project / page** | Step 1 → Step 2 (design system) |
+| **New component** | Step 3 (domain search: style, ux) |
+| **Choose style / color / font** | Step 2 (design system) |
+| **Review existing UI** | [Quick Reference](quick-reference.md#quick-reference) |
+| **Fix a UI bug** | [Quick Reference](quick-reference.md#quick-reference) → relevant section |
+| **Improve / optimize** | Step 3 (domain search: ux, react) |
+| **Implement dark mode** | Step 3 (domain: style "dark mode") |
+| **Add charts / data viz** | Step 3 (domain: chart) |
+| **Stack best practices** | Step 4 (stack search) |
 
 Follow this workflow:
 
@@ -91,8 +76,8 @@ python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<query>" --design-syst
 ```
 
 This creates:
-- `design-system/MASTER.md` — Global Source of Truth with all design rules
-- `design-system/pages/` — Folder for page-specific overrides
+- `design-system/<project-slug>/MASTER.md` — Global Source of Truth with all design rules
+- `design-system/<project-slug>/pages/` — Folder for page-specific overrides
 
 **With page-specific override:**
 ```bash
@@ -100,17 +85,17 @@ python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<query>" --design-syst
 ```
 
 This also creates:
-- `design-system/pages/dashboard.md` — Page-specific deviations from Master
+- `design-system/<project-slug>/pages/dashboard.md` — Page-specific deviations from Master
 
 **How hierarchical retrieval works:**
-1. When building a specific page (e.g., "Checkout"), first check `design-system/pages/checkout.md`
+1. When building a specific page (e.g., "Checkout"), first check `design-system/<project-slug>/pages/checkout.md`
 2. If the page file exists, its rules **override** the Master file
-3. If not, use `design-system/MASTER.md` exclusively
+3. If not, use `design-system/<project-slug>/MASTER.md` exclusively
 
 **Context-aware retrieval prompt:**
 ```
-I am building the [Page Name] page. Please read design-system/MASTER.md.
-Also check if design-system/pages/[page-name].md exists.
+I am building the [Page Name] page. Please read design-system/<project-slug>/MASTER.md.
+Also check if design-system/<project-slug>/pages/[page-name].md exists.
 If the page file exists, prioritize its rules.
 If not, use the Master rules exclusively.
 Now, generate the code...
@@ -123,22 +108,6 @@ After getting the design system, use domain searches to get additional details:
 ```bash
 python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
 ```
-
-**When to use detailed searches:**
-
-| Need | Domain | Example |
-|------|--------|---------|
-| Product type patterns | `product` | `--domain product "entertainment social"` |
-| More style options | `style` | `--domain style "glassmorphism dark"` |
-| Color palettes | `color` | `--domain color "entertainment vibrant"` |
-| Font pairings | `typography` | `--domain typography "playful modern"` |
-| Icon selection | `icons` | `--domain icons "button navigation"` |
-| Chart recommendations | `chart` | `--domain chart "real-time dashboard"` |
-| UX best practices | `ux` | `--domain ux "animation accessibility"` |
-| Alternative fonts | `typography` | `--domain typography "elegant luxury"` |
-| Landing structure | `landing` | `--domain landing "hero social-proof"` |
-| React performance | `react` | `--domain react "rerender memo list"` |
-| App interface a11y | `web` | `--domain web "accessibilityLabel touch safe-areas"` |
 
 ### Step 4: Stack Guidelines
 
@@ -184,44 +153,6 @@ python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "<keyword>" --stack <st
 | `html-tailwind` | HTML and Tailwind UI implementation guidelines |
 | `shadcn` | shadcn/ui component guidelines |
 | `jetpack-compose` | Jetpack Compose UI implementation guidelines |
-
----
-
-## Example Workflow
-
-**User request:** "Make an AI search homepage."
-
-### Step 1: Analyze Requirements
-- Product type: Tool (AI search engine)
-- Target audience: C-end users looking for fast, intelligent search
-- Style keywords: modern, minimal, content-first, dark mode
-- Stack: the project's selected stack
-
-### Step 2: Generate Design System (REQUIRED)
-
-```bash
-python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "search tool modern minimal" --design-system -p "Search Tool"
-```
-
-**Output:** Complete design system with pattern, style, colors, typography, effects, and anti-patterns.
-
-### Step 3: Supplement with Detailed Searches (as needed)
-
-```bash
-# Get style options for a modern tool product
-python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "minimalism dark mode" --domain style
-
-# Get UX best practices for search interaction and loading
-python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "search loading animation" --domain ux
-```
-
-### Step 4: Stack Guidelines
-
-```bash
-python3 $SKILL_DIR/references/ui-ux-db/scripts/search.py "list performance navigation" --stack <stack>
-```
-
-**Then:** Synthesize design system + detailed searches and implement the design.
 
 ---
 

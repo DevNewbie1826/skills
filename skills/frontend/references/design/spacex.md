@@ -45,15 +45,15 @@ What makes SpaceX distinctive is its radical minimalism: no shadows, no borders 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | D-DIN-Bold | 48px (3.00rem) | 700 | 1.00 (tight) | 0.96px | `text-transform: uppercase` |
-| Body | D-DIN | 16px (1.00rem) | 400 | 1.50–1.70 | normal | Standard reading text |
-| Nav Link Bold | D-DIN | 13px (0.81rem) | 700 | 0.94 (tight) | 1.17px | `text-transform: uppercase` |
-| Nav Link | D-DIN | 12px (0.75rem) | 400 | 2.00 (relaxed) | normal | `text-transform: uppercase` |
-| Caption Bold | D-DIN | 13px (0.81rem) | 700 | 0.94 (tight) | 1.17px | `text-transform: uppercase` |
-| Caption | D-DIN | 12px (0.75rem) | 400 | 1.00 (tight) | normal | `text-transform: uppercase` |
-| Micro | D-DIN | 10px (0.63rem) | 400 | 0.94 (tight) | 1px | `text-transform: uppercase` |
+| D-DIN-Bold | Display Hero | 48px (3.00rem) | 700 | 1.00 (tight) | 0.96px | `text-transform: uppercase` |
+| D-DIN | Body | 16px (1.00rem) | 400 | 1.50–1.70 | normal | Standard reading text |
+| D-DIN | Nav Link Bold | 13px (0.81rem) | 700 | 0.94 (tight) | 1.17px | `text-transform: uppercase` |
+| D-DIN | Nav Link | 12px (0.75rem) | 400 | 2.00 (relaxed) | normal | `text-transform: uppercase` |
+| D-DIN | Caption Bold | 13px (0.81rem) | 700 | 0.94 (tight) | 1.17px | `text-transform: uppercase` |
+| D-DIN | Caption | 12px (0.75rem) | 400 | 1.00 (tight) | normal | `text-transform: uppercase` |
+| D-DIN | Micro | 10px (0.63rem) | 400 | 0.94 (tight) | 1px | `text-transform: uppercase` |
 
 ### Principles
 - **Universal uppercase**: Nearly every text element uses `text-transform: uppercase`. This creates a systematic military/aerospace voice where all communication feels like official documentation.

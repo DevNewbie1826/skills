@@ -70,24 +70,24 @@ What distinguishes Mintlify from other documentation platforms is its atmospheri
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Inter | 64px (4.00rem) | 600 | 1.15 (tight) | -1.28px | Maximum impact, hero headlines |
-| Section Heading | Inter | 40px (2.50rem) | 600 | 1.10 (tight) | -0.8px | Feature section titles |
-| Sub-heading | Inter | 24px (1.50rem) | 500 | 1.30 (tight) | -0.24px | Card headings, sub-sections |
-| Card Title | Inter | 20px (1.25rem) | 600 | 1.30 (tight) | -0.2px | Feature card titles |
-| Card Title Light | Inter | 20px (1.25rem) | 500 | 1.30 (tight) | -0.2px | Secondary card headings |
-| Body Large | Inter | 18px (1.13rem) | 400 | 1.50 | normal | Hero descriptions, introductions |
-| Body | Inter | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
-| Body Medium | Inter | 16px (1.00rem) | 500 | 1.50 | normal | Navigation, emphasized text |
-| Button | Inter | 15px (0.94rem) | 500 | 1.50 | normal | Button labels |
-| Link | Inter | 14px (0.88rem) | 500 | 1.50 | normal | Navigation links, small CTAs |
-| Caption | Inter | 14px (0.88rem) | 400–500 | 1.50–1.71 | normal | Metadata, descriptions |
-| Label Uppercase | Inter | 13px (0.81rem) | 500 | 1.50 | 0.65px | `text-transform: uppercase`, section labels |
-| Small | Inter | 13px (0.81rem) | 400–500 | 1.50 | -0.26px | Small body text |
-| Mono Code | Geist Mono | 12px (0.75rem) | 500 | 1.50 | 0.6px | `text-transform: uppercase`, technical labels |
-| Mono Badge | Geist Mono | 12px (0.75rem) | 600 | 1.50 | 0.6px | `text-transform: uppercase`, status badges |
-| Mono Micro | Geist Mono | 10px (0.63rem) | 500 | 1.50 | normal | `text-transform: uppercase`, tiny labels |
+| Inter | Display Hero | 64px (4.00rem) | 600 | 1.15 (tight) | -1.28px | Maximum impact, hero headlines |
+| Inter | Section Heading | 40px (2.50rem) | 600 | 1.10 (tight) | -0.8px | Feature section titles |
+| Inter | Sub-heading | 24px (1.50rem) | 500 | 1.30 (tight) | -0.24px | Card headings, sub-sections |
+| Inter | Card Title | 20px (1.25rem) | 600 | 1.30 (tight) | -0.2px | Feature card titles |
+| Inter | Card Title Light | 20px (1.25rem) | 500 | 1.30 (tight) | -0.2px | Secondary card headings |
+| Inter | Body Large | 18px (1.13rem) | 400 | 1.50 | normal | Hero descriptions, introductions |
+| Inter | Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
+| Inter | Body Medium | 16px (1.00rem) | 500 | 1.50 | normal | Navigation, emphasized text |
+| Inter | Button | 15px (0.94rem) | 500 | 1.50 | normal | Button labels |
+| Inter | Link | 14px (0.88rem) | 500 | 1.50 | normal | Navigation links, small CTAs |
+| Inter | Caption | 14px (0.88rem) | 400–500 | 1.50–1.71 | normal | Metadata, descriptions |
+| Inter | Label Uppercase | 13px (0.81rem) | 500 | 1.50 | 0.65px | `text-transform: uppercase`, section labels |
+| Inter | Small | 13px (0.81rem) | 400–500 | 1.50 | -0.26px | Small body text |
+| Geist Mono | Mono Code | 12px (0.75rem) | 500 | 1.50 | 0.6px | `text-transform: uppercase`, technical labels |
+| Geist Mono | Mono Badge | 12px (0.75rem) | 600 | 1.50 | 0.6px | `text-transform: uppercase`, status badges |
+| Geist Mono | Mono Micro | 10px (0.63rem) | 500 | 1.50 | normal | `text-transform: uppercase`, tiny labels |
 
 ### Principles
 - **Tight tracking at display sizes**: Inter at 40–64px uses -0.8px to -1.28px letter-spacing. This compression creates headlines that feel deliberate and space-efficient — documentation headings, not billboard copy.

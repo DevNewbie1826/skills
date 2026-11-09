@@ -60,19 +60,19 @@ What distinguishes Revolut is its pill-everything button system. Every button us
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Mega | Aeonik Pro | 136px (8.50rem) | 500 | 1.00 (tight) | -2.72px | Stadium-scale hero |
-| Display Hero | Aeonik Pro | 80px (5.00rem) | 500 | 1.00 (tight) | -0.8px | Primary hero |
-| Section Heading | Aeonik Pro | 48px (3.00rem) | 500 | 1.21 (tight) | -0.48px | Feature sections |
-| Sub-heading | Aeonik Pro | 40px (2.50rem) | 500 | 1.20 (tight) | -0.4px | Sub-sections |
-| Card Title | Aeonik Pro | 32px (2.00rem) | 500 | 1.19 (tight) | -0.32px | Card headings |
-| Feature Title | Aeonik Pro | 24px (1.50rem) | 400 | 1.33 | normal | Light headings |
-| Nav / UI | Aeonik Pro | 20px (1.25rem) | 500 | 1.40 | normal | Navigation, buttons |
-| Body Large | Inter | 18px (1.13rem) | 400 | 1.56 | -0.09px | Introductions |
-| Body | Inter | 16px (1.00rem) | 400 | 1.50 | 0.24px | Standard reading |
-| Body Semibold | Inter | 16px (1.00rem) | 600 | 1.50 | 0.16px | Emphasized body |
-| Body Bold Link | Inter | 16px (1.00rem) | 700 | 1.50 | 0.24px | Bold links |
+| Aeonik Pro | Display Mega | 136px (8.50rem) | 500 | 1.00 (tight) | -2.72px | Stadium-scale hero |
+| Aeonik Pro | Display Hero | 80px (5.00rem) | 500 | 1.00 (tight) | -0.8px | Primary hero |
+| Aeonik Pro | Section Heading | 48px (3.00rem) | 500 | 1.21 (tight) | -0.48px | Feature sections |
+| Aeonik Pro | Sub-heading | 40px (2.50rem) | 500 | 1.20 (tight) | -0.4px | Sub-sections |
+| Aeonik Pro | Card Title | 32px (2.00rem) | 500 | 1.19 (tight) | -0.32px | Card headings |
+| Aeonik Pro | Feature Title | 24px (1.50rem) | 400 | 1.33 | normal | Light headings |
+| Aeonik Pro | Nav / UI | 20px (1.25rem) | 500 | 1.40 | normal | Navigation, buttons |
+| Inter | Body Large | 18px (1.13rem) | 400 | 1.56 | -0.09px | Introductions |
+| Inter | Body | 16px (1.00rem) | 400 | 1.50 | 0.24px | Standard reading |
+| Inter | Body Semibold | 16px (1.00rem) | 600 | 1.50 | 0.16px | Emphasized body |
+| Inter | Body Bold Link | 16px (1.00rem) | 700 | 1.50 | 0.24px | Bold links |
 
 ### Principles
 - **Weight 500 as display default**: Aeonik Pro uses medium (500) for ALL headings — no bold. This creates authority through size and tracking, not weight.

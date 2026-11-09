@@ -24,7 +24,7 @@ The contract, in order:
 
 ## 2. Consultation recipe (public endpoints, no auth, no browser)
 
-Placeholder: `<catalog-origin>` is the host of the open catalog you picked from the routing table. Find it with a web search for an open, copy-in pattern catalog that publishes raw source and matches the tone, check its licence first, and use the endpoints below only if it publishes them (many serve `llms.txt` and a registry index). If you cannot find one, skip this lane and say so in the Research Log.
+Placeholder: `<catalog-origin>` is the host of the open catalog you picked from the routing table; how to find one and the licence-first rule are owned by [component-catalogs.md](component-catalogs.md) (section 3).
 
 ```bash
 curl -s https://<catalog-origin>/llms.txt                  # catalog: one line per component + CLI name
@@ -136,7 +136,7 @@ Read `dependencies[]` from the registry item before reading the source. In order
 
 ## 6. DESIGN.md integration
 
-[design-system-architecture.md](design-system-architecture.md) defines a Motion & Interaction section in every `DESIGN.md`. This file feeds it:
+Ambience work feeds the same Motion & Interaction section of `DESIGN.md` as [interaction-skill.md](interaction-skill.md) (section 5 owns the integration path):
 
 - The hero atmosphere is named once, with its mechanism source (catalog pattern), engine, reduced-motion state, and pause behavior.
 - Extracted durations, easings, stagger steps, and intensities land as named tokens before components use them.

@@ -13,10 +13,6 @@ export const visibleText = (snapshot: PageSnapshot, el: ElementSnapshot): boolea
 		&& !(a.tag === "dialog" && a.attributes["open"] === undefined))
 }
 
-export const pageText = (snapshot: PageSnapshot): string =>
-	snapshot.elements.filter((el) => visibleText(snapshot, el) && !["script", "style", "template", "noscript"].includes(el.tag))
-		.map((el) => el.ownText).filter(Boolean).join(" ").replace(/\s+/g, " ").trim()
-
 export const paintedText = (snapshot: PageSnapshot, el: ElementSnapshot): boolean => {
 	if (!visibleText(snapshot, el)) return false
 	let left = el.rect.x

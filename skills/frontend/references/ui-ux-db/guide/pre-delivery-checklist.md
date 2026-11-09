@@ -4,13 +4,11 @@ Read this when doing the final App UI quality pass before delivery: visual quali
 
 Part of [UI/UX Pro Max - Design Intelligence](../README.md)
 
-## Pre-Delivery Checklist
-
 Use this checklist for App UI (iOS/Android/React Native/Flutter). For desktop web, review the relevant Quick Reference sections.
 
 ### Search & Review
 - [ ] Run `--domain ux "animation accessibility z-index loading"` as a UX validation pass before implementation
-- [ ] Review Quick Reference **§1–§3** (CRITICAL + HIGH) before delivery
+- [ ] Review Quick Reference **§1–§5 and §9** (CRITICAL + HIGH) before delivery
 
 ### Visual Quality
 - [ ] No emojis used as icons (use SVG instead)

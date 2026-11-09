@@ -1,4 +1,4 @@
-import { blend, parseColor, TRANSPARENT, WHITE, type Rgba } from "../core"
+import { parseColor, WHITE, type Rgba } from "../core"
 import { ancestors, styleOf } from "../core"
 import type { ElementSnapshot, PageSnapshot } from "../types"
 
@@ -18,7 +18,7 @@ export function splitLayers(value: string): readonly string[] {
 	return parts.filter(Boolean)
 }
 
-export type Stop = { readonly color: Rgba; readonly position: number | null; readonly raw: string }
+type Stop = { readonly color: Rgba; readonly position: number | null; readonly raw: string }
 
 export function gradientStops(value: string): readonly Stop[] {
 	const out: Stop[] = []
@@ -38,48 +38,12 @@ export function gradientStops(value: string): readonly Stop[] {
 }
 
 export const spread = (c: Rgba): number => Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)
-export const colorDistance = (a: Rgba, b: Rgba): number => Math.max(Math.abs(a.r - b.r), Math.abs(a.g - b.g), Math.abs(a.b - b.b))
-export const sameColor = (a: Rgba, b: Rgba): boolean => colorDistance(a, b) < 12 && Math.abs(a.a - b.a) * 255 < 12
 export const opacity = (el: ElementSnapshot): number => {
 	const n = Number.parseFloat(styleOf(el, "opacity"))
 	return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1
 }
 export const effectiveOpacity = (snapshot: PageSnapshot, el: ElementSnapshot): number =>
 	[el, ...ancestors(snapshot, el)].reduce((v, node) => v * opacity(node), 1)
-
-function meanGradient(value: string): Rgba | null {
-	const stops = gradientStops(value)
-	const total = stops.reduce((n, s) => n + s.color.a, 0)
-	if (stops.length === 0) return null
-	if (total === 0) return TRANSPARENT
-	return {
-		r: stops.reduce((n, s) => n + s.color.r * s.color.a, 0) / total,
-		g: stops.reduce((n, s) => n + s.color.g * s.color.a, 0) / total,
-		b: stops.reduce((n, s) => n + s.color.b * s.color.a, 0) / total,
-		a: total / stops.length,
-	}
-}
-
-export function backdrop(snapshot: PageSnapshot, el: ElementSnapshot, ownImage = styleOf(el, "background-image")): Rgba | null {
-	const paints: Rgba[] = []
-	for (const node of [el, ...ancestors(snapshot, el)]) {
-		const image = node === el ? ownImage : styleOf(node, "background-image")
-		for (const layer of splitLayers(image)) {
-			if (layer.includes("url(")) return null
-			const mean = meanGradient(layer)
-			if (mean) {
-				paints.push(mean)
-				if (mean.a >= 0.99) return paints.reduceRight((under, top) => blend(top, under), WHITE)
-			}
-		}
-		const fill = parseColor(styleOf(node, "background-color"))
-		if (fill) {
-			paints.push(fill)
-			if (fill.a >= 0.99) break
-		}
-	}
-	return paints.reduceRight((under, top) => blend(top, under), WHITE)
-}
 
 export function oklch(c: Rgba): { readonly l: number; readonly c: number } {
 	const linear = (v: number): number => v / 255 <= 0.04045 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4

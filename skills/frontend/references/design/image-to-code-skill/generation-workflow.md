@@ -8,7 +8,7 @@ Read this when deciding whether to generate design references, how many images t
 
 - DESIGN_VARIANCE: 8  
   `(1 = rigid / conventional, 10 = highly art-directed / asymmetric)`
-- VISUAL_DENSITY: 3  
+- VISUAL_DENSITY: 4  
   `(1 = airy / calm, 10 = dense / packed)`
 - ART_DIRECTION: 8  
   `(1 = safe commercial, 10 = bold creative statement)`
@@ -24,6 +24,8 @@ Read this when deciding whether to generate design references, how many images t
   `(1 = minimal image count, 10 = generate as many images as needed for excellent extraction)`
 - UI_SIMPLICITY_DISCIPLINE: 9  
   `(1 = willing to add many micro-elements, 10 = aggressively reduce clutter and unnecessary UI chrome)`
+
+The shared dials (`DESIGN_VARIANCE`, `VISUAL_DENSITY`) follow the `8 / 6 / 4` baseline owned by [taste-skill.md](../taste-skill.md); the remaining dials are specific to image-to-code work.
 
 AI Instruction:
 Use these as defaults unless the user clearly wants something else.
@@ -99,18 +101,7 @@ Do not compress too many website sections into one image when that makes text, s
 
 Prefer separate large images per section.
 
-Default rule:
-- 1 section requested → generate 1 image
-- 2 sections requested → generate 2 images
-- 3 sections requested → generate 3 images
-- 4 sections requested → generate 4 images
-- 5 sections requested → generate 5 images
-- 6 sections requested → generate 6 images
-- 7 sections requested → generate 7 images
-- 8 sections requested → generate 8 images
-- 9 sections requested → generate 9 images
-- 10 sections requested → generate 10 images
-- and so on when reasonable
+Default rule: N sections requested → N images.
 
 This is preferred because:
 - text stays readable
@@ -221,31 +212,6 @@ Do not hesitate to create a second or third extraction-oriented image for a sect
 
 ## 8. CLEAN ANALYSIS STANDARD
 
-Analyze cleanly and systematically.
-
-Do not do vague vibe-only analysis.
-Do not jump too fast from image to code.
-
-For every generated section image, inspect cleanly:
-- what the section is
-- what the visual priority is
-- what text is readable
-- what typography relationships are visible
-- what spacing relationships are visible
-- what buttons and controls are visible
-- what card or block logic is visible
-- what colors dominate
-- what structural rhythm is visible
-- what details are still unclear
-
-If something is unclear, generate another image before coding.
-
-The analysis should feel:
-- calm
-- structured
-- exact
-- faithful
-- design-aware
-- implementation-aware
+Owned by [Analysis and implementation](analysis-implementation.md) (Section 8).
 
 ---

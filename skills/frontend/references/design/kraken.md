@@ -44,18 +44,18 @@ Kraken's website is a clean, trustworthy crypto exchange that uses purple as its
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing |
+| Font | Role | Size | Weight | Line Height | Letter Spacing |
 |------|------|------|--------|-------------|----------------|
-| Display Hero | Kraken-Brand | 48px | 700 | 1.17 | -1px |
-| Section Heading | Kraken-Brand | 36px | 700 | 1.22 | -0.5px |
-| Sub-heading | Kraken-Brand | 28px | 700 | 1.29 | -0.5px |
-| Feature Title | Kraken-Product | 22px | 600 | 1.20 | normal |
-| Body | Kraken-Product | 16px | 400 | 1.38 | normal |
-| Body Medium | Kraken-Product | 16px | 500 | 1.38 | normal |
-| Button | Kraken-Product | 16px | 500–600 | 1.38 | normal |
-| Caption | Kraken-Product | 14px | 400–700 | 1.43–1.71 | normal |
-| Small | Kraken-Product | 12px | 400–500 | 1.33 | normal |
-| Micro | Kraken-Product | 7px | 500 | 1.00 | uppercase |
+| Kraken-Brand | Display Hero | 48px | 700 | 1.17 | -1px |
+| Kraken-Brand | Section Heading | 36px | 700 | 1.22 | -0.5px |
+| Kraken-Brand | Sub-heading | 28px | 700 | 1.29 | -0.5px |
+| Kraken-Product | Feature Title | 22px | 600 | 1.20 | normal |
+| Kraken-Product | Body | 16px | 400 | 1.38 | normal |
+| Kraken-Product | Body Medium | 16px | 500 | 1.38 | normal |
+| Kraken-Product | Button | 16px | 500–600 | 1.38 | normal |
+| Kraken-Product | Caption | 14px | 400–700 | 1.43–1.71 | normal |
+| Kraken-Product | Small | 12px | 400–500 | 1.33 | normal |
+| Kraken-Product | Micro | 7px | 500 | 1.00 | uppercase |
 
 ## 4. Component Stylings
 
@@ -96,7 +96,9 @@ Kraken's website is a clean, trustworthy crypto exchange that uses purple as its
 
 ## 5. Layout Principles
 
-### Spacing: 1px, 2px, 3px, 4px, 5px, 6px, 8px, 10px, 12px, 13px, 15px, 16px, 20px, 24px, 25px
+### Spacing System
+- Scale: 1px, 2px, 3px, 4px, 5px, 6px, 8px, 10px, 12px, 13px, 15px, 16px, 20px, 24px, 25px
+
 ### Border Radius: 3px, 6px, 8px, 10px, 12px, 16px, 9999px, 50%
 
 ## 6. Depth & Elevation
@@ -115,7 +117,9 @@ Kraken's website is a clean, trustworthy crypto exchange that uses purple as its
 - Don't use other purples outside the defined scale
 
 ## 8. Responsive Behavior
-Breakpoints: 375px, 425px, 640px, 768px, 1024px, 1280px, 1536px
+
+### Breakpoints
+- 375px, 425px, 640px, 768px, 1024px, 1280px, 1536px
 
 ## 9. Agent Prompt Guide
 

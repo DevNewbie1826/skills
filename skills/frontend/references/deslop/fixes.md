@@ -38,7 +38,7 @@ Propose the neutral values; let the user confirm before applying globally.
 
 ### 04 Default semantic palette
 Replace the framework rainbow with a coherent set derived from your palette:
-neutrals plus at most one or two intentional semantic colours.
+neutrals plus at most one or two intentional semantic colors.
 ```diff
 - <span class="bg-blue-50 text-blue-700">Info</span>
 - <span class="bg-green-50 text-green-700">Success</span>
@@ -66,7 +66,7 @@ Hold one flat background; build surface depth with a hairline, not a gradient.
 - <body class="bg-[radial-gradient(circle_at_top,#1e293b,#020617)]">
 -   <div class="rounded-2xl bg-gradient-to-b from-white/10 to-white/0 …">
 -   <div class="rounded-2xl bg-gradient-to-br from-emerald-400/15 to-transparent …">
-+ <body class="bg-[--bg]">                 /* one flat colour, held */
++ <body class="bg-[--bg]">                 /* one flat color, held */
 +   <div class="rounded-[--radius] bg-[--card] border border-[--rule]">
 +   <div class="rounded-[--radius] bg-[--card] border border-[--rule]">
 ```
@@ -224,7 +224,7 @@ Put the radius and the border on the same box; never let a clip eat a stroke.
 Or keep the hairlines as dividers: run them straight, edge to edge, and drop
 the radius from the fill — square-cornered regions need no arc.
 
-### 23 Badge & pill spam
+### 23 Badge / pill spam
 Delete decorative pills; keep at most a real status tag.
 ```diff
 - <h1>Dashboard</h1><Pill>✨ New</Pill><Pill>🔥 Popular</Pill><Pill>β Beta</Pill>

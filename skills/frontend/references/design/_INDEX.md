@@ -3,11 +3,11 @@
 Read this when selecting a focused design reference or Layer A skill.
 
 Most Layer A and Layer B references live flat in this directory; focused task domains live in named subdirectories. Three layers:
-- **Layer 0 — design system architecture** (1 file): the mandatory gate. Defines `DESIGN.md` structure, creation workflow, validation rules. Always loaded by Phase 0 when no design system exists.
+- **Layer 0 — design system architecture** (1 file): the mandatory gate. Defines `DESIGN.md` structure, creation workflow, validation rules. Always loaded when no design system exists.
 - **Layer A — taste skills** (12 files): how to execute. Discipline, motion, spacing, anti-slop, output completeness.
 - **Layer B — design systems** (70 files): what it should look like. Brand-specific color/type/component tokens.
 
-**Phase 0 runs first** (check/create `DESIGN.md`), then most non-trivial tasks load **one Layer A + one Layer B** together. See the routing flow in the sibling `README.md`.
+**Layer 0 runs first**: the design-system gate and its greenfield workflow are owned by the sibling `README.md`; routes that need a visual direction then load **one Layer A + one Layer B** together.
 
 ---
 
@@ -15,7 +15,7 @@ Most Layer A and Layer B references live flat in this directory; focused task do
 
 | File | Purpose | Load when |
 |---|---|---|
-| [`design-system-architecture.md`](design-system-architecture.md) | Defines the `DESIGN.md` structure — 8 sections plus a greenfield-only `## 0. Research Log` (atmosphere, color tokens, typography scale, spacing system, components, motion, depth, accessibility constraints & accepted debt). Creation workflow for new and existing projects. Validation rules and memory management. | Phase 0 fires and no `DESIGN.md` exists in the project. Also load when extracting a design system from existing code. |
+| [`design-system-architecture.md`](design-system-architecture.md) | Defines the `DESIGN.md` structure — 8 sections plus a greenfield-only `## 0. Research Log` (atmosphere, color tokens, typography scale, spacing system, components, motion, depth, accessibility constraints & accepted debt). Creation workflow for new and existing projects. Validation rules and memory management. | Layer 0 fires and no `DESIGN.md` exists in the project. Also load when extracting a design system from existing code. |
 
 ---
 
@@ -61,7 +61,7 @@ From [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill).
 
 ### Layer A stacking rules
 
-1. **At most one *style* skill at a time** (`taste-skill`, `cinematic-taste-skill`, `minimalist-skill`, `brutalist-skill`, `soft-skill`, `redesign-skill`, `image-to-code-skill`). They encode opposite philosophies - picking two creates contradictions.
+1. **At most one *style* skill at a time** (`taste-skill`, `cinematic-taste-skill`, `minimalist-skill`, `brutalist-skill`, `soft-skill`). They encode opposite philosophies - picking two creates contradictions. `redesign-skill.md` replaces a style skill during audit work rather than stacking on one.
 2. **`output-skill.md` and `mockup-export-skill.md` stack on top of any style skill.** They add discipline and output format, not visual direction.
 3. **`image-to-code-skill.md` pairs with one image-concept skill** for the full flow.
 4. **Image-concept skills are image-only.** Do not load them when the user actually wants code.
@@ -152,7 +152,7 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 | [`figma.md`](figma.md) | Collaborative design tool. Vibrant multi-color, playful yet professional. |
 | [`framer.md`](framer.md) | Website builder. Bold black and blue, motion-first, design-forward. |
 | [`miro.md`](miro.md) | Visual collaboration. Bright yellow accent, infinite canvas aesthetic. |
-| [`webflow.md`](webflow.md) | Visual web builder. Blue-accented, polished marketing site aesthetic. |
+| [`webflow.md`](webflow.md) | Visual web builder. Blue-accented, polished marketing site aesthetic (partial extraction). |
 
 ### Fintech & Crypto (7)
 
@@ -215,9 +215,3 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 - **"Data-dense / dashboard"** → `sentry.md`, `kraken.md`, `posthog.md`, `clickhouse.md`
 - **"Bold / sporty / monochrome punch"** → `nike.md`, `uber.md`, `tesla.md`, `binance.md`
 - **"Playful / colorful / friendly"** → `figma.md`, `airtable.md`, `zapier.md`, `lovable.md`
-- **"Layout breaks with real content"** → [`layout-skill.md`](layout-skill.md) + [StyleGallery patterns](../stylegallery/CATALOG.md)
-- **"Compose a whole homepage, dashboard, settings, or command screen"** → [StyleGallery recipes](../stylegallery/recipes/index.md)
-- **"Name, review, or specify motion"** → [StyleGallery Motion](../stylegallery/motion/index.md)
-- **"Verify product-layer craft"** → [StyleGallery Design Engineering](../stylegallery/design%2Dengineering/index.md)
-- **"Game HUD, menu, or inventory"** → optional [StyleGallery Game UI](../stylegallery/game%2Dui/index.md)
-- **"Compare a platform convention before adaptation"** → optional [StyleGallery Platform Guides](../stylegallery/platform%2Dguides/index.md)

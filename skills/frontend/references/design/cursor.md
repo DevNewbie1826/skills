@@ -77,26 +77,26 @@ The border system is particularly distinctive -- Cursor uses `oklab()` color spa
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | CursorGothic | 72px (4.50rem) | 400 | 1.10 (tight) | -2.16px | Maximum compression, hero statements |
-| Section Heading | CursorGothic | 36px (2.25rem) | 400 | 1.20 (tight) | -0.72px | Feature sections, CTA headlines |
-| Sub-heading | CursorGothic | 26px (1.63rem) | 400 | 1.25 (tight) | -0.325px | Card headings, sub-sections |
-| Title Small | CursorGothic | 22px (1.38rem) | 400 | 1.30 (tight) | -0.11px | Smaller titles, list headings |
-| Body Serif | jjannon | 19.2px (1.20rem) | 500 | 1.50 | normal | Editorial body with `"cswh"` |
-| Body Serif SM | jjannon | 17.28px (1.08rem) | 400 | 1.35 | normal | Standard body text, descriptions |
-| Body Sans | CursorGothic | 16px (1.00rem) | 400 | 1.50 | normal/0.08px | UI body text |
-| Button Label | CursorGothic | 14px (0.88rem) | 400 | 1.00 (tight) | normal | Primary button text |
-| Button Caption | CursorGothic | 14px (0.88rem) | 400 | 1.50 | 0.14px | Secondary button with `"ss09"` |
-| Caption | CursorGothic | 11px (0.69rem) | 400-500 | 1.50 | normal | Small captions, metadata |
-| System Heading | system-ui | 20px (1.25rem) | 700 | 1.55 | normal | System UI headings |
-| System Caption | system-ui | 13px (0.81rem) | 500-600 | 1.33 | normal | System UI labels |
-| System Micro | system-ui | 11px (0.69rem) | 500 | 1.27 (tight) | 0.048px | Uppercase micro labels |
-| Mono Body | berkeleyMono | 12px (0.75rem) | 400 | 1.67 (relaxed) | normal | Code blocks |
-| Mono Small | berkeleyMono | 11px (0.69rem) | 400 | 1.33 | -0.275px | Inline code, terminal |
-| Lato Heading | Lato | 16px (1.00rem) | 600 | 1.33 | normal | Lato section headings |
-| Lato Caption | Lato | 14px (0.88rem) | 400-600 | 1.33 | normal | Lato captions |
-| Lato Micro | Lato | 12px (0.75rem) | 400-600 | 1.27 (tight) | 0.053px | Lato small labels |
+| CursorGothic | Display Hero | 72px (4.50rem) | 400 | 1.10 (tight) | -2.16px | Maximum compression, hero statements |
+| CursorGothic | Section Heading | 36px (2.25rem) | 400 | 1.20 (tight) | -0.72px | Feature sections, CTA headlines |
+| CursorGothic | Sub-heading | 26px (1.63rem) | 400 | 1.25 (tight) | -0.325px | Card headings, sub-sections |
+| CursorGothic | Title Small | 22px (1.38rem) | 400 | 1.30 (tight) | -0.11px | Smaller titles, list headings |
+| jjannon | Body Serif | 19.2px (1.20rem) | 500 | 1.50 | normal | Editorial body with `"cswh"` |
+| jjannon | Body Serif SM | 17.28px (1.08rem) | 400 | 1.35 | normal | Standard body text, descriptions |
+| CursorGothic | Body Sans | 16px (1.00rem) | 400 | 1.50 | normal/0.08px | UI body text |
+| CursorGothic | Button Label | 14px (0.88rem) | 400 | 1.00 (tight) | normal | Primary button text |
+| CursorGothic | Button Caption | 14px (0.88rem) | 400 | 1.50 | 0.14px | Secondary button with `"ss09"` |
+| CursorGothic | Caption | 11px (0.69rem) | 400-500 | 1.50 | normal | Small captions, metadata |
+| system-ui | System Heading | 20px (1.25rem) | 700 | 1.55 | normal | System UI headings |
+| system-ui | System Caption | 13px (0.81rem) | 500-600 | 1.33 | normal | System UI labels |
+| system-ui | System Micro | 11px (0.69rem) | 500 | 1.27 (tight) | 0.048px | Uppercase micro labels |
+| berkeleyMono | Mono Body | 12px (0.75rem) | 400 | 1.67 (relaxed) | normal | Code blocks |
+| berkeleyMono | Mono Small | 11px (0.69rem) | 400 | 1.33 | -0.275px | Inline code, terminal |
+| Lato | Lato Heading | 16px (1.00rem) | 600 | 1.33 | normal | Lato section headings |
+| Lato | Lato Caption | 14px (0.88rem) | 400-600 | 1.33 | normal | Lato captions |
+| Lato | Lato Micro | 12px (0.75rem) | 400-600 | 1.27 (tight) | 0.053px | Lato small labels |
 
 ### Principles
 - **Gothic compression for impact**: CursorGothic at display sizes uses -2.16px letter-spacing at 72px, progressively relaxing: -0.72px at 36px, -0.325px at 26px, -0.11px at 22px, normal at 16px and below. The tracking creates a sense of precision engineering.

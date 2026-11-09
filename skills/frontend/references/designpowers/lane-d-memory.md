@@ -21,20 +21,13 @@ Lane D records design context around frontend work. It can maintain a project-lo
 | Reflect after completion | [design-retrospective.md](memory/design-retrospective.md) | Record what worked, what did not, fix rounds, debt health, and lessons. |
 | Maintain observational design memory | Authored memory guidance | Store observations descriptively; do not feed them back as future project constraints. |
 | Produce a taste reflection on request | [design-retrospective.md](memory/design-retrospective.md) — longitudinal section | Summarize personal-layer observations only when evidence exists or the user asks. |
-| Route concepts into frontend | Frontend reference context | Frontend owns routing and mode language; no separate runtime is available. |
+| Route concepts into frontend | Frontend reference context | Frontend owns routing; no separate runtime is available. |
 
 Lane D records outputs when earlier phases contributed useful evidence.
 
 ## Optional project record
 
-Use a project-local record only when the project already has one or the user requests durable context. Keep it scannable and append-friendly:
-
-- current objective and locked decisions;
-- source inputs and explicit exclusions;
-- brief summary, personas, principles, taste signals, and success criteria;
-- decisions and rationale;
-- open questions and artifact index;
-- design debt, handoff notes, retrospective notes, and evidence index.
+Use a project-local record only when the project already has one or the user requests durable context. [orchestration.md](orchestration.md#shared-state) owns the record schema; keep the record scannable and append-friendly.
 
 ## Prompt injection
 
@@ -73,7 +66,6 @@ Lane D passes only when any record used is inspectable:
 - Accepted debt needs a rationale; accepted accessibility debt needs explicit user acknowledgement.
 - Design memory is a mirror, not a steering wheel.
 - Handoff text serves the next owner, not a narrative transcript.
-- No hooks, background schedulers, or extra runtime contracts belong to this lane.
 
 ## Pass / fail behavior
 

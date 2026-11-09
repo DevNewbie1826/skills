@@ -27,7 +27,7 @@ Typography is the primary structural and decorative infrastructure. Imagery is s
 
 ### 3.1 Macro-Typography (Structural Headers)
 *   **Classification:** Neo-Grotesque / Heavy Sans-Serif.
-*   **Optimal Web Fonts:** Neue Haas Grotesk (Black), Inter (Extra Bold/Black), Archivo Black, Roboto Flex (Heavy), Monument Extended.
+*   **Optimal Web Fonts:** Neue Haas Grotesk (Black), Inter (Extra Bold/Black only in this direction; [mockup-export-skill.md](mockup-export-skill.md) otherwise bans Inter for premium contexts), Archivo Black, Roboto Flex (Heavy), Monument Extended.
 *   **Implementation Parameters:**
     *   **Scale:** Deployed at massive scales using fluid typography (e.g., `clamp(4rem, 10vw, 15rem)`).
     *   **Tracking (Letter-spacing):** Extremely tight, often negative (`-0.03em` to `-0.06em`), forcing glyphs to form solid architectural blocks.

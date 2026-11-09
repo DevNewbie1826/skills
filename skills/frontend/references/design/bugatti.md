@@ -9,7 +9,7 @@ Read this when this reference is selected by the frontend router for a matching 
 
 Bugatti.com does not behave like a website — it behaves like a feature-length car film that a visitor happens to be standing inside. The canvas is pure `#000000`, the only color that appears at rest is white, and the entire page is carried by full-bleed hero video and photography with a single typographic moment laid over the top. There are no cards, no grids, no promotional modules, no newsletter signups, no three-column editorial layouts. It is one continuous cinema-black channel, interrupted only by the cars themselves and a few pill-shaped calls to action that quietly say things like "EXPLORE OUR OPPORTUNITIES" in ALL CAPS monospace.
 
-The single most distinctive move in the entire system is **scale**: the `Bugatti Display` typeface runs at **288px** at hero moments. Two hundred and eighty-eight pixels. That is not a typo — the dembrandt sweep extracted a heading style rendered at an 18rem size, ALL CAPS, line-height 1.0, meant to be read the way you read a brand mark on the front of a Chiron: from across a showroom floor. At 288px the headline is no longer text, it is architecture. The secondary display scale of 60px feels almost miniature next to it, and the 36px mid-display feels like fine print. This typographic hierarchy is the most extreme of any production brand website in this catalog, and it is what gives Bugatti.com its sculptural, couture-showroom presence.
+The single most distinctive move in the entire system is **scale**: the `Bugatti Display` typeface runs at **288px** at hero moments. Two hundred and eighty-eight pixels. That is not a typo — the hero heading is rendered at an 18rem size, ALL CAPS, line-height 1.0, meant to be read the way you read a brand mark on the front of a Chiron: from across a showroom floor. At 288px the headline is no longer text, it is architecture. The secondary display scale of 60px feels almost miniature next to it, and the 36px mid-display feels like fine print. This typographic hierarchy is the most extreme of any production brand website in this catalog, and it is what gives Bugatti.com its sculptural, couture-showroom presence.
 
 The other signature is **monochromatic austerity**. The entire homepage uses exactly three colors at rest: `#000000`, `#ffffff`, and `#999999` (mid gray for disabled/tertiary states). There is no accent, no brand blue, no hazard color, no commerce orange, no gradient wash. The designers have made a conscious decision that Bugatti's color system should be the car paint itself — the page is a black velvet display stand, and the only color that exists is whatever blue-on-black lacquer the hero vehicle happens to be wearing today. This discipline is the exact opposite of PlayStation's PlayStation Blue or The Verge's Jelly Mint: Bugatti refuses to compete with its own product.
 
@@ -53,28 +53,28 @@ None. There are zero decorative gradients on Bugatti.com. The only "gradient" on
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |---|---|---|---|---|---|---|
-| Hero Display (Monumental) | Bugatti Display | 288px / 18.00rem | 400 | 1.00 | — | ALL CAPS — the largest display scale in this catalog, architectural in presence |
-| Mid Display (Feature) | Bugatti Display | 60px / 3.75rem | 400 | 1.00 | 1.4px | Feature-panel headlines, ALL CAPS optional |
-| Mid Display (Subfeature) | Bugatti Display | 60px / 3.75rem | 400 | 1.00 | — | Secondary feature headlines |
-| Section Heading | Bugatti Display | 36px / 2.25rem | 400 | 1.11 | — | Section-level title |
-| Monumental Mono Headline | Bugatti Monospace | 60px / 3.75rem | 400 | 1.00 | — | UPPERCASE — reserved for technical/section labels at hero scale |
-| Body Small (Display) | Bugatti Display | 16px / 1.00rem | 400 | 1.50 | — | Display face used sparingly at body size for marketing copy |
-| Lead Body | Bugatti Text Regular | 20px / 1.25rem | 400 | 1.40 | — | Paragraph lead |
-| Body Regular | Bugatti Text Regular | 16px / 1.00rem | 400 | 1.50 | — | Standard reading body |
-| Body Compact | Bugatti Text Regular | 14px / 0.88rem | 400 | 1.43 | — | Dense body |
-| UI Link (Caps) | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — primary navigation and primary link style |
-| UI Link (Mono Plain) | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | — | Plain-case mono link — rare, used for disclaimer links |
-| Button Label (CAPS) | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — primary pill-button label |
-| Button Label (Compact) | Bugatti Monospace | 12px / 0.75rem | 400 | 1.33 | 1.2px | UPPERCASE — small pill-button label |
-| Button Label (Unstyled) | Bugatti Monospace | 12px / 0.75rem | 400 | 1.33 | — | Plain-case mono — footer microbutton |
-| Caption CAPS Wide | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — section eyebrows and tech-spec labels |
-| Caption Plain Wide | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | 1.4px | Plain-case with 1.4px tracking — the "mid-formal" register |
-| Caption Plain | Bugatti Monospace | 14px / 0.88rem | 400 | 1.43 | — | Plain mono caption |
-| Caption Micro (Text) | Bugatti Text Regular | 14px / 0.88rem | 400 | 1.43 | — | Body-face caption |
-| Caption Micro (CAPS) | Bugatti Monospace | 12px / 0.75rem | 400 | 1.33 | 1.2px | UPPERCASE — smallest tagging label |
-| Caption Micro (Plain) | Bugatti Monospace | 12px / 0.75rem | 400 | 1.33 | — | Smallest plain-case mono |
+| Bugatti Display | Hero Display (Monumental) | 288px / 18.00rem | 400 | 1.00 | — | ALL CAPS — the largest display scale in this catalog, architectural in presence |
+| Bugatti Display | Mid Display (Feature) | 60px / 3.75rem | 400 | 1.00 | 1.4px | Feature-panel headlines, ALL CAPS optional |
+| Bugatti Display | Mid Display (Subfeature) | 60px / 3.75rem | 400 | 1.00 | — | Secondary feature headlines |
+| Bugatti Display | Section Heading | 36px / 2.25rem | 400 | 1.11 | — | Section-level title |
+| Bugatti Monospace | Monumental Mono Headline | 60px / 3.75rem | 400 | 1.00 | — | UPPERCASE — reserved for technical/section labels at hero scale |
+| Bugatti Display | Body Small (Display) | 16px / 1.00rem | 400 | 1.50 | — | Display face used sparingly at body size for marketing copy |
+| Bugatti Text Regular | Lead Body | 20px / 1.25rem | 400 | 1.40 | — | Paragraph lead |
+| Bugatti Text Regular | Body Regular | 16px / 1.00rem | 400 | 1.50 | — | Standard reading body |
+| Bugatti Text Regular | Body Compact | 14px / 0.88rem | 400 | 1.43 | — | Dense body |
+| Bugatti Monospace | UI Link (Caps) | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — primary navigation and primary link style |
+| Bugatti Monospace | UI Link (Mono Plain) | 14px / 0.88rem | 400 | 1.43 | — | Plain-case mono link — rare, used for disclaimer links |
+| Bugatti Monospace | Button Label (CAPS) | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — primary pill-button label |
+| Bugatti Monospace | Button Label (Compact) | 12px / 0.75rem | 400 | 1.33 | 1.2px | UPPERCASE — small pill-button label |
+| Bugatti Monospace | Button Label (Unstyled) | 12px / 0.75rem | 400 | 1.33 | — | Plain-case mono — footer microbutton |
+| Bugatti Monospace | Caption CAPS Wide | 14px / 0.88rem | 400 | 1.43 | 1.4px | UPPERCASE — section eyebrows and tech-spec labels |
+| Bugatti Monospace | Caption Plain Wide | 14px / 0.88rem | 400 | 1.43 | 1.4px | Plain-case with 1.4px tracking — the "mid-formal" register |
+| Bugatti Monospace | Caption Plain | 14px / 0.88rem | 400 | 1.43 | — | Plain mono caption |
+| Bugatti Text Regular | Caption Micro (Text) | 14px / 0.88rem | 400 | 1.43 | — | Body-face caption |
+| Bugatti Monospace | Caption Micro (CAPS) | 12px / 0.75rem | 400 | 1.33 | 1.2px | UPPERCASE — smallest tagging label |
+| Bugatti Monospace | Caption Micro (Plain) | 12px / 0.75rem | 400 | 1.33 | — | Smallest plain-case mono |
 
 ### Principles
 - **Bugatti Display is a sculpture, not a font.** If you find yourself typesetting body copy or a button in Bugatti Display, you're using the wrong tool. Reserve this face for headlines at **36px minimum**, ideally 60px+, and at least once per page use it at 200px+ to create the monumental effect the brand is built around.
@@ -160,7 +160,7 @@ The 1.00 line-height and 288px display scale both assume the **proprietary Bugat
 - **Inline spacing**: 4–12px between stacked labels; the big jump to 36/48/64 happens between content blocks.
 
 ### Grid & Container
-- **Max width**: 1720px (dembrandt detected breakpoints up to 1720). The site scales to ultra-wide for luxury showroom displays and wide cinema monitors.
+- **Max width**: 1720px. The site scales to ultra-wide for luxury showroom displays and wide cinema monitors.
 - **Column patterns**: there is essentially no multi-column grid on the homepage — it is a stack of single full-width blocks. When deeper pages need columns (configurator, atelier, technical specs), they use a 12-column Tailwind-based grid.
 - **Outer padding**: minimal. Most sections bleed to the viewport edge, with padding only applied to the overlaid text and CTA block (typically 48–64px from the bottom-center).
 
@@ -225,7 +225,7 @@ None. Zero gradients (except the subtle text-legibility vignette), zero blurs, z
 | Large Desktop | 1536–1719px | Max headline scale (288px), ultra-wide hero video |
 | Ultra-Wide | ≥1720px | Container caps, hero video locks at 21:9 or wider, everything else stays proportional |
 
-The dembrandt sweep detected 6 breakpoints (1720 → 1536 → 1280 → 1024 → 768 → 640). This is a narrower responsive set than PlayStation's 30 — Bugatti tunes for six clean thresholds rather than micro-adjusting every device boundary. The brand's assumption is that its visitors are either on a high-end laptop, a desktop monitor, or a phone, and the site doesn't need to fuss over everything in between.
+The site defines 6 breakpoints (1720 → 1536 → 1280 → 1024 → 768 → 640). This is a narrower responsive set than PlayStation's 30 — Bugatti tunes for six clean thresholds rather than micro-adjusting every device boundary. The brand's assumption is that its visitors are either on a high-end laptop, a desktop monitor, or a phone, and the site doesn't need to fuss over everything in between.
 
 ### Touch Targets
 - Primary pill buttons are `12px 24px` padded with 14px text — approximately 38–42px tall. **This falls slightly below WCAG AAA 44px recommendations**. For derivative work, bump vertical padding to 14–16px to hit 44px+.
@@ -262,7 +262,7 @@ The dembrandt sweep detected 6 breakpoints (1720 → 1536 → 1280 → 1024 → 
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

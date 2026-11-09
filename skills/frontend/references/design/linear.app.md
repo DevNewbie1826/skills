@@ -77,35 +77,35 @@ The color system is almost entirely achromatic — dark backgrounds with white/g
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display XL | Inter Variable | 72px (4.50rem) | 510 | 1.00 (tight) | -1.584px | Hero headlines, maximum impact |
-| Display Large | Inter Variable | 64px (4.00rem) | 510 | 1.00 (tight) | -1.408px | Secondary hero text |
-| Display | Inter Variable | 48px (3.00rem) | 510 | 1.00 (tight) | -1.056px | Section headlines |
-| Heading 1 | Inter Variable | 32px (2.00rem) | 400 | 1.13 (tight) | -0.704px | Major section titles |
-| Heading 2 | Inter Variable | 24px (1.50rem) | 400 | 1.33 | -0.288px | Sub-section headings |
-| Heading 3 | Inter Variable | 20px (1.25rem) | 590 | 1.33 | -0.24px | Feature titles, card headers |
-| Body Large | Inter Variable | 18px (1.13rem) | 400 | 1.60 (relaxed) | -0.165px | Introduction text, feature descriptions |
-| Body Emphasis | Inter Variable | 17px (1.06rem) | 590 | 1.60 (relaxed) | normal | Emphasized body, sub-headings in content |
-| Body | Inter Variable | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
-| Body Medium | Inter Variable | 16px (1.00rem) | 510 | 1.50 | normal | Navigation, labels |
-| Body Semibold | Inter Variable | 16px (1.00rem) | 590 | 1.50 | normal | Strong emphasis |
-| Small | Inter Variable | 15px (0.94rem) | 400 | 1.60 (relaxed) | -0.165px | Secondary body text |
-| Small Medium | Inter Variable | 15px (0.94rem) | 510 | 1.60 (relaxed) | -0.165px | Emphasized small text |
-| Small Semibold | Inter Variable | 15px (0.94rem) | 590 | 1.60 (relaxed) | -0.165px | Strong small text |
-| Small Light | Inter Variable | 15px (0.94rem) | 300 | 1.47 | -0.165px | De-emphasized body |
-| Caption Large | Inter Variable | 14px (0.88rem) | 510–590 | 1.50 | -0.182px | Sub-labels, category headers |
-| Caption | Inter Variable | 13px (0.81rem) | 400–510 | 1.50 | -0.13px | Metadata, timestamps |
-| Label | Inter Variable | 12px (0.75rem) | 400–590 | 1.40 | normal | Button text, small labels |
-| Micro | Inter Variable | 11px (0.69rem) | 510 | 1.40 | normal | Tiny labels |
-| Tiny | Inter Variable | 10px (0.63rem) | 400–510 | 1.50 | -0.15px | Overline text, sometimes uppercase |
-| Link Large | Inter Variable | 16px (1.00rem) | 400 | 1.50 | normal | Standard links |
-| Link Medium | Inter Variable | 15px (0.94rem) | 510 | 2.67 | normal | Spaced navigation links |
-| Link Small | Inter Variable | 14px (0.88rem) | 510 | 1.50 | normal | Compact links |
-| Link Caption | Inter Variable | 13px (0.81rem) | 400–510 | 1.50 | -0.13px | Footer, metadata links |
-| Mono Body | Berkeley Mono | 14px (0.88rem) | 400 | 1.50 | normal | Code blocks |
-| Mono Caption | Berkeley Mono | 13px (0.81rem) | 400 | 1.50 | normal | Code labels |
-| Mono Label | Berkeley Mono | 12px (0.75rem) | 400 | 1.40 | normal | Code metadata, sometimes uppercase |
+| Inter Variable | Display XL | 72px (4.50rem) | 510 | 1.00 (tight) | -1.584px | Hero headlines, maximum impact |
+| Inter Variable | Display Large | 64px (4.00rem) | 510 | 1.00 (tight) | -1.408px | Secondary hero text |
+| Inter Variable | Display | 48px (3.00rem) | 510 | 1.00 (tight) | -1.056px | Section headlines |
+| Inter Variable | Heading 1 | 32px (2.00rem) | 400 | 1.13 (tight) | -0.704px | Major section titles |
+| Inter Variable | Heading 2 | 24px (1.50rem) | 400 | 1.33 | -0.288px | Sub-section headings |
+| Inter Variable | Heading 3 | 20px (1.25rem) | 590 | 1.33 | -0.24px | Feature titles, card headers |
+| Inter Variable | Body Large | 18px (1.13rem) | 400 | 1.60 (relaxed) | -0.165px | Introduction text, feature descriptions |
+| Inter Variable | Body Emphasis | 17px (1.06rem) | 590 | 1.60 (relaxed) | normal | Emphasized body, sub-headings in content |
+| Inter Variable | Body | 16px (1.00rem) | 400 | 1.50 | normal | Standard reading text |
+| Inter Variable | Body Medium | 16px (1.00rem) | 510 | 1.50 | normal | Navigation, labels |
+| Inter Variable | Body Semibold | 16px (1.00rem) | 590 | 1.50 | normal | Strong emphasis |
+| Inter Variable | Small | 15px (0.94rem) | 400 | 1.60 (relaxed) | -0.165px | Secondary body text |
+| Inter Variable | Small Medium | 15px (0.94rem) | 510 | 1.60 (relaxed) | -0.165px | Emphasized small text |
+| Inter Variable | Small Semibold | 15px (0.94rem) | 590 | 1.60 (relaxed) | -0.165px | Strong small text |
+| Inter Variable | Small Light | 15px (0.94rem) | 300 | 1.47 | -0.165px | De-emphasized body |
+| Inter Variable | Caption Large | 14px (0.88rem) | 510–590 | 1.50 | -0.182px | Sub-labels, category headers |
+| Inter Variable | Caption | 13px (0.81rem) | 400–510 | 1.50 | -0.13px | Metadata, timestamps |
+| Inter Variable | Label | 12px (0.75rem) | 400–590 | 1.40 | normal | Button text, small labels |
+| Inter Variable | Micro | 11px (0.69rem) | 510 | 1.40 | normal | Tiny labels |
+| Inter Variable | Tiny | 10px (0.63rem) | 400–510 | 1.50 | -0.15px | Overline text, sometimes uppercase |
+| Inter Variable | Link Large | 16px (1.00rem) | 400 | 1.50 | normal | Standard links |
+| Inter Variable | Link Medium | 15px (0.94rem) | 510 | 2.67 | normal | Spaced navigation links |
+| Inter Variable | Link Small | 14px (0.88rem) | 510 | 1.50 | normal | Compact links |
+| Inter Variable | Link Caption | 13px (0.81rem) | 400–510 | 1.50 | -0.13px | Footer, metadata links |
+| Berkeley Mono | Mono Body | 14px (0.88rem) | 400 | 1.50 | normal | Code blocks |
+| Berkeley Mono | Mono Caption | 13px (0.81rem) | 400 | 1.50 | normal | Code labels |
+| Berkeley Mono | Mono Label | 12px (0.75rem) | 400 | 1.40 | normal | Code metadata, sometimes uppercase |
 
 ### Principles
 - **510 is the signature weight**: Linear uses Inter Variable's 510 weight (between regular 400 and medium 500) as its default emphasis weight. This creates a subtly bolded feel without the heaviness of traditional medium or semibold.

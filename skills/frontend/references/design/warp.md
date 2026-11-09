@@ -67,27 +67,27 @@ The overall design philosophy is restraint through warmth. Minimal color (almost
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Matter Regular | 80px | 400 | 1.00 | -2.4px | Maximum compression, hero impact |
-| Section Display | Matter Regular | 56px | 400 | 1.20 | -0.56px | Feature section headings |
-| Section Heading | Matter Regular | 48px | 400 | 1.20 | -0.48px to -0.96px | Alternate heading weight |
-| Feature Heading | Matter Regular | 40px | 400 | 1.10 | -0.4px | Feature block titles |
-| Sub-heading Large | Matter Regular | 36px | 400 | 1.15 | -0.72px | Sub-section headers |
-| Card Display | Matter SQ Regular | 42px | 400 | 1.00 | 0px | Squared variant for special display |
-| Sub-heading | Matter Regular | 32px | 400 | 1.19 | 0px | Content sub-headings |
-| Body Heading | Matter Regular | 24px | 400 | 1.20 | -0.72px to 0px | Bold content intros |
-| Card Title | Matter Medium | 22px | 500 | 1.14 | 0px | Emphasized card headers |
-| Body Large | Matter Regular | 20px | 400 | 1.40 | -0.2px | Primary body text, relaxed |
-| Body | Matter Regular | 18px | 400 | 1.30 | -0.18px | Standard body paragraphs |
-| Nav/UI | Matter Regular | 16px | 400 | 1.20 | 0px | Navigation links, UI text |
-| Button Text | Matter Medium | 16px | 500 | 1.20 | 0px | Button labels |
-| Caption | Matter Regular | 14px | 400 | 1.00 | 1.4px | Uppercase labels (transform: uppercase) |
-| Small Label | Matter Regular | 12px | 400 | 1.35 | 2.4px | Uppercase micro-labels (transform: uppercase) |
-| Micro | Matter Regular | 11px | 400 | 1.20 | 0px | Smallest text elements |
-| Code UI | Geist Mono | 16px | 400 | 1.00 | 0px | Terminal/code display |
-| Code Body | Matter Mono Regular | 16px | 400 | 1.00 | -0.2px | Code content |
-| UI Supplement | Inter | 16px | 500 | 1.00 | -0.2px | Specific UI elements |
+| Matter Regular | Display Hero | 80px | 400 | 1.00 | -2.4px | Maximum compression, hero impact |
+| Matter Regular | Section Display | 56px | 400 | 1.20 | -0.56px | Feature section headings |
+| Matter Regular | Section Heading | 48px | 400 | 1.20 | -0.48px to -0.96px | Alternate heading weight |
+| Matter Regular | Feature Heading | 40px | 400 | 1.10 | -0.4px | Feature block titles |
+| Matter Regular | Sub-heading Large | 36px | 400 | 1.15 | -0.72px | Sub-section headers |
+| Matter SQ Regular | Card Display | 42px | 400 | 1.00 | 0px | Squared variant for special display |
+| Matter Regular | Sub-heading | 32px | 400 | 1.19 | 0px | Content sub-headings |
+| Matter Regular | Body Heading | 24px | 400 | 1.20 | -0.72px to 0px | Bold content intros |
+| Matter Medium | Card Title | 22px | 500 | 1.14 | 0px | Emphasized card headers |
+| Matter Regular | Body Large | 20px | 400 | 1.40 | -0.2px | Primary body text, relaxed |
+| Matter Regular | Body | 18px | 400 | 1.30 | -0.18px | Standard body paragraphs |
+| Matter Regular | Nav/UI | 16px | 400 | 1.20 | 0px | Navigation links, UI text |
+| Matter Medium | Button Text | 16px | 500 | 1.20 | 0px | Button labels |
+| Matter Regular | Caption | 14px | 400 | 1.00 | 1.4px | Uppercase labels (transform: uppercase) |
+| Matter Regular | Small Label | 12px | 400 | 1.35 | 2.4px | Uppercase micro-labels (transform: uppercase) |
+| Matter Regular | Micro | 11px | 400 | 1.20 | 0px | Smallest text elements |
+| Geist Mono | Code UI | 16px | 400 | 1.00 | 0px | Terminal/code display |
+| Matter Mono Regular | Code Body | 16px | 400 | 1.00 | -0.2px | Code content |
+| Inter | UI Supplement | 16px | 500 | 1.00 | -0.2px | Specific UI elements |
 
 ### Principles
 - **Regular weight dominance**: Nearly all text uses weight 400 (Regular) — even headlines. Matter Medium (500) appears only for emphasis moments like card titles and buttons. This creates a remarkably even, calm typographic texture
@@ -196,7 +196,7 @@ Warp's elevation system is remarkably flat — almost zero shadow usage on the m
 - Keep negative letter-spacing on headlines (-0.4px to -2.4px) for Matter's compressed display treatment
 
 ### Don't
-- Use pure white (#ffffff) for text — it's always warm parchment (#faf9f6)
+- Don't use pure white (#ffffff) for text — it renders as warm parchment (#faf9f6)
 - Add bold accent colors (blue, red, green) — the system is deliberately monochromatic warm grays
 - Apply bold weight (700+) to any text — Warp never goes above Medium (500)
 - Use heavy drop shadows — depth comes from borders, photography, and opacity shifts
@@ -251,7 +251,7 @@ Warp's elevation system is remarkably flat — almost zero shadow usage on the m
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

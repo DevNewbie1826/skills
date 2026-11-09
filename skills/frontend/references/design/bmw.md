@@ -50,14 +50,14 @@ What makes BMW distinctive is its CSS variable-driven theming system. Context-aw
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Notes |
+| Font | Role | Size | Weight | Line Height | Notes |
 |------|------|------|--------|-------------|-------|
-| Display Hero | BMWTypeNextLatin Light | 60px (3.75rem) | 300 | 1.30 (tight) | `text-transform: uppercase` |
-| Section Heading | BMWTypeNextLatin | 32px (2.00rem) | 400 | 1.30 (tight) | Major section titles |
-| Nav Emphasis | BMWTypeNextLatin | 18px (1.13rem) | 900 | 1.30 (tight) | Navigation bold items |
-| Body | BMWTypeNextLatin | 16px (1.00rem) | 400 | 1.15 (tight) | Standard body text |
-| Button Bold | BMWTypeNextLatin | 16px (1.00rem) | 700 | 1.20–2.88 | CTA buttons |
-| Button | BMWTypeNextLatin | 16px (1.00rem) | 400 | 1.15 (tight) | Standard buttons |
+| BMWTypeNextLatin Light | Display Hero | 60px (3.75rem) | 300 | 1.30 (tight) | `text-transform: uppercase` |
+| BMWTypeNextLatin | Section Heading | 32px (2.00rem) | 400 | 1.30 (tight) | Major section titles |
+| BMWTypeNextLatin | Nav Emphasis | 18px (1.13rem) | 900 | 1.30 (tight) | Navigation bold items |
+| BMWTypeNextLatin | Body | 16px (1.00rem) | 400 | 1.15 (tight) | Standard body text |
+| BMWTypeNextLatin | Button Bold | 16px (1.00rem) | 700 | 1.20–2.88 | CTA buttons |
+| BMWTypeNextLatin | Button | 16px (1.00rem) | 400 | 1.15 (tight) | Standard buttons |
 
 ### Principles
 - **Light display, heavy navigation**: Weight 300 for hero headlines creates whispered elegance; weight 900 for navigation creates stark authority. This extreme weight contrast (300 vs 900) is the signature typographic tension.

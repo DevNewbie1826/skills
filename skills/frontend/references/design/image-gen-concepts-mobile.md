@@ -90,7 +90,7 @@ Generate mobile screen images and screen-flow images only.
 
 - DESIGN_VARIANCE: 8  
   `(1 = rigid / standard, 10 = highly art-directed / varied)`
-- VISUAL_DENSITY: 3  
+- VISUAL_DENSITY: 4  
   `(1 = airy / calm, 10 = dense / packed)`
 - ART_DIRECTION: 9  
   `(1 = safe utility UI, 10 = bold premium mobile statement)`
@@ -126,6 +126,8 @@ Generate mobile screen images and screen-flow images only.
   `(1 = device frame dominates, 10 = device frame supports the screen but content remains the hero)`
 - MIN_TEXT_SIZE_DISCIPLINE: 10  
   `(1 = small text acceptable, 10 = text must never feel too small at normal viewing size)`
+
+The shared dials (`DESIGN_VARIANCE`, `VISUAL_DENSITY`) follow the `8 / 6 / 4` baseline owned by [taste-skill.md](taste-skill.md); the remaining dials are specific to mobile image concepts.
 
 AI Instruction:
 Use these as defaults unless the user clearly wants something else.

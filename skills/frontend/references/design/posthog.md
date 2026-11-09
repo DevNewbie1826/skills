@@ -68,25 +68,25 @@ The interaction design carries the same spirit: hover states flash PostHog Orang
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | IBM Plex Sans Variable | 30px | 800 | 1.20 | -0.75px | Extra-bold, tight, maximum impact |
-| Section Heading | IBM Plex Sans Variable | 36px | 700 | 1.50 | 0px | Large but generous line-height |
-| Feature Heading | IBM Plex Sans Variable | 24px | 700 | 1.33 | 0px | Feature section titles |
-| Card Heading | IBM Plex Sans Variable | 21.4px | 700 | 1.40 | -0.54px | Slightly unusual size (scaled) |
-| Sub-heading | IBM Plex Sans Variable | 20px | 700 | 1.40 | -0.5px | Content sub-sections |
-| Sub-heading Uppercase | IBM Plex Sans Variable | 20px | 700 | 1.40 | 0px | Uppercase transform for labels |
-| Body Emphasis | IBM Plex Sans Variable | 19.3px | 600 | 1.56 | -0.48px | Semi-bold callout text |
-| Label Uppercase | IBM Plex Sans Variable | 18px | 700 | 1.50 | 0px | Uppercase category labels |
-| Body Semi | IBM Plex Sans Variable | 18px | 600 | 1.56 | 0px | Semi-bold body text |
-| Body | IBM Plex Sans Variable | 16px | 400 | 1.50 | 0px | Standard reading text |
-| Body Medium | IBM Plex Sans Variable | 16px | 500 | 1.50 | 0px | Medium-weight body |
-| Body Relaxed | IBM Plex Sans Variable | 15px | 400 | 1.71 | 0px | Relaxed line-height for long reads |
-| Nav / UI | IBM Plex Sans Variable | 15px | 600 | 1.50 | 0px | Navigation and UI labels |
-| Caption | IBM Plex Sans Variable | 14px | 400–700 | 1.43 | 0px | Small text, various weights |
-| Small Label | IBM Plex Sans Variable | 13px | 500–700 | 1.00–1.50 | 0px | Tags, badges, micro labels |
-| Micro | IBM Plex Sans Variable | 12px | 400–700 | 1.33 | 0px | Smallest text, some uppercase |
-| Code | Source Code Pro | 14px | 500 | 1.43 | 0px | Code snippets and terminal |
+| IBM Plex Sans Variable | Display Hero | 30px | 800 | 1.20 | -0.75px | Extra-bold, tight, maximum impact |
+| IBM Plex Sans Variable | Section Heading | 36px | 700 | 1.50 | 0px | Large but generous line-height |
+| IBM Plex Sans Variable | Feature Heading | 24px | 700 | 1.33 | 0px | Feature section titles |
+| IBM Plex Sans Variable | Card Heading | 21.4px | 700 | 1.40 | -0.54px | Slightly unusual size (scaled) |
+| IBM Plex Sans Variable | Sub-heading | 20px | 700 | 1.40 | -0.5px | Content sub-sections |
+| IBM Plex Sans Variable | Sub-heading Uppercase | 20px | 700 | 1.40 | 0px | Uppercase transform for labels |
+| IBM Plex Sans Variable | Body Emphasis | 19.3px | 600 | 1.56 | -0.48px | Semi-bold callout text |
+| IBM Plex Sans Variable | Label Uppercase | 18px | 700 | 1.50 | 0px | Uppercase category labels |
+| IBM Plex Sans Variable | Body Semi | 18px | 600 | 1.56 | 0px | Semi-bold body text |
+| IBM Plex Sans Variable | Body | 16px | 400 | 1.50 | 0px | Standard reading text |
+| IBM Plex Sans Variable | Body Medium | 16px | 500 | 1.50 | 0px | Medium-weight body |
+| IBM Plex Sans Variable | Body Relaxed | 15px | 400 | 1.71 | 0px | Relaxed line-height for long reads |
+| IBM Plex Sans Variable | Nav / UI | 15px | 600 | 1.50 | 0px | Navigation and UI labels |
+| IBM Plex Sans Variable | Caption | 14px | 400–700 | 1.43 | 0px | Small text, various weights |
+| IBM Plex Sans Variable | Small Label | 13px | 500–700 | 1.00–1.50 | 0px | Tags, badges, micro labels |
+| IBM Plex Sans Variable | Micro | 12px | 400–700 | 1.33 | 0px | Smallest text, some uppercase |
+| Source Code Pro | Code | 14px | 500 | 1.43 | 0px | Code snippets and terminal |
 
 ### Principles
 - **Bold heading dominance**: Headings use 700–800 weight — PostHog's typography is confident and assertive, not whispery
@@ -254,7 +254,7 @@ PostHog's elevation system is remarkably minimal — only one shadow definition 
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

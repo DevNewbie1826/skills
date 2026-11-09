@@ -74,22 +74,22 @@ What makes MiniMax distinctive is its pill-button geometry (9999px radius) for n
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Notes |
+| Font | Role | Size | Weight | Line Height | Notes |
 |------|------|------|--------|-------------|-------|
-| Display Hero | DM Sans / Outfit | 80px (5.00rem) | 500 | 1.10 (tight) | Hero headlines |
-| Section Heading | Outfit | 31px (1.94rem) | 600 | 1.50 | Feature section titles |
-| Section Heading Alt | Roboto / DM Sans | 32px (2.00rem) | 600 | 0.88 (tight) | Compact headers |
-| Card Title | Outfit | 28px (1.75rem) | 500–600 | 1.71 (relaxed) | Product card headings |
-| Sub-heading | Poppins | 24px (1.50rem) | 500 | 1.50 | Mid-tier headings |
-| Feature Label | Poppins | 18px (1.13rem) | 500 | 1.50 | Feature names |
-| Body Large | DM Sans | 20px (1.25rem) | 500 | 1.50 | Emphasized body |
-| Body | DM Sans | 16px (1.00rem) | 400–500 | 1.50 | Standard body text |
-| Body Bold | DM Sans | 16px (1.00rem) | 700 | 1.50 | Strong emphasis |
-| Nav/Link | DM Sans | 14px (0.88rem) | 400–500 | 1.50 | Navigation, links |
-| Button Small | DM Sans | 13px (0.81rem) | 600 | 1.50 | Compact buttons |
-| Caption | DM Sans / Poppins | 13px (0.81rem) | 400 | 1.70 (relaxed) | Metadata |
-| Small Label | DM Sans | 12px (0.75rem) | 500–600 | 1.25–1.50 | Tags, badges |
-| Micro | DM Sans / Outfit | 10px (0.63rem) | 400–500 | 1.50–1.80 | Tiny annotations |
+| DM Sans / Outfit | Display Hero | 80px (5.00rem) | 500 | 1.10 (tight) | Hero headlines |
+| Outfit | Section Heading | 31px (1.94rem) | 600 | 1.50 | Feature section titles |
+| Roboto / DM Sans | Section Heading Alt | 32px (2.00rem) | 600 | 0.88 (tight) | Compact headers |
+| Outfit | Card Title | 28px (1.75rem) | 500–600 | 1.71 (relaxed) | Product card headings |
+| Poppins | Sub-heading | 24px (1.50rem) | 500 | 1.50 | Mid-tier headings |
+| Poppins | Feature Label | 18px (1.13rem) | 500 | 1.50 | Feature names |
+| DM Sans | Body Large | 20px (1.25rem) | 500 | 1.50 | Emphasized body |
+| DM Sans | Body | 16px (1.00rem) | 400–500 | 1.50 | Standard body text |
+| DM Sans | Body Bold | 16px (1.00rem) | 700 | 1.50 | Strong emphasis |
+| DM Sans | Nav/Link | 14px (0.88rem) | 400–500 | 1.50 | Navigation, links |
+| DM Sans | Button Small | 13px (0.81rem) | 600 | 1.50 | Compact buttons |
+| DM Sans / Poppins | Caption | 13px (0.81rem) | 400 | 1.70 (relaxed) | Metadata |
+| DM Sans | Small Label | 12px (0.75rem) | 500–600 | 1.25–1.50 | Tags, badges |
+| DM Sans / Outfit | Micro | 10px (0.63rem) | 400–500 | 1.50–1.80 | Tiny annotations |
 
 ### Principles
 - **Multi-font purpose**: DM Sans = UI workhorse (body, nav, buttons); Outfit = geometric display (headings, product names); Poppins = friendly mid-tier (sub-headings, features); Roboto = technical/data contexts.

@@ -66,29 +66,29 @@ The Verge uses **zero decorative gradients**. The only gradient-like treatment i
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |---|---|---|---|---|---|---|
-| Hero Wordmark / Display | Manuka | 107px / 6.69rem | 900 | 0.80 | 1.07px | The top-of-page "The Verge" logo and feature headlines |
-| Secondary Display | Manuka | 90px / 5.63rem | 900 | 0.80 | — | Section-level feature headlines |
-| Tertiary Display | Manuka | 60px / 3.75rem | 900 | 0.80 | — | Inline feature callouts |
-| Large Headline | PolySans | 34px / 2.13rem | 700 | 1.00 | — | Section and module headlines |
-| Heading Wide | PolySans | 32px / 2.00rem | 400 | 1.10 | 0.32px | Sub-heroes, promotional units |
-| Heading Medium | PolySans | 24px / 1.50rem | 700 | 1.00 | — | Story tile headlines in the main feed |
-| Heading Small | PolySans | 20px / 1.25rem | 700 | 1.00 | — | Compact tile headlines |
-| Light Capitalized Label | PolySans | 19px / 1.19rem | 300 | 1.20 | 1.9px | Thin-weight capitalized eyebrows — a distinctive Verge move |
-| All-Caps Label XL | PolySans | 18px / 1.13rem | 400 | 1.10 | 1.8px | UPPERCASE section kickers |
-| Bold Body | PolySans | 16px / 1.00rem | 700 | 1.00 | — | Emphasis within decks |
-| Body Relaxed | PolySans | 16px / 1.00rem | 500 | 1.60 | — | Long-form reading body |
-| Inline Label | PolySans | 15px / 0.94rem | 400 | 1.20 | 0.15px | UI labels and secondary headlines |
-| Body Compact | PolySans | 13px / 0.81rem | 400 | 1.60 | — | Secondary captions and decks |
-| Eyebrow All-Caps | PolySans | 12px / 0.75rem | 400 | 1.30 | 1.8px | UPPERCASE kicker above tile headlines |
-| Tag Label | PolySans | 12px / 0.75rem | 400 | 1.20 | 0.72px | UPPERCASE category tag |
-| Caption Micro | PolySans | 11px / 0.69rem | 400 | 1.20 | 1.1px | UPPERCASE bylines |
-| Meta Nano | PolySans | 10px / 0.63rem | 500 | 1.40 | 1.5px | UPPERCASE timestamp microtext |
-| Mono Button Label | PolySans Mono | 12px / 0.75rem | 600 | 2.00 | 1.5px | UPPERCASE button text, very open leading |
-| Mono Timestamp | PolySans Mono | 11px / 0.69rem | 500/600 | 1.20 | 1.1–1.8px | UPPERCASE StoryStream timestamps |
-| Serif Body | FK Roman Standard | 16px / 1.00rem | 400 | 1.30 | -0.16px | Review decks, print-voice excerpts |
-| Serif Caption | FK Roman Standard | 20px / 1.25rem | 400 | 1.20 | — | Magazine-style pull quotes |
+| Manuka | Hero Wordmark / Display | 107px / 6.69rem | 900 | 0.80 | 1.07px | The top-of-page "The Verge" logo and feature headlines |
+| Manuka | Secondary Display | 90px / 5.63rem | 900 | 0.80 | — | Section-level feature headlines |
+| Manuka | Tertiary Display | 60px / 3.75rem | 900 | 0.80 | — | Inline feature callouts |
+| PolySans | Large Headline | 34px / 2.13rem | 700 | 1.00 | — | Section and module headlines |
+| PolySans | Heading Wide | 32px / 2.00rem | 400 | 1.10 | 0.32px | Sub-heroes, promotional units |
+| PolySans | Heading Medium | 24px / 1.50rem | 700 | 1.00 | — | Story tile headlines in the main feed |
+| PolySans | Heading Small | 20px / 1.25rem | 700 | 1.00 | — | Compact tile headlines |
+| PolySans | Light Capitalized Label | 19px / 1.19rem | 300 | 1.20 | 1.9px | Thin-weight capitalized eyebrows — a distinctive Verge move |
+| PolySans | All-Caps Label XL | 18px / 1.13rem | 400 | 1.10 | 1.8px | UPPERCASE section kickers |
+| PolySans | Bold Body | 16px / 1.00rem | 700 | 1.00 | — | Emphasis within decks |
+| PolySans | Body Relaxed | 16px / 1.00rem | 500 | 1.60 | — | Long-form reading body |
+| PolySans | Inline Label | 15px / 0.94rem | 400 | 1.20 | 0.15px | UI labels and secondary headlines |
+| PolySans | Body Compact | 13px / 0.81rem | 400 | 1.60 | — | Secondary captions and decks |
+| PolySans | Eyebrow All-Caps | 12px / 0.75rem | 400 | 1.30 | 1.8px | UPPERCASE kicker above tile headlines |
+| PolySans | Tag Label | 12px / 0.75rem | 400 | 1.20 | 0.72px | UPPERCASE category tag |
+| PolySans | Caption Micro | 11px / 0.69rem | 400 | 1.20 | 1.1px | UPPERCASE bylines |
+| PolySans | Meta Nano | 10px / 0.63rem | 500 | 1.40 | 1.5px | UPPERCASE timestamp microtext |
+| PolySans Mono | Mono Button Label | 12px / 0.75rem | 600 | 2.00 | 1.5px | UPPERCASE button text, very open leading |
+| PolySans Mono | Mono Timestamp | 11px / 0.69rem | 500/600 | 1.20 | 1.1–1.8px | UPPERCASE StoryStream timestamps |
+| FK Roman Standard | Serif Body | 16px / 1.00rem | 400 | 1.30 | -0.16px | Review decks, print-voice excerpts |
+| FK Roman Standard | Serif Caption | 20px / 1.25rem | 400 | 1.20 | — | Magazine-style pull quotes |
 
 ### Principles
 - **Manuka is always the hero, never the UI.** If you see Manuka below 60px you're looking at a bug. It exists to *shout the brand*, not to label a button.
@@ -214,7 +214,7 @@ The 0.80 line-height on Manuka display (107px, 90px, 60px) assumes the **proprie
 - **Micro-scale**: The 2/4/5/6/9/10px values are used inside buttons, pills, and tight label clusters, not in the editorial grid.
 
 ### Grid & Container
-- **Max width**: ~1280–1300px (dembrandt detected breakpoints at 1200/1280/1300).
+- **Max width**: ~1280–1300px.
 - **Column patterns**: a 12-column underlying grid that resolves into 3-column hero + 1-column StoryStream rail + feature panels. The homepage feels freeform because color-block tiles frequently span 2–3 columns on a whim.
 - **Container padding**: 24px mobile / 48px desktop on the outer edges.
 - **Gutters**: 16–24px between columns, tighter (8–12px) inside StoryStream items.
@@ -247,7 +247,7 @@ Eight discrete radius values — a **lot** for a single site. This is deliberate
 | 6 | `0px -1px 0px 0px inset` (mint/black/white) | Active tab underline — a signature Verge move |
 | 7 | Saturated accent fill (`#3cffd0`, `#5200ff`, white, yellow, pink) | Story-tile elevation via color, not shadow |
 
-The Verge's depth philosophy is **color-as-elevation**. When something needs to stand out, it doesn't get a shadow — it gets a mint fill or a 1px hazard-color border. There are 14 shadow entries in the extracted tokens, but all of them are either inset underlines (0px -1px inset) or near-transparent 1px rings — none of them are traditional elevation shadows. The `#131313` canvas stays perfectly flat throughout, and hierarchy is carried by color saturation.
+The Verge's depth philosophy is **color-as-elevation**. When something needs to stand out, it doesn't get a shadow — it gets a mint fill or a 1px hazard-color border. There are 14 shadow entries in the tokens, but all of them are either inset underlines (0px -1px inset) or near-transparent 1px rings — none of them are traditional elevation shadows. The `#131313` canvas stays perfectly flat throughout, and hierarchy is carried by color saturation.
 
 ### Decorative Depth
 - **1px inset underline** on active tabs/nav links (mint, black, or white depending on context)
@@ -294,7 +294,7 @@ The Verge's depth philosophy is **color-as-elevation**. When something needs to 
 | Desktop | 1180–1299px | Max padding, Manuka wordmark at full hero scale |
 | Large Desktop | ≥1300px | Container caps at ~1280–1300px, whitespace expands at the margins, no further scaling |
 
-The dembrandt sweep detected 26 intermediate breakpoints (1300 → 1280 → 1200 → 1181 → 1180 → 1179 → 1024 → 1023 → 901 → 900 → 897 → 896 → 890 → 769 → 768 → 620 → 605 → 600 → 550 → 549 → 530 → 426 → 425 → 400 → 320). The Verge tunes its grid at virtually every major device boundary — an unusually aggressive responsive strategy.
+The site defines 26 intermediate breakpoints (1300 → 1280 → 1200 → 1181 → 1180 → 1179 → 1024 → 1023 → 901 → 900 → 897 → 896 → 890 → 769 → 768 → 620 → 605 → 600 → 550 → 549 → 530 → 426 → 425 → 400 → 320). The Verge tunes its grid at virtually every major device boundary — an unusually aggressive responsive strategy.
 
 ### Touch Targets
 - Primary pill buttons are ~44px minimum height (10px vertical padding + 16px text + 2px border) — meets WCAG AA.
@@ -335,7 +335,7 @@ The dembrandt sweep detected 26 intermediate breakpoints (1300 → 1280 → 1200
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

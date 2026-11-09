@@ -73,21 +73,21 @@ The component system uses the `mds` (Markdown Design System) prefix, indicating 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |------|------|------|--------|-------------|----------------|-------|
-| Display Hero | HashiCorp Sans | 82px (5.13rem) | 600 | 1.17 (tight) | normal | `"kern"` enabled |
-| Section Heading | HashiCorp Sans | 52px (3.25rem) | 600 | 1.19 (tight) | normal | `"kern"` enabled |
-| Feature Heading | HashiCorp Sans | 42px (2.63rem) | 700 | 1.19 (tight) | -0.42px | Negative tracking |
-| Sub-heading | HashiCorp Sans | 34px (2.13rem) | 600–700 | 1.18 (tight) | normal | Feature blocks |
-| Card Title | HashiCorp Sans | 26px (1.63rem) | 700 | 1.19 (tight) | normal | Card and panel headings |
-| Small Title | HashiCorp Sans | 19px (1.19rem) | 700 | 1.21 (tight) | normal | Compact headings |
-| Body Emphasis | HashiCorp Sans | 17px (1.06rem) | 600–700 | 1.18–1.35 | normal | Bold body text |
-| Body Large | system-ui | 20px (1.25rem) | 400–600 | 1.50 | normal | Hero descriptions |
-| Body | system-ui | 16px (1.00rem) | 400–500 | 1.63–1.69 (relaxed) | normal | Standard body text |
-| Nav Link | system-ui | 15px (0.94rem) | 500 | 1.60 (relaxed) | normal | Navigation items |
-| Small Body | system-ui | 14px (0.88rem) | 400–500 | 1.29–1.71 | normal | Secondary content |
-| Caption | system-ui | 13px (0.81rem) | 400–500 | 1.23–1.69 | normal | Metadata, footer links |
-| Uppercase Label | HashiCorp Sans | 13px (0.81rem) | 600 | 1.69 (relaxed) | 1.3px | `text-transform: uppercase` |
+| HashiCorp Sans | Display Hero | 82px (5.13rem) | 600 | 1.17 (tight) | normal | `"kern"` enabled |
+| HashiCorp Sans | Section Heading | 52px (3.25rem) | 600 | 1.19 (tight) | normal | `"kern"` enabled |
+| HashiCorp Sans | Feature Heading | 42px (2.63rem) | 700 | 1.19 (tight) | -0.42px | Negative tracking |
+| HashiCorp Sans | Sub-heading | 34px (2.13rem) | 600–700 | 1.18 (tight) | normal | Feature blocks |
+| HashiCorp Sans | Card Title | 26px (1.63rem) | 700 | 1.19 (tight) | normal | Card and panel headings |
+| HashiCorp Sans | Small Title | 19px (1.19rem) | 700 | 1.21 (tight) | normal | Compact headings |
+| HashiCorp Sans | Body Emphasis | 17px (1.06rem) | 600–700 | 1.18–1.35 | normal | Bold body text |
+| system-ui | Body Large | 20px (1.25rem) | 400–600 | 1.50 | normal | Hero descriptions |
+| system-ui | Body | 16px (1.00rem) | 400–500 | 1.63–1.69 (relaxed) | normal | Standard body text |
+| system-ui | Nav Link | 15px (0.94rem) | 500 | 1.60 (relaxed) | normal | Navigation items |
+| system-ui | Small Body | 14px (0.88rem) | 400–500 | 1.29–1.71 | normal | Secondary content |
+| system-ui | Caption | 13px (0.81rem) | 400–500 | 1.23–1.69 | normal | Metadata, footer links |
+| HashiCorp Sans | Uppercase Label | 13px (0.81rem) | 600 | 1.69 (relaxed) | 1.3px | `text-transform: uppercase` |
 
 ### Principles
 - **Brand/System split**: HashiCorp Sans for headings and brand-critical text; system-ui for body, navigation, and functional text. The brand font carries the weight, system-ui carries the words.
@@ -181,18 +181,7 @@ The component system uses the `mds` (Markdown Design System) prefix, indicating 
 - Full-width dark hero sections with contained content
 - Card grids: 2–3 column layouts
 - Generous horizontal padding at desktop scale
-
-### Breakpoints
-| Name | Width | Key Changes |
-|------|-------|-------------|
-| Mobile Small | <375px | Tight single column |
-| Mobile | 375–480px | Standard mobile |
-| Small Tablet | 480–600px | Minor adjustments |
-| Tablet | 600–768px | 2-column grids begin |
-| Small Desktop | 768–992px | Full nav visible |
-| Desktop | 992–1120px | Standard layout |
-| Large Desktop | 1120–1440px | Max-width content |
-| Ultra-wide | >1440px | Centered, generous margins |
+- Breakpoints: see the responsive table in Section 8 (Responsive Behavior)
 
 ### Whitespace Philosophy
 - **Enterprise breathing room**: Generous vertical spacing between sections (48px–80px+) communicates stability and seriousness.

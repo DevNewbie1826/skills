@@ -64,25 +64,25 @@ None. WIRED uses zero gradients. The closest thing to a gradient on the page is 
 
 ### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
+| Font | Role | Size | Weight | Line Height | Letter Spacing | Notes |
 |---|---|---|---|---|---|---|
-| Display Headline (Hero) | WiredDisplay | 64px / 4.00rem | regular | 0.93 | -0.5px | Tight, almost touching descenders — newsstand presence |
-| Display Headline (Mobile / Mid) | WiredDisplay | 26px / 1.63rem | regular | 1.08 | — | Same face, scaled down for grid blocks |
-| Section Heading | Apercu | 20px / 1.25rem | 700 | 1.20 | -0.28px | Bold sans for module titles ("Most Popular", "Featured") |
-| Subheading | Apercu | 17px / 1.06rem | 700 | 1.29 | -0.144px | Story decks within feature blocks |
-| Article Deck (Serif) | BreveText | 19px / 1.19rem | regular | 1.47 | 0.108px | Long-form lead paragraphs |
-| Article Body (Serif) | BreveText | 16px / 1.00rem | regular | 1.50 | 0.09px | Standard paragraph text |
-| UI Heading | Apercu | 16px / 1.00rem | 700 | 1.25 | 0.3px | Inline UI labels, button captions |
-| Button Label | Apercu | 16px / 1.00rem | 700 | 1.25 | 0.3px | All caps optional, depending on placement |
-| Link (Inline UI) | Apercu | 14px / 0.88rem | regular | 1.29 | 0.4px | Footer links, secondary nav |
-| Eyebrow / Kicker | WiredMono | 13px / 0.81rem | regular | 1.23 | 0.92px | UPPERCASE — story category above headline |
-| Eyebrow Bold | WiredMono | 13px / 0.81rem | 700 | 1.23 | — | UPPERCASE — featured story marker |
-| Section Ribbon | WiredMono | 12px / 0.75rem | 700 | 1.00 | 1.2px | UPPERCASE — black-bar section labels |
-| Photo Caption | BreveText | 12.73px / 0.80rem | 700 | 2.20 (relaxed) | 0.108px | Generous leading — print-photo treatment |
-| Timestamp / Meta | WiredMono | 12px / 0.75rem | regular | 1.33 | 1.1px | UPPERCASE, used for "X HOURS AGO" markers |
-| Tertiary Footer Link | ProximaNova | 11px / 0.69rem | regular | 1.45 | — | Newsletter footer, legal links |
-| Inter UI Heading | Inter | 16px / 1.00rem | 600 | 1.23 | 0.108px | Newer module headers |
-| Inter UI Caption | Inter | 14px / 0.88rem | 600 | 1.40 | — | Compact UI metadata |
+| WiredDisplay | Display Headline (Hero) | 64px / 4.00rem | regular | 0.93 | -0.5px | Tight, almost touching descenders — newsstand presence |
+| WiredDisplay | Display Headline (Mobile / Mid) | 26px / 1.63rem | regular | 1.08 | — | Same face, scaled down for grid blocks |
+| Apercu | Section Heading | 20px / 1.25rem | 700 | 1.20 | -0.28px | Bold sans for module titles ("Most Popular", "Featured") |
+| Apercu | Subheading | 17px / 1.06rem | 700 | 1.29 | -0.144px | Story decks within feature blocks |
+| BreveText | Article Deck (Serif) | 19px / 1.19rem | regular | 1.47 | 0.108px | Long-form lead paragraphs |
+| BreveText | Article Body (Serif) | 16px / 1.00rem | regular | 1.50 | 0.09px | Standard paragraph text |
+| Apercu | UI Heading | 16px / 1.00rem | 700 | 1.25 | 0.3px | Inline UI labels, button captions |
+| Apercu | Button Label | 16px / 1.00rem | 700 | 1.25 | 0.3px | All caps optional, depending on placement |
+| Apercu | Link (Inline UI) | 14px / 0.88rem | regular | 1.29 | 0.4px | Footer links, secondary nav |
+| WiredMono | Eyebrow / Kicker | 13px / 0.81rem | regular | 1.23 | 0.92px | UPPERCASE — story category above headline |
+| WiredMono | Eyebrow Bold | 13px / 0.81rem | 700 | 1.23 | — | UPPERCASE — featured story marker |
+| WiredMono | Section Ribbon | 12px / 0.75rem | 700 | 1.00 | 1.2px | UPPERCASE — black-bar section labels |
+| BreveText | Photo Caption | 12.73px / 0.80rem | 700 | 2.20 (relaxed) | 0.108px | Generous leading — print-photo treatment |
+| WiredMono | Timestamp / Meta | 12px / 0.75rem | regular | 1.33 | 1.1px | UPPERCASE, used for "X HOURS AGO" markers |
+| ProximaNova | Tertiary Footer Link | 11px / 0.69rem | regular | 1.45 | — | Newsletter footer, legal links |
+| Inter | Inter UI Heading | 16px / 1.00rem | 600 | 1.23 | 0.108px | Newer module headers |
+| Inter | Inter UI Caption | 14px / 0.88rem | 600 | 1.40 | — | Compact UI metadata |
 
 ### Principles
 - **Four faces, four jobs.** WiredDisplay is for shouting, BreveText is for reading, Apercu is for clicking, WiredMono is for labeling. They never trade roles. This separation is what keeps the page from feeling like a typography sample.
@@ -174,7 +174,7 @@ The line-height values in the hierarchy table (especially the 0.93 on the 64px h
 - **Inline spacing**: kickers sit ~4–8px above headlines; decks sit ~8–12px below headlines; bylines/timestamps another 8–12px below the deck.
 
 ### Grid & Container
-- **Max width**: ~1280–1600px on desktop (the dembrandt sweep detected breakpoints up to 1600px), centered with generous outer margins.
+- **Max width**: ~1280–1600px on desktop, centered with generous outer margins.
 - **Column patterns**: 12-column grid that resolves into 2/3/4 column story arrangements depending on module — feature blocks often run a "1 large + 2 small" pattern with hairline rules between each.
 - **Column gutters**: ~24–32px, separated by hairline `#000000` or `#4a5568` 1px rules where the editorial logic demands a "page-fold" feel.
 
@@ -238,7 +238,7 @@ None. No gradients, no glow, no halos, no scrim overlays beyond the standard pho
 | Desktop | 1024–1599px | Full editorial 3–4 column grid, sidebar restored, max headline scale active |
 | Large Desktop | ≥1600px | Page caps at ~1600px container, whitespace expands at the margins, no further scaling |
 
-The dembrandt sweep detected an unusual range of intermediate breakpoints (1280, 1025, 1024, 1023, 768, 767, 667, 599, 570, 569, 480, 425, 375, 320, 319) — Wired's grid micro-tunes at almost every common viewport, especially around the iPad portrait/landscape boundary.
+The site defines an unusual range of intermediate breakpoints (1280, 1025, 1024, 1023, 768, 767, 667, 599, 570, 569, 480, 425, 375, 320, 319) — Wired's grid micro-tunes at almost every common viewport, especially around the iPad portrait/landscape boundary.
 
 ### Touch Targets
 - Primary button: ~44x44px minimum (16px text + 12–14px vertical padding satisfies WCAG AAA).
@@ -275,7 +275,7 @@ The dembrandt sweep detected an unusual range of intermediate breakpoints (1280,
 
 ### Iteration Guide
 
-Iteration Guide preamble: see [airbnb.md#iteration-guide](airbnb.md#iteration-guide).
+See the shared iteration guide in [airbnb.md](airbnb.md#iteration-guide).
 
 #### Brand-specific iteration guidance
 

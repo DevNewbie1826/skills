@@ -1,8 +1,3 @@
----
-name: voice-and-tone
-description: "Use when establishing or applying brand voice — defining voice attributes, tone adaptation across contexts, vocabulary lists, writing examples, and ensuring consistent personality across the interface"
----
-
 # Voice and Tone
 
 Read this when establishing or applying brand voice — voice attributes, tone by context, vocabulary, and reading level so every screen sounds like one writer.
@@ -13,8 +8,8 @@ Voice is who you are. Tone is how you say it right now. Voice stays constant. To
 
 ## When to Use
 
-- At the start of a project, during or after `design-strategy`
-- When the content-writer agent needs voice guardrails
+- At the start of a project, during or after planning
+- When interface copy needs voice guardrails
 - When interface copy sounds inconsistent across screens
 
 ## Step 1: Define Voice Attributes
@@ -50,15 +45,17 @@ The "not that" column prevents drift.
 | check it out | investigate |
 | you | the user |
 
-The content-writer agent uses this as a constraint.
+Treat this list as a constraint on every string that ships.
 
 ## Step 4: Set Reading Level
 
 | Audience | Target |
 |----------|--------|
-| General consumer | Grade 6-8 |
-| Professional tool | Grade 8-10 |
-| Technical docs | Grade 10-12 |
+| General consumer | Reading age 12-14 |
+| Professional tool | Reading age 14-16 |
+| Technical docs | Reading age 16-18 |
+
+These are reading ages, aligned with [accessible-content.md](../execution/accessible-content.md), which owns the general-consumer target.
 
 ## Voice Audit Checklist
 
@@ -79,5 +76,5 @@ The content-writer agent uses this as a constraint.
 
 ## Integration
 
-- **Informed by:** `design-strategy`, `design-discovery`
-- **Feeds into:** `content-writer` agent, `accessible-content`, `design-critic`
+- **Informed by:** planning direction and project research
+- **Feeds into:** [accessible-content.md](../execution/accessible-content.md) and [design-review.md](../review/design-review.md)
