@@ -4,18 +4,18 @@ Read this when deciding whether a changed unit is slop, choosing a safe cleanup,
 
 ## Safety frame
 
-Work only within the agreed scope. First lock observable behavior with green regression tests; see [workflow.md](workflow.md) for the required sequence. When a change is not obviously behavior-preserving, keep the code and report the concern. Preserve public APIs, type information, intentional error handling, and project conventions.
+Work only within the agreed scope. First lock observable behavior with green regression tests; see [workflow.md](workflow.md) for the required sequence. When a change is not obviously behavior-preserving, keep the code and report the concern. Preserve observable behavior, public APIs, type information, exception behavior, intentional boundary validation, and project conventions.
 
 Apply the deletion ladder before category work:
 
 1. **Delete entirely** when behavior is unnecessary, speculative, or dead on arrival.
 2. **Reuse** an existing project helper or established pattern when it already owns the behavior.
 3. **Use platform, standard-library, runtime, or installed-dependency support** instead of a hand-rolled equivalent.
-4. **Simplify in place** only when the code must remain. When a bounded simplification is kept on purpose (a naive scan fine under a known size, a global lock), mark it with a `debt:` comment naming the ceiling and the upgrade trigger and list it in the report's debt ledger; a known ceiling without a marker is indistinguishable from a defect.
+4. **Simplify in place** only when the code must remain. When a bounded simplification is kept on purpose (a naive scan fine under a known size, a global lock), mark it with a `debt:` comment naming the ceiling and the upgrade trigger and list it in the report's debt ledger.
 
 For a bug-fix diff, inspect callers of each shared function it changes. Prefer a root-cause fix at the shared seam over repeated caller-side guards that leave sibling callers broken.
 
-Evaluate all ten categories below in this order: obvious comments, dead code, over-defensive code, duplication, excessive complexity, needless abstraction and boundary violations, performance equivalences, missing or junk tests, oversized modules. Keep separate changes reviewable; do not bundle unrelated refactors.
+Evaluate all ten categories below, in numbered order: obvious comments, dead code, over-defensive code, duplication, excessive complexity, needless abstraction, boundary violations, performance equivalences, missing or junk tests, oversized modules. Keep separate changes reviewable; do not bundle unrelated refactors.
 
 ## 1. Obvious comments
 
@@ -23,7 +23,13 @@ Remove comments that merely restate the code, trivial docstrings, section divide
 
 Keep comments that explain **why**: business rules, edge cases, workarounds, ticket links, regular-expression or algorithm rationale, and behavior-driven test markers such as given/when/then. Do not remove rationale merely because the implementation looks obvious today.
 
-## 2. Over-defensive code
+## 2. Dead code
+
+Remove unused imports, unused private functions or methods, unreachable branches, stale feature flags, debug output, and code that was removed conceptually but remains referenced or copied.
+
+Keep code reached through reflection, dynamic dispatch, configuration, or string lookup. Verify with the owner before removing an intentional rollback path behind a feature flag.
+
+## 3. Over-defensive code
 
 Look for null checks on guaranteed values, exception handling around operations that cannot fail in context, runtime type checks on statically constrained parameters, defaults for required parameters, obsolete compatibility shims, and validation repeated at multiple layers. Also inspect broad exception catches and catch blocks that only log or suppress an unknown error.
 
@@ -33,7 +39,13 @@ Refactor broad handling to the specific expected failure. Narrow an unknown caug
 
 **Proof requirement:** before deleting validation or error handling at a trust boundary, add an adversarial regression using malformed or hostile input that would fail if the guard disappeared. Without that proof, the guard stays. A removable defense duplicates a check already enforced inside the boundary; an unproven guard may be load-bearing.
 
-## 3. Excessive complexity
+## 4. Duplication
+
+Consolidate copy-pasted branches with trivial differences, redundant helpers that implement the same behavior, and repeated literal or magic-number sequences when they represent one shared concept.
+
+Keep incidental similarity when the pieces serve different intents or may need to diverge. Prefer separate clear code over a premature shared abstraction.
+
+## 5. Excessive complexity
 
 Look for nesting beyond three levels, nested ternaries, boolean expressions with four or more predicates, parameter lists longer than five values without a parameter object, functions longer than roughly fifty lines with multiple responsibilities, and clever one-liners that obscure intent.
 
@@ -43,29 +55,17 @@ Keep established local complexity patterns and intentional hot-path idioms. Ordi
 
 Refactor nested conditionals toward guard clauses or early returns, and expand complex ternaries into clear branches. Do not trade one opaque construct for another.
 
-## 4. Needless abstraction
+## 6. Needless abstraction
 
 Remove pass-through wrappers, single-use helpers, speculative indirection, interfaces with one implementation that add no testability benefit, and factory functions that only call a constructor.
 
 Keep abstractions with a real seam: multiple implementations, testability, a required framework boundary, or an established project convention. Do not introduce a replacement abstraction merely to shorten a local function.
 
-## 5. Boundary violations
+## 7. Boundary violations
 
 Look for imports that cross the wrong architectural layer, handlers containing domain work that belongs in a service layer, modules reading another module's private state, and side effects hidden in functions named as pure computations.
 
 Keep pragmatic short-circuits already established by the project. When ownership is uncertain, flag the issue for human judgment instead of moving code speculatively.
-
-## 6. Dead code
-
-Remove unused imports, unused private functions or methods, unreachable branches, stale feature flags, debug output, and code that was removed conceptually but remains referenced or copied.
-
-Keep code reached through reflection, dynamic dispatch, configuration, or string lookup. Verify with the owner before removing an intentional rollback path behind a feature flag.
-
-## 7. Duplication
-
-Consolidate copy-pasted branches with trivial differences, redundant helpers that implement the same behavior, and repeated literal or magic-number sequences when they represent one shared concept.
-
-Keep incidental similarity when the pieces serve different intents or may need to diverge. Prefer separate clear code over a premature shared abstraction.
 
 ## 8. Performance equivalences
 
@@ -83,13 +83,13 @@ Do not alter an algorithm whose correctness has subtle implications. Do not micr
 
 ## 9. Missing or junk tests
 
-Tests are code in scope. The single table of junk classes, the retention bar, the `R`/`F`/`C`/`D` marks, and the proof rule live in [test-junk.md](test-junk.md); read it before marking or cutting any test.
+The single table of junk classes, the retention bar, the `R`/`F`/`C`/`D` marks, and the proof rule live in [test-junk.md](test-junk.md); read it before marking or cutting any test, and for when a missing test may be added.
 
-- **Missing:** for behavior exposed by changed source files, find existing coverage and add the narrowest regression test that pins observable output, side effects, errors, or edge cases before cleanup begins. Do not pin private implementation details.
+- **Missing:** for behavior exposed by changed source files, add the narrowest regression test that pins observable output, side effects, errors, or edge cases before cleanup begins — only under the admission conditions in [test-junk.md](test-junk.md). Do not pin private implementation details.
 - **Junk:** mark every in-scope test declaration. A `D` or `C` mark needs the proof its class names before the cut: a mutation of the production owner run against the candidate and its keeper, the assertion line plus the repository prose rule, the revert that turns a change certificate red, or the owner that already generates or consumes a copied inventory.
-- **Keep:** everything under the retention bar, and every test that is red on the unchanged base (a product bug to report, never a deletion). Static or slow is never a reason to delete.
+- **Keep:** everything under the retention bar in [test-junk.md](test-junk.md), and every test that is red on the unchanged base — a product bug to report, never a deletion.
 
-A prose file, prompt, rule, or markdown document has no behavioral seam by itself. Do not add word-count or phrase-pinning tests for prose. Test only a machine-consumed value through its real parser, validator, or runtime behavior; otherwise rely on review.
+A prose file has no behavioral seam; [test-junk.md](test-junk.md) owns the prose rule and the machine-consumed-value exception.
 
 ## 10. Oversized modules
 
@@ -104,7 +104,7 @@ When a file exceeds the limit, do not merely flag it:
 5. Extract clean modules and keep package-entry files limited to exports where that packaging pattern applies.
 6. Recheck every affected source file against the 250 pure-LOC limit, then run tests, type checking, and linting.
 
-Forbidden escapes include counting blanks or comments toward the budget, splitting by token count rather than responsibility, hiding code in a catch-all module, and claiming generated status unless the file is actually in a build-output directory. A 230-line module that is about to grow should be split now.
+Forbidden escapes include counting blanks or comments toward the budget, splitting by token count rather than responsibility, hiding code in a catch-all module, and claiming generated status unless the file is actually in a build-output directory. A module approaching the 250-pure-LOC limit that is about to grow should be split now.
 
 Keep a genuinely self-contained, single-responsibility script when appropriate. Use the project's explicit size-exception marker only within the first ten lines and only with a comment explaining why.
 
@@ -113,10 +113,10 @@ Keep a genuinely self-contained, single-responsibility script when appropriate. 
 When another reviewer or delegated worker evaluates a file, give it the complete category context above and require this result:
 
 - Run the deletion ladder first.
-- Evaluate every category and respect its KEEP and proof rules.
+- Evaluate every category and respect its Keep rules and proof requirements.
 - Work in the prescribed safest-to-riskiest order.
-- Preserve behavior, public APIs, type information, and exception behavior.
+- Preserve observable behavior, public APIs, type information, exception behavior, intentional boundary validation, and project conventions.
 - Add no dependency or speculative abstraction.
 - For each edit, report the category, before/after, why it is slop, and why the change is safe.
-- For a test file, do not cut: return one ledger row per `D`, `C`, or `F` mark (`test | mark | keeper or reason | proposed proof`), where the proof names its kind and, for a mutation, the owner file, the exact find and replace, and the keeper to run. Apply `F` repairs in the file you own and report them as applied.
+- For a test file, do not cut: return one ledger row per `D`, `C`, or `F` mark, and one per `R` that matches a junk class but stays under the retention bar (`test | mark | keeper or reason | proposed proof`), where the proof names its kind and, for a mutation, the owner file, the exact find/replace, and the keeper to run. Apply `F` repairs in the file you own and report them as applied.
 - For each skipped issue, report the reason.

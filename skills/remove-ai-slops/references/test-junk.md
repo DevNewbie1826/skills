@@ -48,7 +48,7 @@ Keep a test that independently guards a public API, wire or protocol contract, c
 - **Platform suites**: anything that runs shipped code under its real runtime is a platform contract even when another runtime covers the same assertions.
 - **Issue regressions**: a test naming an issue number stays until another test is shown to fail on that exact regression.
 - **Machine-consumed text**: parsed fields, sentinel tokens, tool names, schema keys, a routing-bearing fragment of a parsed frontmatter description.
-- **Baseline-red tests**: a test that fails on the unchanged base is a product bug to report and fix at its owner, never a deletion; exclude it from every proof. If it covers an in-scope file's behavior, that file waits for a green baseline.
+- **Baseline-red tests**: a test that fails on the unchanged base is a product bug to report at its owner, never a deletion; exclude it from every proof. If it covers an in-scope file's behavior, that file waits for a green baseline.
 
 Outside that list, a source-inspection test survives only as the cheapest independent guard of a user-facing key, byte, or path that an identifier-only refactor leaves green. Static or slow is never a reason to delete.
 
