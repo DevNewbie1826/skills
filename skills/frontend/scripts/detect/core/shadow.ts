@@ -1,6 +1,6 @@
 import { parseColor, type Rgba } from "./color"
 
-export type ShadowLayer = {
+type ShadowLayer = {
 	readonly inset: boolean
 	readonly color: Rgba
 	readonly x: number

@@ -9,13 +9,7 @@ export const mono = (e: ElementSnapshot): boolean => {
 	return ["courier", "courier new", "consolas", "menlo", "monaco", "andale mono", "lucida console"].includes(first) ||
 		first.split(/[^a-z0-9]+/).some(w => ["mono", "monospace", "monospaced", "sfmono"].includes(w))
 }
-export const letters = (text: string): readonly string[] => [...text].filter(c => /\p{L}/u.test(c))
-export const cjkChar = (c: string): boolean => /[\u1100-\u11ff\u3040-\u30ff\u3130-\u318f\u31f0-\u31ff\u3400-\u9fff\ua960-\ud7ff\uf900-\ufaff\uff66-\uff9f\u{20000}-\u{3ffff}]/u.test(c)
-export const cjk = (text: string): boolean => {
-	const sample = [...text].slice(0, 256)
-	const count = sample.filter(cjkChar).length
-	return count > 0 && count * 2 >= sample.filter(c => /\p{L}/u.test(c)).length
-}
+const letters = (text: string): readonly string[] => [...text].filter(c => /\p{L}/u.test(c))
 export const caps = (text: string): boolean => {
 	const chars = letters(text)
 	return chars.some(c => c.toUpperCase() !== c.toLowerCase()) && chars.every(c => /\p{Lu}/u.test(c))

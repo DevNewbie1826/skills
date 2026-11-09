@@ -1,4 +1,4 @@
-export type TypeSample = { readonly role: string; readonly size: number; readonly weight: number }
+type TypeSample = { readonly role: string; readonly size: number; readonly weight: number }
 
 function dominant(role: string, values: readonly number[]): number | null {
 	const counts = new Map<number, number>()

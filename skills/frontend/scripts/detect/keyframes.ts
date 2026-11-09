@@ -1,8 +1,8 @@
 import type { PageSnapshot } from "./types"
 import { splitTop } from "./appearance"
 
-export type Frame = Readonly<Record<string, string>>
-export type KeyframeStep = { readonly key: string; readonly declarations: Frame }
+type Frame = Readonly<Record<string, string>>
+type KeyframeStep = { readonly key: string; readonly declarations: Frame }
 export function keyframeSteps(s: PageSnapshot, name: string): readonly KeyframeStep[] | null {
 	const frames: KeyframeStep[] = []
 	let found = false
