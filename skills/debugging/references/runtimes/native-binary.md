@@ -109,10 +109,7 @@ print(repr(data[max(0,pos-100):pos+200]))
 
 If you must keep using `strings`, lower the threshold: `strings -n 1 -t x ./target | rg ...`. The signal-to-noise drops sharply but short content is preserved.
 
-Write the triage summary to the journal:
-
-```markdown
-### Sanitizer build for a crashing C/C++ binary
+### Sanitizer build for a rebuildable C/C++ binary
 
 If the binary can be rebuilt from C/C++ sources, reproduce the crash with sanitizers before inferring the fault from stripped machine code. AddressSanitizer catches out-of-bounds accesses and use-after-free; UndefinedBehaviorSanitizer reports undefined operations.
 
@@ -125,6 +122,11 @@ make clean all
 
 The report names the invalid access and its allocation or free stack, often making the root cause clear before dynamic analysis. A binary that cannot be rebuilt continues with the tracing and debugger workflow below.
 
+### Record the triage summary
+
+Write the triage summary to the journal:
+
+```markdown
 ## Binary triage
 - Type: <ELF 64-bit, dynamically linked, stripped>
 - Arch: <x86_64 | arm64 | ...>
@@ -420,7 +422,7 @@ This script is now your "red test". When the fix is applied, the script should p
 
 ## [6] Fixing a binary bug you can't recompile
 
-Three options, in preference order:
+Four options, in preference order:
 
 ### Option A: Patch at the source (if you have it)
 
@@ -472,7 +474,7 @@ If it's a third-party binary and none of the above are feasible, the "fix" is a 
 # Kill debugger sessions
 # Kill by the PID recorded in this session's journal at spawn; use a pattern-kill only after `pgrep -af gdb` confirms it is this session's process.
 kill <journaled-gdb-pid> 2>/dev/null || true
-pkill -f 'lldb' || true
+pkill -f 'lldb' || true   # only after `pgrep -af lldb` confirms the match is this session's process
 
 # Ghidra scratch projects (if made just for this session)
 # Named something like ~/ghidra-projects/debug-<timestamp>:
@@ -495,16 +497,17 @@ rm -f /tmp/debug-*.bin /tmp/debug-*.strace /tmp/debug-*.ltrace
 
 # macOS-specific:
 # Restore proxy settings if you set them (CRITICAL — leaves system traffic mis-routed otherwise)
-# Use the SAME $SERVICE you used when enabling the proxy (read it from the journal).
-# Do NOT hardcode "Wi-Fi" — many machines route traffic over Ethernet, USB tether, or a VPN service.
+# Use the SAME $SERVICE you used when enabling the proxy (read it from the journal), and restore
+# the journaled pre-session web and secure proxy values — off only when no proxy was set before
+# this session. Do NOT hardcode "Wi-Fi" or force both proxies off — many machines route traffic
+# over Ethernet, USB tethering, or a VPN service.
 [ -n "$SERVICE" ] && {
-  networksetup -setwebproxystate "$SERVICE" off 2>/dev/null
-  networksetup -setsecurewebproxystate "$SERVICE" off 2>/dev/null
+  <journaled-networksetup-proxy-restore-commands>
 }
-# Or restore explicitly from the journaled original state — see the proxy section above.
 
-# Stop mitmproxy
-pkill -f 'mitmproxy' 2>/dev/null
+# Stop mitmproxy — kill by the PID recorded in this session's journal at spawn; use a
+# pattern-kill only after `pgrep -af mitmproxy` confirms it is this session's process.
+kill <journaled-mitmproxy-pid> 2>/dev/null || true
 
 # Remove DYLD shim libraries you built
 rm -f /tmp/*-shim.dylib

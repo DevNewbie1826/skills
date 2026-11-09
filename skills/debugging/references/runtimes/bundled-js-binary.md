@@ -200,20 +200,9 @@ wc -c extracted-bundle.js
 tail -c 200 extracted-bundle.js
 ```
 
-### For PyInstaller
+### For PyInstaller, Electron .asar, or Deno compile
 
-Use `pyinstxtractor` then `uncompyle6` / `decompyle3` on the `.pyc` files.
-
-### For Electron .asar
-
-```bash
-npx asar extract app.asar ./extracted/
-# Now ./extracted/ has a normal node_modules + your source layout
-```
-
-### For Deno compile
-
-Use the `eszip` Rust crate or the `@deno/eszip` JS port to walk the archive after carving the eszip section out at the offset reported by the `ESZIP_V2` magic search. There is no stable Deno CLI as of 2026-04 that inspects compiled-binary eszip contents directly.
+The per-bundler extraction procedures in step [2] above already cover these formats — PyInstaller via `pyinstxtractor` plus `uncompyle6` / `decompyle3`, Electron via the `asar` extract command, Deno via the `eszip` tooling. Apply the matching step-[2] procedure, then continue here with the extracted source tree.
 
 ---
 
@@ -327,7 +316,7 @@ The target's API may require credentials, network access, or paid quota you don'
 
 ### G1. `strings -n N` silently drops short identifier interpolations
 
-`strings` outputs runs of printable characters of length **≥ N**. Default is 4 on most systems; many references (including older versions of `native-binary.md`) recommend `-n 8` for less noise.
+`strings` outputs runs of printable characters of length **≥ N**. Default is 4 on most systems; `-n 8` is a common recommendation for less noise.
 
 **With `-n 8`, short template-literal interpolations like `${x}`, `${i}`, `${R}` are silently dropped** because they are 4 chars surrounded by non-printable bytes (newlines or section padding). The result looks like:
 

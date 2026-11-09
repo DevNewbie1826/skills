@@ -39,6 +39,8 @@ The shape of the answers you need (commands in the runtime reference):
 
 ### 4. Gate check
 
+If any answer is "I'm not sure", investigate at most three investigation rounds on the same question; if still uncertain, proceed to the hypothesis phase with the uncertainty recorded. Guessing here cascades into false-positive hypotheses in Phase 2.
+
 ### Output budget
 
 **Bound every inspection before you run it; unbounded output destroys the investigation's working context.**
@@ -46,12 +48,8 @@ The shape of the answers you need (commands in the runtime reference):
 - Prefer one targeted query over one broad dump: ask for the value that distinguishes hypotheses.
 - Page through more data only when the first bounded result says it is necessary; do not re-dump the whole object.
 - Treat any command whose output size you cannot predict as a command that needs a limit.
-- Before: GDB `bt` - After: GDB `bt 10` to inspect only the top ten frames.
-- Before: LLDB `memory read 0x1000` - After: `memory read 0x1000 -c 32` for a bounded byte range.
-- Before: LLDB `frame variable` - After: `frame variable --children-count 10 user` for one variable's children.
+- Bounded examples: GDB `bt 10` shows only the top ten frames; LLDB `memory read 0x1000 -c 32` reads a bounded byte range; `frame variable --children-count 10 user` lists one variable's first ten children.
 - This is not presentation etiquette: a flooded context hides the decisive observation and can end the investigation.
-
-If any answer is "I'm not sure", investigate at most three investigation rounds on the same question; if still uncertain, proceed to the hypothesis phase with the uncertainty recorded. Guessing here cascades into false-positive hypotheses in Phase 2.
 
 ---
 
@@ -118,7 +116,7 @@ Goal: <one-sentence user request>
 - [ ] terminal-multiplexer session (for example, tmux) `debug-server`. Kill with the command for the multiplexer used.
 - [ ] `/tmp/debug-payload.json`. Remove: `rm /tmp/debug-payload.json`
 - [ ] env var in current shell: `FOO_BASE_URL=...`. Unset when done.
-- [ ] GDB session save: `~/ghidra-projects/scratch.gzf`. Remove if not promoting.
+- [ ] Ghidra scratch project: `~/ghidra-projects/scratch.gzf`. Remove if not promoting.
 
 ## Findings
 <!-- Append observed values here with timestamp. Verbatim only, no paraphrasing. -->

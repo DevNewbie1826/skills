@@ -44,7 +44,7 @@ kill <journaled-pid>
 lsof -iTCP:9229 -sTCP:LISTEN -nP 2>/dev/null     # Node inspector default
 lsof -iTCP:5678 -sTCP:LISTEN -nP 2>/dev/null     # debugpy default
 lsof -iTCP:2345 -sTCP:LISTEN -nP 2>/dev/null     # dlv default
-lsof -iTCP:9999 -sTCP:LISTEN -nP 2>/dev/null     # pwndbg/gdb-server default
+lsof -iTCP:9999 -sTCP:LISTEN -nP 2>/dev/null     # gdbserver example port (see tools/pwndbg.md)
 
 # --- Env var overrides in current shell ---
 # Restore the journaled prior value; unset only an override created by this session.
@@ -130,7 +130,7 @@ If any of the four lacks evidence, you have not finished — return to the appro
 
 Keep it short. Evidence-dense. The user should be able to skim it in 30 seconds.
 
-```markdown
+````markdown
 Fixed.
 
 **Root cause**: <one sentence — the mechanism, not the symptom>
@@ -146,11 +146,11 @@ Diff / baseline check:
 **Next steps I didn't take** (awaiting your decision):
 - <follow-up 1, if any — from QA silent-failure scan or refactor opportunities noted during Phase 7>
 - <follow-up 2 — or "none" if nothing else surfaced>
-```
+````
 
 ### Example (from a real session)
 
-```markdown
+````markdown
 Fixed.
 
 **Root cause**: The client library hardcoded `model.baseUrl` to `https://provider.example`, so the `SERVICE_BASE_URL` override was ignored. The proxy key was rejected upstream with 401, but the library stored the error in the response's `errorMessage` field instead of throwing, so the route's error handler never ran and the client received HTTP 200 with empty content.
@@ -169,4 +169,4 @@ Diff:
 **Next steps I didn't take** (awaiting your decision):
 - The client library silently stores upstream errors in `errorMessage`; adding a throw-on-error wrapper at the integration layer would surface them
 - Same silent-failure pattern exists in the planning route — likely the same fix applies
-```
+````
