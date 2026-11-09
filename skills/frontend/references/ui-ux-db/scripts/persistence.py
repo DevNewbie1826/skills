@@ -4,7 +4,8 @@
 
 from pathlib import Path
 
-from rendering import format_master_md, format_page_override_md
+from rendering_master import format_master_md
+from rendering_pages import format_page_override_md
 
 
 def persist_design_system(design_system: dict, page: str = None, output_dir: str = None, page_query: str = None) -> dict:

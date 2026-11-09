@@ -14,7 +14,8 @@ Usage:
 """
 
 from reasoning import DesignSystemGenerator
-from rendering import format_ascii_box, format_markdown
+from rendering_ascii import format_ascii_box
+from rendering_markdown import format_markdown
 from persistence import persist_design_system
 
 
@@ -43,3 +44,17 @@ def generate_design_system(query: str, project_name: str = None, output_format: 
     if output_format == "markdown":
         return format_markdown(design_system)
     return format_ascii_box(design_system)
+
+# ============ CLI SUPPORT ============
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate Design System")
+    parser.add_argument("query", help="Search query (e.g., 'SaaS dashboard')")
+    parser.add_argument("--project-name", "-p", type=str, default=None, help="Project name")
+    parser.add_argument("--format", "-f", choices=["ascii", "markdown"], default="ascii", help="Output format")
+
+    args = parser.parse_args()
+
+    result = generate_design_system(args.query, args.project_name, args.format)
+    print(result)
