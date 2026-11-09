@@ -1,8 +1,8 @@
 # Junk classes, retention bar, marks
 
-> Read this when deciding whether a test is worth keeping, auditing a suite, or cleaning a branch of low-value tests.
+> Read this when writing a test, deciding whether a test is worth keeping, cleaning a branch of low-value tests, or auditing a suite.
 
-One table for three jobs: writing a test (the `programming` skill), cleaning a branch (the `remove-ai-slops` skill), and auditing a suite. A test that matches a class below is junk unless the retention bar keeps it. A reviewer applies the same table; a test that would be deleted in review is a test not to write.
+One class table for three jobs: writing a test (the `programming` skill), cleaning a branch (the `remove-ai-slops` skill), and auditing a suite. A test that matches a class below is junk unless the retention bar keeps it. A reviewer applies the same table; a test that would be deleted in review is a test not to write.
 
 ## Marks (one per test declaration; one per row when table rows differ)
 
@@ -24,7 +24,7 @@ One table for three jobs: writing a test (the `programming` skill), cleaning a b
 | Prose pin | asserts wording, headings, section order, snapshots, phrase counts, or length of `SKILL.md`, prompts, `AGENTS.md`, docs, rule text | no runtime behavior to mutate; cite the repo's prose-test rule |
 | Copied inventory | a hard-coded list of exports, files, tools, keys that mirrors the source and fails only when someone edits both | a generator or freshness check or a real consumer already owns it |
 | Source grep | reads a source file and greps for a string or import | an identifier-only refactor turns it red for no reason; a behavior mutation it misses |
-| Duplicate contract | the same input/output asserted at two or more layers with no distinct transport or lifecycle risk; an adapter package's copy of a Core package's test | the mutation is caught by both: keep the stronger boundary |
+| Duplicate contract | the same input/output asserted at two or more layers with no distinct transport or lifecycle risk; a wrapper package's copy of a test the wrapped package already runs | the mutation is caught by both: keep the stronger boundary |
 | Layer replay | a shared helper re-tested through every wrapper that calls it | one helper owner test plus one wiring test per real wrapper |
 | Seam keeper | exists to keep a test-only export, flag, getter, or reset hook alive | `knip` or grep shows no production caller; delete test and seam together |
 | Fabricated postcondition | the fixture supplies the receipt, ordering, or stored state the owner should produce; asserts a store nothing writes | mutate the writer: test stays green |
@@ -35,7 +35,21 @@ One table for three jobs: writing a test (the `programming` skill), cleaning a b
 
 ## Retention bar (these stay `R` even when they match a class above)
 
-Keep a test that independently guards a public API, SDK, RPC or app-server protocol, config schema or default, migration, storage format, security boundary, platform behavior, prompt-byte or shipped-copy equality between real artifacts, generated or cross-language contract, package or install payload, release, or architecture invariant (meta-audits, tracked-artifact audits). Say which one in the test. Also keep:
+Keep a test that independently guards one of these, and say which one in the test:
+
+- a public API or SDK
+- an RPC or app-server protocol
+- a config schema or default
+- a migration or storage format
+- a security boundary
+- platform behavior
+- prompt-byte or shipped-copy equality between real artifacts
+- a generated or cross-language contract
+- a package or install payload
+- a release
+- an architecture invariant (meta-audits, tracked-artifact audits)
+
+Also keep:
 
 - **Node-compat suites**: anything that runs shipped code under real Node is a platform contract even when a Bun run covers the same assertions.
 - **Issue regressions**: a test naming an issue number stays until another test is shown to fail on that exact regression.

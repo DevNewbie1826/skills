@@ -19,13 +19,13 @@ A test that fails on the unchanged base is a product bug to fix at its owner; a 
 
 ## Shape
 
-| Rung | Count | Purpose | Budget |
-|---|---|---|---|
-| Unit | many | pure-function correctness for every meaningful input class (happy, edge, boundary, error path) | under 10 ms each; whole unit suite under 30 s |
-| Integration | some | the real adapter against the real downstream (database, queue, HTTP) through containers, `httptest`, or the equivalent; never a unit test pretending to be one | under 1 s each; suite under 5 min |
-| End-to-end scenario | few | one narrative per user-visible outcome, driven through the real surface (HTTP route, CLI invocation, TUI keystroke); include one error-path scenario | seconds, on CI |
+| Rung | Purpose | Budget |
+|---|---|---|
+| Unit | pure-function correctness for every meaningful input class (happy, edge, boundary, error path) | under 10 ms each; whole unit suite under 30 s |
+| Integration | the real adapter against the real downstream (database, queue, HTTP) through containers, `httptest`, or the equivalent; never a unit test pretending to be one | under 1 s each; suite under 5 min |
+| End-to-end scenario | one narrative per user-visible outcome, driven through the real surface (HTTP route, CLI invocation, TUI keystroke); include one error-path scenario | seconds, on CI |
 
-A user-visible outcome never driven through its real surface is unverified; a green unit suite does not stand in for that run. Every test is Given / When / Then with one `When`; names state behavior and condition so a failure reads without the body.
+A user-visible outcome never driven through its real surface is unverified; a green unit suite does not stand in for that run. Every test is Given/When/Then with exactly one When step; its name states the behavior and condition so a failure reads without the body.
 
 If a test fails when the owner's implementation changes but its behavior did not, it is over-mocked: drop the mock and assert on observable outputs. A boundary list (allowlist, flag filter) is tested with the real list imported from production, not a copy.
 
@@ -43,12 +43,7 @@ When delegating test-writing, hand the child the behavior the test must distingu
 
 ## After writing: test your test
 
-A test earns its place by failing. Before handoff, run the junk checker on the test files (it flags the classes a regex can see: source grep, prose pin, fixed sleep, `.only`/`.skip`, self-comparison, lower bound), then for each new or reshaped test:
-
-1. **Break the owner** (flip the condition, drop the branch, return a constant, skip the write) and run the test. Confirm the mutated bytes are actually in the file before reading the result; a no-op edit "passes" identically to the original.
-2. **Red for the intended reason?** Read the failure message: a loose pattern can match the base's generic error by coincidence, and a fake that simulates the failure by a different mechanism than the guard reads fails with the fix present.
-3. **Still green?** Then one of: the test is vacuous (fix the assertion); the mutant is equivalent (a `try/catch`, fallback, or normalization maps it back to the same outcome: retarget the mutation at the observable claim); a second rule already produces the same outcome (make the input exercise only the rule under test); or the mutated code is dead (delete the code, not the test's teeth).
-4. **Restore byte for byte.** Never commit a mutation.
+A test earns its place by failing. Before handoff, run the junk checker on the test files (it flags the classes a regex can see: source grep, prose pin, fixed sleep, `.only`/`.skip`, self-comparison, lower bound), then for each new or reshaped test break the production owner and confirm the test goes red, following the [proof rule](junk-classes.md) in Junk classes; never commit a mutation.
 
 From the skill directory, with Bun or another TypeScript runner (`bun` shown):
 
@@ -58,21 +53,7 @@ bun scripts/typescript/mutation-proof.ts --file <owner> --find <text> --replace 
   --test 'candidate=<test command>' --test 'keeper=<test command>'
 ```
 
-`mutation-proof.ts` does steps 1, 3 and 4 in one run and prints red/green per test. If no TypeScript runner is available, do the same four steps by hand and say the scripts were not run.
-
-Assertion shapes that survive this step:
-
-| Vacuous shape | Why it passes with the bug present | Discriminating shape |
-|---|---|---|
-| expected value derived from the output under test | compares a projection of the output to itself | derive the expected value from the test's input |
-| override fixture equal to its fallback | precedence is never exercised | every value the code must select or override differs from the fallback |
-| `>= n` / `> 0` over independently produced items | removing one item still satisfies the bound | pin the exact set |
-| a count after deduplication where duplicates are byte-identical to a mandatory item | dropping all duplicates gives the same count | distinct payloads, assert retention and placement |
-| the argv, flags, URL, or request handed to a child | an input transcript, not the child's outcome | drive the real component and assert the state it resolved, with a control case |
-| a counter or filter keyed on a value the code path never produces | both sides count zero | count the operation itself |
-| a copy of the production component, props, or allowlist | the copy passes while the shipped one is broken | mount or import the real one |
-| a timing assertion for an off-thread or performance claim | passes on the base at fixture size | prove performance on a field harness; keep the unit test to behavior |
-| a gated or fallback path tested without forcing it | the base's own error path produces the same side effect | force the path (flag, crash limit) and assert the reason the new path records |
+`mutation-proof.ts` applies the mutation, runs both tests, prints red/green per test, and restores the owner in one run. If no TypeScript runner is available, do the same by hand and say the scripts were not run. For the assertion shapes that pass with the bug present, see the classes in [Junk classes](junk-classes.md).
 
 ## Review
 
