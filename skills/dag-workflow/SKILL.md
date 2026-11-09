@@ -9,7 +9,7 @@ omp-native: true
 **Read `references/graph-runs.md` before anything else.** It is how a DAG runs on omp: nodes, stages, retries, the goal and resuming.
 
 One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
-Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. Never run under a goal whose criteria are placeholders. Mirror the phases into `todo` phases, then build every DAG under that goal.
+Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode) and write each phase's success criteria as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
 
 ## The request
 
@@ -54,11 +54,12 @@ Every name here exists on omp or in this pack; `references/omp-names.md` is the 
 | design / UI | `frontend`, `visual-qa`, `programming`, `remove-ai-slops`, `git-master`; `task` agent; `browser` tool | `frontend` builds; `visual-qa` verifies every one of its conditions in full detail and owns the checklist; the `browser` tool drives the real page for QA; `programming` and `remove-ai-slops` guard the code |
 | audit | `remove-ai-slops`, `frontend`, `visual-qa`, `programming`, `seo-html`; `scout` agent | the rule corpus is those skills' own rule sets, cited by id; collection and judging run as one DAG |
 | planning | `programming`, `remove-ai-slops`, plus the work type's own skill (`visual-qa` for design); `reviewer` agent | read `programming` and `remove-ai-slops` first so the plan carries real test and slop constraints; a `reviewer` node critiques a contested plan before the build |
-| review | `programming`, `remove-ai-slops`, `visual-qa`; `reviewer` and `security-reviewer` agents; `security_scan` tool | `programming` and `remove-ai-slops` are the code-review axes; `visual-qa` is the verdict for UI; `security-reviewer` and `security_scan` for anything touching security |
+| review | `programming`, `remove-ai-slops`, `visual-qa`; `reviewer` and `security-reviewer` agents; `security_scan` and `browser` tools | `programming` and `remove-ai-slops` are the code-review axes; `visual-qa` is the verdict for UI; the `browser` tool captures on-surface evidence; `security-reviewer` and `security_scan` for anything touching security |
 | cleanup | `remove-ai-slops`, `git-master` | remove dead code and slop behind regression tests, tear down worktrees and branches under git rules |
 | collection / corpus extraction | `programming`, `remove-ai-slops`, `visual-qa`, `frontend`; `scout` agent; `ast_grep` tool | collect in one DAG; extract by syntax shape with `ast_grep`; harvest the distilled rule sets before any raw corpus |
 | decision history | `lore`, `git-master` | record and read the constraints and rejected options behind a change |
 | multi-unit program | `references/graph-runs.md` | one goal for the program with one phase per unit, one build DAG per wave |
+| browser-facing surface work | `visual-qa`; `browser` tool | the `browser` tool drives the page for actions, screenshots and traces; `visual-qa` judges the captured state. Not for a plain search or a static fetch |
 | resume after death or compaction | `references/graph-runs.md` | re-read the goal, `todo` and handoff files; re-run only nodes whose handoff is missing, never restart the DAG |
 
 Reviewer dispatch follows Size check and Review and merge below.

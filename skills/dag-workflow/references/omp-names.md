@@ -76,30 +76,30 @@ Inside the `eval` tool (`src/prompts/tools/eval-agents.md`, `src/prompts/tools/e
 
 ## Not on omp
 
-Names from other hosts. Each row says what to use instead.
+Names from other hosts. Each row says what to use instead. `anywhere` names fail wherever they appear; `quoted` names are ordinary words and fail only inside backticks or quotes.
 
-| name | use instead |
-| --- | --- |
-| `ultrabrain` | `reviewer` |
-| `oracle` | `reviewer` |
-| `explore` | `scout` |
-| `librarian` | `scout` |
-| `deep-low` | `task` |
-| `deep-high` | `task` |
-| `unspecified-low` | `task` |
-| `unspecified-high` | `task` |
-| `visual-engineering` | `task` with the `frontend` skill |
-| `artistry` | `task` |
-| `plan-reviewer` | `reviewer` |
-| `omo-native-gate-reviewer` | `reviewer` |
-| `mass-ulw` | a DAG of `agent()` nodes in `eval` (`references/graph-runs.md`) |
-| `ulw-loop` | the one `goal` plus `todo` phases (`references/graph-runs.md`) |
-| `ulw-plan` | a `reviewer` node on the plan |
-| `ulw-research` | `scout` nodes plus a review node |
-| `hyperplan` | a `reviewer` node on the plan |
-| `review-work` | `reviewer` |
-| `subagent_type` | the `agent` option of `agent()` or of a `task` item |
-| `load_skills` | name the skill in the node prompt |
-| `team_create` | one DAG; steer a node with `.send()` |
-| `parallel()` | `agent()` handles plus `wait()` |
-| `pipeline()` | waves of `agent()` handles, one `wait()` per wave |
+| name | use instead | match |
+| --- | --- | --- |
+| `ultrabrain` | `reviewer` | anywhere |
+| `oracle` | `reviewer` | `quoted` |
+| `explore` | `scout` | `quoted` |
+| `librarian` | `scout` | `quoted` |
+| `deep-low` | `task` | anywhere |
+| `deep-high` | `task` | anywhere |
+| `unspecified-low` | `task` | anywhere |
+| `unspecified-high` | `task` | anywhere |
+| `visual-engineering` | `task` with the `frontend` skill | anywhere |
+| `artistry` | `task` | `quoted` |
+| `plan-reviewer` | `reviewer` | anywhere |
+| `omo-native-gate-reviewer` | `reviewer` | anywhere |
+| `mass-ulw` | a DAG of `agent()` nodes in `eval` (`references/graph-runs.md`) | anywhere |
+| `ulw-loop` | the one `goal` plus `todo` phases (`references/graph-runs.md`) | anywhere |
+| `ulw-plan` | a `reviewer` node on the plan | anywhere |
+| `ulw-research` | `scout` nodes plus a review node | anywhere |
+| `hyperplan` | a `reviewer` node on the plan | anywhere |
+| `review-work` | `reviewer` | anywhere |
+| `subagent_type` | the `agent` option of `agent()` or of a `task` item | anywhere |
+| `load_skills` | name the skill in the node prompt | anywhere |
+| `team_create` | one DAG; steer a node with `.send()` | anywhere |
+| `parallel()` | `agent()` handles plus `wait()` | anywhere |
+| `pipeline()` | waves of `agent()` handles, one `wait()` per wave | anywhere |

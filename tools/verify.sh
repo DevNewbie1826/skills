@@ -125,22 +125,39 @@ check_skill_contract() {
     check_omp_name_plants
 }
 
-# OMP-NAME must refuse a non-omp name planted in dag-workflow (tools/omp_names.py).
+# OMP-NAME (tools/omp_names.py) on lines planted into a copy of dag-workflow:
+# each case is <expected exit>|<file under the skill>|<planted line>.
 check_omp_name_plants() {
-    local token plant output status
-    for token in 'ultrabrain' 'mass-ulw' '`workflow` tool'; do
+    local case expect file line plant output status
+    local cases=(
+        '1|SKILL.md|Route the review to ultrabrain.'
+        '1|SKILL.md|Run the graph with mass-ulw.'
+        '1|SKILL.md|Start it with the `workflow` tool.'
+        '1|references/graph-runs.md|await agent("x", {"agent":"planner"})'
+        '1|references/graph-runs.md|await agent("x", {agent: `planner`})'
+        '1|references/graph-runs.md|await workpool("planner")'
+        '1|references/graph-runs.md|agent: "bash"'
+        '1|references/graph-runs.md|agent: "workpool"'
+        '1|references/graph-runs.md|Use the `scout` tool.'
+        '1|references/graph-runs.md|Ask the `librarian`.'
+        '1|references/omp-names.md|agent: "librarian"'
+        '0|references/graph-runs.md|Explore each dependency before defining its parent.'
+        '0|references/graph-runs.md|await agent("x", {agent: "reviewer"})'
+    )
+    for case in "${cases[@]}"; do
+        IFS='|' read -r expect file line <<<"$case"
         plant="$TEMP_ROOT/omp-plant"
         rm -rf -- "$plant"
         mkdir -p "$plant/skills"
         cp -R skills/dag-workflow "$plant/skills/"
-        printf '\nRoute the review to %s.\n' "$token" >> "$plant/skills/dag-workflow/SKILL.md"
+        printf '\n%s\n' "$line" >> "$plant/skills/dag-workflow/$file"
         status=0
         output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
-        if (( status != 1 )) || [[ "$output" != *OMP-NAME* ]]; then
-            printf '  planted %s: expected exit 1 with OMP-NAME, got exit %s:\n%s\n' "$token" "$status" "$output" >&2
+        if [[ "$status" != "$expect" ]] || { [[ "$expect" == 1 ]] && [[ "$output" != *OMP-NAME* ]]; }; then
+            printf '  %s <- %s: expected exit %s, got %s:\n%s\n' "$file" "$line" "$expect" "$status" "$output" >&2
             return 1
         fi
-        printf '  planted %s: refused\n' "$token"
+        printf '  %s <- %s: exit %s as expected\n' "$file" "$line" "$status"
     done
 }
 
