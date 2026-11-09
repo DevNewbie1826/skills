@@ -122,6 +122,26 @@ smoke_usage_error() {
 check_skill_contract() {
     require_command python3
     python3 tools/check-skills.py
+    check_omp_name_plants
+}
+
+# OMP-NAME must refuse a non-omp name planted in dag-workflow (tools/omp_names.py).
+check_omp_name_plants() {
+    local token plant output status
+    for token in 'ultrabrain' 'mass-ulw' '`workflow` tool'; do
+        plant="$TEMP_ROOT/omp-plant"
+        rm -rf -- "$plant"
+        mkdir -p "$plant/skills"
+        cp -R skills/dag-workflow "$plant/skills/"
+        printf '\nRoute the review to %s.\n' "$token" >> "$plant/skills/dag-workflow/SKILL.md"
+        status=0
+        output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
+        if (( status != 1 )) || [[ "$output" != *OMP-NAME* ]]; then
+            printf '  planted %s: expected exit 1 with OMP-NAME, got exit %s:\n%s\n' "$token" "$status" "$output" >&2
+            return 1
+        fi
+        printf '  planted %s: refused\n' "$token"
+    done
 }
 
 check_entrypoint_smoke() {
