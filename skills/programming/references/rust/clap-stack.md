@@ -23,14 +23,9 @@ indicatif = { version = "0.17", features = ["tokio"] }
 dialoguer = { version = "0.11", features = ["fuzzy-select"] }
 console = "0.15"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs", "process", "signal"] }
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-codegen-units = 1
-strip = "symbols"
-panic = "abort"
 ```
+
+The release profile is the one in [cargo-strict.md](cargo-strict.md), unmodified.
 
 ## Command structure
 
@@ -342,7 +337,7 @@ tokio::select! {
 }
 ```
 
-For sync CLIs, install a one-shot handler with `ctrlc` crate:
+For sync CLIs, install a one-shot handler with the `ctrlc` crate:
 
 ```rust
 let interrupted = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
@@ -367,7 +362,7 @@ fn main() -> color_eyre::Result<()> {
 }
 ```
 
-Errors with `.wrap_err("...")` from `eyre::WrapErr` (compatible with anyhow's `.context`) show as a numbered chain. `RUST_BACKTRACE=1` shows the full trace; `RUST_SPANTRACE=1` shows tracing spans where the error fired.
+Errors wrapped with `.wrap_err("...")` from `eyre::WrapErr` (compatible with anyhow's `.context`) show as a numbered chain. `RUST_BACKTRACE=1` shows the full trace; `RUST_SPANTRACE=1` shows tracing spans where the error fired.
 
 ## Distribution
 
@@ -389,28 +384,4 @@ Errors with `.wrap_err("...")` from `eyre::WrapErr` (compatible with anyhow's `.
 
 ## Testing CLIs
 
-```rust
-// tests/cli.rs
-use assert_cmd::Command;
-use predicates::prelude::*;
-
-#[test]
-fn shows_help() {
-    Command::cargo_bin("mytool").unwrap()
-        .arg("--help")
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("Usage:"));
-}
-
-#[test]
-fn rejects_unknown_subcommand() {
-    Command::cargo_bin("mytool").unwrap()
-        .arg("nope")
-        .assert()
-        .failure()
-        .stderr(predicate::str::contains("unrecognized subcommand"));
-}
-```
-
-`assert_cmd` builds the binary once per test run and gives a fluent assertion API.
+Test the binary through `assert_cmd` (in `tests/cli.rs`): it builds the binary once per test run and gives a fluent assertion API. Assert on this crate's own output and exit codes, not on clap's generated help text.

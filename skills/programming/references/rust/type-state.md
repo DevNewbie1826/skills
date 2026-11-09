@@ -272,7 +272,7 @@ impl RequestBuilder<NeedsMethod> {
     }
 }
 
-// .header(), .body() available in any state that has at least URL.
+// .header() is available in every state.
 impl<S> RequestBuilder<S> {
     pub fn header(mut self, name: HeaderName, value: HeaderValue) -> Self {
         self.headers.insert(name, value);
@@ -286,7 +286,7 @@ impl RequestBuilder<Ready> {
 }
 ```
 
-`client.send(RequestBuilder::new().send(...))` - compile error. The agent has to fill in the required steps. The IDE autocomplete also reflects only the legal next steps.
+`RequestBuilder::new().send(&client)` - compile error: `send` exists only on `RequestBuilder<Ready>`. The agent has to fill in the required steps. The IDE autocomplete also reflects only the legal next steps.
 
 ### File Handles
 

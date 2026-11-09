@@ -14,7 +14,7 @@ Every `unsafe` block needs all three. No exceptions.
 
 ## The Wrapper Pattern (`NonNull<T>` style)
 
-Reference the screenshot Chris Allen quoted - `std::ptr::NonNull<T>`. Mirror this shape for every raw pointer, raw slice, raw transmute, or uninit memory operation in your own code.
+Model it on `std::ptr::NonNull<T>`. Mirror this shape for every raw pointer, raw slice, raw transmute, or uninit memory operation in your own code.
 
 ```rust
 use core::marker::PhantomData;
@@ -232,35 +232,7 @@ Certain paths are off-limits for miri: most syscalls beyond a curated allowlist,
 
 ## Loom for Concurrency
 
-When `unsafe` participates in a concurrent algorithm (lock-free queue, hazard pointers, custom Arc), miri's single-thread model is insufficient. Use `loom`:
-
-```rust
-#[cfg(loom)]
-use loom::sync::atomic::{AtomicUsize, Ordering};
-#[cfg(not(loom))]
-use std::sync::atomic::{AtomicUsize, Ordering};
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    #[cfg(loom)]
-    fn concurrent_push_pop() {
-        loom::model(|| {
-            let queue = std::sync::Arc::new(MyQueue::new());
-            let q1 = std::sync::Arc::clone(&queue);
-            let q2 = std::sync::Arc::clone(&queue);
-            let h1 = loom::thread::spawn(move || q1.push(1));
-            let h2 = loom::thread::spawn(move || q2.pop());
-            h1.join().unwrap();
-            h2.join().unwrap();
-        });
-    }
-}
-```
-
-Run: `RUSTFLAGS="--cfg loom" cargo test --release`. Loom systematically explores the interleavings its bounded model allows for the test scope; combined with miri on the single-thread paths, that is strong machine-checked evidence, not a proof over every execution.
+When `unsafe` participates in a concurrent algorithm (lock-free queue, hazard pointers, custom Arc), miri's single-thread model is insufficient. Model-check it with `loom` as set up in [concurrency.md](concurrency.md), and keep miri on the single-thread paths.
 
 ## The Forbidden List
 

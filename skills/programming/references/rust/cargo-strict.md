@@ -83,7 +83,6 @@ module_name_repetitions = "allow"
 must_use_candidate = "allow"
 
 # Restriction lints - opt-in soundness rails
-unreachable = "deny"
 mod_module_files = "warn"      # prefer foo.rs over foo/mod.rs
 empty_drop = "warn"
 empty_structs_with_brackets = "warn"
@@ -179,7 +178,7 @@ too-many-lines-threshold = 100
 # msrv - keeps clippy from suggesting features past our MSRV
 msrv = "1.85"
 
-# Avoid `panic` lint complaining about derived Debug impls calling unreachable_unchecked etc.
+# Exempt test code from the panic-family and debug-output denies above
 allow-unwrap-in-tests = true
 allow-expect-in-tests = true
 allow-panic-in-tests = true
@@ -275,6 +274,7 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - run: cargo nextest run --all-targets --all-features --workspace
       - run: cargo test --doc --all-features --workspace   # nextest does not run doctests
+      # proptest replays proptest-regressions/ in the run above; commit any new regression file it writes
 
   doc:
     runs-on: ubuntu-latest
@@ -343,15 +343,4 @@ cargo install cargo-nextest cargo-machete cargo-deny cargo-edit cargo-watch
 rustup install nightly
 rustup component add miri --toolchain nightly
 # drop the configs above
-git add <paths>  # stage only the intended paths
-# commit only when the user asked for a commit
-```
-
-After every change:
-
-```bash
-cargo fmt --all -- --check && \
-cargo clippy --all-targets --all-features -- -D warnings && \
-cargo nextest run && cargo test --doc && \
-cargo +nightly miri nextest run    # only if unsafe is involved
 ```

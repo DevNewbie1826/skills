@@ -2,7 +2,7 @@
 
 > Read this when writing a small Rust script or deciding whether it should become a crate.
 
-Production hygiene with throwaway ergonomics. Rust scripts get the same strict lints, the same miri rule when `unsafe` is touched, the same type discipline. The difference is dependency declaration lives inline.
+Production hygiene with throwaway ergonomics. Rust scripts get the same strict lints, the same miri rule when `unsafe` is touched, the same type discipline. The difference is that dependency declaration lives inline.
 
 ## `rust-script` — the recommended path
 
@@ -174,7 +174,7 @@ Add a lints block in the inline `Cargo.toml`:
 //! ```
 ```
 
-Now the script gets the same strictness as the main project. If you need a one-line `unwrap()` for prototype velocity, switch the lint to `warn` for that one script - never blanket `allow`.
+Now the script gets the core strictness of the main project; copy more of the [cargo-strict.md](cargo-strict.md) `[lints.clippy]` table when the script grows. If you need a one-line `unwrap()` for prototype velocity, switch the lint to `warn` for that one script - never blanket `allow`.
 
 Run with lints visible:
 
@@ -187,7 +187,7 @@ RUSTFLAGS="-D warnings" rust-script ./script.rs
 - It is going to live longer than a week → make it a real crate with `cargo new --bin`.
 - It needs custom build scripts (`build.rs`) → real crate.
 - It needs binary distribution to other machines → real crate with `cargo dist`.
-- It needs to be tested → real crate (scripts can technically run `#[test]`s under `cargo test`, but the workflow is awkward).
+- It needs more tests than the inline workflow below handles comfortably → real crate.
 
 A reasonable migration path: start as a script, when complexity grows past ~200 lines or you reach for a second `.rs` file, run `rust-script --emit ./script.rs` to dump a regular Cargo project skeleton and continue from there.
 
@@ -256,12 +256,15 @@ For numerics:
 #!/usr/bin/env rust-script
 //! sum a column of numbers from stdin
 use std::io::{self, BufRead};
-fn main() {
-    let total: f64 = io::stdin().lock().lines()
-        .filter_map(|l| l.ok())
-        .filter_map(|l| l.trim().parse::<f64>().ok())
-        .sum();
+fn main() -> io::Result<()> {
+    let mut total = 0.0_f64;
+    for line in io::stdin().lock().lines() {
+        if let Ok(n) = line?.trim().parse::<f64>() {
+            total += n;
+        }
+    }
     println!("{total}");
+    Ok(())
 }
 ```
 
@@ -289,7 +292,3 @@ irust
 ```
 
 But these are interactive playgrounds, not scriptable. For shell pipelines, stay with `rust-script`.
-
-## The Promise
-
-Same strict lints. Same `clippy::pedantic` enforcement. Same `unsafe`-requires-SAFETY rule. The agent does not get a free pass on a 30-line script. The whole point of strict scripts is that **production hygiene is cheap when the toolchain enforces it**.
