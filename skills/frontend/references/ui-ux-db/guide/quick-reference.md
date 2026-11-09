@@ -11,7 +11,7 @@ Part of [UI/UX Pro Max - Design Intelligence](../README.md)
 | Priority | Category | Impact | Domain | Key Checks (Must Have) | Anti-Patterns (Avoid) |
 |----------|----------|--------|--------|------------------------|------------------------|
 | 1 | Accessibility | CRITICAL | `ux` | Contrast 4.5:1, Alt text, Keyboard nav, Aria-labels | Removing focus rings, Icon-only buttons without labels |
-| 2 | Touch & Interaction | CRITICAL | `ux` | Min size 44×44px, 8px+ spacing, Loading feedback | Reliance on hover only, Instant state changes (0ms) |
+| 2 | Touch & Interaction | CRITICAL | `ux` | Min size 44×44pt / 48×48dp, 8px+ spacing, Loading feedback | Reliance on hover only, Instant state changes (0ms) |
 | 3 | Performance | HIGH | `ux` | WebP/AVIF, Lazy loading, Reserve space (CLS &lt; 0.1) | Layout thrashing, Cumulative Layout Shift |
 | 4 | Style Selection | HIGH | `style`, `product` | Match product type, Consistency, SVG icons (no emoji) | Mixing flat & skeuomorphic randomly, Emoji as icons |
 | 5 | Layout & Responsive | HIGH | `ux` | Mobile-first breakpoints, Viewport meta, No horizontal scroll | Horizontal scroll, Fixed px container widths, Disable zoom |
@@ -257,5 +257,3 @@ Part of [UI/UX Pro Max - Design Intelligence](../README.md)
 - `export-option` - For data-heavy products, offer CSV/image export of chart data
 - `drill-down-consistency` - Drill-down interactions must maintain a clear back-path and hierarchy breadcrumb
 - `time-scale-clarity` - Time series charts must clearly label time granularity (day/week/month) and allow switching
-
-## How to Use

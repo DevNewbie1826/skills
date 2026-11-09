@@ -7,11 +7,7 @@ description: "UI/UX design intelligence for web and mobile. Includes 50+ styles,
 
 Read this when you need searchable UI/UX guidance, a design-system recommendation, or stack-specific implementation notes.
 
-Comprehensive design guide for web and mobile applications. Contains 50+ styles, 161 color palettes, 73 font pairings, 161 product types with reasoning rules, 99 UX guidelines, and 25 chart types across 13 technology stacks. Searchable database with priority-based recommendations.
-
-Before implementation, run a UX validation search and prioritize accessibility and touch/interaction, then performance, style, and layout. Use the [Pre-Delivery Checklist](guide/pre-delivery-checklist.md) for its full preparation and delivery checks: apply its UX validation before implementation, then complete the checklist and review [Quick Reference priorities 1–3](guide/quick-reference.md#rule-categories-by-priority) before delivery. The detailed checklists remain in those guides.
-
-**Decision criteria**: If the task will change how a feature **looks, feels, moves, or is interacted with**, this Skill should be used.
+Use the [Pre-Delivery Checklist](guide/pre-delivery-checklist.md) for its full preparation and delivery checks: apply its UX validation before implementation, then complete the checklist and review [Quick Reference priorities 1–3](guide/quick-reference.md#rule-categories-by-priority) before delivery. The detailed checklists remain in those guides.
 
 ## Contents
 

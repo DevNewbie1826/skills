@@ -4,8 +4,6 @@ Read this when polishing App UI (iOS/Android/React Native/Flutter) icons, intera
 
 Part of [UI/UX Pro Max - Design Intelligence](../README.md)
 
-## Common Rules for Professional UI
-
 These are frequently overlooked issues that make UI look unprofessional:
 Scope notice: The rules below are for App UI (iOS/Android/React Native/Flutter), not desktop-web interaction patterns.
 
@@ -60,7 +58,3 @@ Scope notice: The rules below are for App UI (iOS/Android/React Native/Flutter),
 | **Section spacing hierarchy** | Define clear vertical rhythm tiers (e.g., 16/24/32/48) by hierarchy | Similar UI levels with inconsistent spacing |
 | **Adaptive gutters by breakpoint** | Increase horizontal insets on larger widths and in landscape | Same narrow gutter on all device sizes/orientations |
 | **Scroll and fixed element coexistence** | Add bottom/top content insets so lists are not hidden behind fixed bars | Scroll content obscured by sticky headers/footers |
-
----
-
-## Pre-Delivery Checklist
