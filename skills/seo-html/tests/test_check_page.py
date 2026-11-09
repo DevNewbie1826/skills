@@ -2000,7 +2000,8 @@ class TestRobustnessBoundary(RuleCase):
         self.assertEqual(report["summary"]["error"], 0)
 
     def test_forced_parse_exception_yields_internal_error_finding(self):
-        # A parser exception must not return a silent partial tree. The
+        # Delta re-review round 5, required change 1 (truncation half):
+        # a parser exception must not return a silent partial tree. The
         # internal-error convention fires with the parse rule's id, and
         # the remaining checks still run over the truncated tree.
         text = fixture_text("good-en.html")
