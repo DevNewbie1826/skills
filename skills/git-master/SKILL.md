@@ -100,3 +100,4 @@ Before finishing:
 
 - Run the most relevant verification available for the changed behavior or history operation.
 - Report commands that passed and any command you could not run.
+- State the final working-tree and branch status explicitly, including any uncommitted files.
