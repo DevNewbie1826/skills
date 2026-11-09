@@ -6,35 +6,7 @@ Part of [image-gen-concepts-web](../image-gen-concepts-web.md)
 
 ## 15. DEFAULT SITE PACKS
 
-### 4-section pack
-1. Hero
-2. Features
-3. Social proof / testimonial
-4. CTA
-
-### 8-section pack
-1. Hero
-2. Trust bar
-3. Features
-4. Product showcase
-5. Benefits / use cases
-6. Testimonials
-7. Pricing
-8. CTA
-
-### 12-section pack
-1. Hero
-2. Trust bar
-3. Feature grid
-4. Product preview
-5. Problem / solution
-6. Benefits
-7. Workflow
-8. Metrics / proof / integration
-9. Testimonials
-10. Pricing
-11. FAQ
-12. CTA + footer
+The 4/8/12-section packs are owned by [Quality and structure](../image-to-code-skill/quality-structure.md) (Section 33). Pick the pack that matches the brief, then adapt it with the examples below.
 
 ---
 

@@ -72,7 +72,7 @@ Never use default transitions. All motion must simulate real-world mass and spri
 - For JavaScript-driven scroll reveals, use `IntersectionObserver` or Framer Motion's `whileInView`. Never use `window.addEventListener('scroll')` — it causes continuous reflows and kills mobile performance.
 
 ## 6. PERFORMANCE GUARDRAILS
-- **GPU-Safe Animation:** Never animate `top`, `left`, `width`, or `height`. Animate exclusively via `transform` and `opacity`. Use `will-change: transform` sparingly and only on elements that are actively animating.
+- **GPU-Safe Animation:** The transform/opacity-only animation rule is owned by [../perfection/build-rules.md](../perfection/build-rules.md). Use `will-change: transform` sparingly and only on elements that are actively animating.
 - **Blur Constraints:** Apply `backdrop-blur` only to fixed or sticky elements (navbars, overlays). Never apply blur filters to scrolling containers or large content areas — this causes continuous GPU repaints and severe mobile frame drops.
 - **Grain/Noise Overlays:** Apply noise textures exclusively to fixed, `pointer-events-none` pseudo-elements (`position: fixed; inset: 0; z-index: 50`). Never attach them to scrolling containers.
 - **Z-Index Discipline:** Do not use arbitrary `z-50` or `z-[9999]`. Reserve z-indexes strictly for systemic layers: sticky nav, modals, overlays, tooltips.
@@ -84,17 +84,3 @@ When generating UI code, follow this exact sequence:
 3. **[ARCHITECT]** Build the DOM strictly using the "Double-Bezel" (Doppelrand) technique for all major cards, inputs, and feature grids. Use exaggerated squircle radii (`rounded-[2rem]`).
 4. **[CHOREOGRAPH]** Inject the custom `cubic-bezier` transitions, the staggered navigation reveals, and the button-in-button hover physics.
 5. **[OUTPUT]** Deliver flawless, pixel-perfect React/Tailwind/HTML code. Do not include basic, generic fallbacks.
-
-## 8. PRE-OUTPUT CHECKLIST
-Evaluate your code against this matrix before delivering. This is the last filter.
-- [ ] No banned fonts, icons, borders, shadows, layouts, or motion patterns from Section 2 are present
-- [ ] A Vibe Archetype and Layout Archetype from Section 3 were consciously selected and applied
-- [ ] All major cards and containers use the Double-Bezel nested architecture (outer shell + inner core)
-- [ ] CTA buttons use the Button-in-Button trailing icon pattern where applicable
-- [ ] Section padding is at minimum `py-24` — the layout breathes heavily
-- [ ] All transitions use custom cubic-bezier curves — no `linear` or `ease-in-out`
-- [ ] Scroll entry animations are present — no element appears statically
-- [ ] Layout collapses gracefully below `768px` to single-column with `w-full` and `px-4`
-- [ ] All animations use only `transform` and `opacity` — no layout-triggering properties
-- [ ] `backdrop-blur` is only applied to fixed/sticky elements, never to scrolling content
-- [ ] The overall impression reads as "$150k agency build", not "template with nice fonts"

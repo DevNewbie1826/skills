@@ -35,7 +35,7 @@ After install, confirm by reading the diff. Each tool should appear ONLY behind 
 
 ## Manual install (when the CLI does not fit)
 
-### Next.js (App Router) — `app/layout.tsx`
+When a CLI does not fit the project, apply the same gate by hand: wrap the tool loads in the dev check (`process.env.NODE_ENV === "development"` or `import.meta.env.DEV`) in the framework's entry file. One worked example, Next.js (App Router) `app/layout.tsx`; every other entry — Pages Router `pages/_document.tsx`, a Vite/Remix/Astro entry, a Webpack/CRA entry file — is the same conditional around the loads:
 
 ```tsx
 import Script from "next/script";
@@ -65,81 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### Next.js (Pages Router) — `pages/_document.tsx`
-
-Same pattern, but the `<Script>` tags live inside `<Head>` from `next/document` and gate on `process.env.NODE_ENV === 'development'`.
-
-### Vite — `src/main.tsx` (or wherever the entry is)
-
-```tsx
-if (import.meta.env.DEV) {
-  void import("react-grab");
-  void import("react-scan");
-}
-```
-
-Optionally add the Vite plugin for richer `displayName` data on react-scan:
-
-```ts
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import reactScan from "vite-plugin-react-scan";
-
-export default defineConfig({
-  plugins: [react(), reactScan()],
-});
-```
-
-### Webpack / CRA — entry file top
-
-```ts
-if (process.env.NODE_ENV === "development") {
-  void import("react-grab");
-  void import("react-scan");
-}
-```
-
-### Remix — `app/root.tsx`
-
-```tsx
-export default function App() {
-  return (
-    <html lang="en">
-      <head>
-        <Meta />
-        {process.env.NODE_ENV === "development" && (
-          <>
-            <script crossOrigin="anonymous" src="//unpkg.com/react-grab/dist/index.global.js" />
-            <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
-          </>
-        )}
-        <Links />
-      </head>
-      <body>
-        <Outlet />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-```
-
-### Astro — `src/layouts/Layout.astro`
-
-```astro
----
-const isDev = import.meta.env.DEV;
----
-<head>
-  {isDev && (
-    <>
-      <script crossorigin="anonymous" src="//unpkg.com/react-grab/dist/index.global.js" is:inline></script>
-      <script crossorigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" is:inline></script>
-    </>
-  )}
-</head>
-```
+In a plain bundler entry file (Vite, Webpack/CRA), the same gate is a conditional dynamic import: `if (import.meta.env.DEV) { void import("react-grab"); }`.
 
 ## react-doctor — wire the scan, not the bundle
 
@@ -206,16 +132,9 @@ For Vite use `VITE_DISABLE_REACT_DEVTOOLS`, for CRA use `REACT_APP_DISABLE_REACT
 
 ## Verification
 
-After install, sanity-check that the tools are loaded ONLY in dev:
-
 ```bash
-# 1. Build for production
+# Build for production, then probe the served HTML for a dev-tool leak
 npm run build && npm run start  # or vite build && vite preview, etc.
-
-# 2. Open the production URL and verify
-#    - No react-grab toolbar visible
-#    - No react-scan overlay or console output
-#    - DOM contains zero <script> tags pointing at unpkg.com/react-grab or unpkg.com/react-scan
 curl -s http://localhost:3000 | grep -E 'react-grab|react-scan' && echo "LEAK — fix the gate" || echo "OK"
 ```
 

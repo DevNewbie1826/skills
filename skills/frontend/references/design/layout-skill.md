@@ -110,4 +110,4 @@ Keep body text at least 16px, target a readable line length of 45–75 character
 
 ## Boundary
 
-This file owns spatial structure only. It never sets color, typography, shadow, radius, or motion values — those trace to `DESIGN.md` and the loaded style skill. If you find yourself adding a brand color to a layout primitive, stop: the primitive stays layout-only and the styling wraps or composes around it.
+This file adds no visual direction; [README.md](README.md) (Stacking rules) owns that rule. If you find yourself adding a brand color to a layout primitive, stop: the primitive stays layout-only and the styling wraps or composes around it.

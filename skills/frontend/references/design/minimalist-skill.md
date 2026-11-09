@@ -13,8 +13,8 @@ Description: An advanced frontend engineering directive for generating highly re
 
 ## 2. Absolute Negative Constraints (Banned Elements)
 The AI must strictly avoid the following generic web development defaults:
-- DO NOT use the "Inter", "Roboto", or "Open Sans" typefaces.
-- DO NOT use generic, thin-line icon libraries like "Lucide", "Feather", or standard "Heroicons".
+- DO NOT use the "Inter", "Roboto", or "Open Sans" typefaces inside this direction.
+- DO NOT use generic, thin-line icon libraries like "Lucide", "Feather", or standard "Heroicons" inside this direction; outside this direction they are discouraged at most, not banned ([taste-skill.md](taste-skill.md)).
 - DO NOT use Tailwind's default heavy drop shadows (e.g., `shadow-md`, `shadow-lg`, `shadow-xl`). Shadows must be practically non-existent or heavily customized to be ultra-diffuse and low opacity (< 0.05).
 - DO NOT use primary colored backgrounds for large elements or sections (e.g., no bright blue, green, or red hero sections).
 - DO NOT use gradients, neon colors, or 3D glassmorphism (beyond subtle navbar blurs).
@@ -74,7 +74,7 @@ Motion should feel invisible — present but never distracting. The goal is quie
 - Hover States: Cards lift with an ultra-subtle shadow shift (`box-shadow` transitioning from `0 0 0` to `0 2px 8px rgba(0,0,0,0.04)` over `200ms`). Buttons respond with `scale(0.98)` on `:active`.
 - Staggered Reveals: Lists and grid items enter with a cascade delay (`animation-delay: calc(var(--index) * 80ms)`). Never mount everything at once.
 - Background Ambient Motion: Optional. A single, very slow-moving radial gradient blob (`animation-duration: 20s+`, `opacity: 0.02-0.04`) drifting behind hero sections. Must be applied to a `position: fixed; pointer-events: none` layer. Never on scrolling containers.
-- Performance: Animate exclusively via `transform` and `opacity`. No layout-triggering properties (`top`, `left`, `width`, `height`). Use `will-change: transform` sparingly and only on actively animating elements.
+- Performance: Animate only via `transform` and `opacity` (the rule is owned by [../perfection/build-rules.md](../perfection/build-rules.md)). Use `will-change: transform` sparingly and only on actively animating elements.
 
 ## 8. Execution Protocol
 When tasked with writing frontend code (HTML, React, Tailwind, Vue) or designing a layout:

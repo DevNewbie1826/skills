@@ -22,14 +22,14 @@ For each journey step, write what the product does at its best: what the user se
 
 Capture the surface under work with `visual-qa` (every state at 375, 768, and 1280 CSS px, both themes; for a new screen, capture the first draft after the brief is written, and let the ledger grow as the draft is checked). List every difference from the ideal state. Do not rank the small ones away.
 
-Then read the rule sources in full and add every violation of each: the build rules and draft guard in [brief-and-subtract.md](brief-and-subtract.md) and [../perfection/build-rules.md](../perfection/build-rules.md) (include the `check-draft-guard.ts` output), the `visual-qa` checklist, every reference this request routed to, and the WCAG 2.2 AA items in [../perfection/wcag-gate.md](../perfection/wcag-gate.md). Capture a screenshot for each row and keep the ledger in a durable record (a file in the repository or the task's own tracking record) so no finding lives only in context. One row per gap:
+Then add every violation of the build rules and draft guard in [brief-and-subtract.md](brief-and-subtract.md) and [../perfection/build-rules.md](../perfection/build-rules.md) (include the `check-draft-guard.ts` output) and of the WCAG 2.2 AA items in [../perfection/wcag-gate.md](../perfection/wcag-gate.md). Capture a screenshot for each row and keep the ledger in a durable record (a file in the repository or the task's own tracking record) so no finding lives only in context. One row per gap:
 
-| ID | Screen / state | Gap | Principle or rule broken | Evidence | Fix | Proof | Status |
-|---|---|---|---|---|---|---|---|
-| G1 | Settings / save | Save button widens from 96 to 128 px when its spinner appears | State-stable controls | `before/settings-save-loading.png` | Spinner overlays the hidden label in a fixed-width slot | Width probe equal across idle/loading/done; `visual-qa` before/after pair | open |
+| ID | Screen / state | Gap | Principle or rule broken | Evidence | Fix | Status |
+|---|---|---|---|---|---|---|
+| G1 | Settings / save | Save button widens from 96 to 128 px when its spinner appears | State-stable controls | `before/settings-save-loading.png` | Spinner overlays the hidden label in a fixed-width slot | open |
 
 ## 5. Close the ledger
 
 Plan the fixes before the first edit: each row names its fix and, in advance, the `visual-qa` item or probe that will prove it. Then execute without stopping to ask between rows. Independent rows may run in parallel, at most one lane per screen, where your runtime supports delegation; each fix is a scoped pass ([brief-and-subtract.md](brief-and-subtract.md), Scoped fix passes), and a large ledger ships as several changes grouped by screen or rule.
 
-A row closes only with its before/after pair and the passing proof; the pairs go in the pull-request body. Report progress as closed/total rows, naming what closed since the last report.
+A row closes only with its passing proof and the before/after pair required by [brief-and-subtract.md](brief-and-subtract.md) (Before captures); the pairs go in the pull-request body. Report progress as closed/total rows, naming what closed since the last report.

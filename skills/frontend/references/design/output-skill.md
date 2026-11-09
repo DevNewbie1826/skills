@@ -41,11 +41,3 @@ When a response approaches the token limit:
 ```
 
 On "continue", pick up exactly where you stopped. No recap, no repetition.
-
-## Quick Check
-
-Before finalizing any response, verify:
-- No banned patterns from the list above appear anywhere in the output
-- Every item the user requested is present and finished
-- Code blocks contain actual runnable code, not descriptions of what code would do
-- Nothing was shortened to save space

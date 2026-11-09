@@ -12,7 +12,7 @@ Read this when a landing page, portfolio, or redesign needs deliberate visual di
 
 ## Required workflow
 
-- Before outputting code, run every item in [the final pre-flight checklist](taste-skill/pre-flight.md). This is required, not optional; if any item fails, fix it before delivery.
+- Before outputting code, run the machine-checkable boxes in [the final pre-flight checklist](taste-skill/pre-flight.md); if any fails, fix it before delivery. The full rule set lives in the references; apply it, do not re-list it.
 - Follow every applicable mandatory, required, and hard-ban directive in the references; their conditions do not make them optional.
 - Test the page in both light and dark modes before finishing.
 
@@ -58,20 +58,15 @@ After the design read, set three dials. Every layout, motion, and density decisi
 
 **Baseline:** `8 / 6 / 4`. Use these unless the design read overrides them. Do not ask the user to edit this file - overrides happen conversationally.
 
-### 1.A Dial Inference (design read → dial values)
-| Signal | VARIANCE | MOTION | DENSITY |
+### 1.A Dial inference and presets (design read → dial values)
+
+| Signal or use case | VARIANCE | MOTION | DENSITY |
 |---|---|---|---|
 | "minimalist / clean / calm / editorial / Linear-style" | 5-6 | 3-4 | 2-3 |
 | "premium consumer / Apple-y / luxury / brand" | 7-8 | 5-7 | 3-4 |
 | "playful / wild / Dribbble / Awwwards / experimental / agency" | 9-10 | 8-10 | 3-4 |
 | "landing page / portfolio / marketing site (default)" | 7-9 | 6-8 | 3-5 |
 | "trust-first / public-sector / regulated / accessibility-critical" | 3-4 | 2-3 | 4-5 |
-| "redesign - preserve" | match existing | +1 | match existing |
-| "redesign - overhaul" | +2 | +2 | match existing |
-
-### 1.B Use-Case Presets
-| Use case | VARIANCE | MOTION | DENSITY |
-|---|---|---|---|
 | Landing (SaaS, mainstream) | 7 | 6 | 4 |
 | Landing (Agency / creative) | 9 | 8 | 3 |
 | Landing (Premium consumer) | 7 | 6 | 3 |
@@ -79,10 +74,10 @@ After the design read, set three dials. Every layout, motion, and density decisi
 | Portfolio (Developer) | 6 | 5 | 4 |
 | Editorial / Blog | 6 | 4 | 3 |
 | Public-sector service | 3 | 2 | 5 |
-| Redesign - preserve | match | match+1 | match |
-| Redesign - overhaul | +2 | +2 | match |
+| Redesign - preserve | match existing | match existing +1 | match existing |
+| Redesign - overhaul | +2 | +2 | match existing |
 
-### 1.C How the Dials Drive Output
+### 1.B How the Dials Drive Output
 Use these (or user-overridden values) as global variables. Cross-references throughout this document refer to these exact variable names - never invent aliases like `LAYOUT_VARIANCE` or `ANIM_LEVEL`.
 
 ---

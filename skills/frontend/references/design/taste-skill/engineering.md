@@ -365,7 +365,7 @@ Use this for: feature lists, testimonial grids, logo walls, anything that just n
 ## 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
 
 ### 6.A Hardware Acceleration
-* Animate ONLY `transform` and `opacity`. Never animate `top`, `left`, `width`, `height`.
+* Animate ONLY `transform` and `opacity`, never `top`, `left`, `width`, `height` - the rule is owned by [../../perfection/build-rules.md](../../perfection/build-rules.md).
 * Use `will-change: transform` sparingly - only on elements that will actually animate.
 
 ### 6.B Reduced Motion (mandatory)

@@ -96,6 +96,8 @@ Default to website design comps.
 - CONVERSION_DISCIPLINE: 8
   `(1 = pure art moodboard, 10 = clear funnel + premium design balance)`
 
+The shared dials (`DESIGN_VARIANCE`, `VISUAL_DENSITY`) follow the `8 / 6 / 4` baseline owned by [taste-skill.md](taste-skill.md); the remaining dials are specific to web image concepts.
+
 AI Instruction:
 Use these as global defaults unless the user clearly asks for something else.
 Do not ask the user to edit this file.
