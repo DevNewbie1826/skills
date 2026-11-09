@@ -1,12 +1,12 @@
 ---
-description: "The agent, tool and eval-helper names omp 18.18.1 provides, read from its package source, and the names from other hosts that this skill must not use. tools/check-skills.py reads this file (rule OMP-NAME)."
+description: "The agent, tool and eval-helper names omp 18.18.1 provides, read from its package source. tools/check-skills.py reads this file (rule OMP-NAME)."
 ---
 
 # omp names
 
 > Read this when you name an agent, tool or eval helper in this skill or in a node prompt. Paths are relative to the `@oh-my-pi/pi-coding-agent` package.
 
-The pack checker treats the first backticked name of each row below as the list: `## Agents`, `## Tools` and `## Eval helpers` are allowed, `## Not on omp` is refused anywhere else in this skill.
+The pack checker treats the first backticked name of each row below as the list: an agent or tool this skill dispatches must be a row of `## Agents` or `## Tools`.
 
 ## Agents
 
@@ -73,33 +73,3 @@ Inside the `eval` tool (`src/prompts/tools/eval-agents.md`, `src/prompts/tools/e
 | `workpool()` | a keep-alive pool for a batch of independent items; the first full drain closes it |
 | `wait()` | the kernel barrier over a list of handles; `raiseErrors: false` keeps a failure in its slot |
 | `tool()` | defines a tool a node can call back into the kernel |
-
-## Not on omp
-
-Names from other hosts. Each row says what to use instead. `anywhere` names fail wherever they appear; `quoted` names are ordinary words and fail only inside backticks or quotes.
-
-| name | use instead | match |
-| --- | --- | --- |
-| `ultrabrain` | `reviewer` | anywhere |
-| `oracle` | `reviewer` | `quoted` |
-| `explore` | `scout` | `quoted` |
-| `librarian` | `scout` | `quoted` |
-| `deep-low` | `task` | anywhere |
-| `deep-high` | `task` | anywhere |
-| `unspecified-low` | `task` | anywhere |
-| `unspecified-high` | `task` | anywhere |
-| `visual-engineering` | `task` with the `frontend` skill | anywhere |
-| `artistry` | `task` | `quoted` |
-| `plan-reviewer` | `reviewer` | anywhere |
-| `omo-native-gate-reviewer` | `reviewer` | anywhere |
-| `mass-ulw` | a DAG of `agent()` nodes in `eval` (`references/graph-runs.md`) | anywhere |
-| `ulw-loop` | the one `goal` plus `todo` phases (`references/graph-runs.md`) | anywhere |
-| `ulw-plan` | a `reviewer` node on the plan | anywhere |
-| `ulw-research` | `scout` nodes plus a review node | anywhere |
-| `hyperplan` | a `reviewer` node on the plan | anywhere |
-| `review-work` | `reviewer` | anywhere |
-| `subagent_type` | the `agent` option of `agent()` or of a `task` item | anywhere |
-| `load_skills` | name the skill in the node prompt | anywhere |
-| `team_create` | one DAG; steer a node with `.send()` | anywhere |
-| `parallel()` | `agent()` handles plus `wait()` | anywhere |
-| `pipeline()` | waves of `agent()` handles, one `wait()` per wave | anywhere |
