@@ -43,8 +43,9 @@ verbatim from omp 18.18.1 `src/prompts/system/ultrathink-notice.md`.
 `skills/dag-workflow/references/workflow.md` is omp 18.18.1
 `src/prompts/system/workflow-notice.md` rendered by `renderWorkflowNotice`
 (`src/modes/magic-keywords.ts`) with all omp defaults: taskBatch, scoutAvailable, evalTools,
-py and js true; freshAgents and perCallModel false. To re-render, call that function with
-these values.
+py and js true; freshAgents and perCallModel false, with its opening
+"User message contains **workflowz** →" replaced by "When using this skill →". To
+re-render, call that function with these values and make the same replacement.
 ## Install
 
 This is an OMP skill pack. Install the whole pack with:

@@ -39,7 +39,7 @@ Size the work, not the node count: one node per independent piece, many small no
 
 ## Supervising a running DAG
 
-Steering and cancelling work only on `agent()` handle nodes. When one drifts outside its SCOPE or circles one sub-problem, steer it with `.send()` naming the exact boundary. Give each node a time box when you start it. A node past its time box gets one steer; if its handoff file still has not changed, `.cancel()` it, keep what it wrote, and treat it as failed. A `workpool()` item has only the pool's `.push()`, `.status()`, `.peek()` and `.close()`: to stop or redirect pool items, `.close()` the pool and push the corrected items to a new named pool. Elapsed time alone is not failure while the file keeps growing.
+Steering and cancelling work only on `agent()` handle nodes. When one drifts outside its SCOPE or circles one sub-problem, steer it with `.send()` naming the exact boundary. Give each node a time box when you start it. A node past its time box gets one steer; if its handoff file still has not changed, `.cancel()` it, keep what it wrote, and treat it as failed. A `workpool()` item has only the pool's `.push()`, `.status()`, `.peek()` and `.close()`, and none of them stops a running item: `.close()` drops only queued items, and an item already running keeps running until it finishes. To redirect pool work, `.close()` the pool, let its running items finish and treat their output as stale, then push the corrected items to a new named pool. Start a node you may need to steer or cancel as an `agent()` handle. Elapsed time alone is not failure while the file keeps growing.
 Before marking a node `done`, check the facts in its handoff that the next node depends on.
 
 ## When a node fails
