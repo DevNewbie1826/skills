@@ -110,9 +110,9 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 | File | Aesthetic |
 |---|---|
 | [`aside.md`](aside.md) | Bright product-app marketing, custom display type, soft squircle controls, browser-product framing. |
-| [`cursor.md`](cursor.md) | Sleek dark interface with gradient accents. |
+| [`ai-code-editor.md`](ai-code-editor.md) | AI code editor. Warm cream canvas, orange accent, gothic display type. |
 | [`expo.md`](expo.md) | React Native platform. Dark theme, tight letter-spacing, code-centric. |
-| [`lovable.md`](lovable.md) | AI full-stack builder. Playful gradients, friendly dev aesthetic. |
+| [`ai-app-builder.md`](ai-app-builder.md) | AI full-stack builder. Playful gradients, friendly dev aesthetic. |
 | [`raycast.md`](raycast.md) | Productivity launcher. Sleek dark chrome, vibrant gradient accents. |
 | [`superhuman.md`](superhuman.md) | Fast email client. Premium dark UI, keyboard-first, purple glow. |
 | [`vercel.md`](vercel.md) | Frontend deployment platform. Black and white precision, Geist font. |
@@ -214,4 +214,4 @@ Each file ships with: visual theme, hex color palette + semantic roles, full typ
 - **"Warm / approachable / soft"** → `airbnb.md`, `notion.md`, `intercom.md`, `mastercard.md`
 - **"Data-dense / dashboard"** → `sentry.md`, `kraken.md`, `posthog.md`, `clickhouse.md`
 - **"Bold / sporty / monochrome punch"** → `nike.md`, `uber.md`, `tesla.md`, `binance.md`
-- **"Playful / colorful / friendly"** → `figma.md`, `airtable.md`, `zapier.md`, `lovable.md`
+- **"Playful / colorful / friendly"** → `figma.md`, `airtable.md`, `zapier.md`, `ai-app-builder.md`
