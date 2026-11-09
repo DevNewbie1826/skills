@@ -8,10 +8,6 @@ A cleanup begins only after observable behavior is protected by a green regressi
 
 Read [slop-categories.md](slop-categories.md) before planning changes. It defines the ten categories, their Keep rules and proof requirements, the deletion ladder, and the oversized-module policy.
 
-## Phase 0: Prepare
-
-Create a checklist covering every phase below. Mark only one phase active at a time so scope and evidence remain clear.
-
 ## Phase 1: Determine scope
 
 1. Use an explicit file list when one was supplied.
@@ -78,7 +74,7 @@ Every per-file pass must preserve the safety-frame guarantees of [slop-categorie
 
 ## Phase 4b: Prove the test cuts, serially, then cut
 
-After the last batch finishes and no worker is running, the lead takes the collected ledger rows. For each row whose proof is a mutation, apply the named find and replace to the production owner, run the candidate and its keeper on the unmodified test tree, record both verdicts, and restore the owner byte for byte (checksum before and after) before the next row, as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded and every behavior the candidate asserts is covered by a surviving keeper, not just the one mutated; a row whose proof does not hold becomes `R` and stays. Workers apply `F` repairs in the files they own and report them as applied; the lead verifies them here. Never run two mutations at once and never leave a mutation in the tree.
+After the last batch finishes and no worker is running, the lead proves each collected ledger row serially, exactly as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded and every behavior the candidate asserts is covered by a surviving keeper, not just the one mutated; a row whose proof does not hold becomes `R` and stays. Workers apply `F` repairs in the files they own and report them as applied; the lead verifies them here.
 
 ## Phase 5: Run quality gates and critical review
 
