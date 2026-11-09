@@ -104,8 +104,3 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   reviewers know the exemption applies. `tools/check-skills.py` skips Tier-A token
   checks for `omp-native: true` skills via `is_omp_native()`; never use this to silence
   real violations in ported skills.
-- An OMP-native skill may ship a reference as a symlink to a prompt omp installs (it
-  dangles where omp is not installed). `tools/check-skills.py` lists each such link by name
-  and target (`OMP_PROMPT_LINKS`; today `references/ultrathink.md` ->
-  `.../@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md`, no `..`), accepts it
-  without reading the file behind it, and fails LINKS on any other symlink pointing outside the skill.

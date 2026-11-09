@@ -154,16 +154,8 @@ def is_python_stdlib(module: str) -> bool:
     return spec.origin in {"built-in", "frozen"} or (is_inside(origin, STDLIB_ROOT) and not {"site-packages", "dist-packages"}.intersection(origin.parts))
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
-OMP_PROMPT_LINKS = {"ultrathink.md": "/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md"}
-def omp_prompt_link(path: Path) -> bool:
-    # docs/PORTING.md Rule 8: these references link to a prompt omp installs; they dangle where omp is absent.
-    suffix = OMP_PROMPT_LINKS.get(path.name)
-    if suffix is None or not path.is_symlink() or path.parent.name != "references":
-        return False
-    target = path.readlink().as_posix()
-    return ".." not in target.split("/") and target.endswith(suffix)
 def text_files(directory: Path, suffixes: set[str]) -> list[Path]:
-    return sorted((path for path in directory.rglob("*") if path.is_file() and not omp_prompt_link(path) and path.suffix.lower() in suffixes),
+    return sorted((path for path in directory.rglob("*") if path.is_file() and path.suffix.lower() in suffixes),
                   key=lambda path: path.as_posix())
 def allowlist_paths(root: Path) -> list[Path]:
     locations = [root / "tools" / "allowlist", Path(__file__).resolve().parent / "allowlist"]
@@ -322,10 +314,7 @@ def markdown_target(value: str) -> str:
 def relative_target(value: str) -> bool:
     return bool(value) and not value.startswith(("#", "/", "\\", "//")) and not re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", value)
 def target_exists(base: Path, target: str, skill: Path) -> tuple[bool, str]:
-    link = base / target
-    if omp_prompt_link(link) and is_inside(link.parent, skill):
-        return True, ""
-    candidate = link.resolve()
+    candidate = (base / target).resolve()
     if not is_inside(candidate, skill):
         return False, "target escapes the skill directory"
     return (True, "") if candidate.exists() else (False, "target does not exist")
@@ -341,9 +330,6 @@ def check_relative_link(root: Path, path: Path, skill: Path, base: Path, target:
         add_failure(results, root, path, line_number, "LINKS", f'{kind} "{target}": {reason}', line)
 
 def check_links(root: Path, skill: Path, texts: dict[Path, str], results: Results) -> None:
-    for path in sorted(skill.rglob("*"), key=lambda item: item.as_posix()):
-        if path.is_symlink() and not omp_prompt_link(path) and not is_inside(path, skill):
-            add_failure(results, root, path, 0, "LINKS", "symlink escapes the skill directory")
     for path, text in texts.items():
         if path.suffix.lower() != ".md":
             continue

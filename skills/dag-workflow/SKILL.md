@@ -1,14 +1,20 @@
 ---
 name: dag-workflow
-description: "Use to work one authorized request to a merged PR on omp: define the ideal state from evidence, run every part as a DAG of eval agent() nodes under one goal, prove each requirement with a strict confirmation device, and review the PR until APPROVED. Triggers: /wf, decompose this task, split work across agents, run it as a DAG, big task, too large for one pass, request to merged PR."
+description: "Use to work one authorized request to a merged PR on omp: define the ideal state from evidence, run every part as a DAG of eval workpool() and agent() nodes under one goal, prove each requirement with a strict confirmation device, and review the PR until APPROVED. Triggers: /wf, decompose this task, split work across agents, run it as a DAG, big task, too large for one pass, request to merged PR."
 omp-native: true
 ---
 
-**Read `references/workflow.md` and `references/ultrathink.md` first.**
+<system-notice>
+Multi-step reasoning: think carefully through the problem before responding.
+</system-notice>
+
+(Copied verbatim from omp 18.18.1 `src/prompts/system/ultrathink-notice.md`.)
+
+**Read `references/workflow.md` first.**
 
 # dag-workflow
 
-**Then read `references/graph-runs.md`.** It is how a DAG runs on omp: nodes, stages, retries, the goal and resuming.
+**Then read `references/graph-runs.md`.** It is how a DAG runs on omp beyond the helpers in `workflow.md`: node prompts, stages, failures, the goal and resuming.
 
 One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
 Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode) and write each phase's success criteria as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
@@ -28,7 +34,7 @@ Arm the goal first: one omp goal for the whole request, its objective listing ev
 
 Build every DAG per `references/dag-construction.md`: top-down to atomic tasks, bottom-up convergence through the direct parent, no skipped layer, no flat convergence, maximum parallelism.
 `references/dag-construction-ko.md` is the owner's original. Where the two differ, the Korean original governs.
-Run each DAG in the `eval` tool with `agent()` nodes under the one goal, as `references/graph-runs.md` describes.
+Run each DAG in the `eval` tool under the one goal: `workpool()` and `agent()` as `references/workflow.md` describes, staged as `references/graph-runs.md` describes.
 Every part with parallelism is a DAG, and its last node is its review.
 Fixes after a review are a DAG too, sized by the same three questions. A 1-2 line fix needs no DAG: make it, confirm it and commit it.
 An integration node that only collects and checks its children's results is a check inside the parent, not a separate node (section 4.3 of the DAG reference). Make it a separate node only when integrating needs its own execution, such as merging edits or running the tests over the combined result.
