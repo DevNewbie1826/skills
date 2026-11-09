@@ -54,7 +54,7 @@ Read this when you lay out the page body, or SEM, H, IMG, LINK, A11Y, or CONT fi
 
 ## Links and forms
 
-- Anchor text says where the link goes. Avoid "click here", "read more", "more", "여기", "클릭", "더보기", "자세히" (LINK-03).
+- Anchor text says where the link goes; the full list of non-descriptive phrases is in [rules.md](rules.md) (LINK-03).
 - No empty or `#` hrefs (LINK-04).
 - Every visible input, select, and textarea has a `<label for>`, a wrapping `<label>`, `aria-label`, or `aria-labelledby` (A11Y-01).
 

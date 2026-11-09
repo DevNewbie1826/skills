@@ -17,7 +17,7 @@ This skill writes one complete, static, SEO-ready HTML page and then proves it. 
 | 4. Model check | Walk the M rules and record pass/fail with a reason each | [model-checklist](references/model-checklist.md) |
 | 5. Fix and report | Fix every error, re-run steps 3 and 4, at most 3 rounds; then report what's left | [workflow](references/workflow.md), [report-format](references/report-format.md) |
 
-Exit codes: 0 = no errors (and no warnings under `--strict`), 1 = errors (or warnings under `--strict`), 2 = unreadable file or bad usage.
+Exit codes and the JSON output shape: [report-format](references/report-format.md).
 
 ## Read this when
 
@@ -25,13 +25,13 @@ Exit codes: 0 = no errors (and no warnings under `--strict`), 1 = errors (or war
 |---|---|
 | [workflow.md](references/workflow.md) | You start a page, or need the fix loop and its stop conditions |
 | [rules.md](references/rules.md) | A finding ID needs explaining, or you need a severity, threshold, or source |
-| [head-meta.md](references/head-meta.md) | You write or fix anything inside `<head>`: meta, canonical, hreflang, OG, Twitter |
+| [head-meta.md](references/head-meta.md) | You write or fix anything inside `<head>`, or HEAD, OG, TW, LINK-01, LINK-02, or PERF findings fire |
 | [structured-data.md](references/structured-data.md) | You write or fix JSON-LD, or an LD-* finding fires |
-| [semantic-html.md](references/semantic-html.md) | You lay out the body, or SEM, H, IMG, LINK, A11Y findings fire |
+| [semantic-html.md](references/semantic-html.md) | You lay out the body, or SEM, H, IMG, LINK-03, LINK-04, A11Y, CONT findings fire |
 | [writing.md](references/writing.md) | You write the body text in any language |
 | [korean-naver.md](references/korean-naver.md) | The page is Korean or must do well on Naver |
 | [english.md](references/english.md) | The page is English |
-| [model-checklist.md](references/model-checklist.md) | Step 4, the checks a script can't make |
+| [model-checklist.md](references/model-checklist.md) | You reach step 4: the checks a script can't make |
 | [report-format.md](references/report-format.md) | You write the final report, or parse the checker JSON |
 
 ## Scope

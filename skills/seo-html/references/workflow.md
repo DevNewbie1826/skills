@@ -2,7 +2,7 @@
 
 Read this when you start a new page or need the fix loop and its stop conditions.
 
-The whole job is five steps. Steps 3 to 5 repeat as a loop of at most 3 rounds.
+The whole job is five steps. After each fix, steps 3 and 4 repeat, at most 3 rounds.
 
 ## 1. Brief
 
@@ -21,7 +21,7 @@ Collect these before writing. If the user didn't give one, pick a sensible value
 
 ## 2. Write
 
-Copy `templates/page.html` to a working page and replace every placeholder. The working page is the user's file, not part of the skill, so it can live anywhere. Pass it to the checker by path, for example `python3 scripts/check_page.py path/to/page.html --json --lang ko` run from the skill directory. Placeholders left in JSON-LD fail LD-05, so search for `[`, `TODO`, and `REPLACE_` before checking.
+Copy `templates/page.html` to a working page and replace every placeholder. The working page is the user's file, not part of the skill, so it can live anywhere. Pass it to the checker by path, for example `python3 scripts/check_page.py path/to/page.html --json --lang ko` run from the skill directory. Placeholders left in JSON-LD fail LD-05, so search for `{{` first, then `[`, `TODO`, and `REPLACE_` before checking.
 
 - Head: [head-meta.md](head-meta.md)
 - Body layout: [semantic-html.md](semantic-html.md)
@@ -43,7 +43,7 @@ Other flags: `--strict` (warnings also fail), `--lang auto` (reads `<html lang>`
 
 Go through [model-checklist.md](model-checklist.md). Record each M rule as pass or fail with one line of evidence.
 
-## 5. Fix and re-check (at most 3 rounds)
+## 5. Fix, re-check, and report (at most 3 rounds)
 
 One round = fix, then run steps 3 and 4 again.
 
@@ -59,6 +59,4 @@ Stop as soon as one of these holds:
 
 Never silence a finding by deleting real content or by adding `--allow-noindex` to a page meant to rank.
 
-## 6. Report
-
-Write the report in the shape from [report-format.md](report-format.md): final checker summary, per-round counts, remaining findings, M rule results, and out-of-scope site-level follow-ups.
+When the loop ends, write the report in the shape from [report-format.md](report-format.md): final checker summary, per-round counts, remaining findings, M rule results, and out-of-scope site-level follow-ups.

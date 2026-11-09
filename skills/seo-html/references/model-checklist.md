@@ -37,4 +37,4 @@ For each rule, read the page and mark pass or fail with one line of evidence (a 
 | NAV-03 | og:image is unique to this page and the file is at least 5,000 bytes (check the file if you have it; otherwise mark "not checked") | Shared site-wide image, or a tiny file |
 | NAV-04 | On a 360px-wide screen the h1 and the answer paragraph are visible without scrolling | A hero image or banner pushes the answer below the fold |
 
-KR-02, KR-03, and NAV-04 are unverified (practitioner observations); NAV-01 to NAV-03 are verified by Naver's guide. A failed unverified rule is still worth fixing, but say it's unverified in the report.
+Status labels for every rule (verified or unverified, and why) live in [rules.md](rules.md). A failed unverified rule is still worth fixing, but say it's unverified in the report.
