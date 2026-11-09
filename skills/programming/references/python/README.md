@@ -117,7 +117,23 @@ Load `one-liners.md` for full patterns, examples, and anti-patterns.
 
 ## Reference loading
 
-Load on demand, not all at once: open the shard in this directory that matches the current concern (the router lists them all).
+Load on demand — not all at once. This index is the lane's topic map; the router links here.
+
+| Need | Load |
+|---|---|
+| Full pyproject.toml config | `pyproject-strict.md` |
+| Type patterns (NewType, Final, enums, narrowing) | `type-patterns.md` |
+| Data modeling (container choice, frozen, parse-don't-validate) | `data-modeling.md` |
+| Error handling (typed errors, union returns, exhaustive match) | `error-handling.md` |
+| Async patterns (anyio) | `async-anyio.md` |
+| Data processing (polars / duckdb) | `data-processing.md` |
+| FastAPI + SQLAlchemy stack | `fastapi-stack.md` |
+| Library decision tree | `libraries.md` |
+| **httpx2 optimization** (MUST load for any network code) | `httpx2-optimization.md` |
+| **orjson** (when JSON is in the hot path; FastAPI/Pydantic v2 integration) | `orjson-stack.md` |
+| One-liner scripts (PEP 723) | `one-liners.md` |
+| PydanticAI agents | `pydantic-ai.md` |
+| Textual TUI | `textual-tui.md` |
 
 ## httpx2 — mandatory for ALL network requests
 

@@ -154,14 +154,14 @@ run(main)
 **Combine with timeouts for graceful shutdown**:
 
 ```python
-import anyio
 from anyio import move_on_after
 
 async def do_something(resource) -> None:
     try:
         await run_async_stuff()
-    except anyio.get_cancelled_exc_class():
-        # Allow up to 10s for cleanup, then move on
+    except BaseException:
+        # Cleanup must run for cancellation AND ordinary failures; this
+        # shielded-cleanup boundary is the sanctioned broad-catch case.
         with move_on_after(10, shield=True):
             await resource.aclose()
         raise
