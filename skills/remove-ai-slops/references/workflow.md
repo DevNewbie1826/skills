@@ -4,9 +4,9 @@ Read this when scoping a cleanup, locking behavior with tests, coordinating cate
 
 ## Core rule
 
-A cleanup begins only after observable behavior is protected by a green regression-test baseline. The test is the safety mechanism; a checklist complements it but does not replace it. If the relevant tests cannot be made green, stop and report the blocker rather than editing unverified code.
+A cleanup begins only after observable behavior is protected by a green regression-test baseline; a checklist complements the test but does not replace it. If a file's baseline cannot be made green, leave that file untouched and report the blocker; only a runner that cannot run at all stops the whole pass (Phase 2 owns the mechanics).
 
-Read [slop-categories.md](slop-categories.md) before planning changes. It defines the ten categories, KEEP rules, proof requirements, deletion ladder, and oversized-module policy.
+Read [slop-categories.md](slop-categories.md) before planning changes. It defines the ten categories, their Keep rules and proof requirements, the deletion ladder, and the oversized-module policy.
 
 ## Phase 0: Prepare
 
@@ -17,7 +17,7 @@ Create a checklist covering every phase below. Mark only one phase active at a t
 1. Use an explicit file list when one was supplied.
 2. Otherwise, use the version-control system to list changed files from the current branch relative to its merge base with the integration branch. If version control is unavailable, require an explicit file list.
 3. Exclude deleted and binary files, generated or vendored paths, dependency lock files, and build artifacts.
-4. List the final source-file scope before editing. Do not change files outside it; report nearby findings as deferred work.
+4. List the final source-file scope before editing. Do not change files outside it; report nearby findings as deferred findings.
 
 ## Phase 2: Lock behavior with regression tests
 
@@ -25,8 +25,8 @@ For every in-scope source file:
 
 1. Identify public or otherwise observable behavior: exports, handlers, commands, integration points, and classes used by other code.
 2. Find related tests using project conventions and search tools.
-3. If coverage is absent or weak, write the narrowest regression test that pins current observable behavior before editing the source. Favor outputs, side effects, errors, and boundary behavior over implementation details.
-4. A prose-only file is exempt from wording-pinning tests. Test a machine-consumed value only through its real parser, validator, or runtime seam; otherwise use review.
+3. If coverage is absent or weak, write the narrowest regression test that pins current observable behavior before editing the source, under the admission conditions in [test-junk.md](test-junk.md). Favor outputs, side effects, errors, and boundary behavior over implementation details.
+4. A prose-only file is exempt from prose-pinning tests; [test-junk.md](test-junk.md) owns the rule and the machine-consumed-value exception.
 5. Run the relevant tests, or the full suite when practical. A test that is red on the unchanged base is recorded as a product bug on a baseline-red list and is never deleted. If it covers behavior of an in-scope file, that file's baseline is not green: leave the file untouched and report the blocker. A red test unrelated to every in-scope file is only recorded and excluded from proofs. Everything covering in-scope behavior must be green before cleanup starts.
 6. Search every in-scope test file, including any written in step 3, for junk candidates as listed under Static candidates in [test-junk.md](test-junk.md). Hits become candidates for the tests ledger, never automatic cuts.
 
@@ -34,9 +34,9 @@ Only a runner that cannot run at all stops the pass: record the failure and stop
 
 ## Phase 3: Create the cleanup plan
 
-Run the deletion ladder from [slop-categories.md](slop-categories.md) on each changed unit before assigning smell categories: delete entirely, reuse existing project code, use platform or installed support, then simplify in place.
+Run the deletion ladder from [slop-categories.md](slop-categories.md) on each changed unit before assigning smell categories.
 
-For a bug-fix diff, inspect callers of each shared changed function. Prefer the root-cause correction at the shared seam over repeated caller-side guards.
+For a bug-fix diff, inspect callers of each shared changed function; [slop-categories.md](slop-categories.md) owns the root-cause-over-caller-guards rule.
 
 Write an explicit plan before edits. Include the ladder decision, relevant categories, safest-to-riskiest order, and risk for each file. For example:
 
@@ -54,17 +54,17 @@ File: src/example-b
   Risk: low
 ```
 
-When deliberately retaining a bounded simplification, document it in code with a `debt:` comment or the project's equivalent intentional-debt marker. Name the ceiling and the upgrade trigger, then include it in the final debt ledger.
+When deliberately retaining a bounded simplification, mark it the way the deletion ladder's step 4 prescribes in [slop-categories.md](slop-categories.md), and include it in the report's Debt Ledger.
 
-For each test file in scope, mark every declaration `R`, `F`, `C`, or `D` per [test-junk.md](test-junk.md) and keep one ledger row per `D`, `C`, or `F`, plus one `R` row for each test that matches a junk class but stays under the retention bar. A known ceiling without a marker is indistinguishable from a defect.
+Plan the tests ledger: one ledger row per `D`, `C`, or `F` mark, plus one `R` row for each test that matches a junk class but stays under the retention bar. Workers produce the rows per the per-file brief in [slop-categories.md](slop-categories.md); Phase 4b proves and cuts.
 
 ## Phase 4: Execute category passes with batch discipline
 
-Use the categories in this order: obvious comments, dead code, over-defensive code, duplication, excessive complexity, needless abstraction and boundary violations, performance equivalences, missing tests, oversized modules.
+Use the categories in the numbered order defined in [slop-categories.md](slop-categories.md).
 
-For independent files, delegation — when the runtime supports it, one `task` agent per file — means exactly one worker per file, in batches of no more than five files. Never spawn workers per category, per finding, or per review question; without delegation, work file by file.
+For independent files, delegation — when the runtime supports it, one `task` worker per file — means exactly one worker per file, never one worker per category, per finding, or per review question; without delegation, work file by file.
 
-1. Divide the scoped file list into batches of at most five.
+1. Divide the scoped file list into batches of at most five files.
 2. When delegation is available, start all independent file reviews in the current batch together; otherwise complete the batch one file at a time.
 3. Give each worker the per-file cleanup brief from [slop-categories.md](slop-categories.md), including every category and hard constraint.
 4. Collect and review every result before starting the next batch.
@@ -72,13 +72,13 @@ For independent files, delegation — when the runtime supports it, one `task` a
 6. Retry a file once only if its result is missing, explicitly blocked, or lacks the required deliverable.
 7. After a failed retry, record the file and blocker under issues rather than silently abandoning it.
 
-A running worker is alive: treat only a finished worker without its deliverable, an acknowledgement-only reply after one follow-up, or an explicit `BLOCKED:` message as failed.
+A running worker is alive: treat only a finished worker without its deliverable, an acknowledgment-only reply after one follow-up, or an explicit `BLOCKED:` message as failed.
 
-Every per-file pass must preserve behavior, public APIs, type information, error behavior, and scope. It must not add dependencies or speculative abstractions. Skip any uncertain change.
+Every per-file pass must preserve the safety-frame guarantees of [slop-categories.md](slop-categories.md) and stay in scope. It must not add dependencies or speculative abstractions. Skip any uncertain change.
 
 ## Phase 4b: Prove the test cuts, serially, then cut
 
-After the last batch finishes and no worker is running, the lead takes the collected ledger rows. For each row whose proof is a mutation, apply the named find and replace to the production owner, run the candidate and its keeper on the unmodified test tree, record both verdicts, and restore the owner byte for byte (checksum before and after) before the next row, as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded and every behavior the candidate asserts is covered by a surviving keeper, not just the one mutated; a row whose proof does not hold becomes `R` and stays. Never run two mutations at once and never leave a mutation in the tree.
+After the last batch finishes and no worker is running, the lead takes the collected ledger rows. For each row whose proof is a mutation, apply the named find and replace to the production owner, run the candidate and its keeper on the unmodified test tree, record both verdicts, and restore the owner byte for byte (checksum before and after) before the next row, as the proof rule in [test-junk.md](test-junk.md) prescribes. Cut a `D` or `C` row only after its proof is recorded and every behavior the candidate asserts is covered by a surviving keeper, not just the one mutated; a row whose proof does not hold becomes `R` and stays. Workers apply `F` repairs in the files they own and report them as applied; the lead verifies them here. Never run two mutations at once and never leave a mutation in the tree.
 
 ## Phase 5: Run quality gates and critical review
 
@@ -154,7 +154,7 @@ Per-File Results:
     - [category]: [before] -> [after]; why slop; why safe
     - Skipped (preserved): [issue and reason]
 
-Tests Ledger (one row per test marked D, C, or F, and per R kept under the retention bar; proofs run in Phase 4b):
+Tests Ledger (one row per `D`, `C`, or `F` mark, plus one per `R` that matches a junk class but stays under the retention bar; proofs run in Phase 4b):
   | Test | Mark | Keeper / reason | Proof |
   |---|---|---|---|
   | path/to/test > name | D | source grep; named keeper owns the contract | mutation of the owner: candidate green, keeper red; owner restored checksum-equal |
@@ -163,8 +163,8 @@ Quality Gates:
   - Regression tests: PASS | FAIL | N/A (reason)
   - Lint: PASS | FAIL | N/A (reason)
   - Type checking: PASS | FAIL | N/A (reason)
-  - Unit/integration tests: PASS | FAIL | N/A (reason)
-  - Static/security scan: PASS | FAIL | N/A (reason)
+  - Unit and integration tests: PASS | FAIL | N/A (reason)
+  - Static or security scan: PASS | FAIL | N/A (reason)
 
 Critical Review:
   - Safety: PASS | FAIL
@@ -180,8 +180,10 @@ Net Impact:
   - Files deleted: [paths or none]
 
 Remaining Risks / Deferred:
-  - [None] or [risk, blocker, or out-of-scope finding]
-  - Intentional-debt markers: [none or file:line -- ceiling -> upgrade trigger]
+  - [None] or [risk, blocker, or deferred finding (out of scope)]
+
+Debt Ledger (intentional-debt markers):
+  - [none or file:line -- ceiling -> upgrade trigger]
 
 Final Status: CLEAN | ISSUES FIXED | REQUIRES ATTENTION
 ```
