@@ -33,23 +33,15 @@ from datetime import date, time
 from html.parser import HTMLParser
 from urllib.parse import urlsplit
 
-# CPython's html.unescape() deletes numeric character references whose
-# code point is in html._invalid_codepoints and is not already replaced
-# through its Windows-1252 table html._invalid_charrefs (both tables
-# verified identical on CPython 3.9.6 and 3.11.15): the C0 controls
-# U+0001-0008, U+000B, U+000E-001F and U+007F, plus the noncharacters
-# U+FDD0-FDEF and every U-xFFFE/U-xFFFF pair. HTML5 instead keeps those
-# code points (as a parse error), so a canonical
+# CPython's html.unescape() deletes numeric character references to the
+# code points its _invalid_codepoints table lists and its Windows-1252
+# table does not replace first; HTML5 keeps those code points, so
 # href="https://exa&#1;mple.com/" must reach URL validation with U+0001
-# intact instead of silently folding to https://example.com/.
-# HTMLParser unescapes attribute values (parse_starttag) and, with
-# convert_charrefs=True (TreeBuilder below), text data (goahead) through
-# its module-level ``unescape`` name, so rebinding html.parser.unescape
-# routes BOTH paths through the HTML5-keeping decoder below while
-# script and style content (raw text the parser never unescapes) keeps
-# its literal text and every other mapping stays exactly
-# html.unescape's: named references, NUL, surrogates and out-of-range
-# values to U+FFFD, and U+0080-009F through the Windows-1252 table.
+# intact. Rebinding html.parser.unescape routes BOTH parser paths
+# (attribute values and convert_charrefs text) through the HTML5-keeping
+# decoder below; raw script/style text stays literal and every other
+# html.unescape mapping is delegated unchanged. The delete set is
+# detected behaviorally below, so it cannot drift from CPython's.
 _NUMERIC_CHARREF = re.compile(r"&(#[0-9]+;?|#[xX][0-9a-fA-F]+;?)")
 _CPYTHON_UNESCAPE = html.unescape
 

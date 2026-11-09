@@ -7,7 +7,7 @@ Each Naver item below says whether Naver's own Search Advisor guide backs it (ve
 ## Title
 
 - Naver sets no title length limit ("별도의 글자 수 제한은 없지만", verified: https://searchadvisor.naver.com/guide/markup-content). It asks for a title that displays well, is unique per page, doesn't repeat a keyword two or more times, and carries no spam or promo words (NAV-01).
-- The checker measures a weighted display width, the same for every language: after collapsing whitespace, each wide or fullwidth code point (East Asian Width W or F, so every Hangul syllable) counts 2.0 units and every other code point 1.0. It warns when the title is outside 50-60 units (HEAD-04) or the description is outside 150-160 units (HEAD-06). Both are owner values, unverified. The basis: Google and Naver set no length limit and cut text to the display width, and a wide CJK glyph takes about two Latin widths. Latin letters, digits, and spaces count 1.0 each, so mixed titles need no separate range.
+- The checker measures a weighted display width, the same for every language and defined in [rules.md](rules.md). It warns when the title is outside 50-60 units (HEAD-04) or the description is outside 150-160 units (HEAD-06). Both are owner values, unverified. The basis: Google and Naver set no length limit and cut text to the display width, and a wide CJK glyph takes about two Latin widths, so mixed titles need no separate range.
 - Put the key term in the first 20 or so syllables (KR-02, unverified).
 - Width is counted per code point, never per byte: "여권 갱신 기간" is 6 syllables x 2.0 + 2 spaces x 1.0 = 14 units, not 22 bytes.
 
@@ -20,7 +20,7 @@ Each Naver item below says whether Naver's own Search Advisor guide backs it (ve
 
 Naver uses og:image as the search thumbnail (verified: https://searchadvisor.naver.com/guide/markup-content):
 
-- larger than 150x150 pixels,
+- declared og:image dimensions of at least 150x150 pixels (the checker fires OG-04 only below 150x150, so exactly 150x150 passes; Naver's guide words this as larger than 150x150),
 - file size at least 5,000 bytes,
 - aspect ratio no wider than 3:1,
 - unique per page.
@@ -59,6 +59,6 @@ Verify by searching the target query in the Naver app and noting which pages the
 - Pick one register and keep it: 합니다체 for guides and reports, 해요체 for casual blogs (KR-01).
 - Run spelling and spacing (맞춤법, 띄어쓰기) carefully; Korean readers notice spacing errors fast.
 - Write numbers with units and dates in full: "2026년 10월 14일 기준 수수료는 5만 3천 원입니다" beats "현재 약 5만 원".
-- Answer first, as in [writing.md](writing.md): "여권 갱신은 2026년 기준 보통 4~8일 걸립니다." then the details.
+- Answer first, as in [writing.md](writing.md): "여권 갱신은 2026년 기준 보통 6~8주 걸립니다." then the details.
 - Mixed scripts are fine for proper nouns; don't translate brand names into Hangul unless the brand does.
 - Link text says where it goes: "외교부 여권 안내" rather than "여기" or "더보기" (LINK-03).

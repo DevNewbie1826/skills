@@ -24,18 +24,18 @@ Put `<meta charset>` first so it lands in the first 1024 bytes (HEAD-01). Then v
 ## Title and description
 
 - One non-empty `<title>` (HEAD-03), one non-empty description (HEAD-05).
-- Target a weighted display width of 50-60 units for the title and 150-160 for the description, in every language (HEAD-04, HEAD-06, warnings). Wide CJK code points such as Hangul count 2.0 units, everything else 1.0, after whitespace collapse. Google and Naver set no hard limit; they cut long text to fit the screen, so lead with the words that matter.
+- Target a weighted display width of 50-60 units for the title and 150-160 for the description, in every language (HEAD-04, HEAD-06, warnings; the width model is defined in [rules.md](rules.md)). Google and Naver set no hard limit; they cut long text to fit the screen, so lead with the words that matter.
 - Don't reuse the title as the description (HEAD-10). Naver penalizes it.
 - Korean pages show fewer characters per line; see [korean-naver.md](korean-naver.md).
 
 ## Robots
 
 - Leave out robots meta or use `index, follow`. `noindex` or `none` in `robots`, `googlebot`, or `yeti` is an error (HEAD-07) unless the brief wants the page hidden and you pass `--allow-noindex`.
-- `nosourceinfo` turns off Naver's AI source descriptions (HEAD-11, info). Add it only when the owner asks.
+- `nosourceinfo` turns off Naver's AI source descriptions (HEAD-11, info; details in [korean-naver.md](korean-naver.md)). Add it only when the owner asks.
 
 ## Canonical and hreflang
 
-- Exactly one canonical, absolute `https://` URL (LINK-01). `og:url` should be the same URL (OG-06).
+- Exactly one canonical link with an absolute http(s) URL — `https://` in practice (LINK-01). `og:url` should be the same URL (OG-06).
 - For language versions, each page lists itself and every other version, plus `x-default` (LINK-02):
 
 ```html
@@ -46,7 +46,7 @@ Put `<meta charset>` first so it lands in the first 1024 bytes (HEAD-01). Then v
 
 ## Open Graph
 
-og:title, og:type, og:image, and og:url are required (OG-01). Add og:description (OG-02) and og:image:alt (OG-03). Declare image size: under 150x150 or wider than 3:1 fails Naver (OG-04); 1200x630 is the usual share size (OG-07, info). Add og:site_name and og:locale (`ko_KR` or `en_US`) (OG-05).
+og:title, og:type, og:image, and og:url are required (OG-01). Add og:description (OG-02) and og:image:alt (OG-03). Declare image size: an image under 150x150 or wider than 3:1 fails Naver (OG-04); 1200x630 is the usual share size (OG-07, info). Add og:site_name and og:locale (`ko_KR` or `en_US`) (OG-05).
 
 ```html
 <meta property="og:type" content="article">

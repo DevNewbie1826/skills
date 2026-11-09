@@ -66,12 +66,12 @@ Use one `<script type="application/ld+json">` with an `@graph` list. Every top-l
 ## Values
 
 - Dates in ISO 8601, ideally with a timezone: `2026-10-14` or `2026-10-14T09:00:00+09:00` (LD-12).
-- `url`, `@id`, `item`, `image`, `logo` are absolute `https://` URLs (LD-13).
+- `url`, `@id`, `item`, `image`, `logo` are absolute http(s) URLs — `https://` in practice (LD-13).
 - The Article headline or WebPage name must appear in the visible `<title>` or `<h1>` (LD-14). Markup describes the page; it doesn't add claims the page doesn't make.
-- No placeholders: `[Business Name]`, `REPLACE_ME`, `TODO`, lorem ipsum (LD-05).
+- No placeholders: `[Business Name]`, `REPLACE_ME`, `TODO`, lorem ipsum, or an unfilled `{{TOKEN}}` slot (LD-05).
 
 ## Don't use
 
 HowTo, ClaimReview, CourseInfo, EstimatedSalary, LearningVideo, SpecialAnnouncement, VehicleListing, and ReadAction/BorrowAction on Book (LD-06). Google stopped showing these rich results, so they only add weight and risk.
 
-Naver reads schema.org in JSON-LD or Microdata and recommends either, so the same block serves both engines.
+Naver reads the same schema.org markup; see [korean-naver.md](korean-naver.md) for what it adds.

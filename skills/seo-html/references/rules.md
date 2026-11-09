@@ -6,7 +6,7 @@ Severity: E = error (exit 1), W = warn (exit 1 only with `--strict`), I = info. 
 
 Title and description lengths (HEAD-04, HEAD-06) are a weighted display width: collapse whitespace, then count 2.0 units for each wide or fullwidth code point (Unicode East Asian Width W or F, which covers Hangul, CJK, and kana) and 1.0 for every other code point. One range applies to every language. Other lengths are plain Unicode code points, never bytes. Thresholds live as constants in the script.
 
-Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-unified-skill reference prose, CS = the checker behavior reference listed in [ATTRIBUTION.md](../ATTRIBUTION.md), OGP = ogp.me, Naver = searchadvisor.naver.com guide, Google = Google Search Central. Status `verified:` cites the official page that backs the rule; `unverified:` says why it's kept anyway. An unverified rule is still enforced at its severity; it's an owner or reference value, not a search-engine requirement.
+Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-unified-skill reference prose, CS = the checker behavior reference listed in [ATTRIBUTION.md](../ATTRIBUTION.md), project-local = this skill's own synthesis (see [ATTRIBUTION.md](../ATTRIBUTION.md)), OGP = ogp.me, Naver = searchadvisor.naver.com guide, Google = Google Search Central. Status `verified:` cites the official page that backs the rule; `unverified:` says why it's kept anyway. An unverified rule is still enforced at its severity; it's an owner or reference value, not a search-engine requirement.
 
 | ID | Sev | Type | Rule | Source | Status |
 |---|---|---|---|---|---|
@@ -28,8 +28,8 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | OG-05 | I | S | og:site_name, og:locale missing, or og:locale not matching lang (ko_KR / en_*) | SUS head-tags | unverified: reference repo only |
 | OG-06 | W | S | og:url differs from canonical, or og:url is not an absolute http(s) URL with a valid host and port | SUS head-tags; CS | unverified: reference repo only |
 | OG-07 | I | S | og:image:width/height missing or below 1200x630 | SUS head-tags | unverified: 1200x630 is not on ogp.me or Naver docs |
-| TW-01 | W | S | twitter:card missing or not one of summary, summary_large_image, app, player | SUS head-tags | unverified: developer.x.com cards markup page renders by script; fetch returned no rule text |
-| TW-02 | I | S | twitter:title/description/image missing (OG fallback noted) | SUS head-tags | unverified: developer.x.com cards markup page renders by script; fetch returned no rule text |
+| TW-01 | W | S | twitter:card missing or not one of summary, summary_large_image, app, player | SUS head-tags | unverified: the developer.x.com cards markup page is rendered by script; fetch returned no rule text |
+| TW-02 | I | S | twitter:title/description/image missing (OG fallback noted) | SUS head-tags | unverified: the developer.x.com cards markup page is rendered by script; fetch returned no rule text |
 | SEM-01 | E | S | exactly one `<main>` | CS | unverified: HTML Standard allows one visible main; search impact is reference repo only |
 | SEM-02 | W | S | `<header>`, `<footer>`, `<article>` each present | FYSA seo.md; CS | unverified: reference repo only |
 | SEM-03 | I | S | `<nav>` present | CS | unverified: reference repo only |
@@ -43,7 +43,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | LD-02 | E | S | `@context` missing on a top-level node; http://schema.org -> W | SUS schema-templates; CS | unverified: reference repo only |
 | LD-03 | E | S | node without `@type` (except @graph container) | SUS schema-templates; CS | unverified: reference repo only |
 | LD-04 | E | S | `@graph` not a list | CS | unverified: JSON-LD 1.1 syntax; not checked against the spec in this pass |
-| LD-05 | E | S | placeholder text (`[...]` tokens, `REPLACE_*`, `TODO`, `lorem ipsum`) in any LD string | CS | unverified: reference repo only |
+| LD-05 | E | S | placeholder text (`[...]` tokens, `REPLACE_*`, `TODO`, `lorem ipsum`, `{{TOKEN}}` slots) in any LD string | CS | unverified: reference repo only |
 | LD-06 | E | S | phased-out types: HowTo, ClaimReview, CourseInfo, EstimatedSalary, LearningVideo, SpecialAnnouncement, VehicleListing, Book actions | CS | verified: https://developers.google.com/search/blog/2025/06/simplifying-search-results and https://developers.google.com/search/updates#how-to-deprecation |
 | LD-07 | I | S | FAQPage present (valid schema; no rich result since 2026-05-07) | CS | verified: https://developers.google.com/search/updates |
 | LD-08 | W | S | Article/BlogPosting/NewsArticle missing headline, author, datePublished, dateModified, or image | SUS schema-templates; FYSA content.md | verified: https://developers.google.com/search/docs/appearance/structured-data/article |
@@ -63,16 +63,16 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 | LINK-04 | I | S | `<a>` with empty or `#` href | CS | unverified: reference repo only |
 | A11Y-01 | W | S | form control without label[for], wrapping label, aria-label, or aria-labelledby | CS | unverified: accessibility best practice; reference repo only |
 | PERF-01 | I | S | `<script src>` in head without async/defer/type=module | SUS head-tags; CS | unverified: reference repo only |
-| CONT-01 | E | S | visible text inside `<main>` under 300 code points (thin); the count covers all visible text in `<main>`, including headings, byline and figure captions | CS | unverified: owner value; no official minimum length |
+| CONT-01 | E | S | visible text inside `<main>` under 300 code points (thin); the count covers all visible text in `<main>`, including headings, byline, and figure captions | CS | unverified: owner value; no official minimum length |
 | CONT-02 | W | S | with `--keyword K`: density outside 1-3% | CS | unverified: owner value; no official density target |
 | CONT-03 | I | S | paragraph with a number+%/unit and no `<a>`, `<cite>`, or `<sup>` | FYSA geo.md | unverified: reference repo only |
 | W-01 | - | M | answer-first: first paragraph answers the page question in 1-2 sentences | FYSA aeo.md | unverified: reference repo only |
 | W-02 | - | M | self-contained paragraphs: subject, number, date, and method in the same paragraph | FYSA geo.md | unverified: reference repo only |
-| W-03 | - | M | numbers and claims cite primary sources inline | FYSA geo.md; neo-naver.md | unverified: reference repo only |
-| W-04 | - | M | E-E-A-T: visible author, publish/update date, about/contact path | SUS core-eeat; Google | unverified: Google helpful-content guidance not fetched in this pass |
+| W-03 | - | M | numbers and claims cite primary sources inline | FYSA geo.md, neo-naver.md | unverified: reference repo only |
+| W-04 | - | M | E-E-A-T: visible author, publish/update date, about/contact path | Google | unverified: Google helpful-content guidance not fetched in this pass |
 | W-05 | - | M | plain language, no filler, no keyword stuffing | FYSA content.md; Naver | unverified: Naver covers title/description spam only (see NAV-01, NAV-02) |
 | KR-01 | - | M | Korean spelling and spacing (맞춤법, 띄어쓰기) clean; one register (합니다 or 해요) throughout | project-local | unverified: style rule |
-| KR-02 | - | M | Hangul title fits the visible display (50-60 weighted width units, see HEAD-04); key term first | FYSA content.md | unverified: display width is observed, not documented |
+| KR-02 | - | M | key term first, within the first ~20 syllables of the Hangul title (display width itself is HEAD-04's script check) | FYSA content.md | unverified: display width is observed, not documented |
 | KR-03 | - | M | facts in label-value grids (table or dl) where the topic has attributes | FYSA neo-naver.md | unverified: AI 브리핑 citation hypothesis; not in Naver docs |
 | EN-01 | - | M | English: active voice, short sentences, US or UK spelling consistent, sentence-case headings | project-local | unverified: style rule |
 | NAV-01 | - | M | title unique, no keyword repeated 2+ times, no spam or promo words | Naver | verified: https://searchadvisor.naver.com/guide/markup-content |
@@ -82,7 +82,7 @@ Source abbreviations: FYSA = fire-your-seo-agency reference prose, SUS = seo-uni
 
 ## Notes on the verified facts
 
-- Google sets no limit on title or meta description length; it truncates to the device width. HEAD-04 and HEAD-06 are owner values kept as warnings: one weighted-width range for every language (title 50-60 units, description 150-160 units), where a wide CJK code point counts 2.0 and any other counts 1.0.
+- Google sets no limit on title or meta description length; it truncates to the device width. HEAD-04 and HEAD-06 are owner values kept as warnings: one weighted-width range for every language (title 50-60 units, description 150-160 units; the width model is the one defined above).
 - Article structured data has no required properties on Google; LD-08 lists the recommended ones, so it's a warning.
 - FAQ rich results stopped appearing in Google Search from 2026-05-07. FAQPage is still valid schema, so LD-07 is info only.
 - HowTo rich results were removed from Google Search and the docs were withdrawn; the other LD-06 types were phased out in June 2025.

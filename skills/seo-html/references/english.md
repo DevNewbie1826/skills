@@ -14,7 +14,7 @@ General writing rules are in [writing.md](writing.md); this file adds what's spe
 
 ## Title and description
 
-- A weighted width of 50-60 units for the title and 150-160 for the description are the checker's targets (HEAD-04, HEAD-06, owner values). Latin letters, digits, and spaces count 1.0 unit each, so for plain English text width equals the character count. Google has no hard limit; it truncates to the device width, so the first 50 characters carry the meaning.
+- The checker targets a weighted width of 50-60 units for the title and 150-160 for the description (HEAD-04, HEAD-06, owner values). Latin letters, digits, and spaces count 1.0 unit each, so for plain English text width equals the character count. Google has no hard limit; it truncates to the device width, so lead with the words that matter.
 - Front-load the primary keyword, then the benefit: "Passport renewal time in 2026: steps, fees, and faster options".
 - The description is a short pitch, not the title again (HEAD-10).
 

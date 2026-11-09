@@ -16,14 +16,14 @@ Read this when you write the final report or need to parse the checker's JSON ou
       "id": "HEAD-04",
       "severity": "warn",
       "line": 5,
-      "message": "title width is 68 units (target 50-60)",
+      "message": "title width 68 units, expected 50-60",
       "evidence": "<title>...</title>",
-      "fix": "shorten the title to 50-60 weighted width units"
+      "fix": "rewrite the title to 50-60 width units"
     }
   ],
   "extracted": {
-    "title": "Passport renewal time in 2026",
-    "title_len": 29,
+    "title": "Passport renewal time in 2026: the steps, fees, and how to go faster",
+    "title_len": 68,
     "description_len": 151,
     "h1": "Passport renewal time in 2026",
     "og": { "og:title": "Passport renewal time in 2026" },
@@ -37,7 +37,7 @@ Read this when you write the final report or need to parse the checker's JSON ou
 }
 ```
 
-`severity` is `error`, `warn`, or `info`. Score = max(0, 100 - 10 x errors - 3 x warnings). Exit code: 0 = no errors (and no warnings with `--strict`), 1 = errors (or warnings with `--strict`), 2 = unreadable file or usage error. `title_len` and `description_len` are weighted display width units, not character counts: after whitespace collapse each wide or fullwidth code point (East Asian Width W or F, such as Hangul) counts 2.0 and every other code point 1.0. `h1` is the text of the first `<h1>`, or `null` when the page has none. `images` lists each `<img>` as an object with `src`, `alt`, `width`, `height`, and `loading`, where a missing `alt` is `null` and any other missing attribute is an empty string. The example values are illustrative; read the real shape of `extracted` from your run.
+`severity` is `error`, `warn`, or `info`; the score formula and the width model are defined in [rules.md](rules.md). Exit code: 0 = no errors (and no warnings with `--strict`), 1 = errors (or warnings with `--strict`), 2 = unreadable file or usage error. `title_len` and `description_len` are weighted display width units, not character counts. `h1` is the text of the first `<h1>`, or `null` when the page has none. `images` lists each `<img>` as an object with `src`, `alt`, `width`, `height`, and `loading`, where a missing `alt` is `null` and any other missing attribute is an empty string. The example values are illustrative; read the real shape of `extracted` from your run.
 
 ## Final report (output)
 
@@ -56,7 +56,7 @@ Give the user a JSON block for machines and a Markdown summary for people.
     { "id": "HEAD-04", "severity": "warn", "reason": "title kept at 64 width units to include the year" }
   ],
   "model_checklist": [
-    { "id": "W-01", "result": "pass", "evidence": "first paragraph states the 4-8 day answer" },
+    { "id": "W-01", "result": "pass", "evidence": "first paragraph states the six-to-eight-week answer" },
     { "id": "NAV-03", "result": "not checked", "evidence": "image file not available" }
   ],
   "follow_up": ["submit sitemap in Search Advisor", "allow Yeti in robots.txt"]
