@@ -35,7 +35,7 @@ Paste every fact the node needs; a phrase like "as above" points at nothing. Giv
 4. End the DAG with its review node: a `reviewer` node that reads every handoff of the last stage, re-runs their VERIFY commands and lists every problem at once.
 5. Write the run file, then start the first stage's handles in one `eval` cell and record their ids.
 
-Size the work, not the node count: one node per independent piece, many small nodes rather than a few large ones, and a piece small enough that briefing it costs more than doing it folds into its neighbour. For a wide wave, give each node a bounded report (a short file with a fixed shape) and let a review node read those, so the lead never reads raw output.
+Size the work, not the node count: one node per independent piece, many small nodes rather than a few large ones, and a piece small enough that briefing it costs more than doing it folds into its neighbour. Keep one judgment that needs the whole problem in view (a design choice, a root-cause diagnosis) in one node; split across nodes, it comes back as confident partial answers instead of a verdict. For a wide wave, give each node a bounded report (a short file with a fixed shape) and let a review node read those, so the lead never reads raw output.
 
 ## Supervising a running DAG
 
@@ -45,7 +45,7 @@ A node that reports completion has made a claim. Read its handoff and check the 
 
 ## When a node fails
 
-- **Call failure** (the node never ran, a provider error, a refused start): start the same prompt again as a new `agent()` call. That is a retry; it costs nothing upstream.
+- **Call failure** (the node never ran, a provider error, a refused start): start the same prompt again as a new `agent()` call. That is a retry; it costs nothing upstream. When many nodes of a stage fail at start within seconds of each other, the agent or model route is failing, not the prompts: start no more nodes, fix the route, then retry the failed ones.
 - **Work failure** (it ran and its VERIFY failed, or its review said FAIL): fix the prompt with the finding and start the node again with the edited prompt. That is a revision. Every node downstream of it runs again; every node beside it or upstream keeps its handoff.
 - A node gets two attempts. After the second failure, mark it `blocked` with the reason; its branch stops, independent branches keep running, and its parent is not done.
 - When a node was right but its definition was wrong (the task itself changed), revise only that node and its downstream nodes; finished nodes elsewhere keep their files.
