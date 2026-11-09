@@ -9,7 +9,7 @@ A test exists to catch a specific break. Two principles govern everything here:
 2. Every test exercises the real thing
 ```
 
-Ship the tests the behavior needs and only those: trivial code and human prose earn none, and a test written to satisfy process costs maintenance forever.
+Ship the tests the behavior needs and only those: trivial code and human prose earn none, and a test written to satisfy the process costs maintenance forever.
 
 ## Principle 1: Name the break
 
@@ -28,7 +28,7 @@ expect(buildSearchQuery({ tag: 'urgent' })).toBe('tag:"urgent"');
 
 **No change detectors.** A test that only intentional decisions can fail — a constant's value, exact message wording, private structure — fires on redesign and sleeps through bugs. Test the behavior that depends on the decision: not `expect(MAX_RETRIES).toBe(5)` but "a failing call is retried 5 times and the 6th attempt never happens."
 
-**Behavior, not source text.** Asserting that a script, skill, or config contains an exact line proves only that the source is the source. Run scripts against controlled inputs and assert outputs, side effects, or exit codes; test agent-consumed documents through the consuming agent's behavior, never by grepping their text.
+**Behavior, not source text.** Asserting that a script, skill, or config contains an exact line proves only that the source is the source. Run scripts against controlled inputs and assert outputs, side effects, or exit codes; test agent-consumed documents through the consuming agent's behavior, never by grepping their text. A text-fragment assertion or prose snapshot blocks legitimate rewording without proving a machine-consumed decision; if no machine consumes the text, review it as prose instead of inventing a brittle test.
 
 **Your code, not the framework.** Test the contract your code makes at its boundaries — the route you register, the query you emit, the payload you produce. Upstream mechanics are their maintainers' tests to write (asserting that your router invokes a registered handler tests the framework, not you). When upstream behavior genuinely surprised you, write one narrow characterization test naming the assumption. The same boundary applies inside your code: constructors, getters, constants, and trivial forwarding earn tests only when they validate, normalize, default, derive, enforce, or cause side effects — otherwise assert the first consumer-visible result that depends on them.
 
@@ -80,7 +80,3 @@ Budgets are targets, not hard limits: unit tests run in milliseconds and the who
 Use all applicable layers. An end-to-end scenario does not replace edge-focused units; units do not prove that the real boundary is wired correctly.
 
 **Given / When / Then:** structure each test around one action — the preconditions and fixtures, the single action under test, and the observable outcome caused by that action. Keep one `When` per test. Assert the contract that changed, not unrelated state, formatting, ordering, whitespace, or implementation details.
-
-## Don't pin prose
-
-A text-fragment assertion or prose snapshot usually blocks legitimate wording changes while failing to prove a machine-consumed decision. Instead test the routing decision, parsed metadata, tool or action schema, feature flag, or other structural behavior. If no machine consumes the text, document that it is reviewed as prose rather than inventing a brittle test.

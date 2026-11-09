@@ -6,14 +6,7 @@ Write the failing test first, watch it fail for the right reason, implement the 
 
 ## Before writing: the authoring gate
 
-Answer all four; a missing answer means do not add the test yet.
-
-1. **What observable behavior, invariant, or contract does it protect?** Name it in the test name.
-2. **What credible regression makes it fail?** If no plausible edit to the production code turns it red, it is a junk test, not a test (the `remove-ai-slops` skill lists the junk classes).
-3. **Why does existing coverage not already catch that failure?** Each contract has one primary owner test at the strongest boundary; extend a table row or shared fixture instead of adding a near-duplicate.
-4. **Does it need a production seam no production caller needs** (an export, flag, getter, reset hook)? If so, test at the real boundary instead.
-
-A bug fix starts from a reproduction that fails on the pre-fix code for the intended reason; an existing test that already fails for it may serve as that proof. A test that fails on the unchanged base is a product bug to fix at its owner; neither it nor your own red test is deleted or edited green to unblock a run.
+Answer the four-question authoring gate before adding any test — a missing answer means do not add the test yet. The gate, the executed mutation proof ("test your test"), and the junk-test judgment live in the `programming` skill's testing reference and the `remove-ai-slops` skill.
 
 ## Red — write the failing test
 
@@ -37,10 +30,10 @@ Before the test body, **name the break**: the production change that should make
 
 ## Mutation check
 
-Before finishing, mentally mutate the production code. For each realistic mutation — a wrong constant or argument, a wrong branch handler, a missing state change or side effect, an empty or default return, or missing validation for zero, empty, nil, unauthorized, or malformed input — at least one test should fail. A mutation nothing catches marks the behavior unprotected or the test tautological. To run the mutations for real and read the results, see [Prove the test can fail](prove-the-test.md).
+Before finishing, mentally mutate the production code. For each realistic mutation — a wrong constant or argument, a wrong branch handler, a missing state change or side effect, an empty or default return, or missing validation for zero, empty, nil, unauthorized, or malformed input — at least one test should fail. A mutation nothing catches marks the behavior unprotected or the test tautological. Run each mutation per asserted behavior — one shared red result proves only the behavior that mutation breaks — restore the owner byte for byte (checksum before and after), and see the `programming` skill's testing reference for the executed procedure and tooling.
 
 ## When TDD does not apply
 
 Judgment, not ritual. Skip the cycle for throwaway prototypes, generated code, and pure configuration — and say why. Reconsider once the code survives or the behavior starts to matter. A test written after the code is still useful when its expectation is derived independently; one that merely mirrors what the code already does proves only that the code agrees with itself.
 
-A flaky (intermittently failing) test is a nondeterminism problem, not a TDD task: reach a controlled, deterministic reproduction with the `debugging` skill before adding a regression test here — the Red cycle assumes a deterministic failure.
+The Red cycle assumes a deterministic failure — for an intermittent test, reach a controlled reproduction with the `debugging` skill before adding a regression test here.
