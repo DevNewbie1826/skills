@@ -2,8 +2,6 @@
 description: "How to run multi-agent work on omp: workpool() first for independent items, agent() handles for dependency-coupled calls, the eval helpers, and the pool workflow. Read first."
 ---
 
-> Rendered from omp 18.18.1 `src/prompts/system/workflow-notice.md` by `renderWorkflowNotice` (`src/modes/magic-keywords.ts`) with this host's settings, all omp defaults: taskBatch, scoutAvailable, evalTools, py and js true; freshAgents and perCallModel false. To re-render, call that function with these values and keep this header.
-
 <system-notice>
 When using this skill → deterministic multi-subagent workflow. Default to `workpool()` for 2+ independent items; use individual `agent()` handles only for dependency-coupled or schema-returning calls.
 
