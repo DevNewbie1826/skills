@@ -122,6 +122,45 @@ smoke_usage_error() {
 check_skill_contract() {
     require_command python3
     python3 tools/check-skills.py
+    check_omp_name_plants
+}
+
+# OMP-NAME (tools/omp_names.py) on lines planted into a copy of dag-workflow:
+# each case is <expected exit>|<file under the skill>|<planted line>.
+check_omp_name_plants() {
+    local case expect file line plant output status
+    local cases=(
+        '1|SKILL.md|Route the review to ultrabrain.'
+        '1|SKILL.md|Run the graph with mass-ulw.'
+        '1|SKILL.md|Start it with the `workflow` tool.'
+        '1|references/graph-runs.md|await agent("x", {"agent":"planner"})'
+        '1|references/graph-runs.md|await agent("x", {agent: `planner`})'
+        '1|references/graph-runs.md|await workpool("planner")'
+        '1|references/graph-runs.md|await workpool ("planner")'
+        '1|references/graph-runs.md|run them with parallel (jobs)'
+        '1|references/graph-runs.md|agent: "bash"'
+        '1|references/graph-runs.md|agent: "workpool"'
+        '1|references/graph-runs.md|Use the `scout` tool.'
+        '1|references/graph-runs.md|Ask the `librarian`.'
+        '1|references/omp-names.md|agent: "librarian"'
+        '0|references/graph-runs.md|Explore each dependency before defining its parent.'
+        '0|references/graph-runs.md|await agent("x", {agent: "reviewer"})'
+    )
+    for case in "${cases[@]}"; do
+        IFS='|' read -r expect file line <<<"$case"
+        plant="$TEMP_ROOT/omp-plant"
+        rm -rf -- "$plant"
+        mkdir -p "$plant/skills"
+        cp -R skills/dag-workflow "$plant/skills/"
+        printf '\n%s\n' "$line" >> "$plant/skills/dag-workflow/$file"
+        status=0
+        output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
+        if [[ "$status" != "$expect" ]] || { [[ "$expect" == 1 ]] && [[ "$output" != *OMP-NAME* ]]; }; then
+            printf '  %s <- %s: expected exit %s, got %s:\n%s\n' "$file" "$line" "$expect" "$status" "$output" >&2
+            return 1
+        fi
+        printf '  %s <- %s: exit %s as expected\n' "$file" "$line" "$status"
+    done
 }
 
 check_entrypoint_smoke() {

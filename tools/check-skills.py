@@ -14,6 +14,8 @@ from sysconfig import get_path
 from typing import TypedDict, cast
 from urllib.parse import unquote
 
+import omp_names
+
 class Violation(TypedDict):
     path: str
     line: int
@@ -563,6 +565,8 @@ def check_skill(root: Path, skill_name: str, allowlists: list[AllowlistEntry], r
     check_links(root, skill, texts, results)
     check_routing_cues(root, skill, texts, results)
     check_scripts(root, skill, texts, results)
+    for path, line, message, excerpt in omp_names.check(skill, texts):
+        add_failure(results, root, path, line, "OMP-NAME", message, excerpt)
 
 def run(root: Path, skills: list[str]) -> Results:
     results: Results = {"root": str(root), "skills": skills, "violations": [], "suppressed": 0, "summary": {}, "ok": False}

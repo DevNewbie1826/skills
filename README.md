@@ -25,19 +25,18 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | `skills/git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
 | `skills/lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
 | `skills/seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
-| `skills/dag-workflow/` | OMP-native: one authorized task from collection to definition, one reviewed plan, a goal-bound worktree build with eval subagent nodes owning each change and proof, verification lanes, one review round to APPROVED, merge, post-merge verification, and cleanup |
+| `skills/dag-workflow/` | OMP-native: one authorized request to a merged PR — define the ideal state from evidence, run every part as a DAG of eval agent() nodes under one goal, prove each requirement with a confirmation device, review the PR until APPROVED, merge on MERGE GO |
 
 
 ### dag-workflow flow
 
-`/wf <task>` arms one goal, reads the dag-workflow router, and runs its stage order in one
-pass: collect, define, plan, plan review, decide, goal, build per unit, verify lanes, round,
-merge, post-merge, cleanup. Collection and definition come before any plan; one plan gets one
-review; one goal carries the build and is never replaced by a second; each independently
-verifiable unit is one PR with its before and after; the review round ends APPROVED or REVISE
-and a verdict covers only the head it reviewed; cleanup removes the worktree and branch with
-receipts. Gates are prose rules the flow enforces, not a script: the plan file, the todo list,
-and the evidence directory hold the state.
+`/wf <task>` arms one goal, reads the dag-workflow router, and works the request in its order:
+analyze the context with a DAG and define the ideal state, create a worktree, set the goal's
+criteria, run all work as DAGs (each ending in its review) with a confirmation device for every
+implementation and fix, open one PR, review it until APPROVED (round 1 the whole PR, later
+rounds only the fixes), and merge only on `MERGE GO <PR> for head <40-hex> only.`. The skill
+names only omp agents and tools: `references/omp-names.md` lists them, and the checker's
+OMP-NAME rule fails on any other name.
 ## Install
 
 This is an OMP skill pack. Install the whole pack with:

@@ -1,124 +1,94 @@
 ---
 name: dag-workflow
-description: "Use for any nontrivial task that benefits from implementation delegation or independent verification, from a single focused change to a large migration: run a bounded staged flow driven by three dependency graphs (a context graph that analyses context and history, a build graph of the smallest independently runnable pieces, a verify graph of tests, QA and confirming devices) through collect, define, one reviewed plan with confirmation devices, a goal-bound build with one PR per unit, per-head verify lanes, a frozen-head VERDICT round, merge, post-merge verification, and cleanup; requires the eval tool). Triggers: parallelize, fan out, decompose this task, split work across agents, orchestrate subagents, big task, too large for one pass, broad sweep, large refactor, large migration, audit sweep, DAG, workflow. Do NOT use for a trivial edit, a quick lookup, a one-step answer, or work that needs no verification machinery"
+description: "Use to work one authorized request to a merged PR on omp: define the ideal state from evidence, run every part as a DAG of eval agent() nodes under one goal, prove each requirement with a strict confirmation device, and review the PR until APPROVED. Triggers: /wf, decompose this task, split work across agents, run it as a DAG, big task, too large for one pass, request to merged PR."
 omp-native: true
 ---
 
 # dag-workflow
 
-## Keyword notices are the base contract
+**Read `references/graph-runs.md` before anything else.** It is how a DAG runs on omp: nodes, stages, retries, the goal and resuming.
 
-`workflowz`, `ultrathink`, and `orchestrate` each carry a notice that is the base contract for this flow: read the notice for the keyword in play from its link before the references below.
-- workflowz: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/workflow-notice.md
-- ultrathink: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/ultrathink-notice.md
-- orchestrate: https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/prompts/system/orchestrate-notice.md
-The workflowz and orchestrate notices carry handlebars-style conditionals: follow only the branches that match the tools enabled in this session. If the notice is already in the conversation (typing the keyword or starting with `/wf` injects it), follow that and skip fetching; if a link cannot be fetched, continue with this skill's own references.
+One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
+Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode) and write each phase's success criteria as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
 
-Entry is `/wf <task>` (the pack rewrites it to `/goal task: <task>` plus an instruction to read this router) or the user naming this skill. Running the flow authorizes collection, definition, planning, implementation in worktrees, verification, opening PRs, review to APPROVED, merge, and cleanup, so phases already covered are never asked again. Genuine owner decisions (irreversible, destructive, spending money, or a contract-level limit to accept) are asked once, at decide, as one batch with a recommended default each; after that nothing is asked, and a decision that appears mid-run parks only its own lane.
+## The request
 
-## The three graphs
+1. Build a DAG over the whole context and history of the work, analyze it at maximum parallelism, and define from evidence the ideal state for the current problems and the main decision points. Size the analysis by the three questions in Size check: small work is one `scout` node, and only big work gets a full analysis DAG. Independent leaves that don't depend on the definition (translating a reference, for example) may start in this first DAG beside the analysis.
+2. From that definition, create a new git worktree. Create one only when the work changes a repository.
+3. Set concrete goals and work toward them.
+4. Run all the defined work as DAGs for maximum efficiency. Building a DAG follows the DAG reference (see DAGs).
+5. Implement it, and strictly include a device that confirms the implementation.
+6. Fix whatever needs fixing, and strictly include a device that confirms each fix.
+7. While doing so, verify that every requirement is met, rigorously and in full detail, with nothing skipped. A strict confirmation device follows the verification reference (see Confirmation devices).
+8. For UI/UX work, verify every `visual-qa` condition in full detail, nothing skipped.
 
-The flow is one idea applied three times. Analyse the whole context and history of the work at maximum parallelism, then define, from evidence, the ideal state and every major decision point. From that definition create a fresh git worktree, set a concrete goal, and cut the defined work into the smallest pieces that can run independently, so they run at the same time. Implement, and put in, strictly, a device that confirms the implementation; fix what needs fixing, and put in, strictly, a device that confirms the fix. Verify all of it rigorously, in detail, leaving nothing out.
+## DAGs
 
-Each of the three parts is a dependency graph run from `eval` on omp's `agent()` handles and `wait()` (with `workpool()` for many same-shaped items):
+Build every DAG per `references/dag-construction.md`: top-down to atomic tasks, bottom-up convergence through the direct parent, no skipped layer, no flat convergence, maximum parallelism.
+`references/dag-construction-ko.md` is the owner's original. Where the two differ, the Korean original governs.
+Run each DAG in the `eval` tool with `agent()` nodes under the one goal, as `references/graph-runs.md` describes.
+Every part with parallelism is a DAG, and its last node is its review.
+Fixes after a review are a DAG too, sized by the same three questions. A 1-2 line fix needs no DAG: make it, confirm it and commit it.
+An integration node that only collects and checks its children's results is a check inside the parent, not a separate node (section 4.3 of the DAG reference). Make it a separate node only when integrating needs its own execution, such as merging edits or running the tests over the combined result.
 
-| graph | stage | what its nodes do | what it hands on |
-|---|---|---|---|
-| context graph | 1 collect | read the code, history, memory, earlier evidence and outside sources, one question or slice per node, then check and reduce | `collect.md`, the input to define (stage 2) |
-| build graph | 9 build, 12 fix | one smallest independent change per node, each with its own confirming device; a fix node also owns the device that proves the fix | commits plus each node's device evidence |
-| verify graph | 10 verify_lane | every test run, QA scenario, mutation, review lane and confirming device as its own node, ending in a reducer | lane receipts the round (stage 15) requires |
+## Node prompts, run files and commits
 
-How any graph is defined, checked before launch, run, recovered and resumed: [references/graphs.md](references/graphs.md). Read it at stage 1, before the first graph.
+A scope line in a node prompt names the node: "this node writes only X". Never write it as a statement about the whole repository, such as "the repo is read-only"; a memory tool can keep that as a standing agreement and stop later work.
+Put node handoffs and build files in a git-ignored folder inside the worktree; when the repository ignores none, list one in `.git/info/exclude`.
+A commit node stages only the paths it names (`git add -- <path>...`, never `git add -A` or `git add .`) and sets the repository's identity for that one command: `git -c user.name=<name> -c user.email=<email> commit`, with no co-author trailer. Take the name and email from the request or brief, never change the global Git identity, and ask before the first commit when no identity is given.
 
-## When to run the flow
+## Confirmation devices
 
-- **Inline.** Trivial work that needs no verification machinery: a quick lookup, a single trivial edit, a one-step answer. No agents, no flow.
-- **Review/sweep.** Analysis only, no code changes. Run finder and verifier lanes per [references/orchestration.md](references/orchestration.md): the `<structure>` finder->verifier contract and the `**Review/sweep rounds (bounded)**` pattern in `<patterns>`. Findings are reported. Acting on them starts the implementation flow.
-- **Implementation.** Anything else runs the stage map below.
+Confirm directly, so another agent can reproduce it from the commands, exit codes, results and unverified items you leave; reuse existing tests and tools; add no ceremonial or duplicate checks; never claim what you didn't verify. The full standard is `references/verification-device.md`.
+This holds for every verification node in a DAG, not only the PR review: an evidence typo (a wrong count, an off line range) is a note, never a FAIL and never a loop.
+Code size has no line-count targets. Judge bloat by the `remove-ai-slops` skill. If one file gets hard to hold, split it into files inside the tool's own folder.
 
-## The stage map
+## Skills and agents per work type
 
-Read each reference at its stage, not before, and report the reads in that stage's first handoff. A rule that composes a prompt before a reference's stage — the node fields at build, the evidence rule at the round — reads that reference's named section at the moment it composes; the schedule forbids prefetching whole files, not a rule's own dependency. The record column names what the stage leaves in the evidence dir (SKILL.md, Follow-up record). The order is mechanical, not advisory: the later gates refuse to run when an earlier record is missing or stale.
+Every name here exists on omp or in this pack; `references/omp-names.md` is the list, and the pack checker fails on any other agent or tool name.
 
-| # | stage | what runs it | record |
-|---|---|---|---|
-| 0 | intake | the session: tier triage; `todo` carries the stage steps | the plan file, created here and never pre-created |
-| 1 | collect | the context graph (references/graphs.md): `scout` for scope and for outside-source reading (it has web_search), `sonic` for mechanical harvest slices, `task` for extract, check and reduce and for questions that must run the product | `collect.md`; an unread source is named, never omitted |
-| 2 | define | the session, seeded by collect | `define.md` + the difference rows in `gaps.tsv` |
-| 3 | before | the session: one pre-edit capture per defect row and per row that edits existing UI | capture receipts, taken before the first edit |
-| 4 | plan | the session writes it in this pack's plan grammar | the plan (`references/planning.md`) |
-| 5 | plan_lint | the session checks the plan against the lint rules — no script, the rule list itself | a clean check, or every complaint fixed |
-| 6 | plan_review | one fresh `reviewer` plan review; a plan-gate branch adds a second fresh `reviewer` with the plan-gate lens | review record: OKAY, or blockers each with one fix |
-| 7 | decide | the session collects the one decision batch | decision records with a recommended default each |
-| 8 | goal | the host's goal tool: `/wf` already armed the run's one goal; its objective is the register's IS-to-QA pairing, and a unit never opens a second goal; each unit gets a fresh worktree off main here | the goal id, the worktree path |
-| 9 | build | the build graph, one per unit; the commit node loads git-master | build records; one PR per unit |
-| 10 | verify_lane | the verify graph, one per head: for code, `task` for `tests` (suite plus one mutation per guard row), `reviewer` for `sweep`, `task` for `qa`, `reviewer` for `code-review` (loading `remove-ai-slops` and `programming`), `reviewer` for `adversarial` at tier L or on a HIGH-RISK row pinned to a model family other than the author's; other work types: mechanical checkers and captures (draft-guard, capture, lint) run `sonic`, QA and execution checks (qa, execution-verify) run `task`, and every judging lane (vqa passes, fact-verify, claim-gate, skeptic, delivery-gate, spot, register-schema) runs `reviewer` | the lane receipt per required lane |
-| 11 | triage | the session | findings rows |
-| 12 | fix | a build graph per round, one node per fix with its fix-confirming device; the reuse rule re-runs only stale lanes | fix + reuse records |
-| 13 | freeze | the session records head and tree, and commits nothing after | freeze record: head, tree, pr |
-| 14 | pr_open | `gh pr create` with the generated body; a background `gh pr checks <pr> --watch` job watches it | the open PR |
-| 15 | round | the gate check, then one fresh `reviewer` every round (round 1 full, later rounds delta), pinned to the strongest configured model and, where required, a family other than the author's by setting `task.agentModelOverrides.reviewer` to an exact model from another family; when none is configured, the round record states same-family as a known limit rather than refusing to dispatch; the session reads the VERDICT line and confirms it names the frozen head | final review record + verdict |
-| 16 | merge | the session merges | merge record: sha, pr |
-| 17 | post_merge | `task`: smoke when the merged tree equals the frozen tree, the full pass otherwise | post-merge record |
-| 18 | checkpoint | the goal checkpoint; `reviewer` reads the evidence record with the narrow scope (presence, criteria match, schema only) stated in the caller's prompt; the lead records the checkpoint | checkpoint record |
-| 19 | cleanup | the session: memory for the classes it caught; teardown receipts | cleanup record |
+| work type | read and use | for what |
+| --- | --- | --- |
+| coding (patch, feature, bugfix, refactor) | `programming`, `tdd`, `debugging`, `git-master`, `remove-ai-slops`; `task` agent; `ast_grep`, `ast_edit`, `lsp` tools | `task` nodes own each change and its proof; production code and tests under `programming` and `tdd`; `debugging` for crashes, wrong output or hangs, locked by a failing test; `ast_grep` and `ast_edit` for syntax-shaped search and codemods; `git-master` on every commit node; `remove-ai-slops` to cut slop behind regression tests |
+| research | `scout` agent; `web_search`, `read`, `grep` tools | `scout` nodes read and report, one per angle, and a review node checks each claim against its source |
+| design / UI | `frontend`, `visual-qa`, `programming`, `remove-ai-slops`, `git-master`; `task` agent; `browser` tool | `frontend` builds; `visual-qa` verifies every one of its conditions in full detail and owns the checklist; the `browser` tool drives the real page for QA; `programming` and `remove-ai-slops` guard the code |
+| audit | `remove-ai-slops`, `frontend`, `visual-qa`, `programming`, `seo-html`; `scout` agent | the rule corpus is those skills' own rule sets, cited by id; collection and judging run as one DAG |
+| planning | `programming`, `remove-ai-slops`, plus the work type's own skill (`visual-qa` for design); `reviewer` agent | read `programming` and `remove-ai-slops` first so the plan carries real test and slop constraints; a `reviewer` node critiques a contested plan before the build |
+| review | `programming`, `remove-ai-slops`, `visual-qa`; `reviewer` and `security-reviewer` agents; `security_scan` and `browser` tools | `programming` and `remove-ai-slops` are the code-review axes; `visual-qa` is the verdict for UI; the `browser` tool captures on-surface evidence; `security-reviewer` and `security_scan` for anything touching security |
+| cleanup | `remove-ai-slops`, `git-master` | remove dead code and slop behind regression tests, tear down worktrees and branches under git rules |
+| collection / corpus extraction | `programming`, `remove-ai-slops`, `visual-qa`, `frontend`; `scout` agent; `ast_grep` tool | collect in one DAG; extract by syntax shape with `ast_grep`; harvest the distilled rule sets before any raw corpus |
+| decision history | `lore`, `git-master` | record and read the constraints and rejected options behind a change |
+| multi-unit program | `references/graph-runs.md` | one goal for the program with one phase per unit, one build DAG per wave |
+| browser-facing surface work | `visual-qa`; `browser` tool | the `browser` tool drives the page for actions, screenshots and traces; `visual-qa` judges the captured state. Not for a plain search or a static fetch |
+| resume after death or compaction | `references/graph-runs.md` | re-read the goal, `todo` and handoff files; re-run only nodes whose handoff is missing, never restart the DAG |
 
-Stages 3 and 12 are conditional: when one truly does not apply, its step stays in the `todo` with `skip: <reason>`, never silently dropped. While any unit runs, report a PROGRESS line on every transition that changes a number and at least every 30 minutes; a repeat with no change is suppressed.
+Reviewer dispatch follows Size check and Review and merge below.
 
-## Plans, units, and tiers
+## Size check
 
-- One plan per unit, written in the plan grammar of [references/planning.md](references/planning.md): front matter, `Todos` and `Final verification wave` checkbox rows, the contract rows (IS, COMPANION, INVARIANT, LIMIT, SWITCH), QA scenarios with one binary pass condition, DEVICE rows, and the risk list. Every IS row carries a confirmation device; a behaviour the repository cannot test gets the no-test path.
-- **Two plan branches.** Default: the plan gets ONE fresh `reviewer` plan review, and the run continues straight to decide. Plan-gate branch, opened only when the requester's own message asked for a planning-workflow review in their words: the plan gets BOTH the `reviewer` plan review and a second fresh `reviewer` with the plan-gate lens, its read-only scope held by the prompt plus a locked review worktree, and no third round. Fresh means a new spawn: nothing depends on a follow-up message reaching it, and its fixes are checked by the final round, not by a re-review.
-- **Units.** A request holding more than one independently verifiable unit becomes one PR per unit: disjoint write scope, own worktree and branch, own Before/After in the PR body. The split is decided at plan, never mid-build. A unit's contract is its own IS rows only; one unit's round never blocks another unit's merge.
-- **Tiers.** S: small, one scout node, short define and plan; the plan review may start alongside build, and a blocker amends the run; at most one mutation per guard row. M: serial stages, full verify wave. L: adds the adversarial lane without needing a HIGH-RISK row, the state and lifetime transition table in QA, and the mutation cap. A tier is never lowered; a heavy fact found mid-run raises it at once.
+Answer three questions about the PR:
 
-## Work types
+1. If it's wrong, is the impact small and recoverable with one revert?
+2. Is it confirmed at once by CI or by eye?
+3. Is it set work with no design judgment? A new file following a pattern counts as set work.
 
-The type is fixed at intake and decides the required lanes: code (tests, qa, sweep, code-review, plus adversarial at tier L or a HIGH-RISK row), design (draft-guard, capture, both visual-qa passes, code-review, qa), research (fact-verify, claim-gate, skeptic, execution-verify, delivery-gate), audit (lint, spot, register-schema), mixed (the primary type's lanes united with the secondary's). The lane table and the five visual-qa classes: [references/verification.md](references/verification.md).
+All yes means small work: CI plus a self-review. No other-model review.
+Any no, or anything touching security, permissions, data loss, concurrency, schema, several repositories, hard recovery or a design fork, means big work: a `reviewer` agent review, on a different model family from the author when one is configured. Work touching security also gets a `security-reviewer` review.
+When unsure, go one level up.
 
-## Reviews, in the one order that holds
+## Review and merge
 
-Triage, fix, freeze, pr_open, and round are one sequence, and the order is mechanical: the round refuses to run unless a valid code-review receipt exists at the frozen head — a refused gate, not a reminder. The head is frozen for the whole round: a fix lands only after the verdict and opens the next round. A verdict is valid only for the head it reviewed, so a head that moved during a round is a re-review, never a carried verdict. Review has no round ceiling: APPROVED is the only end. Two consecutive REVISE rounds on the same component or the same defect class stop the patch loop and force one fresh `reviewer` premise review. A third-or-later REVISE that repeats a class an earlier round cited forces an approach switch among premise, family (a `task` fix node pinned to another model family by `task.perCallModel: on` with an exact `model` on the item), strategy, split (program only), and rediscover, and every repeat after it uses one more kind not yet used. On REVISE the flow returns to define for the cited problem, replans and re-lints it, fixes, and appends the fix commits to the same PR, never a second one. Binding detail: [references/verification.md](references/verification.md).
-
-## The finite contract
-
-The plan's IS and COMPANION rows are the request, INVARIANT rows what must keep holding, LIMIT rows what is knowingly not handled. Only an undelivered IS or COMPANION row, or a listed invariant shown violated by a failing test (or a no-test row's failing QA), blocks; everything else is a note or a follow-up. A listed LIMIT is never a finding. WARN never blocks; a FAIL receipt is a claim the session reproduces first. The boundary and the companion guards: [references/planning.md](references/planning.md).
-
-## Non-negotiable rules
-
-1. One goal for the run, armed by `/wf` at entry; never a second. Its objective carries the register pairing; each unit's plan holds its own IS-to-QA rows, and `todo` holds progress.
-2. Gate order: never open the PR before the verify lanes pass and the code-review lane has run; never run the round without the freeze; never merge before the round returns APPROVED.
-3. Nothing commits after the freeze: a memo goes to the evidence dir, never the branch.
-4. Every run file has one writer. A receipt is valid while its tree matches; a verdict only while its round's head equals the frozen head and the observed head.
-5. Record only what you've checked. A commit counts once `git cat-file -t <sha>` prints `commit`.
-6. Every command pins the task worktree; commits are serialized.
-
-## Agents per stage
-
-The table in [references/agents.md](references/agents.md) mirrors the stage map; anything neither names is not spawned, and never subagents spawning subagents: `task` declares spawns "*" and `reviewer` may spawn `scout`, so the no-nesting rule is held by the prompt, or set `task.maxRecursionDepth: 1`.
-
-## The purpose boundary
-
-The original request and its companion items are the boundary for every stage: discovery, plan, tests, QA, and review. A companion is the same grain as the change and something the requester would naturally expect done together; it must pass the four guards (one hop from a request IS row, no new owner decision, same task and PR, recorded as a COMPANION row) — the guards in full are [references/planning.md](references/planning.md). Same-pattern sibling bugs found while fixing are companions under the guards. Everything else is out of scope: recorded in the follow-up record and named in the final report, never fixed in this task.
-
-## Follow-up record
-
-Out-of-scope findings live in `<evidence dir>/follow-ups.md`. The evidence dir is a directory outside the task worktree, recorded in the plan. Each record carries the finding, a reproduction, evidence, impact, and the exclusion reason naming the guard it failed. Create the file only when a real finding exists. Every out-of-scope finding also appears in the final report; with none, the report says "none".
-
-## Rules
-
-- **Tests and devices:** every IS row carries a confirmation device — existing tests, a guard mutation, or the no-test path with a QA scenario — and every fix carries its own device that fails on the code before the fix and passes after it; the build graph node that makes the change owns its device, and the verify graph re-runs it. A device that mostly tests mocks, encodes implementation details, depends on timing, or needs heavy infrastructure for a small fix is a bad device; prefer no new test over a bad one. Prose gets read-through QA, never wording tests.
-- **Evidence capture:** capture the command and its output; never retype a SHA or number a capture holds.
-- **Test discipline:** no sleeps; wait on the event or state change itself.
-
-## Delegation prompts
-
-Every node prompt carries purpose, scope (permitted paths and the worktree pin), blockers, separate findings, the no-spawning rule, the companion definition, and the return-once instruction; the fields TASK, DELIVERABLE, SCOPE, VERIFY, STOP WHEN; and, where the reference names it, a TIMEBOX. Every reviewer prompt carries the evidence rule verbatim from [references/verification.md](references/verification.md): evidence problems are never a REVISE reason; only a code problem inside the finite contract blocks.
-
-## Progress reporting
-
-`todo` is the live checklist: register it right after the plan is written, one task per atomic unit, mark start and done the instant each happens. Write a short handoff at each stage transition and in each REVISE round.
-
-## Finish
-
-Stop when the register is closed (every defect row fixed, accepted-limit, or out-of-scope), every unit's PR is merged with post-merge recorded, the checkpoint is complete, worktrees and branches are removed with receipts, and the final report is delivered with evidence, limits, and out-of-scope findings. Respond in the user's language; write agent prompts in English.
+The end of the work opens a PR. Its body carries the evidence: commands, exit codes, results and unverified items. Keep no receipts and no ledger.
+Small work puts its self-review in the PR body.
+Big work goes to the `reviewer` agent, which reviews endlessly until APPROVED. There's no round cap, and APPROVED is the only end.
+Round 1 reviews the whole PR to the end and lists every problem at once.
+Fixes for the cited problems go back to the start of this method, sized as in DAGs: they run as a DAG whose last node is the next round, or, for a 1-2 line fix, are made, confirmed and committed directly before the next round.
+From round 2 on, only the fixed parts are reviewed. There's no final full review.
+A blocker is one of two things, and only with proof (a reproduce command, or the exact code line and path):
+- A. A plan violation: a requirement not met, or a must-hold condition the plan lists broken.
+- B. A proven real defect of any kind: security hole, data loss, secret leak, crash, wrong result.
+Anything without proof is a note. There is no default-conditions list.
+A reviewer who doubts the evidence re-runs the command itself.
+Evidence typos are notes, never a loop. Evidence alone never causes a review loop.
+After APPROVED (or the small-work self-review), stop and wait for the lead's line `MERGE GO <PR> for head <40-hex> only.` Merge only that PR at that head. Never merge, release or deploy without it.
+Remove the worktree after the merge.
