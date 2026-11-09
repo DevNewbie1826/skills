@@ -10,7 +10,7 @@ description: "How a DAG of this skill runs on omp beyond the eval helpers in wor
 
 - **A node** is one item of a stage's named `workpool()`, or one `agent()` handle when it is dependency-coupled or must return schema data (`workflow.md`). Pick the agent by what the node does: `task` for a change and its proof, `sonic` for a purely mechanical edit, `scout` for read-only collection, `reviewer` or `security-reviewer` for a review node.
 - **An edge** is a file. A node writes its result to the handoff path its prompt names; a node that depends on it reads that path. Starting the downstream node only after the upstream one finished is the edge's ordering; the file is its data. A missing handoff file is a FAIL for the consumer, never an empty input.
-- **A stage** is one pool (or one set of handles) that settles before the next stage starts.
+- **A stage** is one pool (or one set of handles) that settles before the next stage starts. When a stage of handles closes on the kernel `wait()`, pass `raiseErrors: false` so one failed node keeps its slot and only its own branch degrades.
 - **The run file** is one small markdown table the lead keeps beside the handoffs: node id, agent, handoff path, status (`waiting`, `running`, `done`, `failed`, `blocked`), attempt number, and the pool item id or `agent://` handle. Update it when a node starts and when it ends. It is what makes a run resumable.
 
 Keep handoffs, the run file and build files in the worktree's git-ignored folder (SKILL.md, Node prompts).
