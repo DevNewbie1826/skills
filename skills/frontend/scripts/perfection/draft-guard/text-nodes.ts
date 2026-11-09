@@ -74,7 +74,7 @@ function keepLiterals(segment: string): string {
 	})
 }
 
-/** Copy a reader sees or hears, each piece with the elements open around it. Code, hidden elements and never-rendered blocks are skipped. */
+/** Returns the copy a reader sees or hears; each piece is paired with the elements open around it. Code, hidden elements and never-rendered blocks are skipped. */
 export function textNodes(source: string, kind: MarkupKind): TextNode[] {
 	const text = kind === "html" ? blank(blank(source, NEVER_RENDERED), HTML_TEMPLATE) : blank(source, NEVER_RENDERED)
 	const nodes: TextNode[] = []

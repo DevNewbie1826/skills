@@ -24,7 +24,7 @@ function entriesOrNull(path: string): string[] | null {
 	}
 }
 
-/** Lintable source files under the targets; dangling links and unreadable entries are skipped, an unreadable explicit target is reported. */
+/** Lintable source files under the targets; dangling links and unreadable entries are skipped, and an unreadable explicit target is reported. */
 export function collectFiles(targets: readonly string[]): { readonly paths: string[]; readonly missing: string[] } {
 	const paths: string[] = []
 	const missing: string[] = []

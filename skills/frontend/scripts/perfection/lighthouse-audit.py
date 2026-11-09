@@ -2,7 +2,7 @@
 # Install runtime dependencies with any compatible Python dependency runner, for example:
 #   python3 -m pip install playwright
 #   python3 -m playwright install chromium
-# Node dependencies: lighthouse and chrome-launcher.
+# Node dependency: lighthouse.
 # Any compatible dependency runner may be used; python3 is the portable invocation.
 
 """Lighthouse audit via real Playwright Chrome.
@@ -78,15 +78,11 @@ const config = {
 def _check_node_deps() -> bool:
     """Return whether the required Node modules are available."""
     result = subprocess.run(
-        ["node", "-e", "require('lighthouse'); require('chrome-launcher')"],
+        ["node", "-e", "require('lighthouse')"],
         capture_output=True,
         text=True,
     )
     return result.returncode == 0
-
-
-def _node_dependency_hint() -> str:
-    return "Install Lighthouse dependencies with your Node package manager: lighthouse and chrome-launcher."
 
 
 def _playwright_sync() -> Callable[[], AbstractContextManager[_Playwright]]:
@@ -201,7 +197,7 @@ def run_audit(
     url: str, threshold: int, desktop_only: bool, mobile_only: bool, runs: int = 3
 ) -> int:
     if not _check_node_deps():
-        print(_node_dependency_hint(), file=sys.stderr)
+        print("Install Lighthouse with your Node package manager: lighthouse.", file=sys.stderr)
         return 2
 
     all_at_threshold = True
@@ -249,7 +245,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "-t",
         type=int,
         default=100,
-        help="Diagnostic score threshold; only 100 establishes a passing audit",
+        help=(
+            "Diagnostic score threshold; only 100 is a passing audit. A score below 100 is reported "
+            "as non-passing in the output, but the command exits 0 when every category meets the "
+            "threshold and 1 otherwise"
+        ),
     )
     _ = parser.add_argument(
         "--runs",
