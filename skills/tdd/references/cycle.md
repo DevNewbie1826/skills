@@ -2,34 +2,27 @@
 
 # The Red/Green/Refactor Cycle
 
-Write the failing test first, watch it fail for the right reason, implement the minimum that passes, then refactor while green. Watching the test fail for the right reason is what proves it can catch the bug — a test that has only ever passed may be asserting the wrong thing, pinning the implementation, or missing the edge case, and you would not know.
+Write the failing test first, watch it fail for the right reason, implement the minimum that passes, then refactor while green. Watching the test fail for the right reason is what proves it can catch the bug: a test that has only ever passed may be asserting the wrong thing, pinning the implementation, or missing the edge case, and you would not know.
 
 ## Before writing: the authoring gate
 
-Answer all four; a missing answer means do not add the test yet.
+Answer the four-question authoring gate before adding any test; a missing answer means do not add the test yet. The gate, the executed mutation proof ("test your test"), and the junk-test judgment live in the `programming` skill's testing reference and the `remove-ai-slops` skill.
 
-1. **What observable behavior, invariant, or contract does it protect?** Name it in the test name.
-2. **What credible regression makes it fail?** If no plausible edit to the production code turns it red, it is a junk test, not a test (the `remove-ai-slops` skill lists the junk classes).
-3. **Why does existing coverage not already catch that failure?** Each contract has one primary owner test at the strongest boundary; extend a table row or shared fixture instead of adding a near-duplicate.
-4. **Does it need a production seam no production caller needs** (an export, flag, getter, reset hook)? If so, test at the real boundary instead.
+## Red: write the failing test
 
-A bug fix starts from a reproduction that fails on the pre-fix code for the intended reason; an existing test that already fails for it may serve as that proof. A test that fails on the unchanged base is a product bug to fix at its owner; neither it nor your own red test is deleted or edited green to unblock a run.
-
-## Red — write the failing test
-
-Before the test body, **name the break**: the production change that should make this test fail — a wrong branch, missing side effect, wrong argument, boundary case, or broken contract. Cannot name one? Redesign around an observable behavior.
+Before the test body, **name the break**: the production change that should make this test fail. The catchable breaks are listed under [name the break](writing-good-tests.md) in the test-quality reference. Cannot name one? Redesign around an observable behavior.
 
 - One behavior per test, with a clear name.
 - Test real code; no mocks unless the dependency cannot be real or deterministic.
-- Run it. It must fail because the behavior is absent or incorrect — not because the fixture or import is broken.
-- It passes immediately? You may be testing existing behavior rather than the change you intend — sharpen the test to target the new behavior. (A characterization test that pins existing behavior before a behavior-preserving refactor is meant to pass against the current code; that is its purpose.)
+- Run it. It must fail because the behavior is absent or incorrect, not because the fixture or import is broken.
+- It passes immediately? You may be testing existing behavior rather than the change you intend; sharpen the test to target the new behavior. (A characterization test that pins existing behavior before a behavior-preserving refactor is meant to pass against the current code; that is its purpose.)
 
-## Green — implement the minimum
+## Green: implement the minimum
 
 - Make only the change required for that behavior to pass. No extra features, no refactors, no "improvements."
 - Run it: the test passes and the rest of the suite stays green.
 
-## Refactor — improve while green
+## Refactor: improve while green
 
 - Remove duplication, improve names, extract helpers. Keep tests green; add no behavior.
 - A test that blocks a safe refactor is a coupling problem: fix the test, then refactor.
@@ -37,10 +30,10 @@ Before the test body, **name the break**: the production change that should make
 
 ## Mutation check
 
-Before finishing, mentally mutate the production code. For each realistic mutation — a wrong constant or argument, a wrong branch handler, a missing state change or side effect, an empty or default return, or missing validation for zero, empty, nil, unauthorized, or malformed input — at least one test should fail. A mutation nothing catches marks the behavior unprotected or the test tautological. To run the mutations for real and read the results, see [Prove the test can fail](prove-the-test.md).
+Before finishing, mentally mutate the production code. For each realistic mutation (a wrong constant or argument, a wrong branch handler, a missing state change or side effect, an empty or default return, or missing validation for zero, empty, nil, unauthorized, or malformed input), at least one test should fail. A mutation nothing catches marks the behavior unprotected or the test tautological. Run each mutation per asserted behavior (one shared red result proves only the behavior that mutation breaks), restore the owner byte for byte (checksum before and after), and see the `programming` skill's testing reference for the executed procedure and tooling.
 
 ## When TDD does not apply
 
-Judgment, not ritual. Skip the cycle for throwaway prototypes, generated code, and pure configuration — and say why. Reconsider once the code survives or the behavior starts to matter. A test written after the code is still useful when its expectation is derived independently; one that merely mirrors what the code already does proves only that the code agrees with itself.
+Judgment, not ritual. Skip the cycle for throwaway prototypes, generated code, and pure configuration, and say why. Reconsider once the code survives or the behavior starts to matter. A test written after the code is still useful when its expectation is derived independently; one that merely mirrors what the code already does proves only that the code agrees with itself.
 
-A flaky (intermittently failing) test is a nondeterminism problem, not a TDD task: reach a controlled, deterministic reproduction with the `debugging` skill before adding a regression test here — the Red cycle assumes a deterministic failure.
+The Red cycle assumes a deterministic failure; for an intermittent test, reach a controlled reproduction with the `debugging` skill before adding a regression test here.
