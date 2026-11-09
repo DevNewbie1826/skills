@@ -63,8 +63,8 @@ python3 tools/check-skills.py            # full pack, exit 0 = compliant
 python3 tools/check-skills.py --json     # machine-readable
 ```
 
-Content-driven allowlist exceptions (e.g. brand design references) live in
-`tools/allowlist/` with a reason per entry.
+Content-driven allowlist exceptions, when needed, live in
+`tools/allowlist/*.json` with a reason per entry.
 
 ## Layout
 
@@ -72,11 +72,11 @@ Content-driven allowlist exceptions (e.g. brand design references) live in
 skills/        one folder per skill: <name>/SKILL.md plus references/, scripts/, tests/
 extensions/    omp extensions: skills-pack.ts (skill index), wf-goal.ts (/wf)
 commands/      slash-command templates (wf.md)
-tools/         pack gate: check-skills.py, verify.sh, allowlist/, install-hooks.sh, tests
+tools/         pack gate: check-skills.py, verify.sh, install-hooks.sh, tests
 docs/          PORTING.md (the porting contract)
 package.json   omp pack manifest (pi.skills -> ./skills)
 ```
 
-`.omo/` and `.senpi/` at this root are runtime session/state directories created by
-the authoring environment — they are NOT part of the skill pack and are not installed
-by `omp install`.
+Runtime session/state directories that an authoring environment creates at this root are
+NOT part of the skill pack and are not installed by `omp install`; keep them out of git
+with the clone's `.git/info/exclude`.

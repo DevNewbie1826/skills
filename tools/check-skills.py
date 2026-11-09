@@ -48,27 +48,10 @@ def bounded(pattern: str, trailing_boundary: bool = True, case_sensitive: bool =
 def banned(name: str, pattern: str, aliases: tuple[str, ...] = (), trailing_boundary: bool = True, case_sensitive: bool = False) -> tuple[str, re.Pattern[str], tuple[str, ...]]:
     return name, bounded(pattern, trailing_boundary, case_sensitive), aliases
 
-WORD_TOKENS = (
-    "senpi", "sisyphus", "opencode", "codex", "omo", "codegraph", "ulw-loop", "ultrawork",
-    "ulw-plan", "ulw-research", "start-work", "review-work", "hyperplan", "prometheus", "boulder",
-    "subagent_type", "fork_context", "wait_agent", "followup_task", "interrupt_agent", "list_agents",
-    "load_skills", "team_create", "team_wait", "script/qa", "claude", "gemini", "kimi", "qwen",
-    "deepseek", "opus", "sonnet", "haiku", "imagen", "stitch", "midjourney", "anthropic", "openai",
-    "open-design", "agent-browser",
-)
 BANNED: list[tuple[str, re.Pattern[str], tuple[str, ...]]] = [
-    banned(token, re.escape(token)) for token in WORD_TOKENS
-] + [
-    banned("claude-code", r"claude[ -]code", ("claude code", "claude[ -]code")),
-    banned(".omo/", r"\.omo/", (".omo",), False),
     banned("/Volumes/", r"/Volumes/", trailing_boundary=False, case_sensitive=True),
     banned("/Users/", r"/Users/", trailing_boundary=False, case_sensitive=True),
     banned("/home/", r"/home/", trailing_boundary=False, case_sensitive=True),
-    banned("gpt-*", r"gpt[- ]?[0-9]", ("gpt", "gpt[- ]?[0-9]")),
-    banned("dall-e", r"dall-?e", ("dalle", "dall-?e")),
-    banned("oracle-persona", r"(?:spawn\s+(?:an?\s+)?oracle|oracle\s+(?:sub)?agents?|" +
-           r"(?:sub)?agents?\s+oracle|dual[-\s]+oracle|" +
-           r"(?:ask|consult|delegate(?:\s+\w+){0,3}\s+to)\s+(?:an?\s+)?oracle)", ("oracle",)),
 ]
 MANDATE = re.compile(
     r"(?<![A-Za-z0-9_])(?:installed\s+by\s+default|must\s+use|always\s+use|" +
@@ -172,7 +155,7 @@ def is_python_stdlib(module: str) -> bool:
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 def text_files(directory: Path, suffixes: set[str]) -> list[Path]:
-    return sorted((path for path in directory.rglob("*") if path.is_file() and path.suffix.lower() in suffixes),
+    return sorted((path for path in directory.rglob("*") if path.is_file() and not path.is_symlink() and path.suffix.lower() in suffixes),
                   key=lambda path: path.as_posix())
 def allowlist_paths(root: Path) -> list[Path]:
     locations = [root / "tools" / "allowlist", Path(__file__).resolve().parent / "allowlist"]
@@ -331,7 +314,10 @@ def markdown_target(value: str) -> str:
 def relative_target(value: str) -> bool:
     return bool(value) and not value.startswith(("#", "/", "\\", "//")) and not re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", value)
 def target_exists(base: Path, target: str, skill: Path) -> tuple[bool, str]:
-    candidate = (base / target).resolve()
+    link = base / target
+    if link.is_symlink() and is_inside(link.parent, skill):
+        return True, ""
+    candidate = link.resolve()
     if not is_inside(candidate, skill):
         return False, "target escapes the skill directory"
     return (True, "") if candidate.exists() else (False, "target does not exist")

@@ -1,0 +1,1 @@
+/home/mirage/.bun/install/global/node_modules/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md

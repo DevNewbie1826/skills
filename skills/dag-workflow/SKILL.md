@@ -4,9 +4,11 @@ description: "Use to work one authorized request to a merged PR on omp: define t
 omp-native: true
 ---
 
+**Read `references/workflow.md` and `references/ultrathink.md` first.**
+
 # dag-workflow
 
-**Read `references/graph-runs.md` before anything else.** It is how a DAG runs on omp: nodes, stages, retries, the goal and resuming.
+**Then read `references/graph-runs.md`.** It is how a DAG runs on omp: nodes, stages, retries, the goal and resuming.
 
 One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
 Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode) and write each phase's success criteria as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.

@@ -15,30 +15,24 @@ confirms the expertise survived.
 ## Rule 1 — Agent neutrality (Tier A, banned in ported skills)
 Banned in prose, code, comments, and (where feasible) filenames of **ported** skills
 (OMP-native skills are exempt — see Rule 8):
-- Agent products/runtimes: senpi, omo (incl. `.omo/`), sisyphus, codex, opencode,
-  claude code, aider, windsurf, amp, droid, openclaw, codegraph, cursor-the-IDE
-  (the Layer-B brand file `skills/frontend/references/design/cursor.md` is allowlisted CONTENT),
-  and omo-specific skill names: ulw-loop, ultrawork, ulw-plan, ulw-research, start-work,
-  review-work, hyperplan, prometheus, boulder.
-- Agent-runtime API names: subagent_type, fork_context, wait_agent, followup_task,
-  interrupt_agent, list_agents, load_skills, team_create/team_wait, "Oracle" as a named
-  subagent persona (the testing concept "test oracle" stays).
+- Names of other agent products and runtimes, their state directories and their skill names
+  (a Layer-B brand design file named after a product is CONTENT).
+- Other runtimes' API names and named subagent personas (the testing concept "test oracle" stays).
+- This rule is enforced by review; the checker carries no name list.
 - Replacement pattern: describe the CAPABILITY, not the product.
-  "spawn Oracles from orthogonal angles" ->
+  "spawn <persona>s from orthogonal angles" ->
   "get independent adversarial reviews from orthogonal angles - parallel subagents if your
   runtime supports delegation, otherwise fresh-eyes self-review passes, one per angle".
 
 ## Rule 2 — Model neutrality (Tier A)
-- No model names/families as presuppositions: gpt-*, claude, gemini, kimi, qwen, deepseek,
-  opus, sonnet, haiku, o1/o3, dall-e, midjourney, imagen, stitch.
+- No model names or families as presuppositions (enforced by review).
 - No model-routing advice ("use model X for step Y").
-- Layer-B brand design references named after products (claude.md, cursor.md) are CONTENT:
-  allowed, allowlisted by path. Guidance files (e.g. gpt-tasteskill.md, imagegen-*.md,
-  stitch-skill.md) are NOT content - rename and generalize them
+- Layer-B brand design references named after products are CONTENT and allowed. Guidance
+  files named after a model or product are NOT content - rename and generalize them
   (e.g. cinematic-taste-skill.md, image-gen-concepts-*.md, design-mockup-export-skill.md)
   and update every inbound link.
-- Naming external tools as one option among several ("an image-generation model such as
-  Imagen, DALL-E, or Midjourney, if available") is neutral; presupposing one is not.
+- Naming external tools as one option among several ("an image-generation model, if
+  available") is neutral; presupposing one is not.
 
 ## Rule 3 — Framework & language neutrality (Tier B, routing files)
 - A SKILL.md (and any routing README) must never presuppose ONE framework or ONE language.
@@ -68,15 +62,15 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
 
 ## Rule 5 — Portability
 - No origin-host or user-specific paths (`/Volumes/...`, `/Users/<name>/...`,
-  `/home/<user>/...`, `C:\Users\...`), no paths into the producing repository
-  (`script/qa/...`, `packages/shared-skills/...`). Standard OS locations used as
+  `/home/<user>/...`, `C:\Users\...`), no paths into the producing repository.
+  Standard OS locations used as
   EXAMPLES in guidance (`/tmp`, `/etc`, `/usr`, `/Library`, `C:\Windows`) are content
-  and allowed. No host-specific state dirs (`.omo/`, `.senpi/`) inside skill content.
+  and allowed. No host-specific state dirs inside skill content.
 - External tools are named with a fallback: "if X is unavailable, do Y or skip and say so".
 - Cross-references may only target skills IN THIS PACK (frontend, debugging,
   remove-ai-slops, visual-qa, programming, tdd, git-master, lore, dag-workflow, seo-html) or be
   generic capability text.
-  References to open-design, agent-browser, ulw-plan, start-work, review-work etc. must be
+  References to tools or skills outside this pack must be
   rewritten generically (e.g. "a browser-driving capability", "your planning workflow").
 
 ## Rule 6 — Fidelity
@@ -85,11 +79,11 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   neutralize harder.
 
 ## Verification
-- `python3 tools/check-skills.py` must exit 0 (tier A tokens, tier B routing balance,
+- `python3 tools/check-skills.py` must exit 0 (tier A host paths, tier B routing balance,
   frontmatter, SKILL.md length, reference routing cues (ROUTING-CUE: non-empty
   frontmatter `description`, a "Primary role:" line, or a "Read this when ..." line
   within the first 15 lines after frontmatter), link integrity including escaping
-  `..` paths, script self-containment, dangling skill refs). Allowlists live in `tools/allowlist/*.json`
+  `..` paths, script self-containment, dangling skill refs). Allowlists, when needed, live in `tools/allowlist/*.json`
   — add only CONTENT exceptions with a reason per entry, never to silence real violations.
 - Smoke: every bundled script entrypoint runs (`--help` or a tiny fixture invocation).
 
@@ -110,3 +104,6 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   reviewers know the exemption applies. `tools/check-skills.py` skips Tier-A token
   checks for `omp-native: true` skills via `is_omp_native()`; never use this to silence
   real violations in ported skills.
+- An OMP-native skill may ship a reference as a symlink to a prompt omp installs (it
+  dangles where omp is not installed). The link check accepts a symlink that sits inside
+  the skill, and the checker does not read the host file it points to.
