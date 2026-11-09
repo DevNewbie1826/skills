@@ -1,6 +1,4 @@
-Read this when the user explicitly asks to work in a worktree. It is the detail behind the `WORKTREE` mode in [SKILL.md](../SKILL.md). Never use this for read-only or investigative work.
-
-`WORKTREE` is a setup overlay: when paired with `COMMIT` or `REBASE`, provision the worktree first and run the other mode inside it. `STATUS` is read-only and never triggers provisioning.
+Read this when the user explicitly asks to work in a worktree. It is the detail behind the `WORKTREE` mode in [SKILL.md](../SKILL.md).
 
 The commands below are a procedure, not a script. Read each block, adapt the variables, and run the lines in order. They anchor to the repository root and the base worktree (the checkout you started in), so they stay correct from a subdirectory or from inside an existing linked worktree. Branch refs are always fully qualified (`refs/heads/...`) to avoid ambiguity with tags or other ref namespaces.
 
@@ -87,8 +85,6 @@ if ! git -C "$root" worktree add "$path" -b "worktree/$name" "$start_point"; the
 fi
 git -C "$root" show-ref --verify --quiet "refs/heads/worktree/$name"
 ```
-
-Never use a timestamp suffix.
 
 ## 4. Switch the working directory explicitly
 
@@ -184,20 +180,6 @@ On merge/PR failure or user cancellation, **preserve** the worktree. State that 
 
 ## Safety invariants
 
-- Never `git worktree remove --force` over uncommitted or ignored changes.
 - Never delete the base branch or a branch you did not create in this mode.
-- Never provision without a captured, non-empty `root`, a resolvable `HEAD`, known `base_branch_ref`, and a chosen `start_point` with its `can_merge` flag.
-- Never assume a failed command left no state — verify worktree/branch existence after a provisioning failure and preserve if they exist.
-- Never run merge, removal, or branch deletion from inside the feature worktree; target `$base_worktree` / `$root`.
-- Never run an outcome without the pre-outcome verification gate (feature worktree still on its branch; base worktree still on `base_branch_ref`).
-- Never merge unless `can_merge=yes` and the base is clean of tracked changes. Before merging, confirm no ignored base file shares a path the feature branch adds (clobber risk).
-- Never push a PR branch without first confirming the remote lacks `refs/heads/worktree/$name`.
-- Never proceed to cleanup with the base worktree in a conflicted merge state; abort the merge first.
-- Never auto-retry provisioning on failure; report and let the user choose a new name.
-- Never use short branch names in merge, push, or ancestry checks; fully qualify `refs/heads/...`.
-- Never assume `.worktrees/` is ignored just because you appended to `info/exclude`; verify with `check-ignore`.
-- Never assume `git branch -d` proves base integration; verify with `merge-base --is-ancestor`.
-- Never use `git branch -d` after a PR; the push-upstream can make it succeed without base integration. Remove the worktree first, then `-D` on explicit request.
-- Delete the worktree branch only after a successful Merge with a passing ancestry check; retain it after PR.
 - Every provisioning must end with a stated outcome (merged / PR / kept / preserved-on-failure); an unaccounted worktree is a leak.
 - Leave the worktree state explicit at the end: `git -C "$root" worktree list` and the final branch status.

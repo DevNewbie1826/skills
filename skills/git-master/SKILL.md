@@ -5,7 +5,7 @@ description: "MUST USE for ANY git operation: a commit, a git-history investigat
 
 # Git Master
 
-Use this skill when the user asks you to operate on Git history or answer a Git-history question. Be exact, conservative, and evidence-led. Read the repository state before you infer anything.
+Be exact, conservative, and evidence-led. Read the repository state before you infer anything.
 
 ## Mode Gate
 
@@ -16,7 +16,8 @@ Classify the request first:
 - `HISTORY`: answer when, where, who, why, or which commit changed something.
 - `STATUS`: inspect branch, diff, or working-tree state without changing it.
 - `WORKTREE`: provision an isolated worktree for work the user explicitly asked to do in a worktree.
-WORKTREE is a setup overlay: when paired with `COMMIT` or `REBASE`, provision the worktree first and run the other mode inside it. STATUS stays read-only and never triggers provisioning.
+
+`WORKTREE` is a setup overlay: when paired with `COMMIT` or `REBASE`, provision the worktree first and run the other mode inside it. `STATUS` stays read-only and never triggers provisioning.
 
 Do not commit, rebase, push, force-push, reset, stash-pop, or delete anything unless the user explicitly asked for that operation. When a workflow the user started mandates one of them (a goal loop that commits each verified unit, a plan executor that lands its branches), that workflow's instruction is the ask. If the request is only investigative, report findings and stop.
 
@@ -30,7 +31,6 @@ git diff --stat
 git diff --staged --stat
 git branch --show-current
 git log -30 --oneline
-git log -30 --pretty=format:%s
 git rev-parse --abbrev-ref @{upstream}
 git merge-base HEAD origin/main
 git merge-base HEAD origin/master
@@ -40,7 +40,7 @@ Missing upstream or missing `main`/`master` is normal. Fall back to the best ava
 
 ## PR Body Evidence Attachments
 
-When a PR body needs screenshots or terminal PNGs, use the host's authenticated attachment flow if available; otherwise skip attachments and say so. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Do not log browser cookies, CSRF tokens, form fields, or upload headers. The step-by-step flow is in [PR evidence attachments](references/pr-evidence.md); read it only when a PR body needs images.
+When a PR body needs screenshots or terminal PNGs, use the host's authenticated attachment flow if available; otherwise skip attachments and say so. Never commit temporary images, never use release assets for PR evidence, and never use external image hosts. Do not log session cookies, anti-forgery tokens, upload form fields, or upload headers. The step-by-step flow is in [PR evidence attachments](references/pr-evidence.md); read it only when a PR body needs images.
 
 ## Commit Mode
 
@@ -48,21 +48,7 @@ Commit only the user's requested changes. Preserve unrelated dirty work.
 
 For decision-context trailers in commit messages, use the `lore` skill.
 
-1. Detect message style from recent history. Use the dominant local pattern, language, and casing. Do not default to Conventional Commits unless the repo uses them.
-2. Inspect the full diff, not only filenames. Separate unrelated user edits from the requested commit.
-3. Build atomic groups by behavior, module, and revertability. Keep implementation and its direct tests together.
-4. Prefer multiple commits for unrelated concerns. A single commit is acceptable only when the changed files form one indivisible behavior or the user explicitly asks for one commit.
-5. Stage by path or hunk so each commit contains only its atomic group.
-6. Before each commit, verify `git diff --staged --stat` and enough staged diff to prove the group is right.
-7. Commit with the detected style. After each commit, verify `git log -1 --oneline`.
-
-Grouping rules:
-
-- Split different features, modules, generated artifacts, config, docs, and test-only changes unless they are inseparable.
-- Keep generated files with the source change that produced them when omitting them would leave the repo inconsistent.
-- Never hide failing or unrelated changes inside a broad commit.
-
-Final report: list commit hashes, messages, and any remaining uncommitted files.
+The staging, grouping, and message-style procedure is in [Commit procedure](references/commit.md); read it when the mode is COMMIT.
 
 ## Rebase Mode
 
@@ -75,7 +61,7 @@ History rewriting is a shared-impact operation.
 - For conflicts, read the conflicting files and resolve by intent. Do not choose ours/theirs blindly.
 - If a rebase goes wrong, use `git rebase --abort` first. Use reflog only after explaining the recovery path.
 
-After rewriting, run the relevant tests or at least the project's cheapest smoke check, then show the new branch log from base to HEAD.
+After rewriting, show the new branch log from base to HEAD.
 
 ## History Mode
 
@@ -85,23 +71,20 @@ Choose the Git tool by the question:
 - `git log -G "regex"`: when diffs touched lines matching a pattern.
 - `git blame -L start,end -- file`: who last changed specific lines.
 - `git log --follow -- file`: history across renames for one file.
-- `git show <hash>`: inspect the commit that appears relevant.
 - `git bisect`: find the first bad commit when there is a deterministic pass/fail command and known good/bad bounds.
 - `git reflog`: recover or explain recent local history movement.
 
 Always cite the exact command evidence in the answer: commit hash, subject, file path, and line or diff context when relevant. If the evidence is ambiguous, say what remains unproven.
 
+## Status Mode
+
+Read-only inspection: gather Ground Truth and report the state; change nothing.
+
 ## Worktree Mode
 
 Provision an isolated worktree only when the user explicitly asks to work in one. Never create one for read-only or investigative work. The full provisioning, ignore handling, merge/PR, and cleanup lifecycle is in [Worktree lifecycle](references/worktree.md).
 
-Core rules:
-
-- Anchor everything to the repository root and the base worktree you start in, not the current directory; capture both before provisioning.
-- Ignore `.worktrees/` through the local exclude file first (commit-free); commit to `.gitignore` only on a separate explicit request for a team-wide convention.
-- Before provisioning, confirm the start point (a branch, or a commit that limits outcomes to PR/Keep), check a name collision on both the path and the branch ref, and warn if the base worktree is dirty.
-- For the outcome, run merge and cleanup against the base worktree, never inside the feature worktree.
-- Never `git worktree remove --force`; before removal check ignored files (`git status --untracked-files=all --ignored --short`), which plain status hides.
+Core rules: anchor to the repository root and the base worktree; decide the start point and merge eligibility before provisioning; run merge and cleanup from the base worktree, never inside the feature worktree; never `git worktree remove --force`.
 
 ## Safety Checks
 
@@ -117,4 +100,4 @@ Before finishing:
 
 - Run the most relevant verification available for the changed behavior or history operation.
 - Report commands that passed and any command you could not run.
-- Leave the worktree state explicit.
+- State the final working-tree and branch status explicitly, including any uncommitted files.
