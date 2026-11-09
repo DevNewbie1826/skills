@@ -69,7 +69,7 @@ Add design-specific acceptance criteria:
 - deferred questions are explicit owner decisions, not hidden assumptions
 ```
 
-When design principles are part of that context, distil them into 3–5 principles that are opinionated, actionable, and testable — "Simple" is not a principle; "Show only what matters for the current task" is. Each principle includes: **the principle** (one sentence, opinionated and specific), **what it means in practice** (concrete examples of decisions this principle would drive), **what it rules out** (what this principle says no to), and **how to test it** (how to verify the design lives up to it). *(from the former design-strategist role reference)*
+When design principles are part of that context, distil them into 3–5 principles that are opinionated, actionable, and testable — "Simple" is not a principle; "Show only what matters for the current task" is. Each principle includes: **the principle** (one sentence, opinionated and specific), **what it means in practice** (concrete examples of decisions this principle would drive), **what it rules out** (what this principle says no to), and **how to test it** (how to verify the design lives up to it). *(from the former strategy role)*
 
 ## Evidence requirements
 
@@ -85,7 +85,7 @@ Lane A passes only when the plan has inspectable design context, not vague inten
 - The planning workflow owns the final plan; Lane A may enrich it but must not create a second plan.
 - Cross-project memory is descriptive only and cannot steer the project unless the user states the preference now.
 - Product-shaping, accessibility-critical, or hard-to-reverse trade-offs pause for a user decision.
-- Do not introduce a scheduler, background automation, or a project-root state convention solely for this reference.
+- Do not introduce a scheduler, background automation, or a new project-root state convention for this reference; use a design record only when the project already has one or the user asks (see [orchestration.md](orchestration.md)).
 
 ## Pass / fail behavior
 

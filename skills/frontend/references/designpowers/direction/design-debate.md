@@ -1,8 +1,3 @@
----
-name: design-debate
-description: "Use when a design direction is uncertain, when the team could go multiple ways, or when the user wants to see competing approaches argued before committing — orchestrates structured debate between agents who advocate for different directions"
----
-
 # Design Debate
 
 Read this when a design direction is genuinely contested — competing options are argued with real trade-offs, an accessibility check is applied, and the user decides.
@@ -13,10 +8,10 @@ Good design decisions come from tension, not consensus. When agents converge too
 
 ## When to Use
 
-- When the design-strategist identifies multiple viable directions
-- When the design-lead proposes a visual direction and alternatives exist
+- When a planning pass identifies multiple viable directions
+- When a visual direction is proposed and real alternatives exist
 - When the user says "I'm not sure which way to go" or "what are my options?"
-- When the design-critic recommends "rethink" — a debate can surface the better path
+- When critique recommends "rethink" — a debate can surface the better path
 - When a decision has significant downstream consequences (navigation pattern, layout model, interaction paradigm)
 - When the user explicitly asks for a debate: "debate this", "argue both sides", "what are the trade-offs?"
 
@@ -36,7 +31,7 @@ Define the design question precisely. A debate without a clear question produces
 Format:
 ```
 DESIGN QUESTION: [Specific, answerable question]
-CONTEXT: [Brief context from design-state.md]
+CONTEXT: [Brief context from the project design record, when one exists]
 CONSTRAINTS: [Non-negotiable requirements from brief, accessibility, taste profile]
 STAKES: [Why this decision matters — what it affects downstream]
 ```
@@ -51,7 +46,7 @@ STAKES: Sets the interaction pattern for all future multi-step flows in the app.
 
 ### Step 2: Assign Advocates
 
-Select 2-3 agents to argue for different directions. Each agent argues FOR their assigned position — they are advocates, not neutral analysts.
+Select 2-3 perspectives to argue for different directions. Each argues FOR its assigned position — an advocate, not a neutral analyst.
 
 | Role | What They Argue |
 |------|----------------|
@@ -61,21 +56,21 @@ Select 2-3 agents to argue for different directions. Each agent argues FOR their
 
 Assign agents based on their expertise:
 
-| Agent | Best suited to advocate for |
-|-------|---------------------------|
-| **design-strategist** | UX patterns, information architecture, user flow approaches |
-| **design-lead** | Visual directions, layout models, component architecture |
-| **content-writer** | Content strategy approaches, tone directions, naming conventions |
-| **motion-designer** | Interaction paradigms, feedback models, transition approaches |
-| **accessibility-reviewer** | The most inclusive option, cognitive load implications |
-| **design-scout** | Evidence-backed positions from competitive research |
+| Perspective | Best suited to advocate for |
+|-------------|---------------------------|
+| UX strategy | Patterns, information architecture, user-flow approaches |
+| Visual direction | Layout models, composition, component architecture |
+| Content strategy | Tone directions, naming conventions, copy structure |
+| Interaction | Interaction paradigms, feedback models, transition approaches |
+| Accessibility | The most inclusive option and its cognitive-load implications |
+| Research evidence | Evidence-backed positions from competitive research |
 
 ### Step 3: Run the Debate
 
 Each advocate delivers their argument in this format:
 
 ```markdown
-## [Agent Name] argues for: [Direction]
+## [Perspective] argues for: [Direction]
 
 ### The Case
 [2-3 paragraphs making the strongest possible argument for this direction.
@@ -106,7 +101,7 @@ Rules for advocates:
 After all advocates present, each gets one round of rebuttal:
 
 ```markdown
-### [Agent Name] responds to [Other Agent]:
+### [Perspective] responds to [Other perspective]:
 [1-2 paragraphs directly addressing the strongest point of the opposing argument.
 Concede what is true. Challenge what is weak.]
 ```
@@ -115,7 +110,7 @@ This prevents echo-chamber advocacy — each agent must engage with the other si
 
 ### Step 5: Accessibility Check
 
-Before presenting to the user, the **accessibility-reviewer** evaluates all proposed directions:
+Before presenting to the user, apply an accessibility check to all proposed directions:
 
 ```markdown
 ## Accessibility Assessment
@@ -135,43 +130,25 @@ If a direction has High accessibility concern, it should be flagged prominently 
 
 Show the debate to the user in a structured format:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  DESIGN DEBATE
-  Question: [The design question]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+| Direction | Argued by | The case | Best for | Trade-off |
+|-----------|-----------|----------|----------|-----------|
+| A: [name] | [perspective] | [2-3 sentence summary] | [personas] | [key trade-off] |
+| B: [name] | [perspective] | [2-3 sentence summary] | [personas] | [key trade-off] |
+| C: [name] (optional) | [perspective] | [hybrid or "neither — here's why"] | [personas] | [key trade-off] |
 
-  DIRECTION A: [Name]
-  Argued by: [agent]
-  [2-3 sentence summary of the case]
-  Best for: [personas]
-  Trade-off: [key trade-off]
+**Accessibility:** [one-line summary of any concerns].
 
-  DIRECTION B: [Name]
-  Argued by: [agent]
-  [2-3 sentence summary of the case]
-  Best for: [personas]
-  Trade-off: [key trade-off]
+**Your call:** which direction do you want to take? Ask for more detail on any direction, or propose a hybrid.
 
-  [DIRECTION C if applicable]
-
-  ACCESSIBILITY: [One-line summary of any concerns]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  YOUR CALL: Which direction do you want to take?
-  (You can also ask for more detail on any direction,
-   or propose a hybrid.)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
 
 ### Step 7: Record the Decision
 
 After the user decides:
 
-1. Record the chosen direction in `design-state.md` Decisions Log with rationale
+1. Record the chosen direction, with rationale, in the project design record when one exists
 2. Record the rejected directions and why — this is valuable context for future debates
-3. If the decision reveals a taste preference, update `design-memory`
-4. Dispatch the appropriate agent to execute the chosen direction
+3. If the decision reveals a taste preference, record it as a descriptive taste signal
+4. Hand the chosen direction to the workflow that owns the next step
 
 ## Debate Depth
 
@@ -185,11 +162,10 @@ Not every debate needs the full process. Scale the depth to the stakes:
 
 ## Integration
 
-- **Called by:** `design-strategy`, `using-designpowers` (when user requests debate), `designpowers-critique` (when "rethink" is recommended)
-- **Calls:** Any agent as advocate, `accessibility-reviewer` for constraint check
-- **Updates:** `design-state` with decision and rejected alternatives
-- **Informs:** `design-memory` with taste signals from the user's choice
-- **Pairs with:** `design-strategy`, `design-memory`, `taste-feedback`
+- **Triggered by:** planning when several directions are viable, critique when it recommends a rethink, or the user asking for the trade-offs
+- **Updates:** the project design record when one exists, with the decision and the rejected alternatives
+- **Informs:** taste signals recorded from the user's choice
+- **Pairs with:** `taste-feedback`, [design-review.md](../review/design-review.md)
 
 ## Anti-Patterns
 
@@ -199,5 +175,4 @@ Not every debate needs the full process. Scale the depth to the stakes:
 | Debating trivial decisions | 8px vs 12px padding is not a debate — it's a design system decision |
 | Agents being polite instead of advocating | "Both options are great!" is not a debate. Agents must argue to win |
 | Presenting a debate without accessibility review | Every direction must be evaluated for inclusion before the user chooses |
-| Running a debate in auto mode without pausing | Debates ALWAYS pause for user decision — they are inherently direct-mode moments |
 | More than 3 directions | Too many options cause decision paralysis. If there are more than 3, narrow down first |

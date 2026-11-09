@@ -27,28 +27,9 @@ Visual-system mechanics — layout, composition, interaction states, motion, res
 | Content-driven breakpoints and user-preference adaptation | `references/stylegallery/platform-guides/` | Prove narrow, mid, desktop, and 200-percent zoom behavior when the surface is visual; support relevant preferences. Application-level choices such as density persist across sessions, and users are never asked to justify a preference (from former adaptive-interfaces). |
 | Tokens and design-system consistency | `references/design/design-system-architecture.md` | Use real tokens and existing components before one-off styling. |
 
-### Motion numbers (from the former motion-designer role reference)
+### Motion constraints
 
-- **Duration discipline** — micro-interactions: 100–200ms. Transitions: 200–400ms. Complex choreography: 400–700ms. Nothing over 1 second unless it is a loading indicator
-- **Reduced-motion alternatives** — for `prefers-reduced-motion: reduce`, reduce, remove, or substitute non-essential motion as appropriate while preserving equivalent state and feedback. A fade is not automatically safe or a pass; verify the alternative against the task and device evidence, following the StyleGallery motion owner (`references/stylegallery/motion/`). Numeric duration and easing examples below are subordinate to that evidence and owner (from former motion-designer).
-- **Test at 6x slow-motion** — if an animation looks wrong at 6x slowdown, the timing is wrong
-
-| Context | Easing | Why |
-|---------|--------|-----|
-| Element entering | ease-out (decelerate) | Arrives and settles |
-| Element leaving | ease-in (accelerate) | Departs with momentum |
-| State change | ease-in-out | Smooth weight shift |
-| Micro-interaction | spring (stiffness 300–500, damping 20–30) | Responsive, alive |
-| Attention redirect | sharp ease-out, 150ms | Snappy, purposeful |
-
-Never animate:
-
-- Colour changes on text (accessibility issue — can cause flickering for photosensitive users)
-- Layout properties (`width`, `height`, `top`, `left`) in performance-critical paths — use `transform` instead
-- Anything that delays the user from completing their task
-- Decorative loops that run continuously — they drain battery, consume attention, and can trigger vestibular disorders
-
-Done checks: all animated properties are GPU-compositable (`transform`, `opacity`, `filter`) where possible; no continuously looping animations without user control; no large-scale zoom, spin, or parallax without a reduced-motion fallback (vestibular safety).
+Duration, easing, spring, and never-animate rules are owned by [references/stylegallery/motion/](../stylegallery/motion/index.md). Carry them into the assignment from the owner; do not restate them here. Acceptance check only: every animated effect names its reduced-motion alternative and the behaviour it signals.
 
 ## Salvaged from removed references
 
@@ -75,10 +56,10 @@ Carry forward:
 Do not invent visual direction that conflicts with the plan. If a user-impacting decision is missing, identify the exact owner decision needed.
 ```
 
-Content rules from the former content-writer role reference:
+Content rules (from the former copy role):
 
 - Every error message follows this structure: 1. **What happened** — in plain language ("We couldn't save your changes"); 2. **Why** — if it helps the user ("The file is too large"); 3. **What to do** — always actionable ("Try a file under 10 MB"). Never: "Error 403: Forbidden", "An unexpected error occurred", or "Invalid input"
-- Reading level assessment (target: Grade 6–8 / age 11–14)
+- Reading level assessment (target: reading age 12–14, aligned with [accessible-content.md](execution/accessible-content.md))
 - Time-sensitive content includes enough context to remain meaningful later
 
 ## Evidence requirements

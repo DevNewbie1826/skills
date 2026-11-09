@@ -6,26 +6,11 @@ Read this when routing design operating guidance into frontend planning, impleme
 
 ## Phase routing
 
-| User intent or workflow phase | Load or instruct | Required handoff |
-|---|---|---|
-| Ambiguous or multi-step web UI request; a request needing a plan | Your planning workflow + `lane-a-direction.md` | Provide design discovery prompts, target users, inclusive personas, taste direction, owner decisions, and design-debt policy as planning inputs. |
-| Approved-plan execution | Your implementation workflow + `lane-b-execution.md` | Carry current design constraints into implementation assignments and evidence expectations. |
-| Building, styling, redesigning, auditing, or performance-checking a web UI | Frontend `design` + `perfection`; add `lane-b-execution.md` when designpowers affects implementation | Preserve the `DESIGN.md` gate, design/perfection routing, framework-matched tooling, real-browser checks, and implementation standards. |
-| Screenshots, visual regressions, clone fidelity, layout quality, alpha/CJK checks, or design QA | `visual-qa` + `lane-c-review.md` | Capture objective evidence before design judgment and use the same artifacts for persona, accessibility, and heuristic review. |
-| Final approval, QA, review changes, or significant completed implementation | Your review workflow + `lane-c-review.md` and `lane-d-memory.md` | Include the design brief, visual artifacts, unresolved design debt, and accessibility-debt acknowledgements. |
+Each lane's Phase owner table names what to load or instruct, and the required handoff, for its phase. Add the lane's Prompt injection block to the assignment when the phase uses it.
 
 ## Planning
 
-When planning is needed, supply design-specific context to the project's planning workflow rather than writing a parallel plan. Include:
-
-- product or page goal;
-- primary tasks and user journeys;
-- inclusive personas and assistive or cognitive constraints;
-- taste direction, anti-references, and design-system constraints;
-- content tone and plain-language requirements;
-- responsive, motion, and user-preference requirements (detailed guidance lives in `references/stylegallery/` platform and motion domains);
-- verification expectations: frontend checks, visual QA artifacts, persona walkthroughs, and independent review; and
-- explicit constraints, including prohibited bridge or canvas tooling.
+When planning is needed, supply design-specific context to the project's planning workflow rather than writing a parallel plan; the Prompt injection block in [lane-a-direction.md](lane-a-direction.md) lists that context.
 
 ## Implementation
 
@@ -36,10 +21,6 @@ When a plan is approved, the implementation workflow owns execution. Enrich impl
 - required frontend `design` and `perfection` references;
 - required `visual-qa` evidence for rendered claims; and
 - the design-debt rule: unresolved accessibility debt cannot disappear into a summary.
-
-## UI build through frontend design and perfection
-
-The frontend skill owns UI build quality. This reference may point it to user taste and anti-reference notes, target personas and success criteria, content and state expectations, and cognitive-accessibility requirements. Design-system and token constraints come from `references/design/design-system-architecture.md`; layout, motion, interaction, and platform-adaptive mechanics come from `references/stylegallery/`. It does not replace the `DESIGN.md` gate, taste routing, real-browser QA, or performance discipline.
 
 ## Visual checks
 
@@ -58,4 +39,4 @@ Use the project's review workflow as the final gate for significant implementati
 
 ## Prohibited routes
 
-Frames, bridge tooling, canvas adapters, and fabricated direct calls are not available integration paths. Do not add scripts, hooks, schedulers, or competing planning and build harnesses.
+Frames, bridge tooling, canvas adapters, and fabricated direct calls are not available integration paths. Do not introduce scripts, hooks, tool APIs, schedulers, or competing planning and build harnesses from this reference.

@@ -1,13 +1,8 @@
----
-name: synthetic-user-testing
-description: "Use after the fix round to validate the design by walking through key tasks as each persona — simulating how Jordan (low-vision), Priya (non-native speaker), Marcus (motor impairment), or any project persona would actually experience the interface. Catches the issues that code review misses because they only surface in the act of using"
----
-
 # Synthetic User Testing
 
 Read this when a built design needs validation by walking each key task as every inclusive persona — simulating how each person would actually experience the interface before real-participant testing.
 
-Back-link: [Lane C — Review & Repair](../lane-c-review.md)
+Back-link: [Lane C — Review](../lane-c-review.md)
 
 Synthetic user testing is the closest thing to putting the design in front of real people without leaving the pipeline. You walk through the interface as each persona, attempting real tasks, and report what works, what breaks, and what feels wrong — from their perspective, not yours.
 
@@ -15,9 +10,9 @@ This is not a checklist exercise. It is an act of empathy disciplined by specifi
 
 ## When to Use
 
-- **After the fix round** — the design-builder has addressed findings from critic, accessibility-reviewer, and heuristic-evaluator. Now validate that the fixes work and no new issues were introduced
-- **Before verification-before-shipping** — synthetic testing feeds directly into the persona walkthrough in the verification report
-- **When the design-critic flags persona coverage gaps** — if the critique says "unclear whether Persona X can complete Task Y," run a synthetic test to find out
+- **After the fix round** — implementation has addressed findings from critique, accessibility review, and heuristic evaluation. Now validate that the fixes work and no new issues were introduced
+- **Before final verification** — synthetic testing feeds directly into the persona walkthrough in the verification report
+- **When critique flags persona coverage gaps** — if the critique says "unclear whether Persona X can complete Task Y," run a synthetic test to find out
 - **When the team is unsure about a flow** — synthetic testing turns "I think this works for screen reader users" into "here's exactly where a screen reader user would get stuck"
 
 ## Process
@@ -25,7 +20,7 @@ This is not a checklist exercise. It is an act of empathy disciplined by specifi
 ### Step 1: Gather Test Context
 
 Before testing, assemble:
-- **Personas** from `inclusive-personas` (via `design-state.md`)
+- **Personas** from `inclusive-personas` (via the optional project design record when one exists)
 - **Key tasks** from the design brief — the things the design must enable
 - **The build** — test the actual implementation, not the spec
 - **Assistive technology context** — for each persona, what tools they use and how (zoom level, screen reader, keyboard-only, switch access, etc.)
@@ -107,79 +102,33 @@ Compile findings into a structured report (see "What You Deliver" below). Every 
 - Suggest a fix
 - Classify severity (Critical / Major / Minor)
 
-**Severity in synthetic testing:**
-| Severity | Definition |
-|----------|-----------|
-| **Critical** | Persona cannot complete the task at all |
-| **Major** | Persona completes the task but with significant difficulty, confusion, or emotional friction |
-| **Minor** | Persona completes the task but the experience is rougher than it should be |
+**Severity:** classify each finding on the single scale owned by [design-review.md](design-review.md#step-5-classify-issues) — Critical when the persona cannot complete the task at all, Major when the task completes with significant difficulty or friction, Minor when the experience is rougher than it should be.
 
 ### Step 6: Feed Results Forward
 
 Synthetic testing results feed into two places:
-1. **design-builder** — if fixes are needed, dispatch the builder with specific findings
-2. **verification-before-shipping** — the persona walkthrough section of the verification report should reference synthetic test results, not guesswork
+1. **Implementation** — hand specific findings to whoever owns the build when fixes are needed.
+2. **Final verification** — the persona walkthrough section of the verification report should reference synthetic test results, not guesswork.
 
 ## What You Deliver
 
-```markdown
-# Synthetic User Test Results: [Project Name]
+One report per test, with these sections in this order. Steps 2-5 above already define the content; do not restate their instructions in the report.
 
-**Date:** [YYYY-MM-DD]
-**Build tested:** [what was tested]
-**Personas tested:** [list]
-**Tasks tested:** [list]
-
-## Summary
-[2-3 sentences: overall findings — who can use this, who can't,
- and the biggest gap]
-
-## Scenario Results
-
-### Scenario 1: [Scenario name]
-**Persona:** [Name] — [context]
-**Task:** [what they're trying to do]
-**Result:** ✓ / ⚠ / ✗
-
-[Step-by-step walkthrough with findings]
-
-### Scenario 2: ...
-
-## Barrier Matrix
-
-| Task | [Persona 1] | [Persona 2] | [Persona 3] | ... |
-|------|-------------|-------------|-------------|-----|
-| ...  | ✓/⚠/✗      | ✓/⚠/✗      | ✓/⚠/✗      | ... |
-
-## Cross-Persona Patterns
-- **Universal barriers:** [issues affecting 2+ personas]
-- **Friction hotspots:** [steps with clustered difficulty]
-- **Emotional patterns:** [where confusion/frustration clusters]
-
-## Findings by Severity
-
-### Critical
-- [Persona] cannot [task] because [specific reason] → [Fix]
-
-### Major
-- [Persona] struggles with [task] at [step] because [reason] → [Fix]
-
-### Minor
-- [Persona] experiences friction at [step] because [reason] → [Fix]
-
-## Comparison: Pre-Fix vs Post-Fix
-[If this is a re-test after fixes, show what improved and what didn't]
-
-## Recommendation
-[Ship / Fix and re-test / Rethink flow for [persona]]
-```
+1. Header: date, build tested, personas tested, tasks tested.
+2. Summary: 2-3 sentences on who can use this, who cannot, and the biggest gap.
+3. Scenario results: one entry per scenario with its persona, task, result, and step-by-step findings.
+4. Barrier matrix: tasks against personas, marked pass, partial, or fail.
+5. Cross-persona patterns: universal barriers, friction hotspots, emotional patterns.
+6. Findings by severity: persona, task, reason, and fix.
+7. Comparison: pre-fix vs post-fix when this is a re-test.
+8. Recommendation: ship, fix and re-test, or rethink the flow for a named persona.
 
 ## Integration
 
-- **Runs after:** Fix round (design-builder has addressed critic, accessibility-reviewer, and heuristic-evaluator findings)
-- **Runs before:** `verification-before-shipping`
-- **Informed by:** `inclusive-personas`, `design-discovery` (brief), `design-state` (all decisions)
-- **Feeds into:** `verification-before-shipping` (persona walkthrough evidence), `design-builder` (if fixes needed), `design-debt-tracker` (deferred findings)
+- **Runs after:** the fix round, once implementation has addressed critique, accessibility-review, and heuristic findings
+- **Runs before:** final verification
+- **Informed by:** `inclusive-personas`, the design brief, and the project design record when one exists
+- **Feeds into:** the verification report's persona walkthrough, implementation (if fixes are needed), and `design-debt-tracker` (deferred findings)
 - **Complements:** `usability-testing` (which plans tests with real people — synthetic testing validates before real testing begins)
 
 ## The Difference from Usability Testing

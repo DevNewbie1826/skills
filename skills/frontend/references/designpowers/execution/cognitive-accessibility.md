@@ -1,8 +1,3 @@
----
-name: cognitive-accessibility
-description: "Use when evaluating mental load, wayfinding, focus management, memory demands, or decision complexity in any interface — ensures designs work for people with cognitive differences, under stress, or managing divided attention"
----
-
 # Cognitive Accessibility
 
 Read this when evaluating mental load, wayfinding, focus management, memory demands, or decision complexity in any interface — for people with cognitive differences, under stress, or with divided attention.
@@ -94,9 +89,9 @@ For each screen or flow, note:
 
 ## Integration
 
-- **Called by:** Any design skill, especially `ui-composition` and `interaction-design`
-- **Pairs with:** `accessible-content` (language complexity), `adaptive-interfaces` (personalisation), `inclusive-personas` (cognitive diversity)
-- **Reviewed by:** `designpowers-critique`
+- **Called by:** any design work that adds steps, choices, or memory demands
+- **Pairs with:** [accessible-content.md](accessible-content.md) (language complexity), [inclusive-personas.md](../direction/inclusive-personas.md) (cognitive diversity)
+- **Reviewed by:** [design-review.md](../review/design-review.md)
 
 ## Quick Reference: COGA Guidelines
 

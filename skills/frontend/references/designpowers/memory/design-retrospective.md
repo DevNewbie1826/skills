@@ -1,8 +1,3 @@
----
-name: design-retrospective
-description: "Use after shipping or completing a design project — structured reflection on what worked, what did not, debt health, and how the person's design decisions are evolving across projects"
----
-
 # Design Retrospective
 
 Read this when a design project ships or completes — structured reflection on what worked, what did not, design-debt health, and how the person's design decisions are evolving, including the on-request longitudinal taste reflection.
@@ -80,14 +75,7 @@ This section has two levels of analysis. Keep both; do not duplicate prompts bet
 - **Possible blind spots** — surfaced gently, as questions, never verdicts
 - **Where the signal is thin** — what the record does not yet know; confidence vs guess
 
-Editorial rules for the synthesis:
-
-1. **Synthesise, do not transcribe.** The value is patterns across entries, not re-listed table rows
-2. **Every claim cites evidence** — projects, overrides, repeated decisions. No evidence, no claim
-3. **Describe decision-making, not just preference.** "Decides colour last, after structure is settled" is insight; "prefers muted palettes" is a lookup
-4. **Be honest about confidence and thin evidence**; do not manufacture a richer picture than the data supports
-5. **Blind spots are questions, not judgements**
-6. **Stay in the personal layer.** The synthesis describes portable, personal tendencies only. Client- or project-specific requirements (any project's design spec) are that client's, not the person's; if client-bound entries leaked into the personal record, flag them as contamination rather than reporting them as taste
+Editorial rules: the anti-pattern table at the end of this file owns them — synthesise rather than transcribe, cite evidence, describe decision-making, and stay in the personal layer.
 
 ### Step 7: Carry-forward items
 

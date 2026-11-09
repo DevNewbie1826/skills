@@ -19,7 +19,7 @@ People, content, and process concerns around design work:
 
 Layout, composition patterns, interaction contracts, motion, responsive and platform-adaptive behavior, and design tokens are owned elsewhere — route there first:
 
-- `references/stylegallery/` — [layout patterns and recipes](../stylegallery/patterns/), [motion](../stylegallery/motion/index.md), [design-engineering](../stylegallery/design-engineering/) (component contracts, loading and feedback, state management), [platform guides](../stylegallery/platform-guides/index.md) (including preferences and accessibility), and [design terminology](../stylegallery/design-terminology/)
+- `references/stylegallery/` — [layout patterns and recipes](../stylegallery/patterns/index.md), [motion](../stylegallery/motion/index.md), [design-engineering](../stylegallery/design-engineering/index.md) (component contracts, loading and feedback, state management), [platform guides](../stylegallery/platform-guides/index.md) (including preferences and accessibility), and [design terminology](../stylegallery/design-terminology/index.md)
 - `references/design/design-system-architecture.md` — the project design-system contract, tokens, and the DESIGN.md format
 
 ## Route table
@@ -44,19 +44,8 @@ Each lane file indexes the leaves in its directory with a one-line read-when cue
 
 ## Guardrails
 
-Do not introduce scripts, hooks, tool APIs, schedulers, bridge tooling, canvas adapters, or fake direct calls from this reference. Keep it as design-process context inside `frontend`.
-
-## Completion rule
-
-Designpowers-enhanced frontend work is complete only when:
-
-- the frontend design ruleset ran or was explicitly ruled out for the scope;
-- perfection ran for implementation, audit, performance, SEO, or accessibility work;
-- visual claims cite objective visual evidence;
-- any project design record used names the brief, personas, taste constraints, accessibility constraints, and accepted debt;
-- remaining accessibility or persona debt is explicit, located, and user-accepted; and
-- significant implementation work completes through the project's review workflow.
+Prohibited integration routes are owned by [routing.md](routing.md#prohibited-routes). Keep this corpus as design-process context inside `frontend`.
 
 ## Provenance
 
-[EVIDENCE.md](EVIDENCE.md) records bundling checks; [UPSTREAM.md](UPSTREAM.md) records the corpus manifest, removals, and merges with reasons; [LICENSE](LICENSE) carries the upstream MIT notice.
+[UPSTREAM.md](UPSTREAM.md) records the corpus manifest, removals, and merges with reasons; [LICENSE](LICENSE) carries the upstream MIT notice.

@@ -1,8 +1,8 @@
-# Lane C: Review & Repair
+# Lane C: Review
 
 Read this when UI implementation needs evidence-based visual, accessibility, heuristic, and persona review before final sign-off.
 
-Lane C runs after implementation and before final sign-off. It requires objective `visual-qa` evidence first, then applies designpowers judgment to the same artifact, then hands reconciled context to the project's review workflow. Measurements and screenshots anchor the review; designpowers adds human-centered judgment that metrics alone do not encode.
+Lane C runs after implementation and before final sign-off. It requires objective `visual-qa` evidence first, then applies designpowers judgment to the same artifact, then hands reconciled context to the project's review workflow. It does not repair. Measurements and screenshots anchor the review; designpowers adds human-centered judgment that metrics alone do not encode.
 
 ## Leaves in this lane
 
@@ -29,16 +29,16 @@ Lane C runs after implementation and before final sign-off. It requires objectiv
 
 Short items whose full source documents were removed as duplicated elsewhere:
 
-- **From former ui-composition:** test colour-dependent information with simulated colour-vision deficiency (protanopia, deuteranopia, tritanopia) — not only contrast ratios.
+- **From former ui-composition:** test color-dependent information with simulated color-vision deficiency (protanopia, deuteranopia, tritanopia) — not only contrast ratios.
 
 ## Prompt injection
 
-Use this sequence for UI review and repair:
+Use this sequence for UI review:
 
 ```text
 Run `visual-qa` first against the built surface. Capture objective screenshots, diffs, browser or terminal artifacts, and any required visual QA report.
 
-Then apply Lane C Review & Repair to the same artifact:
+Then apply Lane C Review to the same artifact:
 - critique against brief, plan, principles, personas, taste, craft, and design-system alignment
 - accessibility review for WCAG, COGA, keyboard, screen reader, touch, motion, adaptive preferences, and content
 - heuristic evaluation for Nielsen H1-H10 and cognitive walkthroughs
@@ -78,7 +78,12 @@ When evaluating a live website, discover real URLs before attempting to fetch an
 | `contact` | `https://example.test/catalog/items/contact` |
 | `/contact` | `https://example.test/contact` |
 
-Href types: relative hrefs (for example, `/acheter`, `../contact`) resolve against the effective document base URL before fetching; fragment hrefs (`#section`) are classified after resolution — skip one as same-document only when its resolved URL without the fragment equals the current document URL (on `https://example.test/catalog/items/`, `#section` resolves to `…/catalog/items/#section`, same document; with `<base href="../docs/">` it resolves to `…/catalog/docs/#section`, a different document that follows the normal fetch policy); JavaScript hrefs (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation — flag as a potential SEO and accessibility issue and do not fetch; external hrefs are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
+Href types:
+
+- **Relative hrefs** (for example, `/acheter`, `../contact`) resolve against the effective document base URL before fetching.
+- **Fragment hrefs** (`#section`) are classified after resolution. Skip one as same-document only when its resolved URL without the fragment equals the current document URL: on `https://example.test/catalog/items/`, `#section` resolves to `…/catalog/items/#section`, the same document; with `<base href="../docs/">` it resolves to `…/catalog/docs/#section`, a different document that follows the normal fetch policy.
+- **JavaScript hrefs** (`javascript:void(0)`, `onclick` handlers, missing `href`) indicate JS-rendered navigation. Flag them as a potential SEO and accessibility issue and do not fetch.
+- **External hrefs** are fetched only when directly relevant to the evaluation. *(from the former heuristic-evaluator role reference)*
 
 ## Guardrails
 

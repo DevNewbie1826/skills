@@ -1,8 +1,3 @@
----
-name: research-planning
-description: "Use when user needs are unclear, assumptions need validation, or the design brief identifies gaps in understanding — plans what to learn, which methods to use, and from whom"
----
-
 # Research Planning
 
 Read this when user needs are unclear, assumptions need validation, or the design brief exposes gaps in understanding — planning what to learn, which methods to use, and from whom.
@@ -53,7 +48,7 @@ Match methods to questions:
 
 When competitive research is undertaken, assess competitors' UX and accessibility, label findings as observed evidence or speculation, and explain the implications for this project. Competitive research is optional; do not add it to every task by default.
 
-When proposing navigation or information architecture, include a findability task probe: give representative users realistic destination-finding tasks and record whether they locate the intended content. If a journey map is produced, capture each stage's goals, actions, thoughts, emotions, pain points, opportunities, and ability considerations. A journey map is an optional method, not a required deliverable for every task. *(from former design-scout and design-strategist roles)*
+When proposing navigation or information architecture, include a findability task probe: give representative users realistic destination-finding tasks and record whether they locate the intended content. If a journey map is produced, capture each stage's goals, actions, thoughts, emotions, pain points, opportunities, and ability considerations. A journey map is an optional method, not a required deliverable for every task. *(from former scouting and strategy roles)*
 
 ### Step 4: Plan for Inclusion
 
@@ -87,17 +82,13 @@ Every research plan must address:
 [Which design decisions this research will inform]
 ```
 
-Save to: `docs/designpowers/research/YYYY-MM-DD-<topic>-plan.md`
-
 ### Step 6: User Review
 
 Present the plan. Confirm scope, methods, and timeline are realistic.
 
 ## Integration
 
-- **Called by:** `design-discovery`
-- **Calls:** `inclusive-personas` (when persona development is a research output)
-- **Pairs with:** `design-strategy` (research informs strategy)
+- **Pairs with:** [inclusive-personas.md](inclusive-personas.md) when persona development is a research output; planning, since research informs strategy
 
 ## What This Skill Does NOT Do
 
