@@ -126,7 +126,7 @@ check_skill_contract() {
     check_symlink_plants
 }
 
-# A symlink in a skill must stay inside it, except a reference linking to a prompt omp installs.
+# A symlink in a skill must stay inside it, except references/ultrathink.md linking to omp's installed notice.
 # each case is <expected exit>|<link under the skill>|<link target>.
 check_symlink_plants() {
     local case expect link target plant output status
@@ -134,7 +134,11 @@ check_symlink_plants() {
         '1|references/outside.md|../../../../README.md'
         '1|scripts/outside.py|/etc/hostname'
         '1|references/elsewhere.md|/nonexistent/prompts/system/x.md'
-        '0|references/notice.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/x.md'
+        '1|references/omp-names.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md'
+        '1|references/notice.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md'
+        '1|references/ultrathink.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/../../../../etc/ultrathink-notice.md'
+        '1|references/ultrathink.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/other.md'
+        '0|references/ultrathink.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md'
     )
     for case in "${cases[@]}"; do
         IFS='|' read -r expect link target <<<"$case"
@@ -143,7 +147,7 @@ check_symlink_plants() {
         mkdir -p "$plant/skills"
         cp -R skills/dag-workflow "$plant/skills/"
         mkdir -p "$(dirname "$plant/skills/dag-workflow/$link")"
-        ln -s "$target" "$plant/skills/dag-workflow/$link"
+        ln -sfn "$target" "$plant/skills/dag-workflow/$link"
         status=0
         output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
         if [[ "$status" != "$expect" ]] || { [[ "$expect" == 1 ]] && [[ "$output" != *LINKS* ]]; }; then

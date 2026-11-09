@@ -154,10 +154,14 @@ def is_python_stdlib(module: str) -> bool:
     return spec.origin in {"built-in", "frozen"} or (is_inside(origin, STDLIB_ROOT) and not {"site-packages", "dist-packages"}.intersection(origin.parts))
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
-OMP_PROMPT_TARGET = re.compile(r"/@oh-my-pi/pi-coding-agent/src/prompts/[\w./-]+\.md$")
+OMP_PROMPT_LINKS = {"ultrathink.md": "/@oh-my-pi/pi-coding-agent/src/prompts/system/ultrathink-notice.md"}
 def omp_prompt_link(path: Path) -> bool:
-    # docs/PORTING.md Rule 8: a reference may link to a prompt omp installs; it dangles where omp is absent.
-    return path.is_symlink() and path.parent.name == "references" and bool(OMP_PROMPT_TARGET.search(str(path.readlink())))
+    # docs/PORTING.md Rule 8: these references link to a prompt omp installs; they dangle where omp is absent.
+    suffix = OMP_PROMPT_LINKS.get(path.name)
+    if suffix is None or not path.is_symlink() or path.parent.name != "references":
+        return False
+    target = path.readlink().as_posix()
+    return ".." not in target.split("/") and target.endswith(suffix)
 def text_files(directory: Path, suffixes: set[str]) -> list[Path]:
     return sorted((path for path in directory.rglob("*") if path.is_file() and not omp_prompt_link(path) and path.suffix.lower() in suffixes),
                   key=lambda path: path.as_posix())
