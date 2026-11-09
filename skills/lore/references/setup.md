@@ -30,7 +30,7 @@ When writing git commit messages for non-trivial changes, use the Lore format wi
 Format:
 - Imperative summary line (focused on *why*, not *what*)
 - Optional body explaining the change
-- Git trailers (all optional — include only those that carry signal):
+- Git trailers (all optional; include only those that carry signal):
 
 | Trailer | Purpose |
 |---------|---------|

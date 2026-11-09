@@ -26,7 +26,7 @@ confidence, directives, and test gaps stay queryable with plain `git log`.
 
 `Constraint:` `Rejected:` `Confidence:` `Scope-risk:` `Reversibility:` `Directive:`
 `Tested:` `Not-tested:` `Related:`. All are optional and repeatable; add one only when it
-carries signal. Values, ordering, and examples live in `references/commits.md`.
+carries signal. Value vocabularies, format rules, and examples live in `references/commits.md`.
 
 ## Routing
 

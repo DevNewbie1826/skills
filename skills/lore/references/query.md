@@ -4,17 +4,9 @@ Read this when you need to query Lore trailers from git history.
 
 Run the commands with your runtime's shell tool, from inside the repository.
 
-## Usage forms
-
-| Ask for | Do this |
-|---|---|
-| A specific trailer type | Query that trailer name |
-| A file or directory scope | Add the path after `--` in the git log command |
-| A summary of recent Lore context | Use the summary-mode command |
-
-The user may say the trailer name in Korean, English, or the full trailer key. Map the shortcut to the trailer before querying.
-
 ## Trailer shortcuts
+
+The user may name a trailer in Korean, in English, or by its full key. Map the shortcut to the trailer before querying.
 
 | Shortcut | Trailer |
 |---|---|
@@ -43,8 +35,7 @@ git log -n 20 --all -E --grep="^(Constraint|Rejected|Confidence|Scope-risk|Rever
 ```
 
 Replace `TRAILER_NAME` with the mapped trailer key. Omit `-- [PATH]` when no path scope is needed.
-`--grep` also matches a trailer-looking line inside the body, but `%(trailers)` reads only the final paragraph; such a commit prints a heading with no trailer lines, and the `awk` filter removes it. Without the filter, report only commits that show a trailer line.
-Summary mode prints only the nine Lore keys, so unrelated trailers such as `Signed-off-by:` never appear and cannot hide a body-only lookalike.
+`--grep` also matches a trailer-looking line in the body, but `%(trailers)` reads only the final paragraph; the `awk` filter drops the resulting empty headings.
 
 ## Output format
 
@@ -63,4 +54,4 @@ If no Lore trailers are found, say so clearly.
 
 ## Read-only note
 
-This skill only reads git history. It does not modify commits, refs, or the working tree.
+Querying only reads git history. It never modifies commits, refs, or the working tree.

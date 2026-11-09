@@ -33,7 +33,7 @@ line between them. A line indented under a trailer continues that trailer's valu
 | Trailer | Purpose | Example |
 |---|---|---|
 | `Constraint:` | External limit that shaped the decision | `Auth service does not support token introspection` |
-| `Rejected:` | Alternative considered and why it was dropped | `Extend token TTL to 24h | security policy violation` |
+| `Rejected:` | Alternative considered and why it was dropped | `Extend token TTL to 24h \| security policy violation` |
 | `Confidence:` | How sure the change is right | `high` |
 | `Scope-risk:` | Blast radius of the change | `narrow` |
 | `Reversibility:` | How hard it is to undo | `clean` |
@@ -69,10 +69,7 @@ Not-tested: Auth service cold-start > 500ms behavior
 3. Add a body only when the how needs explanation.
 4. Append trailers, one per decision fact; keep only signal. To add them without editing the
    message by hand: `git commit --trailer "Confidence: high" --trailer "Rejected: alt | reason"`.
-5. Self-check: would a future modifier benefit from this context?
-6. Confirm the trailers parse: `git log -1 --format='%(trailers:only)'` must list each one.
-
-Reading trailers back is in `references/query.md`.
+5. Confirm the trailers parse: `git log -1 --format='%(trailers:only)'` must list each one.
 
 ## Common mistakes
 
@@ -80,8 +77,4 @@ Reading trailers back is in `references/query.md`.
 |---|---|
 | Writing trailers as prose paragraphs | Use `Key: value` on separate lines |
 | Putting trailers before the body | Put trailers after the body, separated by a blank line |
-| Blank line between trailers, or text after them | Keep them as one final paragraph, or git will not parse them |
-| Omitting the reason in `Rejected:` | Use `alternative | reason` |
-| Adding trailers to trivial commits | Reserve them for non-trivial decisions |
 | Duplicating diff content in trailers | Capture the why, not the what |
-| Using `Confidence: yes` | Use `high`, `medium`, or `low` |
