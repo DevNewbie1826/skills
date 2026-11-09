@@ -1,6 +1,6 @@
 # Deslop — find and remove AI slop
 Read this when auditing or de-slopping visual/copy AI tells.
-Adapted from yetone/kill-ai-slop (Apache-2.0); modified for this pack: rewritten as a pack ruleset guide, with a routing cue and this notice added.
+Adapted from yetone/kill-ai-slop (Apache-2.0); attribution and the list of pack changes live in `ATTRIBUTION.md`.
 
 This ruleset covers **visual and copy slop**: the generic, machine-default
 tells of vibe-coded products (indigo→violet gradients, gradient-clip headlines,
@@ -61,13 +61,12 @@ node scripts/scan.mjs <root> --json   # machine-readable, for triage
 pure Node (no dependencies) and never edits files. Use its output as a
 starting map, not gospel — confirm each hit by reading the code.
 
-To narrow a scan: `--only=01,06` / `--skip=19` filter by tell id, and
-`--exclude=legacy` drops paths (substring match on the project-relative path).
-`--rules=extra.mjs` loads additional project- or language-specific tells
-(`$SKILL_DIR/references/deslop/scripts/rules.ru.mjs` is a shipped Russian-copy example and the template for
-your own). Hits the user has confirmed as intentional can be pinned in source
-with `deslop-ignore`, `deslop-ignore-next-line 06`, or `deslop-ignore-file`
-comments — prefer the id-scoped forms so new tells still surface.
+`--only=` / `--skip=` filter by tell id, `--exclude=` drops paths, and
+`--rules=extra.mjs` loads project-specific tells
+(`$SKILL_DIR/references/deslop/scripts/rules.ru.mjs` is a shipped example).
+Suppression directives and the full flag spec are documented in the scanner's
+header comment; prefer the id-scoped `deslop-ignore` forms so new tells still
+surface.
 
 ### 3. Triage
 For every hit, open the file and decide **slop vs. intentional**. This is the
@@ -122,7 +121,7 @@ function. Use `fixes.md` for the before→after pattern per tell.
 ## Files
 
 - `taxonomy.md` — the 34 tells: what each is, why it's slop, the fix.
-- `detection.md` — concrete ripgrep/regex patterns + false positives.
+- `detection.md` — false positives, manual-only patterns, and confirmation checks.
 - `fixes.md` — before→after remediation patterns.
 - `$SKILL_DIR/references/deslop/scripts/scan.mjs` — the dependency-free scanner.
 - `$SKILL_DIR/references/deslop/scripts/rules.ru.mjs` — example extension rules (Russian copy tells).

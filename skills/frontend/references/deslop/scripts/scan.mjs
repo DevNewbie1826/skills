@@ -3,7 +3,7 @@
   kill-ai-slop scanner — dependency-free.
 
   Walks a project's frontend source and greps for the code-level signals of each
-  AI-slop tell (see references/detection.md). Prints a grouped report of
+  AI-slop tell (see $SKILL_DIR/references/deslop/detection.md). Prints a grouped report of
   file:line hits. It NEVER edits files. Every hit is a lead to confirm by
   reading the code, not a verdict.
 
@@ -322,9 +322,6 @@ function walk(dir, files = []) {
     return files;
   }
   for (const e of entries) {
-    if (e.name.startsWith(".") && e.name !== ".") {
-      if (SKIP_DIRS.has(e.name)) continue;
-    }
     const full = join(dir, e.name);
     if (isExcluded(full)) continue;
     if (e.isDirectory()) {
@@ -493,6 +490,7 @@ for (const g of groups) {
 }
 
 console.log(
-  `${bold("→")} ${groups.length} groups, ${totalHits} hits. ` +
-    dim("Confirm each by reading the code, then fix per references/fixes.md.\n"),
+  `${bold("→")} ${groups.length} ${groups.length === 1 ? "group" : "groups"}, ` +
+    `${totalHits} ${totalHits === 1 ? "hit" : "hits"}. ` +
+    dim("Confirm each by reading the code, then fix per $SKILL_DIR/references/deslop/fixes.md.\n"),
 );
