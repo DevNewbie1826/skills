@@ -19,7 +19,7 @@ ROW = re.compile(r"^\|\s*`([^`]+)`(.*)$")
 QUOTE = "[\"'`]"
 DISPATCH = (
     ("agent", re.compile(rf"{QUOTE}?\bagent{QUOTE}?\s*[:=]\s*{QUOTE}([\w-]+){QUOTE}")),
-    ("agent", re.compile(rf"\bworkpool\(\s*{QUOTE}([\w-]+){QUOTE}")),
+    ("agent", re.compile(rf"\bworkpool\s*\(\s*{QUOTE}([\w-]+){QUOTE}")),
     ("agent", re.compile(r"`([\w-]+)`\s+agents?\b", re.IGNORECASE)),
     ("agent", re.compile(r"\bagent\s+`([\w-]+)`", re.IGNORECASE)),
     ("tool", re.compile(r"`([\w-]+)`\s+tools?\b", re.IGNORECASE)),
@@ -50,7 +50,7 @@ def read_table(text: str) -> tuple[dict[str, set[str]], list[tuple[str, bool]], 
 
 def denied_pattern(name: str, quoted_only: bool) -> re.Pattern[str]:
     if name.endswith("()"):
-        return re.compile(rf"(?<![\w.]){re.escape(name[:-2])}\(")
+        return re.compile(rf"(?<![\w.]){re.escape(name[:-2])}\s*\(")
     body = "[-_]".join(re.escape(part) for part in name.split("-"))
     if quoted_only:
         return re.compile(rf"{QUOTE}{body}{QUOTE}", re.IGNORECASE)

@@ -136,6 +136,8 @@ check_omp_name_plants() {
         '1|references/graph-runs.md|await agent("x", {"agent":"planner"})'
         '1|references/graph-runs.md|await agent("x", {agent: `planner`})'
         '1|references/graph-runs.md|await workpool("planner")'
+        '1|references/graph-runs.md|await workpool ("planner")'
+        '1|references/graph-runs.md|run them with parallel (jobs)'
         '1|references/graph-runs.md|agent: "bash"'
         '1|references/graph-runs.md|agent: "workpool"'
         '1|references/graph-runs.md|Use the `scout` tool.'
