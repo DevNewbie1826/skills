@@ -45,10 +45,6 @@ python -c 'import asyncio; print(asyncio.__version__)'
 
 `debugpy` is a Debug Adapter Protocol (DAP) adapter, not merely an IDE convenience. Its listener exposes a machine-readable protocol that an agent or script can drive; that is a better automation boundary than the human-oriented `pdb` REPL, whose prompt text must be screen-scraped. Drive it with [tools/dap.md](../tools/dap.md) (`python -m debugpy.adapter` over stdio, or `--listen` plus the client's `attach`).
 
-```bash
-python -m debugpy --listen <host:port> --wait-for-client <script>
-```
-
 ### Use `ipdb` or `pudb` when installed; otherwise use plain `pdb`
 
 - **ipdb** — drop-in replacement with tab completion, syntax highlighting. `pip install ipdb`, then `PYTHONBREAKPOINT=ipdb.set_trace` or use `import ipdb; ipdb.set_trace()`.

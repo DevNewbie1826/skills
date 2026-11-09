@@ -59,9 +59,9 @@ If two hypotheses have identical distinguishing evidence, they are not actually 
 | No stop event within the expected window | Process is running, the breakpoint is unreachable, or the wait was too short | Pause and inspect threads rather than waiting longer. |
 | Session terminated unexpectedly | The debuggee crashed or exited | Capture the exit and crash evidence before restarting. |
 
-### Lanes
+### Choose your lane
 
-Choose the lane based on available capability, not a particular product interface. Assign one hypothesis to each independent line of inquiry. Keep every pass read-only until the investigator explicitly approves instrumentation.
+Pick the lane from available capability, not a particular product interface: the delegated passes below when your runtime supports delegation, otherwise the fresh-eyes self-review passes. Either way, assign one hypothesis to each independent line of inquiry and keep every pass read-only until the investigator explicitly approves instrumentation.
 
 ### Delegated parallel investigation (if supported)
 

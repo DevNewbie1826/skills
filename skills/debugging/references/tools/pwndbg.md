@@ -254,7 +254,7 @@ gdb ./target
 # Kill gdb / pwndbg sessions
 # Kill by the PID recorded in this session's journal at spawn; use a pattern-kill only after `pgrep -af gdb` confirms it is this session's process.
 kill <journaled-gdb-pid> 2>/dev/null || true
-pkill -f 'gdbserver' || true
+pkill -f 'gdbserver' || true   # only after `pgrep -af gdbserver` confirms the match is this session's
 
 # Remove core dumps generated during session
 # Delete only core-dump paths this session created and journaled; verify ownership before rm.

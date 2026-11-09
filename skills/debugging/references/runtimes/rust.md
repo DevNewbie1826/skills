@@ -265,8 +265,8 @@ git diff | grep -E 'dbg!\('
 unset RUST_LOG RUST_BACKTRACE
 
 # Kill any rust-gdb/lldb sessions
-pkill -f 'rust-gdb' || true
-pkill -f 'rust-lldb' || true
+pkill -f 'rust-gdb' || true    # only after `pgrep -af rust-gdb` confirms the match is this session's
+pkill -f 'rust-lldb' || true   # only after `pgrep -af rust-lldb` confirms the match is this session's
 # Kill by the PID recorded in this session's journal at spawn; use a pattern-kill only after `pgrep -af '^lldb '` confirms it is this session's process.
 kill <journaled-lldb-pid> 2>/dev/null || true
 

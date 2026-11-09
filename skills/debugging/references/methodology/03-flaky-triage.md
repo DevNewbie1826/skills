@@ -6,7 +6,7 @@ Do not enter the hypothesis loop blind: **intermittence itself is evidence.** Th
 
 ---
 
-## Step 1 — Capture the failure signature (three cheap reruns)
+## Step 1 — Capture the failure signature (cheap reruns before any hypothesis)
 
 Run these before forming any hypothesis. Journal each result.
 

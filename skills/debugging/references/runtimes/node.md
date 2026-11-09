@@ -278,7 +278,7 @@ git diff | grep -E '(debugger;|console\.log\(.*DEBUG|\[ARBITER-DEBUG|\[DEBUG)'
 # Kill inspector-attached processes
 # Kill by the PID recorded in this session's journal at spawn; use a pattern-kill only after `pgrep -af 'node --inspect'` confirms it is this session's process.
 kill <journaled-node-inspector-pid> 2>/dev/null || true
-pkill -f 'bun --inspect' || true
-pkill -f 'deno.*--inspect' || true
+pkill -f 'bun --inspect' || true    # only after `pgrep -af 'bun --inspect'` confirms the match is this session's
+pkill -f 'deno.*--inspect' || true  # only after `pgrep -af 'deno.*--inspect'` confirms the match is this session's
 lsof -iTCP:9229 -sTCP:LISTEN -nP 2>/dev/null
 ```

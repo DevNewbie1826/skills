@@ -71,7 +71,7 @@ Write a test that fails *specifically because of this bug*. Requirements:
 
 Run the test. Confirm it fails. Paste the failure output into the journal:
 
-```markdown
+````markdown
 ### Red phase (<ISO timestamp>)
 Test: <path>::<name>
 Command: <exact invocation>
@@ -80,7 +80,7 @@ Output:
 <verbatim failure output>
 ```
 Confirms: the bug is reproducible at the test-harness level, not just the manual repro.
-```
+````
 
 ### 2. Green — minimum change
 
