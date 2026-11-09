@@ -105,5 +105,6 @@ Banned in prose, code, comments, and (where feasible) filenames of **ported** sk
   checks for `omp-native: true` skills via `is_omp_native()`; never use this to silence
   real violations in ported skills.
 - An OMP-native skill may ship a reference as a symlink to a prompt omp installs (it
-  dangles where omp is not installed). The link check accepts a symlink that sits inside
-  the skill, and the checker does not read the host file it points to.
+  dangles where omp is not installed): a symlink in `references/` whose target ends in
+  `@oh-my-pi/pi-coding-agent/src/prompts/<path>.md`. The checker accepts that link and does
+  not read the file behind it; any other symlink that points outside the skill fails LINKS.

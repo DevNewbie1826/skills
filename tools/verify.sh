@@ -123,6 +123,35 @@ check_skill_contract() {
     require_command python3
     python3 tools/check-skills.py
     check_omp_name_plants
+    check_symlink_plants
+}
+
+# A symlink in a skill must stay inside it, except a reference linking to a prompt omp installs.
+# each case is <expected exit>|<link under the skill>|<link target>.
+check_symlink_plants() {
+    local case expect link target plant output status
+    local cases=(
+        '1|references/outside.md|../../../../README.md'
+        '1|scripts/outside.py|/etc/hostname'
+        '1|references/elsewhere.md|/nonexistent/prompts/system/x.md'
+        '0|references/notice.md|/nonexistent/@oh-my-pi/pi-coding-agent/src/prompts/system/x.md'
+    )
+    for case in "${cases[@]}"; do
+        IFS='|' read -r expect link target <<<"$case"
+        plant="$TEMP_ROOT/link-plant"
+        rm -rf -- "$plant"
+        mkdir -p "$plant/skills"
+        cp -R skills/dag-workflow "$plant/skills/"
+        mkdir -p "$(dirname "$plant/skills/dag-workflow/$link")"
+        ln -s "$target" "$plant/skills/dag-workflow/$link"
+        status=0
+        output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
+        if [[ "$status" != "$expect" ]] || { [[ "$expect" == 1 ]] && [[ "$output" != *LINKS* ]]; }; then
+            printf '  %s -> %s: expected exit %s, got %s:\n%s\n' "$link" "$target" "$expect" "$status" "$output" >&2
+            return 1
+        fi
+        printf '  %s -> %s: exit %s as expected\n' "$link" "$target" "$status"
+    done
 }
 
 # OMP-NAME (tools/omp_names.py) on lines planted into a copy of dag-workflow:
@@ -135,6 +164,7 @@ check_omp_name_plants() {
         '1|references/graph-runs.md|await agent("x", {agent: `planner`})'
         '1|references/graph-runs.md|await workpool("planner")'
         '1|references/graph-runs.md|await workpool ("planner")'
+        '1|references/graph-runs.md|await agent("x", {agent:\n    "planner"})'
         '1|references/graph-runs.md|agent: "bash"'
         '1|references/graph-runs.md|agent: "workpool"'
         '1|references/graph-runs.md|Use the `scout` tool.'
@@ -147,7 +177,7 @@ check_omp_name_plants() {
         rm -rf -- "$plant"
         mkdir -p "$plant/skills"
         cp -R skills/dag-workflow "$plant/skills/"
-        printf '\n%s\n' "$line" >> "$plant/skills/dag-workflow/$file"
+        printf '\n%b\n' "$line" >> "$plant/skills/dag-workflow/$file"
         status=0
         output="$(python3 tools/check-skills.py --root "$plant" --skills dag-workflow)" || status=$?
         if [[ "$status" != "$expect" ]] || { [[ "$expect" == 1 ]] && [[ "$output" != *OMP-NAME* ]]; }; then

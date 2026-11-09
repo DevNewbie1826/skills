@@ -43,9 +43,10 @@ def check(skill: Path, texts: dict[Path, str]) -> list[tuple[Path, int, str, str
         return [(table, 1, "omp-names.md needs Agents, Tools and Eval helpers rows", "")]
     failures: list[tuple[Path, int, str, str]] = []
     for path, text in texts.items():
-        for number, line in enumerate(text.splitlines(), 1):
-            for kind, dispatch in DISPATCH:
-                for found in dispatch.finditer(line):
-                    if found.group(1) not in allowed[kind]:
-                        failures.append((path, number, f"`{found.group(1)}` is not an omp {kind} listed in references/omp-names.md", line))
+        lines = text.splitlines()
+        for kind, dispatch in DISPATCH:
+            for found in dispatch.finditer(text):
+                if found.group(1) not in allowed[kind]:
+                    number = text.count("\n", 0, found.start(1)) + 1
+                    failures.append((path, number, f"`{found.group(1)}` is not an omp {kind} listed in references/omp-names.md", lines[number - 1]))
     return failures
