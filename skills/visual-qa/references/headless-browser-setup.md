@@ -37,33 +37,11 @@ Connect a CDP-capable client to the endpoint, create or select a page, set the e
 
 ## Playwright option
 
-When Playwright is available, use either its browser launch API or its CDP connection API. The essential sequence is the same regardless of runner:
-
-```js
-import { chromium } from "playwright"
-
-const [targetUrl, screenshotPath = "actual.png"] = process.argv.slice(2)
-if (!targetUrl) throw new Error("provide a target URL")
-
-const browser = await chromium.launch({ headless: true })
-try {
-  const page = await browser.newPage({
-    viewport: { width: 1280, height: 720 },
-    deviceScaleFactor: 1,
-  })
-  await page.goto(targetUrl, { waitUntil: "networkidle", timeout: 30_000 })
-  // Drive the required page state here using deterministic page events or locators.
-  await page.screenshot({ path: screenshotPath, fullPage: false })
-} finally {
-  await browser.close()
-}
-```
-
-If a browser is already running with a CDP endpoint, replace launch with `chromium.connectOverCDP(endpoint)` and select the intended context and page. If the installed Playwright version, browser channel, or runner cannot perform this sequence, use the CDP or equivalent-driver fallback instead.
+When Playwright is available, use either its browser launch API or its CDP connection API. Launch a browser, open a page with the exact viewport and device scale factor, navigate to the target, drive the needed state with deterministic events or locators (never an arbitrary sleep), and save a viewport screenshot; the matrix loop below shows the full shape. If a browser is already running with a CDP endpoint, replace launch with `chromium.connectOverCDP(endpoint)` and select the intended context and page. If the installed Playwright version, browser channel, or runner cannot perform this sequence, use the CDP or equivalent-driver fallback instead.
 
 ## Capture matrix loop
 
-One loop produces the matrix [Capture evidence](capture-evidence.md) requires: phone with true mobile emulation and desktop, light and dark, top and scrolled-to-end, plus a reduced-motion variant for motion frames. Playwright shape (adapt to your driver); `urls` and `outDir` belong to this QA run:
+One loop produces the capture matrix [Capture evidence](capture-evidence.md) defines. The Playwright shape follows (adapt it to your driver); `urls` and `outDir` belong to this QA run:
 
 ```js
 import { chromium } from "playwright"
@@ -86,34 +64,23 @@ try {
       }
     }
   }
-  // Motion frames: drive the state (hover, press, open), capture rest, about 100 ms, and settled;
+  // Motion frames: drive the state (hover, press, open), capture at rest, at about 100 ms in, and settled;
   // repeat in a context created with reducedMotion: "reduce" for the reduced-motion pass.
 } finally {
   await browser.close()
 }
 ```
 
-Add a 1920 desktop column for page layouts. A 390-wide capture at desktop scale factor with classic scrollbars is not a phone capture, and a PNG is never resized to force a pass.
+Add a 1920 desktop column for page layouts. A 390-wide capture at a desktop scale factor with classic scrollbars is not a phone capture, and a PNG is never resized to force a pass.
 
 ## Browser teardown
 
-When browser work is complete, close every browser, tab, or driver you opened for it. The one-shot headless CLI (Option 2) exits on its own, and the Playwright example above already closes an in-process launch in its `finally` block — those need no extra step. The remaining paths do:
+When browser work is complete, close every browser, tab, or driver you opened for it. The one-shot headless CLI and an in-process Playwright launch (closed in its `finally` block) need no extra step. The remaining paths do:
 
-- **Built-in browser control (Option 1):** the browser tool keeps its tab open across calls until you close it. When the capture is done, call the tool's `close` action for the capture tab; use `all: true` only when every open tab belongs to this capture.
-- **CDP-capable Chromium (Option 3):** for an instance you launched, close it through the driver or connection, or verify and stop its recorded PID after capture. For a pre-existing endpoint you did not start, close only the page, context, or connection you opened — never its process.
-- **Equivalent driver (Option 5):** close the driver or browser you opened; if you launched a process, record its PID at launch and stop only that recorded process.
+- **Built-in browser control:** the browser tool keeps its tab open across calls until you close it. When the capture is done, call the tool's `close` action for the capture tab; use `all: true` only when every open tab belongs to this capture.
+- **CDP-capable Chromium:** for an instance you launched, close it through the driver or connection, or verify and stop its recorded PID after capture. For a pre-existing endpoint you did not start, close only the page, context, or connection you opened — never its process; a `connectOverCDP` connection closes through its own connection object.
+- **Equivalent driver:** close the driver or browser you opened; if you launched a process, record its PID at launch and stop only that recorded process.
 
 ## Capture discipline
 
-For every screenshot, record and match the reference's:
-
-- viewport width and height,
-- device scale factor and color mode,
-- URL or route,
-- scroll position,
-- authenticated or unauthenticated state, and
-- interaction and animation state.
-
-Wait for the page's relevant load, locator, network, or animation condition rather than sleeping for an arbitrary duration. Capture a viewport image unless the reference is explicitly full-page; use matching mode for both target and actual. Validate the PNG signature, compositing, and dimensions before comparison.
-
-Use the image comparison and complete evidence procedure in [Capture evidence](capture-evidence.md). If an authenticated state exists only in a user's own browser session and no permitted capture path can access it, report that limitation rather than attempting to reproduce credentials or declaring the state visually verified.
+Wait for the page's relevant load, locator, network, or animation condition rather than sleeping for an arbitrary duration. Capture a viewport image unless the reference is explicitly full-page, with matching mode for both target and actual. The artifact gate (signature, compositing, dimensions, state match) lives in [Capture evidence](capture-evidence.md). If an authenticated state exists only in a user's own browser session and no permitted capture path can access it, report that limitation rather than attempting to reproduce credentials or declaring the state visually verified.

@@ -12,7 +12,7 @@ Enumerate every reference page, viewport, state, scroll position, and annotation
 node "$SKILL_DIR/scripts/visual-qa.mjs" image-diff <reference.png> <actual.png>
 ```
 
-Use a different available runner when Node is unavailable. Treat a missing runner as an evidence limitation, not a passing result. The comparison result directs attention to differences but does not establish fidelity by itself.
+Use any runner listed in [the skill router](../SKILL.md#bundled-evidence-cli); treat a missing runner as an evidence limitation, not a passing result. The comparison result directs attention to differences but does not establish fidelity by itself.
 
 ## Required check 1: pixel and content comparison
 
@@ -23,16 +23,15 @@ Dispatch a fresh read-only `reviewer` (task tool `agent: reviewer`, or eval `age
 - rendered copy and DOM text against overview text and annotations; and
 - each changed state, viewport, and responsive extrapolation.
 
-The reviewer must consume `dimensionsMatch`, `diffRatio`, `similarityScore`, `alphaChannelIntact`, and every hotspot. Anything beyond unavoidable rasterization or rounding is a finding, with a capture region and concrete fix. Under a concrete reference there is no taste category: any deviation, spacing and radius included, is a `[defect]`. If the reference packet covers only one viewport, still capture the full matrix and record which captures are extrapolated from the design contract rather than pixel-compared.
+The reviewer must consume `dimensionsMatch`, `diffRatio`, `similarityScore`, `alphaChannelIntact`, and every hotspot. Anything beyond unavoidable rasterization or rounding is a finding, with a capture region and concrete fix. Tagging follows [Independent review passes](independent-review.md): under a concrete reference every deviation, spacing and radius included, is a `[defect]`. If the reference packet covers only one viewport, still capture the full matrix and record which captures are extrapolated from the design contract rather than pixel-compared.
 
 ## Required check 2: code-level design-system fidelity
 
 Dispatch a second, separate fresh `reviewer`, given the same read-only instruction, to inspect the source, relevant change set, reference artifacts, and evidence. It must determine whether:
 
-1. Live, reusable components and state variants render the UI rather than a pasted screenshot, raster image, or background image standing in for elements.
-2. Tokens or reusable primitives drive colors, spacing, typography, and component anatomy rather than scattered one-off values.
-3. The DOM or terminal layout hierarchy matches the target's layer and layout structure.
-4. The rendered design, content, and behavior match the reference.
+1. Live structure and design-system use, per the general tests in [Independent review passes](independent-review.md): live elements and state variants rather than a pasted screenshot, raster image, or background image; tokens or reusable primitives rather than scattered one-off values.
+2. The DOM or terminal layout hierarchy matches the target's layer and layout structure.
+3. The rendered design, content, and behavior match the reference.
 
 The reviewer's brief states the goal, success criteria, changed files, full diff, the reference artifacts, and evidence paths, and tells it to be skeptical but fair: the author may have overstated success or faked the design, so it inspects the diff and artifacts before approving, and it recommends no fixes. Require this response shape:
 
