@@ -269,9 +269,7 @@ def find_comment_violations(source: str, file: Path) -> list[Violation]:
     return violations
 
 
-# ─────────────────────────────────────────────────────────────────
 # Rust-like pattern checks
-# ─────────────────────────────────────────────────────────────────
 
 
 def _has_keyword(decorator_node: ast.Call, keyword: str) -> bool | None:

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// allow: SIZE_OK — single scanner state machine; tests/check-copy-rules.test.ts pins its invariants as one unit
 /**
  * Check TypeScript sources for copy-text and suppression-honesty violations.
  *
