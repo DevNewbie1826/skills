@@ -8,16 +8,16 @@ omp-native: true
 Multi-step reasoning: think carefully through the problem before responding.
 </system-notice>
 
-(Copied verbatim from omp 18.18.1 `src/prompts/system/ultrathink-notice.md`.)
+Every reference below is a `skill://dag-workflow/references/<file>` link: open it with the `read` tool. A relative path in this skill resolves from this SKILL.md's folder, never from the current working directory.
 
-**Read `references/workflow.md` first.**
+**Read [references/workflow.md](skill://dag-workflow/references/workflow.md) first.** Skip it when this turn already carries the omp workflow notice (`/wf` injects it).
 
 # dag-workflow
 
-**Then read `references/graph-runs.md`.** It is how a DAG runs on omp beyond the helpers in `workflow.md`: node prompts, stages, failures, the goal and resuming.
+**Then read [references/graph-runs.md](skill://dag-workflow/references/graph-runs.md).** It is how a DAG runs on omp beyond the helpers in [references/workflow.md](skill://dag-workflow/references/workflow.md): node prompts, stages, failures, the goal and resuming.
 
 One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
-Arm the goal first: one omp goal for the whole request, its objective listing every phase with that phase's real success criteria. When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode) and write each phase's success criteria as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
+Arm the goal first: one omp goal for the whole request. If `goal` is not in your tool list, goal mode is off: ask the user to restart with `/wf <task>` and stop; do not run the DAG without a goal. The goal's objective is the request text plus the phase names (analysis, build, review and merge). When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode). Each phase's success criteria come from the phase-1 analysis (step 1): write them as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
 
 ## The request
 
@@ -28,13 +28,13 @@ Arm the goal first: one omp goal for the whole request, its objective listing ev
 5. Implement it, and strictly include a device that confirms the implementation.
 6. Fix whatever needs fixing, and strictly include a device that confirms each fix.
 7. While doing so, verify that every requirement is met, rigorously and in full detail, with nothing skipped. A strict confirmation device follows the verification reference (see Confirmation devices).
-8. For UI/UX work, verify every `visual-qa` condition in full detail, nothing skipped.
+8. For UI/UX work, verify every `visual-qa` condition in full detail, nothing skipped. If `browser` is not in your tool list, ask the user to enable it.
 
 ## DAGs
 
-Build every DAG per `references/dag-construction.md`: top-down to atomic tasks, bottom-up convergence through the direct parent, no skipped layer, no flat convergence, maximum parallelism.
-`references/dag-construction-ko.md` is the owner's original. Where the two differ, the Korean original governs.
-Run each DAG in the `eval` tool under the one goal: `workpool()` and `agent()` as `references/workflow.md` describes, staged as `references/graph-runs.md` describes.
+Build every DAG per [references/dag-construction.md](skill://dag-workflow/references/dag-construction.md): top-down to atomic tasks, bottom-up convergence through the direct parent, no skipped layer, no flat convergence, maximum parallelism.
+[references/dag-construction-ko.md](skill://dag-workflow/references/dag-construction-ko.md) is the owner's original. Open it only when the English is ambiguous or seems to differ; where the two differ, the Korean original governs.
+Run each DAG in the `eval` tool under the one goal: `workpool()` and `agent()` as [references/workflow.md](skill://dag-workflow/references/workflow.md) describes, staged as [references/graph-runs.md](skill://dag-workflow/references/graph-runs.md) describes.
 Every part with parallelism is a DAG, and its last node is its review.
 Fixes after a review are a DAG too, sized by the same three questions. A 1-2 line fix needs no DAG: make it, confirm it and commit it.
 An integration node that only collects and checks its children's results is a check inside the parent, not a separate node (section 4.3 of the DAG reference). Make it a separate node only when integrating needs its own execution, such as merging edits or running the tests over the combined result.
@@ -42,22 +42,22 @@ An integration node that only collects and checks its children's results is a ch
 ## Node prompts, run files and commits
 
 A scope line in a node prompt names the node: "this node writes only X". Never write it as a statement about the whole repository, such as "the repo is read-only"; a memory tool can keep that as a standing agreement and stop later work.
-Put node handoffs and build files in a git-ignored folder inside the worktree; when the repository ignores none, list one in `.git/info/exclude`.
+Put node handoffs and build files in a git-ignored folder inside the worktree; when the repository ignores none, list one in the file `git rev-parse --git-path info/exclude` prints (in a worktree `.git` is a file, so build the path this way).
 A commit node stages only the paths it names (`git add -- <path>...`, never `git add -A` or `git add .`) and sets the repository's identity for that one command: `git -c user.name=<name> -c user.email=<email> commit`, with no co-author trailer. Take the name and email from the request or brief, never change the global Git identity, and ask before the first commit when no identity is given.
 
 ## Confirmation devices
 
-Confirm directly, so another agent can reproduce it from the commands, exit codes, results and unverified items you leave; reuse existing tests and tools; add no ceremonial or duplicate checks; never claim what you didn't verify. The full standard is `references/verification-device.md`.
+Confirm directly, so another agent can reproduce it from the commands, exit codes, results and unverified items you leave; reuse existing tests and tools; add no ceremonial or duplicate checks; never claim what you didn't verify. The full standard is [references/verification-device.md](skill://dag-workflow/references/verification-device.md).
 This holds for every verification node in a DAG, not only the PR review: an evidence typo (a wrong count, an off line range) is a note, never a FAIL and never a loop.
 Code size has no line-count targets. Judge bloat by the `remove-ai-slops` skill. If one file gets hard to hold, split it into files inside the tool's own folder.
 
 ## Skills and agents per work type
 
-Every name here exists on omp or in this pack; `references/omp-names.md` is the list, and the pack checker fails on any other agent or tool name.
+Every name here exists on omp or in this pack; [references/omp-names.md](skill://dag-workflow/references/omp-names.md) is the list, and the pack checker fails on any other agent or tool name.
 
 | work type | read and use | for what |
 | --- | --- | --- |
-| coding (patch, feature, bugfix, refactor) | `programming`, `tdd`, `debugging`, `git-master`, `remove-ai-slops`; `task` agent; `ast_grep`, `ast_edit`, `lsp` tools | `task` nodes own each change and its proof; production code and tests under `programming` and `tdd`; `debugging` for crashes, wrong output or hangs, locked by a failing test; `ast_grep` and `ast_edit` for syntax-shaped search and codemods; `git-master` on every commit node; `remove-ai-slops` to cut slop behind regression tests |
+| coding (patch, feature, bugfix, refactor) | `programming`, `tdd`, `debugging`, `git-master`, `remove-ai-slops`; `task` and `sonic` agents; `ast_grep`, `ast_edit`, `lsp` tools | `task` nodes own each change and its proof; `sonic` nodes take strictly mechanical edits; production code and tests under `programming` and `tdd`; `debugging` for crashes, wrong output or hangs, locked by a failing test; `ast_grep` and `ast_edit` for syntax-shaped search and codemods; `git-master` on every commit node; `remove-ai-slops` to cut slop behind regression tests |
 | research | `scout` agent; `web_search`, `read`, `grep` tools | `scout` nodes read and report, one per angle, and a review node checks each claim against its source |
 | design / UI | `frontend`, `visual-qa`, `programming`, `remove-ai-slops`, `git-master`; `task` agent; `browser` tool | `frontend` builds; `visual-qa` verifies every one of its conditions in full detail and owns the checklist; the `browser` tool drives the real page for QA; `programming` and `remove-ai-slops` guard the code |
 | audit | `remove-ai-slops`, `frontend`, `visual-qa`, `programming`, `seo-html`; `scout` agent | the rule corpus is those skills' own rule sets, cited by id; collection and judging run as one DAG |
@@ -66,15 +66,15 @@ Every name here exists on omp or in this pack; `references/omp-names.md` is the 
 | cleanup | `remove-ai-slops`, `git-master` | remove dead code and slop behind regression tests, tear down worktrees and branches under git rules |
 | collection / corpus extraction | `programming`, `remove-ai-slops`, `visual-qa`, `frontend`; `scout` agent; `ast_grep` tool | collect in one DAG; extract by syntax shape with `ast_grep`; harvest the distilled rule sets before any raw corpus |
 | decision history | `lore`, `git-master` | record and read the constraints and rejected options behind a change |
-| multi-unit program | `references/graph-runs.md` | one goal for the program with one phase per unit, one build DAG per wave |
+| multi-unit program | [references/graph-runs.md](skill://dag-workflow/references/graph-runs.md) | one goal for the program with one phase per unit, one build DAG per wave |
 | browser-facing surface work | `visual-qa`; `browser` tool | the `browser` tool drives the page for actions, screenshots and traces; `visual-qa` judges the captured state. Not for a plain search or a static fetch |
-| resume after death or compaction | `references/graph-runs.md` | re-read the goal, `todo` and handoff files; re-run only nodes whose handoff is missing, never restart the DAG |
+| resume after death or compaction | [references/graph-runs.md](skill://dag-workflow/references/graph-runs.md) | re-read the goal, `todo` and handoff files; re-run only nodes whose handoff is missing, never restart the DAG |
 
 Reviewer dispatch follows Size check and Review and merge below.
 
 ## Size check
 
-Answer three questions about the PR:
+Answer three questions about the work (PR, analysis or fix):
 
 1. If it's wrong, is the impact small and recoverable with one revert?
 2. Is it confirmed at once by CI or by eye?
@@ -98,5 +98,5 @@ A blocker is one of two things, and only with proof (a reproduce command, or the
 Anything without proof is a note. There is no default-conditions list.
 A reviewer who doubts the evidence re-runs the command itself.
 Evidence typos are notes, never a loop. Evidence alone never causes a review loop.
-After APPROVED (or the small-work self-review), stop and wait for the lead's line `MERGE GO <PR> for head <40-hex> only.` Merge only that PR at that head. Never merge, release or deploy without it.
+After APPROVED (or the small-work self-review), stop and request MERGE GO from the user with the `ask` tool. MERGE GO comes only as a message from the user or operator, the line `MERGE GO <PR> for head <40-hex> only.`; never issue it yourself, and do not start merging until it arrives. Merge only that PR at that head. Never merge, release or deploy without it.
 Remove the worktree after the merge.

@@ -37,6 +37,14 @@ implementation and fix, open one PR, review it until APPROVED (round 1 the whole
 rounds only the fixes), and merge only on `MERGE GO <PR> for head <40-hex> only.`. The skill
 names only omp agents and tools: `references/omp-names.md` lists them, and the checker's
 OMP-NAME rule fails on any other name.
+
+Maintenance: the `<system-notice>` at the top of `skills/dag-workflow/SKILL.md` is copied
+verbatim from omp 18.18.1 `src/prompts/system/ultrathink-notice.md`.
+`skills/dag-workflow/references/workflow.md` is omp 18.18.1
+`src/prompts/system/workflow-notice.md` rendered by `renderWorkflowNotice`
+(`src/modes/magic-keywords.ts`) with all omp defaults: taskBatch, scoutAvailable, evalTools,
+py and js true; freshAgents and perCallModel false. To re-render, call that function with
+these values.
 ## Install
 
 This is an OMP skill pack. Install the whole pack with:

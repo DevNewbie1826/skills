@@ -4,16 +4,16 @@ description: "How a DAG of this skill runs on omp beyond the eval helpers in wor
 
 # Running a DAG on omp
 
-> Read this when you are about to start, steer, repair or resume a DAG, after `workflow.md`. The DAG's shape comes from `dag-construction.md`; the eval helpers (`workpool()`, `agent()`, `wait()`, result delivery, the `wait` tool) are in `workflow.md` and not repeated here. Names come from `omp-names.md`.
+> Read this when you are about to start, steer, repair or resume a DAG, after [references/workflow.md](skill://dag-workflow/references/workflow.md). The DAG's shape comes from [references/dag-construction.md](skill://dag-workflow/references/dag-construction.md); the eval helpers (`workpool()`, `agent()`, `wait()`, result delivery, the `wait` tool) are in [references/workflow.md](skill://dag-workflow/references/workflow.md) and not repeated here. Names come from [references/omp-names.md](skill://dag-workflow/references/omp-names.md).
 
 ## The pieces
 
-- **A node** is one item of a stage's named `workpool()`, or one `agent()` handle when it is dependency-coupled or must return schema data (`workflow.md`). Pick the agent by what the node does: `task` for a change and its proof, `sonic` for a purely mechanical edit, `scout` for read-only collection, `reviewer` or `security-reviewer` for a review node.
+- **A node** is one item of a stage's named `workpool()`, or one `agent()` handle when it is dependency-coupled or must return schema data ([references/workflow.md](skill://dag-workflow/references/workflow.md)). Pick the agent by what the node does: `task` for a change and its proof, `sonic` for a purely mechanical edit, `scout` for read-only collection, `reviewer` or `security-reviewer` for a review node.
 - **An edge** is a file. A node writes its result to the handoff path its prompt names; a node that depends on it reads that path. Starting the downstream node only after the upstream one finished is the edge's ordering; the file is its data. A missing handoff file is a FAIL for the consumer, never an empty input.
-- **A stage** is one pool (or one set of handles) that settles before the next stage starts. When a stage of handles closes on the kernel `wait()`, pass `raiseErrors: false` so one failed node keeps its slot and only its own branch degrades.
-- **The run file** is one small markdown table the lead keeps beside the handoffs: node id, agent, handoff path, status (`waiting`, `running`, `done`, `failed`, `blocked`), attempt number, and the pool item id or `agent://` handle. Update it when a node starts and when it ends. It is what makes a run resumable.
+- **A stage** is one pool (or one set of handles) that settles before the next stage starts. When a stage of handles closes on the kernel `wait()`, pass `raiseErrors: false` (Python: `raise_errors=False`) so one failed node keeps its slot and only its own branch degrades.
+- **The run file** is one small markdown table you (the orchestrating agent) keep beside the handoffs: node id, agent, handoff path, status (`waiting`, `running`, `done`, `failed`, `blocked`), attempt number, and the pool item id or `agent://` handle. Update it when a node starts and when it ends. It is what makes a run resumable.
 
-Keep handoffs, the run file and build files in the worktree's git-ignored folder (SKILL.md, Node prompts).
+Keep handoffs, the run file and build files in the worktree's git-ignored folder ([SKILL.md](skill://dag-workflow/SKILL.md), Node prompts).
 
 ## Writing a node prompt
 
@@ -21,7 +21,7 @@ A node sees only its prompt. Write it so a stranger can do the work without aski
 
 1. `TASK:` one imperative sentence naming the deliverable.
 2. `DELIVERABLE:` the exact file or files it writes, and the shape of its report.
-3. `SCOPE:` what this node reads and what this node writes, as paths. Name the node, never the repository (SKILL.md, Node prompts).
+3. `SCOPE:` what this node reads and what this node writes, as paths. Name the node, never the repository ([SKILL.md](skill://dag-workflow/SKILL.md), Node prompts).
 4. `VERIFY:` the command it runs on its own work and the result that means PASS.
 5. `STOP WHEN:` the one observable condition that ends it.
 
@@ -29,17 +29,17 @@ Paste every fact the node needs; a phrase like "as above" points at nothing. Giv
 
 ## Building and starting a DAG
 
-1. Write the tree per `dag-construction.md`: goal, levels, atomic leaves, the direct parent of each leaf, and the real dependencies.
-2. Turn the leaves into stages: everything whose inputs exist goes in the first stage; each later stage holds the nodes whose inputs the earlier stages produce. A parent that only collects and checks its children is a check the lead runs after the stage, not a node.
+1. Write the tree per [references/dag-construction.md](skill://dag-workflow/references/dag-construction.md): goal, levels, atomic leaves, the direct parent of each leaf, and the real dependencies.
+2. Turn the leaves into stages: everything whose inputs exist goes in the first stage; each later stage holds the nodes whose inputs the earlier stages produce. A parent that only collects and checks its children is a check you (the orchestrating agent) run after the stage, not a node.
 3. Between two stages where every later node needs every earlier one, put one review node instead of a web of edges. It reads the earlier handoffs and writes PASS or FAIL per node, so a finding re-runs only the node it names.
 4. End the DAG with its review node: a `reviewer` node that reads every handoff of the last stage, re-runs their VERIFY commands and lists every problem at once.
 5. Write the run file, then start the first stage in one `eval` cell and record the ids.
 
-Size the work, not the node count: one node per independent piece, many small nodes rather than a few large ones, and a piece small enough that briefing it costs more than doing it folds into its neighbour. Keep one judgment that needs the whole problem in view (a design choice, a root-cause diagnosis) in one node; split across nodes, it comes back as confident partial answers instead of a verdict. For a wide wave, give each node a bounded report (a short file with a fixed shape) and let a review node read those, so the lead never reads raw output.
+Size the work, not the node count: one node per independent piece, many small nodes rather than a few large ones, and a piece small enough that briefing it costs more than doing it folds into its neighbour. Keep one judgment that needs the whole problem in view (a design choice, a root-cause diagnosis) in one node; split across nodes, it comes back as confident partial answers instead of a verdict. For a wide wave, give each node a bounded report (a short file with a fixed shape) and let a review node read those, so you never read raw output.
 
 ## Supervising a running DAG
 
-When a node drifts outside its SCOPE or circles one sub-problem, steer it with `.send()` naming the exact boundary. Give each node a time box when you start it. A node past its time box gets one steer; if its handoff file still has not changed, `.cancel()` it, keep what it wrote, and treat it as failed. Elapsed time alone is not failure while the file keeps growing.
+Steering and cancelling work only on `agent()` handle nodes. When one drifts outside its SCOPE or circles one sub-problem, steer it with `.send()` naming the exact boundary. Give each node a time box when you start it. A node past its time box gets one steer; if its handoff file still has not changed, `.cancel()` it, keep what it wrote, and treat it as failed. A `workpool()` item has only the pool's `.push()`, `.status()`, `.peek()` and `.close()`: to stop or redirect pool items, `.close()` the pool and push the corrected items to a new named pool. Elapsed time alone is not failure while the file keeps growing.
 Before marking a node `done`, check the facts in its handoff that the next node depends on.
 
 ## When a node fails
@@ -53,7 +53,7 @@ Never restart a whole DAG to repair one node.
 
 ## The goal and the phases
 
-omp holds one goal at a time (`goal` tool), so one request has one goal. Its objective names the deliverable and lists, per phase (analysis, build, review and merge), the success criteria and the device that will prove each one. The `goal` tool can create, read, resume, complete or drop a goal but cannot rewrite one, so when `/wf` already armed it with the task text, keep that goal and put each phase's criteria in `todo` as the phase's first items, marking each step when it starts and when it finishes.
+omp holds one goal at a time (`goal` tool), so one request has one goal. Its objective is the request text plus the phase names (analysis, build, review and merge). Each phase's success criteria, and the device that will prove each one, come from the phase-1 analysis and go in `todo` as that phase's first items, marking each step when it starts and when it finishes. The `goal` tool can create, read, resume, complete or drop a goal but cannot rewrite one, so when `/wf` already armed it with the task text, keep that goal.
 A phase is done when its criteria pass with captured evidence, not when its last node reports. Mark the goal complete only when every phase's criteria pass. A decision only the user can make is asked with the `ask` tool before the stage that needs it.
 
 ## Picking a run back up
