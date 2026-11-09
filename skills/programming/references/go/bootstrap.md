@@ -292,7 +292,7 @@ jobs:
         run: go build -trimpath ./...
 ```
 
-The order matters: format → lint → nilaway → test → build. Fail fast on the cheap checks.
+These steps wire the CI gate defined in [`golangci-strict.md`](golangci-strict.md), plus a build. The order matters: format → lint → nilaway → test → build. Fail fast on the cheap checks.
 
 ## `AGENTS.md` — agent-readable project facts
 

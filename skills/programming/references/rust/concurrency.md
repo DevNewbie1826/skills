@@ -264,7 +264,7 @@ async fn main() -> anyhow::Result<()> {
 
 ## Loom — model-checking lock-free code
 
-When `unsafe` participates in a concurrent algorithm, miri's single-thread model is insufficient. Loom exhaustively explores thread interleavings.
+When `unsafe` participates in a concurrent algorithm, miri's single-thread model is insufficient. Loom systematically explores the thread interleavings its bounded model allows.
 
 `Cargo.toml`:
 

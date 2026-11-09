@@ -1,4 +1,4 @@
-# RPC — Connect-Go (default) + grpc-go (fallback) + protovalidate
+# RPC — connect-go (default) + grpc-go (fallback) + protovalidate
 
 > Read this when choosing or implementing a Go RPC service, schema, code generation, or streaming API.
 
@@ -13,7 +13,6 @@
 | Standard unary + server-streaming + client-streaming | **Connect** |
 | Browser client without `grpc-web` proxy | **Connect** (native gRPC-Web support) |
 | HTTP/1.1 fallback for hostile networks | **Connect** (gRPC requires HTTP/2 end-to-end) |
-| Server reflection for `grpcurl` | grpc-go (Connect has reflection too, but ecosystem smaller) |
 | Bidirectional streaming with frame-level control | grpc-go |
 | Strict gRPC environment (Envoy with gRPC filters, Istio strict mode) | grpc-go |
 
@@ -25,12 +24,9 @@
 
 ```bash
 go install github.com/bufbuild/buf/cmd/buf@latest
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest
-go install github.com/bufbuild/protovalidate/cmd/protoc-gen-go-vtproto@latest
 ```
 
-Buf replaces `protoc` for everything: linting, breaking-change detection, codegen, formatting. The `protoc` toolchain is dead-letter walking — every modern proto project uses Buf.
+Buf replaces `protoc` for everything: linting, breaking-change detection, codegen, formatting. The `protoc` toolchain is on its way out — every modern proto project uses Buf.
 
 ---
 

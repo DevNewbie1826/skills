@@ -430,24 +430,6 @@ fn create_and_process(path: &str) -> std::io::Result<()> {
 }
 ```
 
-### defer! — Always-Run Cleanup (like Zig's defer)
-
-```rust
-use scopeguard::defer;
-
-fn with_temp_dir() -> anyhow::Result<()> {
-    let dir = tempfile::tempdir()?;
-    defer! {
-        // Runs when scope exits, success or failure.
-        tracing::debug!(path = %dir.path().display(), "leaving temp dir scope");
-        // dir's Drop also cleans up, but this shows the pattern.
-    }
-
-    do_work(dir.path())?;
-    Ok(())
-}
-```
-
 ### Drop as RAII Cleanup
 
 ```rust
@@ -526,14 +508,10 @@ tempfile = "3"  # idiomatic RAII temp files/dirs
 | `errdefer` | `scopeguard::guard` + defuse on success | Easy | §5 |
 | `defer` | `scopeguard::defer!` / `Drop` | Easy | §5 |
 
-All achievable within Rust's single toolchain. You get Zig's explicitness **plus** the borrow checker, lifetime analysis, trait bounds, and `miri`. The combination is strictly more powerful than either alone.
-
 ## When NOT to Use These Patterns
 
-- **Arena allocation** overkill for simple CLI tools that allocate once and exit.
+- **Arena allocation** is overkill for simple CLI tools that allocate once and exit.
 - **Zero-alloc APIs** hurt readability when the function naturally produces owned data. Don't force `&mut [u8]` output buffers on a function that logically returns `String`.
 - **`#[repr(packed)]`** only for wire formats and FFI. Never for regular domain types.
-- **Scope guards** unnecessary when `Drop` on the value itself handles cleanup (e.g., `tempfile::NamedTempFile` already does this).
+- **Scope guards** are unnecessary when `Drop` on the value itself handles cleanup (e.g., `tempfile::NamedTempFile` already does this).
 - **`const fn`** everything? No — only when a `const` context needs the function or it is trivially const-eligible. Don't contort logic just to be const.
-
-The goal is **visible costs and explicit control**, not asceticism. Use `String` and `Vec` freely when they're the right tool. Reach for these patterns when allocation behavior matters for correctness or performance.

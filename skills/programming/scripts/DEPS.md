@@ -32,6 +32,8 @@ This file declares the non-standard-library packages imported by bundled scripts
 
 **Third-party packages:** none. It uses the Python standard library only.
 
+**Why both Rust checkers exist:** the shell gate needs only Bash and single files; this Python version adds directory walking and richer parsing.
+
 ## `scripts/rust/check-no-excuse-rules.sh`
 
 **Third-party packages:** none. Run it with Bash against Rust source files.

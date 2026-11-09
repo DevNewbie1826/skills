@@ -241,66 +241,7 @@ async def raise_on_error(response: httpx2.Response) -> None:
 
 ---
 
-## 6. Verification script — confirm your setup is fully optimized
-
-Run this against your target endpoint to **verify** (not decide) that all optimizations are active:
-
-```python
-"""Verify httpx2 is fully optimized against a target endpoint."""
-
-from __future__ import annotations
-
-import socket
-import time
-
-import anyio
-import httpx2
-
-TARGET_URL = "https://api.example.com/health"
-ITERATIONS = 30
-
-async def bench(label: str, client: httpx2.AsyncClient, url: str, n: int) -> float:
-    for _ in range(3):  # warmup
-        await client.get(url)
-    start = time.perf_counter()
-    for _ in range(n):
-        r = await client.get(url)
-        assert r.status_code == 200
-    elapsed = time.perf_counter() - start
-    avg_ms = (elapsed / n) * 1000
-    print(f"  {label}: {avg_ms:.1f}ms avg ({n} reqs in {elapsed:.2f}s)")
-    return avg_ms
-
-async def main() -> None:
-    results: dict[str, float] = {}
-
-    # BAD: bare defaults (this is what we're proving is worse)
-    async with httpx2.AsyncClient() as c:
-        results["BAD-bare-defaults"] = await bench("BAD-bare-defaults", c, TARGET_URL, ITERATIONS)
-
-    # GOOD: full production defaults (this is what we always use)
-    limits = httpx2.Limits(max_connections=200, max_keepalive_connections=40, keepalive_expiry=30.0)
-    timeout = httpx2.Timeout(connect=5.0, read=30.0, write=10.0, pool=10.0)
-    transport = httpx2.AsyncHTTPTransport(
-        http2=True, retries=3, limits=limits,
-        socket_options=[(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)],
-    )
-    async with httpx2.AsyncClient(transport=transport, timeout=timeout, follow_redirects=True) as c:
-        results["GOOD-full-production"] = await bench("GOOD-full-production", c, TARGET_URL, ITERATIONS)
-
-    print("\n--- Proof ---")
-    baseline = results["BAD-bare-defaults"]
-    for label, avg in results.items():
-        delta = ((avg - baseline) / baseline) * 100
-        print(f"  {label}: {avg:.1f}ms ({delta:+.1f}% vs bare)")
-
-if __name__ == "__main__":
-    anyio.run(main)
-```
-
----
-
-## 7. Quick reference — all knobs
+## 6. Quick reference — all knobs
 
 ### `httpx2.AsyncClient` / `httpx2.Client`
 

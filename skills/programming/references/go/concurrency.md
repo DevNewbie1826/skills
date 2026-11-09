@@ -334,8 +334,7 @@ go test -race -shuffle=on -count=1 ./...
 ```
 
 - `-race` instruments memory accesses; catches data races at runtime. ~10x slow-down — acceptable for tests, not production.
-- `-shuffle=on` randomizes test order; catches hidden ordering dependencies.
-- `-count=1` defeats the test cache. Without it, "passing" might mean "ran 3 weeks ago".
+- `-shuffle=on` randomizes test order; `-count=1` defeats the test cache.
 
 If a test ONLY fails under `-race`, the bug is real. Don't disable the test; fix the race.
 
@@ -361,4 +360,4 @@ If a test ONLY fails under `-race`, the bug is real. Don't disable the test; fix
 - `errgroup` package: https://pkg.go.dev/golang.org/x/sync/errgroup
 - `goleak`: https://github.com/uber-go/goleak
 - "Go concurrency patterns" (Pike): https://go.dev/blog/pipelines
-- Sync.OnceValue blog: https://go.dev/blog/synctest (1.24+ note: `testing/synctest` for time-controlled tests is now experimental)
+- synctest blog: https://go.dev/blog/synctest (1.24+ note: `testing/synctest` for time-controlled tests is now experimental)

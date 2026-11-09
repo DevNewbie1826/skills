@@ -76,23 +76,8 @@ Never log inside pure functions, utilities, or private helpers — callers with 
 - **Payload content belongs to the tracing channel, not the log stream.** In LLM/agent systems, user messages, model responses, and tool outputs are captured by the tracing channel (a turn recorder or trace exporter); a log line carries a hash, a length, and at most a short excerpt for correlation. Dumping conversation content into logs bloats the store and leaks data the log pipeline was never hardened for.
 - **The logging path may not break the program.** If a log call can itself fail (serializing exotic state, a wrapper that touches I/O), that failure is caught, downgraded to a `warn` through a channel that cannot fail, and the operation continues. An empty catch around logging is still an empty catch.
 
-## Anti-patterns
-
-| Anti-pattern | Why it fails |
-|---|---|
-| `console.*` / `print` bypassing the project's designated logger | Escapes stage routing, redaction, and shipping — invisible in prod |
-| Introducing a logging framework to a project that has none | Uninvited behavior change; Rule 0 violation |
-| 4xx logged as `error` | Alert noise buries real pages |
-| Log-and-rethrow at every layer | One incident looks like five |
-| Failure converted to a caller response (5xx body, SSE error, LLM tool-error string, exit code) with no log | The caller got an answer; operations got nothing |
-| Logging expected validation feedback that is returned to the caller | Response content, not an event — buries real failures |
-| Variables interpolated into the message string | Un-aggregatable, un-alertable |
-| "Might need it later" logs | No consumer → pure cost |
-| Debug-time prints promoted to permanent `info` | Narration, not state transitions |
-| Trusting Error serialization without the proof | `error: {}` in prod, discovered during the incident |
-
 ## Debugging bridge — how logs earn their place
 
-When a `debugging`-skill session takes extra rounds *because state was invisible* — no line told you which branch ran, what the value was, whether the fallback engaged — that invisibility is a defect adjacent to the bug. **The fix ships with the log line that would have made diagnosis one round**: placed at a decision point, leveled by consumer, fields not interpolation, through the project's designated logger.
+When a session of the `debugging` skill takes extra rounds *because state was invisible* — no line told you which branch ran, what the value was, whether the fallback engaged — that invisibility is a defect adjacent to the bug. **The fix ships with the log line that would have made diagnosis one round**: placed at a decision point, leveled by consumer, fields not interpolation, through the project's designated logger.
 
 The inverse also holds: every temporary `print` / `dbg!` / `console.log` planted *during* diagnosis is a debug artifact and gets scrubbed at cleanup. The triage between the two is the consumer test — a line whose ongoing consumer you can name is part of the fix; a line that only served today's session is an artifact.

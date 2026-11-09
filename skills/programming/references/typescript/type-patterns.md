@@ -33,7 +33,7 @@ With Zod (preferred at boundaries):
 ```typescript
 import { z } from "zod"
 
-const UserIdSchema = z.string().uuid().brand("UserId")
+const UserIdSchema = z.uuid().brand("UserId")
 type UserId = z.infer<typeof UserIdSchema>
 ```
 
@@ -64,7 +64,7 @@ type HttpStatus = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS]  // 200 | 404 |
 
 ## satisfies — validate without widening
 
-Type-checks a value against a type while preserving the literal type. Best of both worlds.
+Type-checks a value against a type while preserving its literal type.
 
 ```typescript
 type Config = Record<string, string | number>
@@ -103,7 +103,7 @@ The `kind` field (or `type`, `status`, `_tag`) is the discriminant. TypeScript n
 
 ## Exhaustive switch — assertNever
 
-Every switch on a discriminated union ends with a default that calls `assertNever`.
+Every `switch` on a discriminated union ends with `default: assertNever(x)`.
 
 ```typescript
 function assertNever(x: never): never {
@@ -173,26 +173,7 @@ import { createUser, type User } from "./users"
 
 ---
 
-## Utility types — quick reference
-
-| Need | Use |
-|---|---|
-| All properties readonly | `Readonly<T>` |
-| All properties optional | `Partial<T>` |
-| All properties required | `Required<T>` |
-| Pick specific properties | `Pick<T, "a" \| "b">` |
-| Omit specific properties | `Omit<T, "a" \| "b">` |
-| Key-value map | `Record<K, V>` |
-| Extract from union | `Extract<T, U>` |
-| Exclude from union | `Exclude<T, U>` |
-| Return type of function | `ReturnType<typeof fn>` |
-| Parameters of function | `Parameters<typeof fn>` |
-| Awaited type | `Awaited<Promise<T>>` → `T` |
-
----
-
 ## Sources
 
 - TypeScript Handbook: [Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
-- TypeScript Handbook: [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html)
 - Total TypeScript: [as const](https://www.totaltypescript.com/as-const)

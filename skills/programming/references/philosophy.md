@@ -9,7 +9,7 @@ The best code is code that never needs to exist. When code is necessary, make th
 These apply before the first edit, for any change to code, configuration, documentation, prompts, or skill guidance.
 
 1. **Resolve assumptions at the source.** Read the approved task and any relevant plan, the current behavior and tests, and nearby conventions before the first edit; then confirm types, interfaces, imports, and call sites through reads, AST/LSP, or tests — not after. A guessed API or contract is a bug waiting to happen.
-2. **Touch only what the task justifies.** No drive-by refactors, broad renames, or style rewrites alongside an unrelated change. A corrective change the escalation rules below require (a responsibility split, a typed parameter group) is justified, not a drive-by.
+2. **Touch only what the task justifies.** No drive-by refactors, broad renames, or style rewrites alongside an unrelated change. A corrective change that the escalation rules below require, such as a responsibility split or a typed parameter group, is justified, not a drive-by.
 3. **Define done before editing.** Name the concrete success criterion and the verification command first. Completion is evidence, not effort.
 
 ## The seven axioms
@@ -46,23 +46,16 @@ Semver promises nothing below 1.0, and version knowledge lives in more files tha
 
 ## Code-smell escalation
 
-Read [Code smells](code-smells.md) when any of these triggers fires.
+Read [Code smells](code-smells.md) when any of these triggers fires; it owns the required response for each.
 
-| Trigger | Required response |
-|---|---|
-| A source file exceeds 200 pure LOC | Treat it as a warning band; name the responsibility and plan a split before the next growth. |
-| A source file exceeds 250 pure LOC | Treat it as a defect. Split by responsibility before adding more behavior, except for a specifically justified generated or data-only exception. |
-| A function has more than three independent parameters | Group related inputs in a typed domain value or justify the independent inputs concretely. |
-| A destructive action is immediately re-queried | Remove the redundant verification; fix an operation that can silently fail instead. |
-| A variable, function, or flag is named negatively | Rename it positively and invert the branch where that improves readability. |
-
-Pure LOC excludes blank and comment-only lines. Measure it with a language-appropriate tool or the bundled checker.
+- A source file exceeds 200 pure LOC (warning band) or 250 pure LOC (defect).
+- A function has more than three independent parameters.
+- A destructive action is immediately re-queried.
+- A variable, function, or flag is named negatively.
 
 ## Logging
 
 Read [Logging](logging.md) before adding or changing log lines, logger setup, service entry points, or boundary error handling.
-
-The existing project convention wins, including the convention of having no logging in a layer. Choose a level by naming its consumer, place logs at decisions and boundaries rather than helpers, keep messages stable, and put variable data in structured fields.
 
 ## Post-write review
 
@@ -83,22 +76,6 @@ Fix a failed answer before declaring the change complete. For a structural chang
 
 ## Verification commands and fallbacks
 
-Run commands from the skill directory or use equivalent relative paths from the current working directory.
-
-```bash
-# Python: standard-library checker; no package manager is required.
-python3 scripts/python/check-no-excuse-rules.py <changed-paths>
-
-# Rust
-bash scripts/rust/check-no-excuse-rules.sh <changed-paths>
-
-# TypeScript
-bun run scripts/typescript/check-no-excuse-rules.ts <changed-paths>
-
-# Any language: junk classes a regex can see in the test files you touched
-bun scripts/typescript/check-test-junk.ts <changed-test-paths>
-```
-
-The Python checker requires Python 3.9 or newer and only the standard library. If `python3` is not the local command, use the platform's compatible Python launcher. The Rust and TypeScript checkers require their respective runtimes; if one is unavailable, run the project's native compiler and test command where possible, or state that the unavailable check was not run. Never report an unavailable validator as a pass.
+Run the bundled no-excuse checker for the language and the test-junk checker on touched tests; their runtimes and invocations live in [Bundled script dependencies](../scripts/DEPS.md). If a checker's runtime is unavailable, run the project's native compiler and test command where possible, or state that the unavailable check was not run. Never report an unavailable validator as a pass.
 
 Then run the language lane's formatter, type checker or compiler, relevant tests, and the real user-facing entry point when one exists. Scale breadth to the change, but do not substitute assumptions for a command that actually passed.

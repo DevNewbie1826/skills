@@ -29,8 +29,6 @@ def build_workflow(model: str | Model) -> Agent:
     )
 ```
 
-`result_type` was renamed to `output_type`; use `output_type`.
-
 ## 2. Model configuration
 
 Resolve the model at the application configuration boundary. A string identifier is adapter-specific; many adapters use a form such as `provider:model-id`. Keep that identifier in configuration, not scattered through source files.
@@ -117,8 +115,6 @@ def describe_city(model: str | Model) -> City:
     return result.output
 ```
 
-`result.data` was renamed; the canonical accessor is `result.output`.
-
 ## 5. Async, sync, and streaming
 
 | Method | Mode | Returns |
@@ -144,7 +140,7 @@ Use a dataclass container, pass its type to `deps_type`, and pass an instance th
 ```python
 from dataclasses import dataclass
 
-import httpx
+import httpx2
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models import Model
 
@@ -152,7 +148,7 @@ from pydantic_ai.models import Model
 @dataclass(frozen=True, slots=True)
 class Deps:
     api_token: str
-    http_client: httpx.AsyncClient
+    http_client: httpx2.AsyncClient
 
 
 def build_fetcher(model: str | Model) -> Agent:
@@ -171,7 +167,7 @@ def build_fetcher(model: str | Model) -> Agent:
 
 
 async def run_fetcher(model: str | Model, endpoint: str, token: str) -> str:
-    async with httpx.AsyncClient() as client:
+    async with create_async_client() as client:  # factory from httpx2-optimization.md
         workflow = build_fetcher(model)
         result = await workflow.run(
             f"Fetch {endpoint}",
@@ -242,75 +238,7 @@ def build_instrumented_workflow(model: str | Model) -> Agent:
     return Agent(model, instrument=True)
 ```
 
-If that optional integration is unavailable, use the project's existing telemetry convention or leave instrumentation out and state that limitation. Do not introduce a second logging or tracing stack only for this workflow.
-
-## 9. Minimal complete patterns
-
-### Basic workflow with structured output
-
-```python
-from pydantic import BaseModel
-from pydantic_ai import Agent
-from pydantic_ai.models import Model
-
-
-class City(BaseModel):
-    name: str
-    country: str
-
-
-def get_city(model: str | Model) -> City:
-    workflow = Agent(model, output_type=City)
-    result = workflow.run_sync("Provide a city and its country.")
-    return result.output
-```
-
-### Workflow with tools and dependencies
-
-```python
-from dataclasses import dataclass
-
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.models import Model
-
-
-@dataclass(frozen=True, slots=True)
-class Deps:
-    secret: str
-
-
-def build_secret_workflow(model: str | Model) -> Agent:
-    workflow = Agent(model, deps_type=Deps)
-
-    @workflow.tool
-    async def get_secret(ctx: RunContext[Deps], code: str) -> str:
-        if code == "1234":
-            return f"secret-for-{ctx.deps.secret}"
-        return "wrong code"
-
-    return workflow
-```
-
-### Async streaming
-
-```python
-import anyio
-from pydantic_ai import Agent
-from pydantic_ai.models import Model
-
-
-async def main(model: str | Model) -> None:
-    workflow = Agent(model)
-    async with workflow.run_stream("Summarize the supplied text.") as response:
-        async for text in response.stream_text():
-            print(text, end="")
-        print("\n---")
-        print("Final:", response.output)
-
-
-# Supply a configured model from the application's startup boundary.
-# anyio.run(main, configured_model)
-```
+If logfire is unavailable in the project's install, use the project's existing telemetry convention or leave instrumentation out and state that limitation. Do not introduce a second logging or tracing stack only for this workflow.
 
 ## Version notes
 

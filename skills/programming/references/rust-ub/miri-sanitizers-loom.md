@@ -10,15 +10,9 @@ Miri is the **primary weapon**. Everything else is supplementary for the gaps Mi
 
 ### What Miri Is
 
-Miri is an interpreter for Rust's MIR (Mid-level IR). It executes your test suite inside a virtual machine that tracks every byte of memory for validity, provenance, alignment, initialization, and aliasing. It is **deterministic** — same inputs, same result — and it can find UB that no amount of testing on real hardware will ever trigger.
+Miri is an interpreter for Rust's MIR (Mid-level IR). It executes your test suite inside a virtual machine that tracks every byte of memory for validity, provenance, alignment, initialization, and aliasing. It is **deterministic** for a given seed and flag set (a nonzero preemption rate makes scheduling depend on the seed), and it can find UB that no amount of testing on real hardware will ever trigger.
 
-### Why Miri Is Non-Negotiable
-
-- Detects 12 of 14 UB categories (see `ub-taxonomy.md`).
-- Catches aliasing violations that compile and run correctly on every platform today but are UB that future compiler optimizations will exploit.
-- Catches data races under a configurable scheduling model.
-- Catches provenance violations that are impossible to observe on real hardware.
-- **Zero false positives** — if Miri says it is UB, it is UB. Period.
+Miri detects 10 of the 14 categories in [ub-taxonomy.md](ub-taxonomy.md) with high confidence (1-6 and 9-12); categories 7, 8, 13, and 14 are only partly covered and need the tools below.
 
 ### Installation
 
@@ -89,7 +83,7 @@ Catches alignment UB that happens to be aligned on your machine but is not guara
 #### Data Race Detection Tuning
 
 ```bash
-# Increase preemption rate to stress-test race conditions
+# Targeted stress on one suspected race (the audit sweep uses 0.1 to keep full-suite runs fast)
 MIRIFLAGS="-Zmiri-preemption-rate=0.5" cargo +nightly miri test
 
 # Disable preemption (sequential scheduling — fewer races found but deterministic)
@@ -98,27 +92,28 @@ MIRIFLAGS="-Zmiri-preemption-rate=0" cargo +nightly miri test
 
 #### The Full Paranoia Sweep (Use This for Audits)
 
+Level 3:
 ```bash
 MIRIFLAGS="\
   -Zmiri-strict-provenance \
   -Zmiri-symbolic-alignment-check \
   -Zmiri-preemption-rate=0.1 \
-  -Zmiri-backtrace=full \
-  -Zmiri-disable-isolation" \
+  -Zmiri-backtrace=full" \
 cargo +nightly miri test
 ```
 
-Then a second pass with Tree Borrows:
+Level 4, a second pass with Tree Borrows:
 ```bash
 MIRIFLAGS="\
   -Zmiri-tree-borrows \
   -Zmiri-strict-provenance \
   -Zmiri-symbolic-alignment-check \
   -Zmiri-preemption-rate=0.1 \
-  -Zmiri-backtrace=full \
-  -Zmiri-disable-isolation" \
+  -Zmiri-backtrace=full" \
 cargo +nightly miri test
 ```
+
+Add `-Zmiri-disable-isolation` only for the tests that need I/O (see below).
 
 #### Isolation and I/O
 
@@ -128,6 +123,50 @@ MIRIFLAGS="-Zmiri-disable-isolation" cargo +nightly miri test
 ```
 
 Use sparingly — isolation is a feature, not a limitation. Tests that need I/O should have a separate `#[cfg(not(miri))]` path.
+
+### UB Audit Workflow
+
+**Phase 1: Reconnaissance.** Find the hunting ground:
+
+```bash
+rg 'unsafe\s*(fn|impl|\{)' --type rust -n
+rg 'unsafe\s+impl\s+(Send|Sync)' --type rust -n
+rg '(transmute|transmute_copy|from_raw|into_raw|as_ptr|as_mut_ptr|offset|add|sub|read|write|copy|ptr::null)' --type rust -n
+rg 'extern\s+"C"' --type rust -n
+```
+
+Catalog each hit: file, line, `unsafe` category, initial risk (high/medium/low based on the UB taxonomy).
+
+**Phase 2: Miri sweep.** Run every level; **do not skip any**:
+
+1. Level 1: the default run (Stacked Borrows).
+2. Level 2: `-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-backtrace=full`.
+3. Level 3: the full paranoia sweep above (the audit standard).
+4. Level 4: the Tree Borrows pass above (second model confirmation).
+
+A failure at Level 1 is definite UB; a failure first seen at Level 2 is provenance or alignment UB; a failure only at Level 4 means the aliasing models disagree, and [ub-taxonomy.md](ub-taxonomy.md) category 1 states the policy for that case. Passing all four makes the code Miri-clean.
+
+**Phase 3: Supplementary scans.** For code Miri cannot fully cover, run loom for custom atomics, ASAN for FFI-heavy code, and cargo-fuzz for untrusted input parsing (commands in the sections below).
+
+**Phase 4: Fix-and-prove loop.** For each UB finding:
+
+1. **Classify** against the 14-category taxonomy.
+2. **Write the SAFETY comment** stating the invariant the fix establishes ([../rust/unsafe-discipline.md](../rust/unsafe-discipline.md), "SAFETY Comment Grammar").
+3. **Apply the minimal fix.** Do not refactor — fix the UB and nothing else.
+4. **Run Miri (Level 3 minimum) on the specific test that triggered the UB.**
+5. **Run Miri (Level 3) on the full test suite** to check for regressions.
+6. **Document the bead:**
+   ```
+   BEAD: [Category #] [Short description]
+   FILE: [path:line]
+   ROOT CAUSE: [one sentence]
+   FIX: [one sentence]
+   PROOF: Miri Level [N] pass — [command used]
+   ```
+
+**Phase 5: Hardening.** After all beads are resolved, add Miri to CI (config below; it runs Level 2 under both aliasing models), add a `#[cfg(miri)]` regression test for each bead, and review the SAFETY comment on every remaining `unsafe` block. Head the audit report with its scope, the `cargo +nightly miri --version` output, and the date.
+
+During any Rust task, not just audits: when the changeset touches `unsafe`, run Levels 1 and 2 before proceeding and stop to classify, fix, and prove on any failure. **Every `unsafe` block passes Miri Levels 3 and 4 before it ships.**
 
 ### Miri Limitations
 
@@ -362,7 +401,7 @@ fuzz_target!(|data: &[u8]| {
 # Run until interrupted
 cargo +nightly fuzz run parse_input
 
-# Run with ASAN (catches memory bugs in unsafe code)
+# Cap memory (cargo fuzz builds with ASAN by default, which catches memory bugs in unsafe code)
 cargo +nightly fuzz run parse_input -- -rss_limit_mb=4096
 
 # Minimize a crashing input
@@ -383,30 +422,7 @@ cargo +nightly miri test -- test_fuzz_regression_001
 
 ---
 
-## Tool Selection Decision Tree
-
-```
-Start
-  │
-  ├── Is it pure Rust (no FFI, no I/O)?
-  │     YES → Miri (full paranoia flags)
-  │     │     └── Also: loom (if atomics/lock-free)
-  │     │     └── Also: proptest (if parsing/serialization)
-  │     │     └── Also: cargo-fuzz (if untrusted input)
-  │     │
-  │     NO → Does it involve FFI?
-  │           YES → ASAN + MSAN on integration tests
-  │           │     └── Miri on the Rust-side handling
-  │           │     └── cbindgen in CI for layout verification
-  │           │
-  │           NO → Is it I/O-heavy?
-  │                 YES → TSAN for thread safety
-  │                 │     └── Miri with -Zmiri-disable-isolation where possible
-  │                 │
-  │                 NO → Miri (full paranoia flags)
-  │
-  └── Always: Miri is the default. Other tools supplement.
-```
+Tool selection by code type lives in [README.md](README.md) under "Tool Selection".
 
 ## The One Rule
 

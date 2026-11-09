@@ -32,10 +32,10 @@ myapi/
 
 ```bash
 uv add fastapi 'sqlalchemy[asyncio]>=2.0' asyncpg 'pydantic[email]>=2' pydantic-settings 'uvicorn[standard]' orjson
-uv add --dev httpx pytest alembic
+uv add --dev 'httpx2[http2,brotli,zstd]' pytest alembic
 ```
 
-`orjson` is mandatory: set `default_response_class=ORJSONResponse` on the FastAPI app. Pydantic-typed responses bypass it (Pydantic v2's `model_dump_json` is already Rust-backed); raw `dict` / `list` returns are accelerated. For SSE / NDJSON streams, call `orjson.dumps(...)` per chunk inside `StreamingResponse`. See `orjson-stack.md` for the decision tree, flag reference, and benchmarks.
+`orjson` is mandatory: set `default_response_class=ORJSONResponse` on the FastAPI app. See `orjson-stack.md` for when Pydantic responses bypass it, streaming, and flags.
 
 ## Configuration (`config.py`)
 
@@ -54,17 +54,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]  # pydantic populates from env
-```
-
-Wait — that comment violates the no-excuse rule. Use proper field defaults instead. Real version:
-
-```python
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="MYAPI_")
-    database_url: PostgresDsn
-    debug: bool = False
-    cors_origins: list[str] = Field(default_factory=list)
+    return Settings()
 ```
 
 Construct via `Settings(_env_file=".env")` if needed in tests; in production it reads from env.
@@ -259,7 +249,7 @@ uv run alembic upgrade head
 
 ```python
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx2 import ASGITransport, AsyncClient
 
 from myapi.main import app
 

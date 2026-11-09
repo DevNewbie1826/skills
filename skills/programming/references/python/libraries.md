@@ -54,33 +54,7 @@ Next-generation HTTP client under Pydantic stewardship. Sync and async in one li
 
 **Install**: `httpx2[http2,brotli,zstd]` — always include all three extras, no exceptions.
 
-**A bare `httpx2.AsyncClient()` / `httpx2.Client()` is a bug.** Always use the factory pattern from `httpx2-optimization.md` with ALL optimizations enabled by default:
-
-```python
-import socket
-import httpx2
-
-# ── Production defaults — ALL ON, always. ──
-_LIMITS = httpx2.Limits(max_connections=200, max_keepalive_connections=40, keepalive_expiry=30.0)
-_TIMEOUT = httpx2.Timeout(connect=5.0, read=30.0, write=10.0, pool=10.0)
-_SOCKET_OPTS: list[tuple[int, int, int]] = [(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)]
-
-# Async (the common case)
-transport = httpx2.AsyncHTTPTransport(http2=True, retries=3, limits=_LIMITS, socket_options=_SOCKET_OPTS)
-async with httpx2.AsyncClient(transport=transport, timeout=_TIMEOUT, follow_redirects=True) as client:
-    response = await client.get("https://api.example.com/users")
-    response.raise_for_status()
-    users = response.json()
-
-# Sync
-transport = httpx2.HTTPTransport(http2=True, retries=3, limits=_LIMITS, socket_options=_SOCKET_OPTS)
-with httpx2.Client(transport=transport, timeout=_TIMEOUT, follow_redirects=True) as client:
-    response = client.get("https://api.example.com/users")
-    response.raise_for_status()
-    users = response.json()
-```
-
-See `httpx2-optimization.md` for the full factory functions (`create_client()` / `create_async_client()`), event hooks, and the rationale behind every setting. **Load that reference whenever you write ANY network code.**
+**A bare `httpx2.AsyncClient()` / `httpx2.Client()` is a bug.** Use the factory functions (`create_client()` / `create_async_client()`) from `httpx2-optimization.md`, which carries the verbatim defaults, event hooks, and rationale. **Load that reference whenever you write ANY network code.**
 
 ## JSON — stdlib `json` (default) or `orjson` (hot paths)
 
@@ -96,11 +70,7 @@ raw: bytes = orjson.dumps(
 )
 ```
 
-**Critical 2026 fact**: with Pydantic v2, `model.model_dump_json()` is backed by pydantic-core (Rust) and is faster than `orjson + default=` bridge for Pydantic-shaped responses. **Use `model_dump_json()` for Pydantic; orjson for everything else.**
-
-For FastAPI: `app = FastAPI(default_response_class=ORJSONResponse)`. Pydantic-typed responses bypass it (and that's correct — Pydantic's path is faster). Raw `dict`/`list` returns go through orjson.
-
-See `orjson-stack.md` for the full decision tree, option flag reference, FastAPI integration, Redis/queue/logging patterns, and the `model_dump_json()` vs orjson benchmark.
+Use `model_dump_json()` for Pydantic models and orjson for everything else. See `orjson-stack.md` for the decision tree, flags, and FastAPI integration.
 
 ## Validation — pydantic v2
 
@@ -110,26 +80,7 @@ Pydantic v2's core is in Rust (~10x faster than v1). It is the de-facto boundary
 - Config files (env vars via `pydantic-settings`)
 - Anything entering the program from outside
 
-```python
-from pydantic import BaseModel, Field, EmailStr, field_validator
-
-class User(BaseModel):
-    id: int = Field(ge=1)
-    email: EmailStr
-    name: str = Field(min_length=1, max_length=100)
-    age: int | None = Field(default=None, ge=0, le=150)
-
-    @field_validator("name")
-    @classmethod
-    def name_no_digits(cls, v: str) -> str:
-        if any(c.isdigit() for c in v):
-            raise ValueError("name cannot contain digits")
-        return v
-
-# Inside the program, use the validated instance with confidence
-user = User.model_validate({"id": 1, "email": "a@b.com", "name": "Alice"})
-print(user.model_dump_json(indent=2))
-```
+Patterns: [data-modeling.md](data-modeling.md).
 
 `@dataclass` is fine for purely internal records (no validation needed). For anything crossing a process boundary, use Pydantic.
 
@@ -158,49 +109,11 @@ Never `import asyncio` directly. The third-party libraries you call are free to 
 
 Type-hint-driven HTTP framework. Pydantic models become OpenAPI schemas automatically.
 
-```python
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-app = FastAPI()
-
-class CreateUser(BaseModel):
-    name: str
-    email: str
-
-class User(BaseModel):
-    id: int
-    name: str
-    email: str
-
-@app.post("/users", response_model=User)
-async def create_user(payload: CreateUser) -> User:
-    return User(id=1, **payload.model_dump())
-```
-
 Full stack with database: [fastapi-stack.md](fastapi-stack.md).
 
 ## ORM — sqlalchemy 2.x async
 
 SQLAlchemy 2.x finally has a real async API. Use the modern declarative `MappedAsDataclass` style with type annotations.
-
-```python
-from sqlalchemy import String
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, MappedAsDataclass
-
-class Base(MappedAsDataclass, DeclarativeBase):
-    pass
-
-class User(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    name: Mapped[str] = mapped_column(String(100))
-    email: Mapped[str] = mapped_column(String(255), unique=True)
-
-engine = create_async_engine("postgresql+asyncpg://localhost/myapp")
-SessionFactory = async_sessionmaker(engine, expire_on_commit=False)
-```
 
 Full pattern with FastAPI integration: [fastapi-stack.md](fastapi-stack.md).
 
@@ -210,7 +123,7 @@ For new applications, default to Postgres. SQLite for tests is fine; SQLite for 
 
 asyncpg is the fastest Python Postgres driver, native to SQLAlchemy 2.x async, native to FastAPI's lifespan model. URL: `postgresql+asyncpg://user:pass@host:5432/db`.
 
-For migrations, use Alembic with `[alembic.context]` configured to use the async engine. Single-step:
+For migrations, use Alembic's async template and set `sqlalchemy.url` in `env.py` (see [fastapi-stack.md](fastapi-stack.md)):
 
 ```bash
 uv add alembic
@@ -235,16 +148,15 @@ DuckDB is the SQL engine for analytical workloads. Query CSV/Parquet/JSON files 
 
 ## Tests — pytest
 
-Plain `unittest` is fine for stdlib; everything else uses pytest. Conventions:
+Use pytest. Conventions:
 
 - File names `test_*.py`, function names `test_*`.
-- Fixtures via `@pytest.fixture`. Async fixtures are anyio-aware (`@pytest.fixture` on an async function works under `pytest-anyio` which is bundled with anyio).
+- Fixtures via `@pytest.fixture`. Async fixtures are anyio-aware (`@pytest.fixture` on an async function works under anyio's pytest plugin).
 - Parametrise with `@pytest.mark.parametrize`.
 - Mark async tests with `@pytest.mark.anyio` (provided by anyio's pytest plugin).
 
 ```python
 import pytest
-import anyio
 
 @pytest.fixture
 def sample_user() -> dict[str, str]:
@@ -254,11 +166,6 @@ def sample_user() -> dict[str, str]:
 def test_greet(count: int, expected: str) -> None:
     result = ", ".join(["Hello"] * count)
     assert result == expected
-
-@pytest.mark.anyio
-async def test_async_fetch() -> None:
-    await anyio.sleep(0)
-    assert True
 ```
 
 `pyproject.toml`:

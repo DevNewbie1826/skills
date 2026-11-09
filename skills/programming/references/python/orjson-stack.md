@@ -322,7 +322,7 @@ Set `OPT_PASSTHROUGH_SUBCLASS` and handle the subclass in `default=`. The design
 
 ### `int` overflow
 
-orjson refuses to encode integers larger than 2⁵³ - 1 by default (the IEEE-754 double-precision safe-integer limit — what JavaScript can round-trip). For larger ints, opt in:
+By default orjson encodes any 64-bit integer as a JSON number. To refuse integers larger than 2⁵³ - 1 (the IEEE-754 double-precision safe-integer limit — what JavaScript can round-trip), opt in:
 
 ```python
 orjson.dumps(huge_int, option=orjson.OPT_STRICT_INTEGER)  # error
@@ -338,29 +338,7 @@ By default, orjson treats naive `datetime` as the system local timezone — almo
 
 ---
 
-## 9. Benchmark — should I actually adopt this?
-
-The numbers below are 2024–2026 averages from `tiangolo/fastapi#11728` and orjson's own benchmark suite, on Python 3.13, modern x86_64:
-
-| Payload | stdlib `json` | `orjson` | `model_dump_json()` (Pydantic v2) |
-|---|---|---|---|
-| Small dict (100 fields) | 1.0× | **8×** | n/a |
-| List of 10k dicts | 1.0× | **11×** | n/a |
-| Pydantic model with 20 fields | 1.0× (after `model_dump()`) | 5× (with `default=` bridge) | **6×** |
-| Datetime-heavy payload | 1.0× (after manual ISO conv) | **9×** | 6× |
-| numpy array (1M floats) | impossible without manual conv | **20×** vs json+tolist | n/a |
-
-The takeaways:
-
-- For raw dict/list/datetime, **orjson is dramatically faster**.
-- For Pydantic models, **`model_dump_json()` is already faster than orjson+bridge**.
-- For numpy, orjson is the only sane choice.
-
-In production, the actual measured win on a FastAPI app with mixed payloads is typically 5–15% reduction in p99 latency. Worth the one-line `default_response_class=ORJSONResponse` switch.
-
----
-
-## 10. When NOT to adopt orjson
+## 9. When NOT to adopt orjson
 
 - The codebase is small, JSON is not a bottleneck, and you have no measured perf concern.
 - You depend on stdlib `json`'s `cls=` arg or its lax tolerance for non-spec input (NaN, Infinity, comments).

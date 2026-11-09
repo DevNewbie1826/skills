@@ -5,118 +5,29 @@ description: "MUST USE for work on Python, Rust, TypeScript, JavaScript, or Go s
 
 # Programming
 
-Build the smallest correct change: type-strict, boundary-aware, async-correct, and honest about module size. Read the applicable language lane before changing code.
-
-## Shared philosophy
-
-Use these principles; the full doctrine lives in [Shared programming philosophy](references/philosophy.md).
-
-- Root causes over symptoms
-- Types as proof
-- Parse once at the boundary
-- Exhaustive matches and focused tests
+Build the smallest correct change: type-strict, boundary-aware, async-correct, and clear about ownership. The doctrine lives in [Shared programming philosophy § The seven axioms](references/philosophy.md).
 
 ## Language gate
 
-Before writing or editing code, identify the language and read its entry point. Follow the entry point's on-demand links for the affected concern.
+Before writing or editing code, identify the language and read its lane. Each lane README is that language's topic index; follow its links for the affected concern. One-off scripts use the same lane with the smallest suitable verification command.
 
 | Files or request | Read first | Also read when relevant |
 |---|---|---|
-| `.py`, `.pyi`, Python | [Python lane](references/python/README.md) | The linked Python topic reference |
-| `.rs`, `Cargo.toml`, Rust | [Rust lane](references/rust/README.md) | [Rust soundness lane](references/rust-ub/README.md) for `unsafe`, raw pointers, `MaybeUninit`, FFI, manual `Send`/`Sync`, or lock-free primitives |
-| `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, TypeScript or JavaScript | [TypeScript lane](references/typescript/README.md) | The linked TypeScript topic reference |
-| `.go`, `go.mod`, `go.sum`, `.golangci.yml`, or Go-adjacent `.proto` | [Go lane](references/go/README.md) | The linked Go topic reference |
-| Any test file (`*.test.*`, `*.spec.*`, `*_test.go`, `test_*.py`, `tests/`, `__tests__/`) or a change that adds, reshapes, or deletes a test | The language row above | [Testing](references/testing/README.md) (authoring gate) and [Junk classes](references/testing/junk-classes.md) |
+| `.py`, `.pyi`, Python | [Python lane](references/python/README.md) | Its topic index |
+| `.rs`, `Cargo.toml`, Rust | [Rust lane](references/rust/README.md) | [Rust soundness lane](references/rust-ub/README.md) for `unsafe`, raw pointers, `MaybeUninit`, FFI, manual `Send`/`Sync`, lock-free primitives, or a memory-safety audit |
+| `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, TypeScript or JavaScript | [TypeScript lane](references/typescript/README.md) | Its topic index |
+| `.go`, `go.mod`, `go.sum`, `.golangci.yml`, or Go-adjacent `.proto` | [Go lane](references/go/README.md) | Its topic index |
+| Any test file (`*.test.*`, `*.spec.*`, `*_test.go`, `test_*.py`, `tests/`, `__tests__/`) or a change that adds, reshapes, or deletes a test | The language row above | [Testing § Before writing: the authoring gate](references/testing/README.md) and [Junk classes](references/testing/junk-classes.md) |
 
 ## Cross-cutting routes
 
 | Need | Read |
 |---|---|
 | Before the first edit: assumptions, task scope, or done criteria | [Shared programming philosophy § Pre-edit discipline](references/philosophy.md) |
-| Design, review, LOC limits, or portable verification | [Shared programming philosophy](references/philosophy.md) |
+| Cross-language design rules or the post-write review | [Shared programming philosophy § Cross-language design rules and § Post-write review](references/philosophy.md) |
+| Upgrading a dependency, bumping a version, or resolving a lockfile conflict | [Shared programming philosophy § Dependency upgrades](references/philosophy.md) |
+| A file past 200 pure LOC (warning) or 250 (defect), a function with more than three parameters, redundant verification, or negative-form names | [Code smells](references/code-smells.md) |
 | Test-driven development, test shape, fakes or mocks | the `tdd` skill (Test-Driven Delivery) |
-| Whether a test should exist, proving a test can fail, or pruning junk tests | [Testing](references/testing/README.md) and [Junk classes](references/testing/junk-classes.md) |
+| Proving a test can fail or pruning junk tests | [Junk classes § Proof rule for `D` and `C`](references/testing/junk-classes.md) |
 | Bundled checkers, scaffolders, and the test-junk and mutation scripts | [Bundled script dependencies](scripts/DEPS.md) |
-| Adding or changing logs, logger setup, or boundary error handling | [Logging](references/logging.md) |
-| A file exceeds 200 pure LOC, a function has more than three parameters, verification is redundant, or names are negative-form | [Code smells](references/code-smells.md) |
-| Upgrading a dependency, bumping a version, or resolving a lockfile conflict | [Shared programming philosophy](references/philosophy.md) |
-| Rust memory safety, FFI, or concurrent primitive audit | [Rust soundness lane](references/rust-ub/README.md) and its linked taxonomy |
-
-## Python lane
-
-Read [Python lane](references/python/README.md) first, then select the relevant detail.
-
-| Need | Read |
-|---|---|
-| Strict project configuration and tooling | [Python strict configuration](references/python/pyproject-strict.md) |
-| Type patterns | [Python type patterns](references/python/type-patterns.md) |
-| Data models and boundary parsing | [Python data modeling](references/python/data-modeling.md) |
-| Typed errors and exhaustive matching | [Python error handling](references/python/error-handling.md) |
-| Structured async work | [Python async](references/python/async-anyio.md) |
-| Production HTTP client behavior | [Python HTTP client](references/python/httpx2-optimization.md) |
-| Fast JSON paths | [Python JSON stack](references/python/orjson-stack.md) |
-| Data processing | [Python data processing](references/python/data-processing.md) |
-| HTTP service implementation | [Python HTTP service](references/python/fastapi-stack.md) |
-| Model-driven workflow implementation | [Python model workflows](references/python/pydantic-ai.md) |
-| Terminal UI | [Python TUI](references/python/textual-tui.md) |
-| Disposable scripts | [Python one-liners](references/python/one-liners.md) |
-| Library selection | [Python library defaults](references/python/libraries.md) |
-
-## Rust lane
-
-Read [Rust lane](references/rust/README.md) first, then select the relevant detail.
-
-| Need | Read |
-|---|---|
-| Strict project configuration and tooling | [Rust strict configuration](references/rust/cargo-strict.md) |
-| Type state and semantic types | [Rust type state](references/rust/type-state.md) |
-| `unsafe` implementation discipline | [Rust unsafe discipline](references/rust/unsafe-discipline.md) |
-| Full undefined-behavior audit | [Rust soundness lane](references/rust-ub/README.md) |
-| Async work | [Rust async](references/rust/async-tokio.md) |
-| Concurrency primitives | [Rust concurrency](references/rust/concurrency.md) |
-| HTTP service implementation | [Rust HTTP service](references/rust/axum-stack.md) |
-| Command-line application | [Rust CLI](references/rust/clap-stack.md) |
-| Public API design, traits, and semver | [Rust API design](references/rust/api-design.md) |
-| Declarative or procedural macros | [Rust macros](references/rust/macros.md) |
-| Property and snapshot testing | [Rust testing](references/rust/proptest-insta.md) |
-| Disposable scripts | [Rust one-liners](references/rust/one-liners.md) |
-| Libraries, allocation, compile-time, or zero-allocation work | [Rust library defaults](references/rust/libraries.md) and [Rust zero-cost safety](references/rust/zero-cost-safety.md) |
-
-## TypeScript lane
-
-Read [TypeScript lane](references/typescript/README.md) first, then select the relevant detail.
-
-| Need | Read |
-|---|---|
-| Strict project configuration and tooling | [TypeScript strict configuration](references/typescript/tsconfig-strict.md) |
-| Branded types and narrowing | [TypeScript type patterns](references/typescript/type-patterns.md) |
-| Data models and boundary parsing | [TypeScript data modeling](references/typescript/data-modeling.md) |
-| Typed errors, results, cancellation, and timeouts | [TypeScript error handling](references/typescript/error-handling.md) |
-| New project or package setup | [TypeScript bootstrap](references/typescript/bootstrap.md) |
-| HTTP service implementation | [TypeScript HTTP service](references/typescript/backend-hono.md) |
-| Copy text with long dashes, or suppression comments without reasons | [Copy and suppression rules](references/typescript/copy-rules.md) |
-
-## Go lane
-
-Read [Go lane](references/go/README.md) first, then select the relevant detail.
-
-| Need | Read |
-|---|---|
-| Go library and framework selection | [Go library defaults](references/go/libraries.md) |
-| Strict lint configuration | [Go strict configuration](references/go/golangci-strict.md) |
-| New project, layout, or CI | [Go bootstrap](references/go/bootstrap.md) |
-| Named types, constructors, interfaces, or generics | [Go type patterns](references/go/type-patterns.md) |
-| Boundary and domain validation | [Go data modeling](references/go/data-modeling.md) |
-| Errors and wrapping | [Go error handling](references/go/error-handling.md) |
-| Context, goroutines, channels, locks, or race detection | [Go concurrency](references/go/concurrency.md) |
-| HTTP service implementation | [Go HTTP service](references/go/backend-stack.md) |
-| RPC service implementation | [Go RPC](references/go/grpc-connect.md) |
-| Command-line application | [Go CLI](references/go/cobra-stack.md) |
-| Database access and migrations | [Go database](references/go/sqlc-pgx.md) |
-| Terminal UI and CJK input | [Go TUI](references/go/bubbletea-v2.md) |
-| Tests, fakes, and integration coverage | [Go testing](references/go/testing.md) |
-| Disposable scripts | [Go one-liners](references/go/one-liners.md) |
-
-## Activation
-
-Use this router for source changes and relevant manifests. For a one-off script, use the same language lane and the smallest suitable verification command; disposable code still crosses boundaries, has failure modes, and benefits from types and tests.
+| Adding or changing logs, logger setup, service entry points, or boundary error handling | [Logging](references/logging.md) |

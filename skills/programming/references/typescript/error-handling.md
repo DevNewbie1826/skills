@@ -2,7 +2,7 @@
 
 > Read this when designing, returning, converting, or handling typed errors in TypeScript.
 
-Typed errors, exhaustive matching, Result pattern, and resource safety.
+Typed errors, exhaustive matching, the Result pattern, and catch discipline.
 
 ---
 
@@ -39,13 +39,13 @@ throw new UserNotFoundError(userId)
 throw new PermissionDeniedError(userId, "admin")
 ```
 
-Always set `readonly name` explicitly — `instanceof` checks survive minification, but `error.name` is more reliable for logging and serialization.
+Always set `readonly name` explicitly: `instanceof` survives minification, and a stable `error.name` keeps logs and serialized errors readable.
 
 ---
 
 ## Result pattern — expected failures without exceptions
 
-For failures that are **expected** (not found, validation), return a discriminated union instead of throwing.
+For failures that are **expected** and handled within 1-2 call levels (not found, a domain rule), return a discriminated union instead of throwing.
 
 ```typescript
 type Result<T, E = Error> =
@@ -95,8 +95,6 @@ const user = result.value  // narrowed to User
 
 ### When to use which
 
-**The heuristic**: caller is 1-2 levels away and MUST handle it → Result. Error should propagate up many layers → throw.
-
 | Scenario | Pattern | Why |
 |---|---|---|
 | Repository → service (caller handles it) | Result | Caller is right there, must handle both |
@@ -105,7 +103,7 @@ const user = result.value  // narrowed to User
 | Service → service (deep internal) | throw (typed Error subclass) | Result boilerplate across many layers is worse |
 | HTTP handler → response | Catch errors, convert to response | Boundary code catches and translates |
 
-**Practical tradeoff**: Result is safest (compiler forces handling) but creates boilerplate when every caller in a chain must check `.ok`. If the error would just propagate through 3+ layers unchanged, use a typed Error subclass instead.
+Use Result when the caller is 1-2 levels away and must handle the failure; a typed Error subclass when it would propagate through 3+ layers unchanged.
 
 ### Library or roll your own?
 
@@ -126,6 +124,46 @@ try {
 ```
 
 The `cause` is available on `error.cause` and shows up in stack traces.
+
+---
+
+## Catch blocks — narrow or re-throw
+
+Every `catch` receives `unknown`. The language gives you no type safety in catch blocks; you earn it with `instanceof`. A bare `catch (e) { console.error(e) }` swallows `TypeError`, `RangeError`, and your domain errors identically, and when a new error type appears nothing warns you.
+
+```typescript
+// BANNED — empty catch
+try { await fetchData() } catch {}
+try { await fetchData() } catch (e) { /* will fix later */ }
+
+// BANNED — catch-and-swallow (no narrowing, no rethrow)
+try {
+  const data = await api.get("/users")
+} catch (e) {
+  console.error("failed", e)
+}
+
+// GOOD — narrow with instanceof
+try {
+  const data = await api.get("/users")
+} catch (e) {
+  if (e instanceof HttpError) {
+    logger.warn(`API ${e.status}: ${e.message}`)
+    return fallback
+  }
+  throw e  // unknown errors propagate
+}
+
+// GOOD — top-level boundary (only place catch-all is acceptable)
+async function main(): Promise<void> {
+  try {
+    await run()
+  } catch (e) {  // no-excuse-ok: catch
+    console.error("unhandled:", e)
+    process.exit(1)
+  }
+}
+```
 
 ---
 
@@ -151,15 +189,15 @@ app.onError((error, c) => {
 ## Async error patterns
 
 ```typescript
-// Promise.allSettled — when partial failure is OK
-const results = await Promise.allSettled(urls.map(fetch))
+// Promise.allSettled — when partial failure is OK (ky is the lane's HTTP client)
+const results = await Promise.allSettled(urls.map((url) => ky.get(url)))
 const successes = results
   .filter((r): r is PromiseFulfilledResult<Response> => r.status === "fulfilled")
   .map((r) => r.value)
 
 // AbortSignal — cancellation
-async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
-  return fetch(url, { signal: AbortSignal.timeout(ms) })
+async function getWithTimeout(url: string, ms: number): Promise<Response> {
+  return ky.get(url, { signal: AbortSignal.timeout(ms) })
 }
 ```
 

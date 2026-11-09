@@ -120,7 +120,7 @@ const tsconfig = `{
     "rootDir": "src",
     "module": "${runtime === "node" ? "NodeNext" : "ESNext"}",
     "moduleResolution": "${runtime === "node" ? "NodeNext" : "bundler"}",
-    "types": ["${runtime === "node" ? "node" : "bun-types"}"],
+    "types": ["${runtime === "node" ? "node" : "bun"}"],
     "skipLibCheck": true,
     "noEmit": true
   },

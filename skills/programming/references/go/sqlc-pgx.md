@@ -289,7 +289,7 @@ func (s *UserStore) CreateWithProfile(
 ) error {
     tx, err := pool.Begin(ctx)
     if err != nil { return fmt.Errorf("begin: %w", err) }
-    defer tx.Rollback(ctx)  // no-op if Commit succeeded
+    defer func() { _ = tx.Rollback(ctx) }() //nolint:errcheck // Rollback after Commit returns ErrTxClosed by design
 
     q := s.q.WithTx(tx)  // sqlc.Queries bound to the tx
 
@@ -305,7 +305,7 @@ func (s *UserStore) CreateWithProfile(
 
 Pattern:
 
-- `defer tx.Rollback(ctx)` immediately after `Begin` — safe even after Commit (returns "tx closed", which we ignore via the unhandled return).
+- `defer tx.Rollback(ctx)` immediately after `Begin` — safe even after Commit (returns `pgx.ErrTxClosed`); the discard is the one justified `nolint` exception.
 - `q.WithTx(tx)` returns a `*Queries` bound to the tx.
 - Last line: `tx.Commit(ctx)`.
 
@@ -401,7 +401,6 @@ func newTestDB(t *testing.T) *pgxpool.Pool {
     require.NoError(t, err)
     t.Cleanup(pool.Close)
 
-    require.NoError(t, goose.UpContext(ctx, /* sql.DB from pool */, "../migrations"))
     return pool
 }
 

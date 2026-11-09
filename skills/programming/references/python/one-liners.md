@@ -18,8 +18,6 @@ print(httpx2.get('https://api.github.com').json())
 "
 ```
 
-Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-
 Use for terminal one-shots that you don't want to save. `--with PKG` may be repeated.
 
 ### Pattern 2: PEP 723 script with shebang (THE CANONICAL PATTERN)
@@ -36,15 +34,7 @@ A regular `.py` file with metadata in a comment block. uv reads the metadata, ma
 # ]
 # ///
 
-# ─── How to run ───
-# 1. Install uv (if not installed):
-#      curl -LsSf https://astral.sh/uv/install.sh | sh
-# 2. Run directly (no venv, no pip install needed):
-#      uv run my_script.py
-# 3. Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-# 4. Or make executable and run:
-#      chmod +x my_script.py && ./my_script.py
-# ──────────────────
+# <usage comment block: copy the template from "The usage comment block">
 
 from __future__ import annotations
 
@@ -52,7 +42,7 @@ import httpx2
 from rich import print as rprint
 
 def main() -> None:
-    with httpx2.Client(http2=True, follow_redirects=True) as client:
+    with create_client() as client:  # factory from httpx2-optimization.md, pasted into the script
         resp = client.get("https://api.github.com")
         resp.raise_for_status()
         rprint(resp.json())
@@ -67,7 +57,7 @@ Every PEP 723 script MUST include these, in order:
 
 1. **Shebang**: `#!/usr/bin/env -S uv run --script`
 2. **PEP 723 metadata block**: `# /// script` ... `# ///` with `requires-python` and `dependencies`
-3. **Usage comment block**: How to install uv + how to run the script. Copy the template above verbatim.
+3. **Usage comment block**: How to install uv + how to run the script. Copy the template below verbatim.
 4. **`from __future__ import annotations`**: Always first import.
 5. **`if __name__ == "__main__": main()`**: Entry point guard.
 
@@ -107,8 +97,6 @@ uv run scripts/python/new-script.py my_tool --deps "polars" "duckdb" "rich"
 uv run scripts/python/new-script.py my_tool --plain
 ```
 
-Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-
 ## Common dependency sets
 
 | Use case | Dependencies line |
@@ -135,11 +123,8 @@ Or use plain pip / pipx / python3 -m venv if uv is unavailable.
 # ]
 # ///
 
-# ─── How to run ───
-# 1. Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh
-# 2. Run: uv run fetch_json.py https://api.github.com/repos/pydantic/httpx2
-# 3. Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-# ──────────────────
+# <usage comment block: copy the template from "The usage comment block">
+# (run: uv run fetch_json.py https://api.github.com/repos/pydantic/httpx2)
 
 from __future__ import annotations
 
@@ -150,7 +135,7 @@ from rich import print as rprint
 
 def main() -> None:
     url = sys.argv[1] if len(sys.argv) > 1 else "https://api.github.com"
-    with httpx2.Client(http2=True, follow_redirects=True) as client:
+    with create_client() as client:  # factory from httpx2-optimization.md, pasted into the script
         resp = client.get(url)
         resp.raise_for_status()
         rprint(resp.json())
@@ -172,11 +157,8 @@ if __name__ == "__main__":
 # ]
 # ///
 
-# ─── How to run ───
-# 1. Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh
-# 2. Run: uv run csv2parquet.py input.csv output.parquet
-# 3. Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-# ──────────────────
+# <usage comment block: copy the template from "The usage comment block">
+# (run: uv run csv2parquet.py input.csv output.parquet)
 
 from __future__ import annotations
 
@@ -197,64 +179,6 @@ if __name__ == "__main__":
     typer.run(main)
 ```
 
-### Quick benchmark
-
-```python
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.13"
-# dependencies = [
-#     "httpx2[http2,brotli,zstd]",
-#     "rich",
-#     "anyio",
-# ]
-# ///
-
-# ─── How to run ───
-# 1. Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh
-# 2. Run: uv run bench.py https://api.example.com/health 50
-# 3. Or use plain pip / pipx / python3 -m venv if uv is unavailable.
-# ──────────────────
-
-from __future__ import annotations
-
-import socket
-import sys
-import time
-
-import anyio
-import httpx2
-from rich import print as rprint
-
-async def main() -> None:
-    url = sys.argv[1] if len(sys.argv) > 1 else "https://api.github.com"
-    n = int(sys.argv[2]) if len(sys.argv) > 2 else 20
-
-    limits = httpx2.Limits(max_connections=200, max_keepalive_connections=40, keepalive_expiry=30.0)
-    timeout = httpx2.Timeout(connect=5.0, read=30.0, write=10.0, pool=10.0)
-    transport = httpx2.AsyncHTTPTransport(
-        http2=True, retries=3, limits=limits,
-        socket_options=[(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)],
-    )
-
-    async with httpx2.AsyncClient(transport=transport, timeout=timeout, follow_redirects=True) as client:
-        # warmup
-        for _ in range(3):
-            await client.get(url)
-
-        start = time.perf_counter()
-        for _ in range(n):
-            r = await client.get(url)
-            assert r.status_code == 200
-        elapsed = time.perf_counter() - start
-
-    avg_ms = (elapsed / n) * 1000
-    rprint(f"[bold]{url}[/bold]: {avg_ms:.1f}ms avg over {n} requests ({elapsed:.2f}s total, {r.http_version})")
-
-if __name__ == "__main__":
-    anyio.run(main)
-```
-
 ## Anti-patterns
 
 | ❌ Don't | ✅ Do |
@@ -262,11 +186,8 @@ if __name__ == "__main__":
 | `pip install httpx2 && python script.py` | `uv run script.py` |
 | `requirements.txt` alongside script | PEP 723 inline metadata |
 | `python -m venv .venv && ...` | `uv run --script` handles it |
-| Script without usage comment | Always include the "How to run" block |
 | `import asyncio; asyncio.run(main())` | `import anyio; anyio.run(main)` |
 | Bare `httpx2.AsyncClient()` | Full production defaults (see `httpx2-optimization.md`) |
-
-Or use plain pip / pipx / python3 -m venv if uv is unavailable.
 
 ## Sources
 

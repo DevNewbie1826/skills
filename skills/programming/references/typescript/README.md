@@ -3,7 +3,7 @@
 
 > Read this when writing or reviewing TypeScript source, packages, configuration, or services.
 
-Modern TypeScript. Type-strict, stack-first, async-correct.
+Modern TypeScript: type-strict, boundary-aware, and async-correct.
 
 ## Philosophy
 
@@ -20,7 +20,7 @@ These are deliberate project choices. Violations are always wrong, not "style pr
 | Runtime | Bun, Node, tsx, or ts-node | Match the project's deployment target and existing runtime |
 | Package manager | bun, npm, pnpm, or yarn | Preserve the project's lockfile and package-manager convention |
 | Linter + formatter | Biome | ESLint, Prettier |
-| Type checker | `tsc --noEmit` with strict config | skip type checking |
+| Type checker | `tsc --noEmit` with strict config | do not skip type checking |
 | Web framework | Hono | Express |
 | Validation | Zod | joi, yup, class-validator |
 | Testing | `bun test` or vitest | jest |
@@ -28,7 +28,7 @@ These are deliberate project choices. Violations are always wrong, not "style pr
 
 ### The iron list
 
-1. **Readonly by default** — all `type`/`interface` properties are `readonly`. Arrays are `readonly T[]`. Mutable only when mutation is the documented purpose.
+1. **Readonly by default** — all `type`/`interface` properties are `readonly`. Arrays are `readonly T[]`. Exceptions: [data modeling](data-modeling.md).
 2. **Branded types for distinct IDs** — `type UserId = Brand<string, "UserId">`. Never pass raw `string` where a branded type exists.
 3. **Exhaustive switch** — every `switch` on a discriminated union ends with `default: assertNever(x)`. No fall-through.
 4. **No any** — `any` is banned in annotations, returns, and parameters. Use `unknown` and narrow.
@@ -40,8 +40,8 @@ These are deliberate project choices. Violations are always wrong, not "style pr
 10. **Typed errors** — Error subclasses with typed fields. No `throw new Error("bare string")` for domain errors. Use Result for expected failures within 1-2 call levels; throw for propagation across many layers.
 11. **as const for constants** — module-level constant objects and arrays use `as const`.
 12. **import type** — type-only imports use `import type`. Enforced by `verbatimModuleSyntax`.
-13. **Named exports only** — no `export default`. Exception: framework requirement (Next.js pages, etc.).
-14. **No empty catch, no catch-and-swallow** — every `catch` block must either (a) narrow the error with `instanceof` and handle each case, or (b) re-throw. Empty catch blocks and `catch (e) { console.error(e) }` without narrowing or re-throw are banned — they hide bugs. At top-level boundaries (CLI entry, HTTP handler), opt out with `// no-excuse-ok: catch`.
+13. **Named exports only** — no `export default`. Exception: framework entrypoint requirement (e.g. Hono's `export default app`, Next.js pages).
+14. **No empty catch, no catch-and-swallow** — every `catch` block must either (a) narrow the error with `instanceof` and handle each case, or (b) re-throw. Empty catch blocks and `catch (e) { console.error(e) }` without narrowing or re-throw are banned — they hide bugs. At top-level boundaries (CLI entry, HTTP handler), opt out with `// no-excuse-ok: catch`. Rationale and examples: [error handling](error-handling.md).
 
 ### Data modeling — which construct, when
 
@@ -55,53 +55,9 @@ These are deliberate project choices. Violations are always wrong, not "style pr
 | Distinct primitive (UserId vs OrderId) | Branded type |
 | Key-value map | `Record<K, V>` or index signature |
 
-**The one rule**: data crosses trust boundary → Zod. Everything else → plain `type` with `readonly`.
+**The one rule**: data crosses a trust boundary → Zod. Everything else → plain `type` with `readonly`.
 
-Load `data-modeling.md` for the full decision flowchart and comparison.
-
-### When readonly does not apply
-
-- **Framework state** (React `useState`, signals) — managed by framework.
-- **Builder / accumulator** — object exists to be mutated (buffer, cache). Document why.
-- **ORM mutations** — Drizzle insert/update objects.
-
-### Why empty/unhandled catch is banned
-
-In TypeScript, every `catch` receives `unknown`. The language gives you no type safety in catch blocks — you must earn it with `instanceof`. A bare `catch (e) { console.error(e) }` swallows `TypeError`, `RangeError`, and your domain errors identically. When a new error type appears, nothing warns you.
-
-```typescript
-// BANNED — empty catch
-try { await fetchData() } catch {}
-try { await fetchData() } catch (e) { /* will fix later */ }
-
-// BANNED — catch-and-swallow (no narrowing, no rethrow)
-try {
-  const data = await api.get("/users")
-} catch (e) {
-  console.error("failed", e)
-}
-
-// GOOD — narrow with instanceof
-try {
-  const data = await api.get("/users")
-} catch (e) {
-  if (e instanceof HttpError) {
-    logger.warn(`API ${e.status}: ${e.message}`)
-    return fallback
-  }
-  throw e  // unknown errors propagate
-}
-
-// GOOD — top-level boundary (only place catch-all is acceptable)
-async function main(): Promise<void> {
-  try {
-    await run()
-  } catch (e) {  // no-excuse-ok: catch
-    console.error("unhandled:", e)
-    process.exit(1)
-  }
-}
-```
+Load [data modeling](data-modeling.md) for the full decision flowchart and comparison.
 
 ### Libraries
 
@@ -112,13 +68,13 @@ async function main(): Promise<void> {
 | ORM | Drizzle | Type-safe SQL, no codegen |
 | HTTP client | `ky` | Thin fetch wrapper (5KB); auto-throw on non-2xx, retry, timeout, hooks, prefixUrl. Browser + Node + Bun + Deno |
 | HTTP client (perf) | `undici` (direct API) | When a Node backend needs connection pooling, HTTP/2, or pipelining |
-
-> **HTTP client rule** - production code must not use bare `fetch()`. It has no retry, timeout, or error-handling policy and causes silent failures during incidents. Install **`ky`** by default, and use the **`undici`** direct API when a Node backend needs high-volume requests, connection pooling, HTTP/2, or pipelining. ~~`axios`~~ is forbidden after the supply-chain compromise (2026-03). `node-fetch` is unnecessary because Node 18+ includes built-in fetch.
 | Testing | `bun test` / vitest | Fast, ESM-native |
 | Logging | `pino` | Structured JSON, fast |
 | CLI | `@clack/prompts` + `commander` | Interactive + parsing |
 
-## tsconfig — the one true config
+> **HTTP client rule**: production code must not use bare `fetch()`. It has no retry, timeout, or error-handling policy and causes silent failures during incidents. Install **`ky`** by default, and use the **`undici`** direct API when a Node backend needs high-volume requests, connection pooling, HTTP/2, or pipelining. ~~`axios`~~ is forbidden after the supply-chain compromise (2026-03). `node-fetch` is unnecessary because Node 18+ includes built-in fetch.
+
+## Scaffolding
 
 Scaffold a new project with all strict defaults pre-configured:
 
@@ -131,21 +87,9 @@ bun run ../../scripts/typescript/new-project.ts my-api --path ./projects
 node ../../scripts/typescript/new-project.ts my-api --runtime node
 ```
 
-Bun, or npm/pnpm/yarn with node — adapt the commands; the contract is the config, not the runner. The default emits Bun scripts and types; `--runtime node` emits npm scripts, `tsx`, Node types, and the Hono Node server adapter.
+The default emits Bun scripts and types; `--runtime node` emits npm scripts, `tsx`, Node types, and the Hono Node server adapter. Creates: `package.json` (Hono + Zod + Biome), `tsconfig.json` (ultra-strict), `biome.json`, `src/index.ts`, `.gitignore`, `README.md`, and `tests/smoke.test.ts` in the Bun variant.
 
-Creates: `package.json` (Hono + Zod + Biome), `tsconfig.json` (ultra-strict), `biome.json`, `src/index.ts`, `.gitignore`, and `README.md`. Works on macOS, Linux, Windows.
-
-For manual setup: `bunx tsc --init`, `npx tsc --init`, `pnpm exec tsc --init`, or `yarn tsc --init`; then load `tsconfig-strict.md` for the full strict config.
-
-Key flags beyond `"strict": true`:
-
-| Flag | What it catches |
-|---|---|
-| `noUncheckedIndexedAccess` | `arr[0]` is `T \| undefined`, forces check |
-| `exactOptionalPropertyTypes` | `{ x?: string }` ≠ `{ x: string \| undefined }` |
-| `verbatimModuleSyntax` | Forces `import type` for type-only imports |
-| `noFallthroughCasesInSwitch` | Forgotten `break` / `return` |
-| `noPropertyAccessFromIndexSignature` | `.key` on index sig → bracket notation |
+The canonical `tsconfig.json` and `biome.json`, with what each extra flag catches, live in [TypeScript strict configuration](tsconfig-strict.md).
 
 ## Reference loading
 
@@ -153,48 +97,42 @@ Load on demand — not all at once.
 
 | Need | Load |
 |---|---|
-| Strict tsconfig + Biome config | `tsconfig-strict.md` |
-| Type patterns (branded, as const, satisfies, narrowing, assertNever) | `type-patterns.md` |
-| Data modeling (type vs interface vs Zod, readonly, parse-don't-validate) | `data-modeling.md` |
-| Error handling (Result, typed errors, union vs throw) | `error-handling.md` |
-| Bootstrapping a new project (runner options, Hono, Vite) | `bootstrap.md` |
-| Hono backend stack (hono-openapi, Scalar, Swagger) | `backend-hono.md` |
+| Strict tsconfig + Biome config | [tsconfig-strict.md](tsconfig-strict.md) |
+| Type patterns (branded, as const, satisfies, narrowing, assertNever) | [type-patterns.md](type-patterns.md) |
+| Data modeling (type vs interface vs Zod, readonly, parse-don't-validate) | [data-modeling.md](data-modeling.md) |
+| Error handling (Result, typed errors, union vs throw) | [error-handling.md](error-handling.md) |
+| Bootstrapping a new project (runner options, Hono, Vite) | [bootstrap.md](bootstrap.md) |
+| Hono backend stack (hono-openapi, Scalar, Swagger) | [backend-hono.md](backend-hono.md) |
+| Copy and suppression rules | [copy-rules.md](copy-rules.md) |
 
 ## No-excuse audit
 
 Violations caught by `../../scripts/typescript/check-no-excuse-rules.ts`. Run after every edit session.
 
-| Rule ID | Catches | Opt-out |
-|---|---|---|
-| `no-any-assertion` | `as any` | None — redesign types |
-| `no-unknown-assertion` | `as unknown` | None — redesign types |
-| `no-ts-ignore` | `@ts-ignore` | None — fix the type |
-| `no-ts-expect-error` | `@ts-expect-error` | None — fix the type |
-| `no-enum` | `enum` declarations | None — use `as const` |
-| `no-non-null-assertion` | `x!` postfix | None — narrow or `?.` |
-| `no-throw-literal` | `throw "string"` / `throw 123` | None — throw Error subclass |
-| `no-mutable-export` | `export let` / `export var` | None — use `export const` |
-| `no-any-annotation` | `: any` in parameter/return/variable types | `// no-excuse-ok: any` |
-| `no-explicit-any-return` | `(): any` or `(): Promise<any>` return types | `// no-excuse-ok: any` |
-| `empty-catch` | `catch { }` or `catch (e) { }` with empty body | `// no-excuse-ok: catch` |
-| `catch-without-narrowing` | `catch (e)` used without `instanceof` or re-throw | `// no-excuse-ok: catch` |
-
-Biome enforces additional rules (noExplicitAny, noNonNullAssertion, noDefaultExport, useImportType). The script catches what Biome cannot.
+| Rule ID | Opt-out |
+|---|---|
+| `no-any-assertion` | None |
+| `no-unknown-assertion` | None |
+| `no-ts-ignore` | None |
+| `no-ts-expect-error` | None |
+| `no-enum` | None |
+| `no-non-null-assertion` | None |
+| `no-throw-literal` | None |
+| `no-mutable-export` | None |
+| `no-any-annotation` | `// no-excuse-ok: any` |
+| `no-explicit-any-return` | `// no-excuse-ok: any` |
+| `empty-catch` | `// no-excuse-ok: catch` |
+| `catch-without-narrowing` | `// no-excuse-ok: catch` |
 
 ### Copy and suppression audit
 
-Violations caught by `../../scripts/typescript/check-copy-rules.ts`. Run after editing copy or a suppression comment.
-
-| Rule ID | Catches | Opt-out |
-|---|---|---|
-| `no-em-dash-copy` | em dash (U+2014) in copy text outside comments | None: rewrite the sentence |
-| `require-suppression-reason` | bare `<word>-disable`/`-enable`/`-ignore`/`-suppress` directive | Add the reason after the directive |
+Violations caught by `../../scripts/typescript/check-copy-rules.ts` (`no-em-dash-copy`, `require-suppression-reason`). Run after editing copy or a suppression comment; rules and messages: [copy rules](copy-rules.md).
 
 Run: `bun ../../scripts/typescript/check-copy-rules.ts .`
 
 ## In tests
 
-Tests are strict too, with these exceptions (configure in `biome.jsonc` overrides):
+Tests are strict too, with these exceptions (configure in `biome.json` overrides):
 
 | In tests you may | Why |
 |---|---|
@@ -210,4 +148,4 @@ When editing an existing file that doesn't follow these rules: **write new code 
 
 ## Activation
 
-This reference applies to `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, and `.cjs`. JavaScript uses the same lint, formatting, and copy rules; TypeScript-only syntax and compiler gates apply to TS or checked JS projects. Even one-off scripts get the strict treatment.
+This reference applies to `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, and `.cjs`. JavaScript uses the same lint and formatting rules, while the copy checker scans only `.ts`, `.tsx`, `.mts`, and `.cts`; TypeScript-only syntax and compiler gates apply to TS or checked JS projects. Even one-off scripts get the strict treatment.

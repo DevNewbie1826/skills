@@ -142,33 +142,7 @@ Sustained CPU parallelism → a dedicated pool (`rayon`), not tokio's blocking p
 
 ## Channels
 
-| Need | Use |
-|---|---|
-| 1-many producers → 1 consumer, async | `tokio::sync::mpsc::channel(cap)` |
-| Same as above, both sync + async | `flume::bounded(cap)` |
-| 1 → many fan-out, latest-value semantics | `tokio::sync::watch::channel(initial)` |
-| 1 → many fan-out, queued | `tokio::sync::broadcast::channel(cap)` |
-| One-shot reply | `tokio::sync::oneshot::channel()` |
-| Backpressure-driven stream of items | `tokio::sync::mpsc::Receiver` + `ReceiverStream` |
-
-Mpsc pattern:
-
-```rust
-let (tx, mut rx) = tokio::sync::mpsc::channel::<Job>(256);
-
-tokio::spawn(async move {
-    while let Some(job) = rx.recv().await {
-        if let Err(error) = process(job).await {
-            tracing::warn!(%error, "job failed");
-        }
-    }
-    tracing::info!("queue closed, shutting down worker");
-});
-
-tx.send(Job { ... }).await?;  // blocks if full, applies backpressure
-```
-
-Always bound channels. Unbounded channels are a memory leak waiting to happen.
+Channel selection (mpsc, `watch`, `broadcast`, `oneshot`) and the mpsc worker pattern live in [concurrency.md](concurrency.md). Always bound channels: an unbounded channel is a memory leak waiting to happen.
 
 ## Streams
 
@@ -249,23 +223,7 @@ Pattern: catch signal → cancel a token shared with the server → server's `se
 
 ## Concurrency primitives
 
-- `tokio::sync::Mutex` — async mutex. Use for state shared between async tasks. **Do not hold across `.await` without thinking** (you'll serialize the whole system).
-- `tokio::sync::RwLock` — async read-write lock. Same caveat.
-- `std::sync::Mutex` / `parking_lot::Mutex` — sync mutex for a critical section that never spans an `.await` (see [concurrency.md](concurrency.md) for choosing between them).
-- Nothing guard-like lives across an `.await`: not a sync lock guard, not a `watch` borrow ([concurrency.md](concurrency.md)), not a `span.enter()` guard. Instrument the future instead: `fut.instrument(span).await`.
-- `tokio::sync::Semaphore` — bound concurrent operations. Perfect for "max 10 in-flight HTTP requests" or "max 3 DB writers".
-
-```rust
-let sem = Arc::new(tokio::sync::Semaphore::new(10));
-let mut set = JoinSet::new();
-for url in urls {
-    let permit = Arc::clone(&sem).acquire_owned().await?;
-    set.spawn(async move {
-        let _permit = permit;  // released on task end
-        fetch(&url).await
-    });
-}
-```
+Lock choice and the `Semaphore` pattern for bounding in-flight work live in [concurrency.md](concurrency.md). The async-specific rule: nothing guard-like lives across an `.await`. Not a sync lock guard, not a `watch` borrow, not a `span.enter()` guard. Instrument the future instead: `fut.instrument(span).await`. A `tokio::sync::Mutex` guard may cross an `.await`, but holding it there serializes every task that needs the lock.
 
 ## Common mistakes
 
@@ -296,7 +254,7 @@ async fn fetches_and_parses() {
 async fn parallel_work() { ... }
 ```
 
-`current_thread` is the default test runtime; it chooses a scheduler, it does not make a test deterministic. Wait on the exact event (a channel message, a `Notify`, a `watch` change) or on paused virtual time below, never on a real `sleep`.
+`current_thread` is the default test runtime; it chooses a scheduler, but it does not make a test deterministic. Wait on the exact event (a channel message, a `Notify`, a `watch` change) or on paused virtual time below, never on a real `sleep`.
 
 For time-sensitive tests, advance virtual time:
 

@@ -232,7 +232,7 @@ pub async fn get_user(
 
 ```rust
 // src/routes/mod.rs
-use axum::{routing::{get, post}, Router};
+use axum::{http::{HeaderValue, Method}, routing::{get, post}, Router};
 use tower_http::{
     compression::CompressionLayer,
     cors::CorsLayer,
@@ -271,7 +271,11 @@ pub fn router(state: AppState) -> Router {
                 .layer(PropagateRequestIdLayer::x_request_id())
                 .layer(TimeoutLayer::new(Duration::from_secs(30)))
                 .layer(CompressionLayer::new())
-                .layer(CorsLayer::permissive()), // tighten in production
+                .layer(
+                    CorsLayer::new()
+                        .allow_origin(HeaderValue::from_static("https://app.example.com"))
+                        .allow_methods([Method::GET, Method::POST]),
+                ),
         )
 }
 ```
@@ -352,8 +356,7 @@ Apply with `.route_layer(middleware::from_fn_with_state(state.clone(), require_a
 // tests/users.rs
 #[tokio::test]
 async fn creates_user() {
-    let pool = test_db().await;          // helper that spins up a transactional DB
-    let state = AppState::new_test(pool).await.unwrap();
+    let state = AppState::new(test_settings()).await.unwrap(); // helper: Settings pointing at a throwaway test DB
     let app = my_app::routes::router(state);
 
     let request = axum::http::Request::builder()

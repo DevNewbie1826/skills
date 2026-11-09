@@ -154,13 +154,14 @@ run(main)
 **Combine with timeouts for graceful shutdown**:
 
 ```python
-from anyio import CancelScope, move_on_after
+from anyio import move_on_after
 
 async def do_something(resource) -> None:
     try:
         await run_async_stuff()
     except BaseException:
-        # Allow up to 10s for cleanup, then move on
+        # Cleanup must run for cancellation AND ordinary failures; this
+        # shielded-cleanup boundary is the sanctioned broad-catch case.
         with move_on_after(10, shield=True):
             await resource.aclose()
         raise
@@ -315,7 +316,7 @@ Some APIs have no AnyIO equivalent and require direct event loop access:
 If you absolutely need the running loop:
 
 ```python
-import asyncio
+import asyncio  # noqa: ANYIO_OK
 
 async def main() -> None:
     loop = asyncio.get_running_loop()
@@ -402,29 +403,6 @@ def blocking_callback() -> None:
 
 async def main() -> None:
     await anyio.to_thread.run_sync(blocking_callback)
-
-anyio.run(main)
-```
-
-### Snippet 5: Graceful shutdown with shielded cleanup
-
-```python
-import anyio
-
-async def worker() -> None:
-    try:
-        await anyio.sleep_forever()
-    except anyio.get_cancelled_exc_class():
-        with anyio.CancelScope(shield=True):
-            await anyio.sleep(0.5)  # cleanup
-            print("cleaned up")
-        raise
-
-async def main() -> None:
-    async with anyio.create_task_group() as tg:
-        tg.start_soon(worker)
-        await anyio.sleep(1)
-        tg.cancel_scope.cancel()
 
 anyio.run(main)
 ```

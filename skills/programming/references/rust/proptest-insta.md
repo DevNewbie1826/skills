@@ -20,7 +20,7 @@ Use all three. They cover different bug classes.
 ## Where tests live
 
 - **Unit tests of private behavior**: `#[cfg(test)] mod tests { use super::*; ... }` at the bottom of the module they test.
-- **Public-API behavior**: `tests/*.rs`. Each file is a separate crate that sees only `pub` items, so it fails when the public contract breaks, not when an internal changes.
+- **Public-API behavior**: `tests/*.rs`. Each file is a separate crate that sees only `pub` items, so it fails when the public contract breaks, not when an internal detail changes.
 - **Examples in rustdoc**: doctests. They compile and run, so a documented example that drifts from the API fails the build. `cargo nextest run` skips them; the gate runs `cargo test --doc` too. Write examples with `?` and hide setup behind `# ` lines ([api-design.md](api-design.md#rustdoc-sections)).
 - **Panics**: `#[should_panic(expected = "...")]` only when panicking is the documented contract (an out-of-bounds index on a slice-like type). An invalid input that returns `Err` is asserted as that `Err` value.
 - **Environment and globals**: `std::env::set_var` is `unsafe` in the 2024 edition because another thread may read the environment at the same moment, and tests run in parallel threads. Inject configuration as a parameter instead of mutating process state; a test that must touch the real environment runs in its own process (`tests/` binary, or nextest's process-per-test).
@@ -240,11 +240,11 @@ When a property fails, proptest reduces the input to a minimal counter-example. 
 
 ## Regression corpus
 
-When a property test fails, proptest writes the failing input to `proptest-regressions/<test_name>.txt`. Commit this directory. Future runs replay these failing inputs first, so the bug stays fixed forever.
+When a property test fails, proptest writes the failing input to `proptest-regressions/regressions.txt`, the file `failure_persistence` names above. Commit this directory. Future runs replay these failing inputs first, so the bug stays fixed forever.
 
 ```
 proptest-regressions/
-└── parse_color.txt   # commit this
+└── regressions.txt   # commit this
 ```
 
 ## Insta — setup
@@ -414,21 +414,6 @@ proptest! {
 ```
 
 But honestly, this is rarely a fit. Proptest tests properties, insta tests output shape. Don't snapshot random inputs - that defeats both tools.
-
-## CI matrix recommendation
-
-```yaml
-- name: Tests
-  run: cargo nextest run --all-features
-
-- name: Property regressions (replay)
-  run: |
-    # The regression files in proptest-regressions/ replay first.
-    # Failures here mean a previously-fixed bug came back.
-    cargo nextest run --all-features --test-threads 1
-```
-
-When a proptest finds a new failure, the regression file appears as a git diff - check it in.
 
 ## What proptest cannot do
 

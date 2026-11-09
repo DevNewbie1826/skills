@@ -26,7 +26,7 @@ console.log("build failed. Retry with --force")
 
 ## `require-suppression-reason`
 
-Flags a bare suppression directive in a comment. The directive matcher accepts generic `<word>-disable`, `<word>-enable`, `<word>-ignore`, and `<word>-suppress` forms, so it stays tool-neutral without naming any tool. A directive whose convention carries no reason text is still flagged: append the reason as a trailing phrase naming the constraint. The reason must sit on the directive's own line; a reason written on a later line of a block comment does not count.
+Flags a bare suppression directive in a comment. The directive matcher accepts generic `<word>-disable`, `<word>-enable`, `<word>-ignore`, and `<word>-suppress` forms, so it stays tool-neutral without naming any tool. A directive that follows a tool convention but carries no reason text is still flagged: append the reason as a trailing phrase on the same line as the directive, naming the constraint. A reason written on a later line of a block comment does not count.
 
 A suppression is a claim that a rule does not apply here. Without a written reason the next reader cannot tell a deliberate exception from a stale workaround.
 
@@ -56,6 +56,3 @@ bun scripts/typescript/check-copy-rules.ts [--json] <file-or-dir>...
 
 `--json` prints the same findings as machine-readable records. The script uses Node built-ins only and needs no third-party packages.
 
-## Equivalence with the other lanes
-
-An equivalent reason requirement already exists in this pack's Go checker (`nolint-no-reason` in `scripts/go/check-no-excuse-rules.sh`) and Rust checker (`expect-without-reason` in `scripts/rust/check-no-excuse-rules.py`). This TypeScript rule mirrors their posture: a reasoned suppression is legal, a bare one is not. The TypeScript no-excuse checker additionally bans `@ts-ignore` and `@ts-expect-error` outright in this pack's own TS lane, and that stricter rule is unchanged.

@@ -63,7 +63,7 @@ linters:
     - gosec              # CWE-aware security scanner
 
     # ── Logging ─────────────────────────────────────────────────
-    - sloglint           # slog attr style + no slog.Any(); enforce structured logs
+    - sloglint           # slog attr-only style, no mixed args; enforce structured logs
 
     # ── Performance ─────────────────────────────────────────────
     - perfsprint         # fmt.Sprintf where strconv suffices
@@ -188,25 +188,14 @@ formatters:
     - goimports
 ```
 
-## Per-linter rationale (why each is on)
+## Rationale for the less obvious linters
+
+The config comments explain each linter. Two need more:
 
 | Linter | What it catches | Why no compromise |
 |---|---|---|
-| `errcheck` (incl. `check-blank: true`) | `_ = err`, ignored errors from `Close()`, `Write()`, `json.Marshal()` | Silent error ignore is the #1 Go bug class. Banning `_ = err` forces a decision at every site. |
-| `errorlint` | `err == io.EOF` instead of `errors.Is(err, io.EOF)`; missing `%w` in `fmt.Errorf` | Once you wrap in middleware, `==` checks silently break. `errors.Is/As` is the only safe form. |
-| `nilerr` / `nilnil` | `return nil` after `err != nil`; `return nil, nil` from `(*T, error)` | Classic AI-generated bugs. Linter catches them mechanically. |
-| `bodyclose` | `defer resp.Body.Close()` missed | Single most common Go memory leak. |
-| `contextcheck` | `ctx := context.Background()` inside a function that received `ctx` | Breaks cancellation propagation — the entire reason ctx exists. |
-| `exhaustive` | `switch x.(type)` missing a sealed-interface variant | **Go's weakest type-system spot.** This linter is the closest thing to compiler-enforced exhaustiveness. |
-| `sloglint` | `slog.Info(...)` (global), mixed `Any`/typed attrs | Without this, structured logging silently degrades into string concatenation. |
-| `govet/shadow` strict | `err := ... ; if ... { err := ...; ... }` shadowing | Hides the real error from outer scope — extremely common. |
 | `govet/fieldalignment` | Struct field order wasting memory | Cheap correctness signal. Disable per-file when JSON tag order matters for OpenAPI. |
-| `copyloopvar` + `intrange` | Pre-1.22 loop-var capture and old `for i := 0; i < N; i++` | The language modernized; the lint enforces it. |
-| `usetesting` | `os.Setenv` / `os.Mkdir` in tests instead of `t.Setenv` / `t.TempDir` | Avoids test isolation bugs. |
 | `gocognit` / `gocyclo` / `funlen` | Functions exceeding cognitive thresholds | Direct architectural signal — same purpose as the 250 LOC ceiling, at function granularity. |
-| `gosec` | CWE patterns — SQL injection, weak crypto, path traversal | Production must pass this. |
-| `testifylint` | `assert.Equal` where `require.Equal` was meant; `ObjectsAreEqual` misuse | Subtle test-correctness bugs. |
-| `perfsprint` | `fmt.Sprintf("%d", n)` instead of `strconv.Itoa(n)` | 5–10x faster in tight loops, lints catch the lazy form. |
 
 ## `nolint` policy
 
@@ -217,7 +206,31 @@ formatters:
 
 The skill auto-rejects `//nolint` without a reason. So does `revive` if you enable its `nolint` rule.
 
+## Toolchain policy
+
+| Category | Use | Never |
+|---|---|---|
+| Go version | **1.23+** (range-over-func, iter package, slog stable) | <1.23 |
+| Module | `go modules` + `go work` for monorepos | dep, GOPATH layouts |
+| Format | **`gofumpt`** (stricter gofmt) + `goimports -local <module>` | bare `gofmt` |
+| Linter | **`golangci-lint v2`** with the strict bundle in `golangci-strict.md` | bare `go vet` |
+| Nil checker | **`nilaway`** (Uber, stable since 2024) in CI | hope |
+| Vet bundle | `go vet` + `fieldalignment` + `shadow` | "tests cover it" |
+| Tests | `go test -race -shuffle=on -count=1` | `-count` cache, no race |
+| Goroutine leaks | `go.uber.org/goleak` in `TestMain` | "looks fine" |
+| Mock | `go.uber.org/mock` (gomock successor) | hand-written stubs |
+| DB | `sqlc` + `jackc/pgx/v5` | `database/sql` + `gorm` |
+| HTTP framework lane | Choose `gin-gonic/gin` for its full framework ecosystem, `go-chi/chi` for minimal `net/http` composition, or `connectrpc/connect-go` for RPC; see `libraries.md` for trade-offs | Picking by habit instead of service constraints |
+| RPC | **`connectrpc/connect-go`** (gRPC-compatible, HTTP/1.1-friendly, browser-friendly) | hand-rolled `grpc-go` unless you specifically need bidi streaming features Connect lacks |
+| Validation | `go-playground/validator/v10` for HTTP boundary + `bufbuild/protovalidate-go` for proto + smart constructors for domain | ad-hoc `if len(s) == 0` chains |
+| Config | `caarlos0/env/v11` (struct-tag env) | `viper` unless you actually need file+env+flag merging |
+| Logging | **`log/slog`** (stdlib, Go 1.21+) | logrus, zap, zerolog (all superseded) |
+| CLI | `spf13/cobra` | hand-rolled `os.Args` parsing past 2 flags |
+| TUI | `charm.land/bubbletea/v2` + `bubbles/v2` + `lipgloss/v2` — see `bubbletea-v2.md` for CJK/IME | bubbletea v1 for CJK input |
+
 ## CI gate
+
+This is the single gate; [`bootstrap.md`](bootstrap.md) wires it into CI.
 
 ```bash
 gofumpt -l . | (! grep .)                          # format

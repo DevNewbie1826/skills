@@ -22,7 +22,7 @@ Is it an interface / contract ("this thing can do X")?
 Does the data cross a trust boundary (user input, API, file, external DB)?
   YES → pydantic.BaseModel (frozen=True) — validates + serializes
   NO ↓
-Is it a dict shape needed for JSON compat / **kwargs typing?
+Do you need a dict shape for JSON compat or **kwargs typing?
   YES → TypedDict
   NO ↓
 Is it structured data with named fields?

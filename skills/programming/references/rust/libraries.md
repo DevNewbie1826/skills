@@ -2,7 +2,7 @@
 
 > Read this when selecting Rust libraries or an implementation lane for a new concern.
 
-The opinionated, audited-in-prod stack for 2026 Rust. Every entry has a one-line rationale and a canonical code snippet so the agent does not have to relearn each library's idioms.
+The opinionated, audited-in-prod stack for 2026 Rust. Every entry has a one-line rationale, and most carry a canonical code snippet or a link to the file that owns the pattern.
 
 ## Async runtime — `tokio`
 
@@ -327,37 +327,11 @@ Generalize the pattern to your own domains (see `type-state.md`).
 
 ## Property tests — `proptest`
 
-```rust
-use proptest::prelude::*;
-
-proptest! {
-    #[test]
-    fn parse_roundtrips(s in r"[a-zA-Z0-9_-]{1,50}") {
-        let parsed = parse(&s).unwrap();
-        let back = parsed.to_string();
-        prop_assert_eq!(back, s);
-    }
-}
-```
-
-Avoid `quickcheck` (older, less ergonomic). proptest gives shrinking + regression corpus + integration with `criterion`.
+Avoid `quickcheck` (older, less ergonomic). proptest gives shrinking + regression corpus + integration with `criterion`. Patterns → [proptest-insta.md](proptest-insta.md).
 
 ## Snapshot tests — `insta`
 
-```rust
-#[test]
-fn renders_help() {
-    let output = render(&example_input());
-    insta::assert_snapshot!(output);
-}
-
-#[test]
-fn serializes_well() {
-    insta::assert_json_snapshot!(serializable_value());
-}
-```
-
-`cargo insta review` (after `cargo install cargo-insta`) — interactive review of changed snapshots.
+`cargo insta review` (after `cargo install cargo-insta`) — interactive review of changed snapshots. Patterns → [proptest-insta.md](proptest-insta.md).
 
 ## Benchmarks — `criterion`
 

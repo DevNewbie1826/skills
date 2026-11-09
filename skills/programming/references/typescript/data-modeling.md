@@ -73,7 +73,7 @@ interface UserRepository extends Repository<User> {
 |---|---|
 | `type` | Union types, intersections, mapped types, utility types, internal data shapes |
 | `interface` | Contracts that will be `implements`ed or `extends`ed, declaration merging needed |
-| **Default** | **`type` — unless you have a specific reason for `interface`** |
+| **`type` (default)** | **Unless declaration merging or `implements` is needed** |
 
 ### Zod schema — trust boundary guardian
 
@@ -84,13 +84,13 @@ import { z } from "zod"
 
 const CreateUserSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   age: z.number().int().min(0),
 })
 type CreateUser = z.infer<typeof CreateUserSchema>
 
 const UserResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   email: z.string(),
 })
@@ -100,46 +100,9 @@ type UserResponse = z.infer<typeof UserResponseSchema>
 **The one rule**: data crosses a trust boundary → Zod. Everything else → plain type/interface.
 Never use Zod for internal-only data. The runtime validation cost and Zod coupling are unnecessary.
 
-### as const — fixed constants
+### as const and discriminated unions
 
-Replaces `enum` entirely. Type-safe, tree-shakeable, no runtime overhead.
-
-```typescript
-const ROLES = ["admin", "user", "guest"] as const
-type Role = (typeof ROLES)[number]
-
-const STATUS = {
-  ACTIVE: "active",
-  INACTIVE: "inactive",
-  DELETED: "deleted",
-} as const
-type Status = (typeof STATUS)[keyof typeof STATUS]
-```
-
-### Discriminated union — multiple outcomes
-
-```typescript
-type GetUserResult =
-  | { readonly kind: "found"; readonly user: User }
-  | { readonly kind: "not_found"; readonly id: UserId }
-  | { readonly kind: "forbidden"; readonly reason: string }
-```
-
-Each variant has a `kind` discriminant. TypeScript narrows on `switch (result.kind)`.
-
----
-
-## Quick lookup
-
-| Situation | Use |
-|---|---|
-| User input, API request/response | Zod schema + `z.infer` |
-| Internal value object | `type` with `readonly` properties |
-| Function with multiple outcomes | Discriminated union |
-| Contract for implementations | `interface` |
-| Fixed constants | `as const` + literal union |
-| Distinct primitive (UserId vs OrderId) | Branded type |
-| Dict shape / key-value map | `Record<K, V>` or index signature |
+Fixed constants use `as const` + a literal union (replaces `enum` entirely); multiple outcomes use a discriminated union with a `kind` field. Both are illustrated in [type patterns](type-patterns.md).
 
 ---
 
@@ -159,8 +122,14 @@ function getUsers(): readonly User[] { ... }
 
 // Utility for existing types
 type ReadonlyUser = Readonly<User>
-type DeepReadonlyConfig = Readonly<Config>
+type ReadonlyConfig = Readonly<Config>  // shallow: one level only
 ```
+
+Readonly does not apply to:
+
+- **Framework state** (React `useState`, signals) — managed by framework.
+- **Builder / accumulator** — object exists to be mutated (buffer, cache). Document why.
+- **ORM mutations** — Drizzle insert/update objects.
 
 For mutable state (rare), document why:
 
@@ -184,8 +153,9 @@ function processEmail(email: string): void {
   // still a raw string downstream
 }
 
-// GOOD — parse into typed value at boundary
-const EmailSchema = z.string().email().brand("Email")
+// GOOD — parse into a branded value at the boundary
+// (Zod brand recipe: "Branded types" in type-patterns.md)
+const EmailSchema = z.email().brand("Email")
 type Email = z.infer<typeof EmailSchema>
 
 function sendWelcome(email: Email): void { ... }

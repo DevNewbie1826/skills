@@ -10,11 +10,10 @@ The biggest difference from Python/Rust/TypeScript: **Go has fewer "best" choice
 
 ## HTTP framework — `gin` (default) or `chi` (minimalist) or `net/http` (no deps)
 
-The reality of 2026 Go: **`gin` runs ~48% of new Go API projects** (Go Developer Survey 2024 + crawls of new repos), with `gorilla/mux` (~17%, in maintenance), `echo` (~16%), and `fiber` (~11%) the remaining quarter. The skill picks gin not because it is technically superior — it is not — but because:
+The reality of 2026 Go: **`gin` runs ~48% of new Go API projects** (Go Developer Survey 2024 + crawls of new repos), with `gorilla/mux` (~17%, in maintenance), `echo` (~16%), and `fiber` (~11%) most of the remainder. The skill picks gin not because it is technically superior — it is not — but because:
 
 1. The ecosystem (middleware, examples, SO answers) is largest.
-2. A production proxy service uses gin for streaming and WebSocket upgrades. That is a practical reference workload, not a toy.
-3. Gin's `Context` API is the closest thing Go has to a framework-blessed "request-scoped object", which makes middleware composition straightforward.
+2. Gin's `Context` API is the closest thing Go has to a framework-blessed "request-scoped object", which makes middleware composition straightforward.
 
 ```go
 import "github.com/gin-gonic/gin"
@@ -64,7 +63,7 @@ res, err := client.Say(ctx, connect.NewRequest(&elizav1.SayRequest{Sentence: "hi
 ```
 
 **Use raw `grpc-go`** only when:
-- You need server-streaming-from-multiple-services with a single gRPC mux.
+- You need bidirectional streaming with frame-level control.
 - You are integrating with a strict gRPC-only environment (Envoy proxy with gRPC reflection, Istio strict-gRPC).
 
 See `grpc-connect.md`.
@@ -169,7 +168,7 @@ Use **v2 RC** (`charm.land/bubbletea/v2`), not v1. The v2 model adds:
 - `SetVirtualCursor(false)` on textareas — lets the terminal own the cursor, which is **required** for CJK IME (Korean Hangul composition, Japanese kana→kanji conversion, Chinese pinyin lookup).
 - Granular mouse events (`MouseClickMsg`, `MouseMotionMsg`, `MouseReleaseMsg`) instead of v1's coarse `MouseMsg`.
 
-This is not a preference. v1 has no way to position the IME candidate window correctly — Korean input shows up two cells to the left of where you typed, every time. **If your TUI accepts text input AND your users include CJK speakers, v1 is broken.**
+This is not a preference. v1 has no way to position the IME candidate window correctly — the candidate window appears at the top-left of the screen instead of at the cursor. **If your TUI accepts text input AND your users include CJK speakers, v1 is broken.**
 
 See `bubbletea-v2.md` for the full IME-correct skeleton.
 
@@ -278,24 +277,13 @@ Same philosophy as Python's "never pandas":
 | Numerical | `gonum.org/v1/gonum` |
 | Stats | `gonum/stat` |
 
-Go's data-science story is intentionally thin. For heavy data work, write the pipeline in Polars/DuckDB (see `python/data-processing.md`), expose the result via Parquet or Arrow, consume from Go.
+Go's data-science story is intentionally thin. For heavy data work, write the pipeline in Polars/DuckDB (see [`../python/data-processing.md`](../python/data-processing.md)), expose the result via Parquet or Arrow, consume from Go.
 
 ---
 
 ## Testing — stdlib + selective additions
 
-| Need | Use |
-|---|---|
-| Assertions | `stretchr/testify/require` (fail-fast) — `assert` only in table-driven loops |
-| Snapshots / golden | `hexops/autogold/v2` (auto-updates with `-update`) |
-| Property-based | `pgregory.net/rapid` (modern) or stdlib `testing/quick` |
-| Mocks | `go.uber.org/mock` (gomock successor) |
-| HTTP mocks | `h2non/gock` for outbound, stdlib `httptest` for inbound |
-| Integration containers | `testcontainers/testcontainers-go` |
-| Goroutine leak | `go.uber.org/goleak` |
-| Benchmarks | stdlib `testing.B` + `perf.dev/benchstat` |
-
-See `testing.md` for canonical patterns.
+The Go lane uses stdlib `testing` plus the additions listed in [`testing.md`](testing.md).
 
 ---
 
