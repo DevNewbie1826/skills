@@ -17,7 +17,8 @@ Every reference below is a `skill://dag-workflow/references/<file>` link: open i
 **Then read [references/graph-runs.md](skill://dag-workflow/references/graph-runs.md).** It is how a DAG runs on omp beyond the helpers in [references/workflow.md](skill://dag-workflow/references/workflow.md): node prompts, stages, failures, the goal and resuming.
 
 One request is one authorized piece of work, worked until its PR merges. `/wf <task>` starts it: the pack arms a goal for the task and points here.
-Arm the goal first: one omp goal for the whole request. If `goal` is not in your tool list, goal mode is off: ask the user to restart with `/wf <task>` and stop; do not run the DAG without a goal. The goal's objective is the request text plus the phase names (analysis, build, review and merge). When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode). Each phase's success criteria come from the phase-1 analysis (step 1): write them as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
+Running `/wf` authorizes the whole flow through merge and cleanup — analysis, the worktree, the DAG work, the confirmation devices, the PR, review to APPROVED, the merge — so phases already covered are never asked again.
+Arm the goal first: one omp goal for the whole request. If `goal` is not in your tool list, goal mode is off: run the request in the current session instead, without stopping, and keep each phase's success criteria as that phase's first `todo` items. The goal's objective is the request text plus the phase names (analysis, build, review and merge). When `/wf` already armed the goal with the task text, keep it (the `goal` tool cannot rewrite an objective, and dropping it ends goal mode). Each phase's success criteria come from the phase-1 analysis (step 1): write them as the first `todo` items of that phase. Never run with placeholder criteria. Mirror the phases into `todo` phases, then build every DAG under that goal.
 
 ## The request
 
@@ -28,7 +29,7 @@ Arm the goal first: one omp goal for the whole request. If `goal` is not in your
 5. Implement it, and strictly include a device that confirms the implementation.
 6. Fix whatever needs fixing, and strictly include a device that confirms each fix.
 7. While doing so, verify that every requirement is met, rigorously and in full detail, with nothing skipped. A strict confirmation device follows the verification reference (see Confirmation devices).
-8. For UI/UX work, verify every `visual-qa` condition in full detail, nothing skipped. If `browser` is not in your tool list, ask the user to enable it.
+8. For UI/UX work, verify every `visual-qa` condition in full detail, nothing skipped. If `browser` is not in your tool list, capture through the repository's existing capture path instead and state that limit in the evidence.
 
 ## DAGs
 
@@ -43,7 +44,7 @@ An integration node that only collects and checks its children's results is a ch
 
 A scope line in a node prompt names the node: "this node writes only X". Never write it as a statement about the whole repository, such as "the repo is read-only"; a memory tool can keep that as a standing agreement and stop later work.
 Put node handoffs and build files in a git-ignored folder inside the worktree; when the repository ignores none, list one in the file `git rev-parse --git-path info/exclude` prints (in a worktree `.git` is a file, so build the path this way).
-A commit node stages only the paths it names (`git add -- <path>...`, never `git add -A` or `git add .`) and sets the repository's identity for that one command: `git -c user.name=<name> -c user.email=<email> commit`, with no co-author trailer. Take the name and email from the request or brief, never change the global Git identity, and ask before the first commit when no identity is given.
+A commit node stages only the paths it names (`git add -- <path>...`, never `git add -A` or `git add .`) and sets the repository's identity for that one command: `git -c user.name=<name> -c user.email=<email> commit`, with no co-author trailer. Take the name and email from the request or brief; when neither gives one, take the repository's existing git config. Never change the global Git identity.
 
 ## Confirmation devices
 
@@ -98,5 +99,4 @@ A blocker is one of two things, and only with proof (a reproduce command, or the
 Anything without proof is a note. There is no default-conditions list.
 A reviewer who doubts the evidence re-runs the command itself.
 Evidence typos are notes, never a loop. Evidence alone never causes a review loop.
-After APPROVED (or the small-work self-review), stop and request MERGE GO from the user with the `ask` tool. MERGE GO comes only as a message from the user or operator, the line `MERGE GO <PR> for head <40-hex> only.`; never issue it yourself, and do not start merging until it arrives. Merge only that PR at that head. Never merge, release or deploy without it.
-Remove the worktree after the merge.
+After APPROVED (or the small-work self-review), merge that PR at the reviewed head, then remove the worktree.

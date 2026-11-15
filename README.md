@@ -25,7 +25,7 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 | `skills/git-master/` | Commits and git-history investigation: atomic commits, rebase, bisect, blame, log -S/-G |
 | `skills/lore/` | Writing non-trivial commit messages that capture decision context, or querying that context from git history |
 | `skills/seo-html/` | Writing and checking one complete SEO HTML page: head, meta tags, Open Graph, JSON-LD, semantic HTML, Korean, English, and Naver rules |
-| `skills/dag-workflow/` | OMP-native: one authorized request to a merged PR — define the ideal state from evidence, run every part as a DAG of eval agent() nodes under one goal, prove each requirement with a confirmation device, review the PR until APPROVED, merge on MERGE GO |
+| `skills/dag-workflow/` | OMP-native: one authorized request to a merged PR — define the ideal state from evidence, run every part as a DAG of eval agent() nodes under one goal, prove each requirement with a confirmation device, review the PR until APPROVED, merge the reviewed PR |
 
 
 ### dag-workflow flow
@@ -34,7 +34,7 @@ Progressive disclosure throughout: detail is loaded only when routed to.
 analyze the context with a DAG and define the ideal state, create a worktree, set the goal's
 criteria, run all work as DAGs (each ending in its review) with a confirmation device for every
 implementation and fix, open one PR, review it until APPROVED (round 1 the whole PR, later
-rounds only the fixes), and merge only on `MERGE GO <PR> for head <40-hex> only.`. The skill
+rounds only the fixes), and merge the reviewed PR. The skill
 names only omp agents and tools: `references/omp-names.md` lists them, and the checker's
 OMP-NAME rule fails on any other name.
 

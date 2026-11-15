@@ -54,7 +54,7 @@ Never restart a whole DAG to repair one node.
 ## The goal and the phases
 
 omp holds one goal at a time (`goal` tool), so one request has one goal. Its objective is the request text plus the phase names (analysis, build, review and merge). Each phase's success criteria, and the device that will prove each one, come from the phase-1 analysis and go in `todo` as that phase's first items, marking each step when it starts and when it finishes. The `goal` tool can create, read, resume, complete or drop a goal but cannot rewrite one, so when `/wf` already armed it with the task text, keep that goal.
-A phase is done when its criteria pass with captured evidence, not when its last node reports. Mark the goal complete only when every phase's criteria pass. A decision only the user can make is asked with the `ask` tool before the stage that needs it.
+A phase is done when its criteria pass with captured evidence, not when its last node reports. Mark the goal complete only when every phase's criteria pass.
 
 ## Picking a run back up
 
