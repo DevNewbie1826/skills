@@ -19,11 +19,15 @@ if (import.meta.main) {
   const handler = handlers[0];
 
 const FLOW_HEAD = "Run this task using the dag-workflow skill.";
-// The injected flow carries the whole contract through merge: no approval gate
-// may reappear between APPROVED and the merge, and no blocking ask may be
-// demanded of the user. Both are checked on the rendered rewrite, not the source.
+// The injected flow carries the whole contract through merge: no merge gate may
+// reappear between APPROVED and the merge. Checked on the rendered rewrite, the
+// text a session actually receives, never on the source prose.
 const MERGE_STEP = "merge the reviewed PR";
 const MERGE_GATE = /MERGE GO/;
+// Scoped to what this can actually decide: the rendered text must not contain
+// the word ask (ask/asks/asking/asked) or the merge gate. "task" does not match,
+// since its "ask" has no leading word boundary. Skill prose is not checked here.
+const ASK_WORD = /\bask\w*/i;
 // omp fires a magic keyword only for the exact lowercase word standing alone in
 // prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), never
 // inside a code fence or tag. The keywords must open the objective, before the
@@ -82,13 +86,17 @@ for (const [input, expected] of cases) {
     }
   } else {
     const tailOk = actual !== null && actual.includes("skills/dag-workflow/SKILL.md");
-    const flowOk = actual !== null && actual.includes(MERGE_STEP) && !MERGE_GATE.test(actual);
+    const flowOk =
+      actual !== null &&
+      actual.includes(MERGE_STEP) &&
+      !MERGE_GATE.test(actual) &&
+      !ASK_WORD.test(actual);
     const missing = actual === null ? KEYWORDS : KEYWORDS.filter((word) => !standalone(word).test(actual));
     if (missing.length > 0) {
       console.log(`FAIL ${JSON.stringify(input)} → keyword not standalone prose: ${missing.join(", ")}`);
       failed++;
     } else if (actual !== null && !flowOk) {
-      console.log(`FAIL ${JSON.stringify(input)} → flow must say "${MERGE_STEP}" and carry no merge gate`);
+      console.log(`FAIL ${JSON.stringify(input)} → flow must say "${MERGE_STEP}" and carry no merge gate and no ask`);
       failed++;
     } else if (actual === null || !actual.startsWith(expected) || !tailOk) {
       console.log(`FAIL ${JSON.stringify(input)}\n  expected head: ${JSON.stringify(expected)}\n  actual head:   ${JSON.stringify(actual?.slice(0, expected.length + 4))}`);
