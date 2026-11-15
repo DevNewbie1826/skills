@@ -21,7 +21,7 @@ const FLOW = `Run this task using the dag-workflow skill.
 First, read the skill router and follow its contract:
 ${SKILL_MD}
 
-Work the request in its order: analyze the context with a DAG and define the ideal state, create the worktree, set the goal's criteria, run all work as DAGs with a confirmation device for every implementation and fix, open one PR, review it until APPROVED, and merge only on MERGE GO.`;
+Work the request in its order: analyze the context with a DAG and define the ideal state, create the worktree, set the goal's criteria, run all work as DAGs with a confirmation device for every implementation and fix, open one PR, review it until APPROVED, and merge the reviewed PR.`;
 
 export default function wfGoalExtension(pi: ExtensionAPI) {
   pi.setLabel("Workflowz flow (/wf)");

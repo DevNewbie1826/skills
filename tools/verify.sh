@@ -380,6 +380,13 @@ check_seo_html_fixtures() {
     python3 -m unittest discover -s skills/seo-html/tests -v
 }
 
+# The /wf rewrite is what carries the skill contract into a session, so the
+# extension's input→text contract is part of the gate, not an optional extra.
+check_wf_goal_extension() {
+    require_command bun
+    bun tools/wf-goal.test.ts
+}
+
 if (( fast )); then
     printf 'Running fast pre-commit subset (contract checker and SKILL.md cap).\n'
     run_section 'A. portable skill contract' check_skill_contract
@@ -391,6 +398,7 @@ else
     run_section 'D. visual-qa functional check' check_visual_qa_functional
     run_section 'E. SKILL.md line cap' check_skill_line_cap
     run_section 'F. seo-html checker golden fixtures' check_seo_html_fixtures
+    run_section 'G. /wf goal rewrite contract' check_wf_goal_extension
 fi
 
 printf '\nPASS: verification gate\n'
