@@ -24,10 +24,13 @@ const FLOW_HEAD = "Run this task using the dag-workflow skill.";
 // text a session actually receives, never on the source prose.
 const MERGE_STEP = "merge the reviewed PR";
 const MERGE_GATE = /MERGE GO/;
-// Scoped to what this can actually decide: the rendered text must not contain
-// the word ask (ask/asks/asking/asked) or the merge gate. "task" does not match,
-// since its "ask" has no leading word boundary. Skill prose is not checked here.
+// Scoped to what this can actually decide, and only to the contract sentence the
+// session reads: ask/asks/asking/asked and the merge gate must not appear there.
+// "task" does not match (its "ask" has no leading word boundary). The sentence
+// is isolated because the rendered text also embeds the checkout path and the
+// echoed task, and neither may decide this test. Skill prose is not checked here.
 const ASK_WORD = /\bask\w*/i;
+const CONTRACT_HEAD = "Work the request in its order:";
 // omp fires a magic keyword only for the exact lowercase word standing alone in
 // prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), never
 // inside a code fence or tag. The keywords must open the objective, before the
@@ -53,6 +56,9 @@ const cases: Array<[string, string | null]> = [
   ["/wf     code", goalHead("code")],
   ["/wf test task\n~~~", goalHead("test task\n~~~")],   // unclosed fence in the task
   ["/wf fix <div> layout", goalHead("fix <div> layout")], // unclosed tag in the task
+  // The task text is echoed into the rewrite, so a task naming "ask" must still
+  // pass: the contract sentence, not the echo, is what the flow assertion reads.
+  ["/wf ask why the login test flakes", goalHead("ask why the login test flakes")],
   // no-rewrite cases
   ["/wf", null],
   ["/wf\n", null],
@@ -86,11 +92,12 @@ for (const [input, expected] of cases) {
     }
   } else {
     const tailOk = actual !== null && actual.includes("skills/dag-workflow/SKILL.md");
+    const contract = actual === null ? "" : actual.slice(actual.indexOf(CONTRACT_HEAD));
     const flowOk =
-      actual !== null &&
-      actual.includes(MERGE_STEP) &&
-      !MERGE_GATE.test(actual) &&
-      !ASK_WORD.test(actual);
+      contract.includes(CONTRACT_HEAD) &&
+      contract.includes(MERGE_STEP) &&
+      !MERGE_GATE.test(contract) &&
+      !ASK_WORD.test(contract);
     const missing = actual === null ? KEYWORDS : KEYWORDS.filter((word) => !standalone(word).test(actual));
     if (missing.length > 0) {
       console.log(`FAIL ${JSON.stringify(input)} → keyword not standalone prose: ${missing.join(", ")}`);
