@@ -29,14 +29,16 @@ const MERGE_GATE = /MERGE GO/;
 const ASK_WORD = /\bask\w*/i;
 // The rewrite is /goal …, the echoed task, then the flow. Only the flow is the
 // contract: the echo is cut by its exact prefix, so a task that says "ask" cannot
-// decide this test, and the absolute SKILL.md path line is dropped, so a checkout
-// directory named with an ask word cannot either. Every flow line stays in scope,
-// including the two before the merge sentence.
+// decide this test, and the one line that ends in the absolute SKILL.md path is
+// dropped, so a checkout directory named with an ask word cannot either. Every
+// other flow line stays in scope, including the two before the merge sentence.
 const flowOf = (input: string, actual: string | null): string => {
   if (actual === null) return "";
   const prefix = `/goal ${KEYWORDS.join(" ")}\n\ntask: ${input.replace(/^\/wf\s+/, "").trim()}\n\n`;
   const flow = actual.startsWith(prefix) ? actual.slice(prefix.length) : actual;
-  return flow.replace(/^\/\S.*$/m, "");
+  // Only that one line goes: a slash-led prose line, or text appended to the
+  // path line, stays in scope and cannot carry a gate through.
+  return flow.replace(/^\/.*skills\/dag-workflow\/SKILL\.md$/m, "");
 };
 // omp fires a magic keyword only for the exact lowercase word standing alone in
 // prose (same boundaries as omp's tui/src/prompt/magic-keywords.ts), never
