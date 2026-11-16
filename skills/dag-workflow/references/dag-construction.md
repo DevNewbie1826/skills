@@ -1,4 +1,4 @@
-> Read this when you build, change or check any DAG: decomposition, dependencies, convergence and the invariants. Translation of `dag-construction-ko.md`; where they differ, the Korean original governs.
+> Read this when you build, change or check any DAG: decomposition, dependencies, convergence and the invariants.
 
 # Top-Level Rules for Hierarchical DAG Design and Progressive Convergence
 
@@ -24,13 +24,13 @@ Every task is decomposed based on the following hierarchical structure.
 
 **Top-level goal → Major category → Middle category → Minor category → Detailed task → Minimal executable task**
 
-The level names above are a conceptual example; the actual number and depth of levels is decided dynamically by the complexity of the work.
+The level names above are a conceptual example; the actual number and depth of levels are decided dynamically by the complexity of the work.
 
 Rules:
 
 1. Decompose every top-level goal into semantically distinct subtasks.
 2. Analyze each subtask independently to evaluate whether it can be decomposed further.
-3. If further decomposition provides a real benefit for execution, verification or management, it must be decomposed recursively.
+3. If further decomposition provides a real benefit for execution, verification or management, the subtask must be decomposed recursively.
 4. Repeat this process until no further meaningful decomposition is possible.
 5. Every lowest-level task must satisfy the definition of a minimal executable task (Atomic Task).
 6. Don't arbitrarily fix the decomposition depth or the number of subtasks.
@@ -170,7 +170,7 @@ When only simple result passing or status aggregation is needed, it may be handl
 
 Decomposing work sufficiently must be distinguished from making it needlessly complex.
 
-The following is forbidden.
+The following are forbidden.
 
 1. Creating meaningless intermediate tasks to match a set number of levels
 2. Placing the same responsibility on several levels under different names
